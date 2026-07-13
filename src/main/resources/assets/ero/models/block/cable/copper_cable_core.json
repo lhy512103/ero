@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "texture": "ero:block/cable/copper_cable",
+    "particle": "ero:block/cable/copper_cable"
+  },
+  "elements": [
+    {
+      "from": [6, 6, 6],
+      "to": [10, 10, 10],
+      "faces": {
+        "north": { "texture": "#texture" },
+        "south": { "texture": "#texture" },
+        "east":  { "texture": "#texture" },
+        "west":  { "texture": "#texture" },
+        "up":    { "texture": "#texture" },
+        "down":  { "texture": "#texture" }
+      }
+    }
+  ]
+}

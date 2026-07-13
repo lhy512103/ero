@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "ero:tin_plate",
+    "ero:iron_plate",
+    "ero:zinc_plate",
+    "ero:aluminium_plate",
+    "ero:cobalt_plate",
+    "ero:lead_plate",
+    "ero:nickel_plate",
+    "ero:silver_plate",
+    "ero:gold_plate",
+    "ero:copper_plate"
+  ]
+}

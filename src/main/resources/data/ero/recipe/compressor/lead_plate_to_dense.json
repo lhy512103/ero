@@ -1,0 +1,12 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "compressor",
+    "input":  "ero:lead_plate",
+    "input_count":  9,
+    "result":  {
+                   "id":  "ero:dense_lead_plate",
+                   "count":  1
+               },
+    "energy":  400,
+    "time":  200
+}

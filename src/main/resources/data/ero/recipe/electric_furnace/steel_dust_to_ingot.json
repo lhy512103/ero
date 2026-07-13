@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "electric_furnace",
+    "input":  "ero:steel_dust",
+    "result":  {
+                   "id":  "ero:steel_ingot",
+                   "count":  1
+               },
+    "energy":  400,
+    "time":  300
+}

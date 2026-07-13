@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "side": "ero:block/rubber/rubber_wood_sides",
+    "end": "ero:block/rubber/rubber_wood_dry_bottomtop"
+  }
+}

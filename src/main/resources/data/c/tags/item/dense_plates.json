@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "ero:dense_tin_plate",
+    "ero:dense_iron_plate",
+    "ero:dense_gold_plate",
+    "ero:dense_copper_plate",
+    "ero:dense_bronze_plate",
+    "ero:dense_steel_plate",
+    "ero:dense_lead_plate",
+    "ero:dense_lapis_plate",
+    "ero:dense_obsidian_plate"
+  ]
+}

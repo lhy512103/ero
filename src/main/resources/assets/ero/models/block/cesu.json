@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "ero:block/machine/storage/cesu/cesu_side",
+    "top": "ero:block/machine/storage/cesu/chargepad_cesu_bottom",
+    "front": "ero:block/machine/storage/cesu/cesu_front",
+    "side": "ero:block/machine/storage/cesu/cesu_side",
+    "bottom": "ero:block/machine/storage/cesu/chargepad_cesu_bottom"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"texture": "#front", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "east": {"texture": "#side", "cullface": "east"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "up": {"texture": "#top", "cullface": "up"},
+        "down": {"texture": "#bottom", "cullface": "down"}
+      }
+    }
+  ]
+}

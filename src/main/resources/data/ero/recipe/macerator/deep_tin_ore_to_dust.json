@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:deep_tin_ore",
+    "result":  {
+                   "id":  "ero:purified_tin_dust",
+                   "count":  3
+               },
+    "energy":  600,
+    "time":  250
+}

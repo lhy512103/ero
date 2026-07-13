@@ -1,0 +1,7 @@
+{
+  "values": [
+    "ero:ejector_upgrade", "ero:energy_storage_upgrade", "ero:fluid_ejector_upgrade",
+    "ero:fluid_pulling_upgrade", "ero:overclocker_upgrade", "ero:overclocker_upgrade1",
+    "ero:overclocker_upgrade2", "ero:pulling_upgrade"
+  ]
+}

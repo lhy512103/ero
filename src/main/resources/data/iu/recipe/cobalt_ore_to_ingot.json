@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "ero:cobalt_ore",
+  "result": {
+    "id": "ero:cobalt_ingot",
+    "count": 1
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

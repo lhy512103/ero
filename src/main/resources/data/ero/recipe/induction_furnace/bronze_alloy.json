@@ -1,0 +1,14 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "alloy_furnace",
+    "input":  "#c:ingots/copper",
+    "input_count":  3,
+    "input2":  "#c:ingots/tin",
+    "input2_count":  1,
+    "result":  {
+                   "id":  "ero:bronze_ingot",
+                   "count":  4
+               },
+    "energy":  600,
+    "time":  300
+}

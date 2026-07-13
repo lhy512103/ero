@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "ero:aluminium_stick",
+    "ero:cobalt_stick",
+    "ero:nickel_stick",
+    "ero:silver_stick",
+    "ero:zinc_stick"
+  ]
+}

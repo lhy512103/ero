@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:silver_ore",
+    "result":  {
+                   "id":  "ero:purified_silver_dust",
+                   "count":  2
+               },
+    "energy":  400,
+    "time":  200
+}

@@ -1,0 +1,12 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "compressor",
+    "input":  "#c:ingots/zinc",
+    "input_count":  9,
+    "result":  {
+                   "id":  "ero:zinc_block",
+                   "count":  1
+               },
+    "energy":  400,
+    "time":  200
+}

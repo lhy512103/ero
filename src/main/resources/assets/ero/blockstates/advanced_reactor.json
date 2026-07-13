@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,running=false": { "model": "ero:block/advanced_reactor", "y": 0 },
+    "facing=north,running=true": { "model": "ero:block/advanced_reactor_active", "y": 0 },
+    "facing=south,running=false": { "model": "ero:block/advanced_reactor", "y": 180 },
+    "facing=south,running=true": { "model": "ero:block/advanced_reactor_active", "y": 180 },
+    "facing=west,running=false": { "model": "ero:block/advanced_reactor", "y": 270 },
+    "facing=west,running=true": { "model": "ero:block/advanced_reactor_active", "y": 270 },
+    "facing=east,running=false": { "model": "ero:block/advanced_reactor", "y": 90 },
+    "facing=east,running=true": { "model": "ero:block/advanced_reactor_active", "y": 90 }
+  }
+}

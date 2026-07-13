@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "#c:ores/gold",
+    "result":  {
+                   "id":  "ero:copper_dust",
+                   "count":  2
+               },
+    "energy":  400,
+    "time":  200
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "ero:cobalt_ore",
+    "ero:lead_ore",
+    "ero:nickel_ore",
+    "ero:silver_ore",
+    "ero:deep_cobalt_ore",
+    "ero:deep_nickel_ore",
+    "ero:deep_silver_ore"
+  ]
+}

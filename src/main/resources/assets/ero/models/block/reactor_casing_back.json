@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ero:block/reactor/reactor_casing_back"
+  }
+}

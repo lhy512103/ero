@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ero:block/fission_controller_front", "y": 0 },
+    "facing=south": { "model": "ero:block/fission_controller_front", "y": 180 },
+    "facing=west": { "model": "ero:block/fission_controller_front", "y": 270 },
+    "facing=east": { "model": "ero:block/fission_controller_front", "y": 90 }
+  }
+}

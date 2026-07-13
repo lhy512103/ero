@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "ero:block/machine/workbench/industrial_workbench_front",
+    "top": "ero:block/machine/workbench/industrial_workbench_top",
+    "front": "ero:block/machine/workbench/industrial_workbench_front",
+    "side": "ero:block/machine/workbench/industrial_workbench_front",
+    "bottom": "ero:block/machine/workbench/industrial_workbench_front"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"texture": "#front", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "east": {"texture": "#side", "cullface": "east"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "up": {"texture": "#top", "cullface": "up"},
+        "down": {"texture": "#bottom", "cullface": "down"}
+      }
+    }
+  ]
+}

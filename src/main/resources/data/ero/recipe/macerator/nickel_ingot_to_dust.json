@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:nickel_ingot",
+    "result":  {
+                   "id":  "ero:purified_nickel_dust",
+                   "count":  1
+               },
+    "energy":  200,
+    "time":  100
+}

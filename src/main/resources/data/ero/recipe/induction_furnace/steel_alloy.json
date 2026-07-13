@@ -1,0 +1,14 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "alloy_furnace",
+    "input":  "#c:ingots/iron",
+    "input_count":  1,
+    "input2":  "#c:dusts/coal",
+    "input2_count":  2,
+    "result":  {
+                   "id":  "ero:steel_ingot",
+                   "count":  1
+               },
+    "energy":  800,
+    "time":  400
+}

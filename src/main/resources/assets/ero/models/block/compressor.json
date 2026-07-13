@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "ero:block/machine/compressor/side",
+    "top": "ero:block/machine/compressor/top_1",
+    "front": "ero:block/machine/compressor/compressor_front",
+    "side": "ero:block/machine/compressor/side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"texture": "#front", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "east": {"texture": "#side", "cullface": "east"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "up": {"texture": "#top", "cullface": "up"},
+        "down": {"texture": "#top", "cullface": "down"}
+      }
+    }
+  ]
+}

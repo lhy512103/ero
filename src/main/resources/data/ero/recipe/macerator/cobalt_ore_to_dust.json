@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:cobalt_ore",
+    "result":  {
+                   "id":  "ero:purified_cobalt_dust",
+                   "count":  2
+               },
+    "energy":  400,
+    "time":  200
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "ero:tin_ingot",
+    "#iu:cutter"
+  ],
+  "result": {
+    "id": "ero:tin_cable",
+    "count": 1
+  }
+}

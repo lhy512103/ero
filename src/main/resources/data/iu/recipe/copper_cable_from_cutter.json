@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "ero:copper_plate",
+    "#iu:cutter"
+  ],
+  "result": {
+    "id": "ero:copper_cable",
+    "count": 3
+  }
+}

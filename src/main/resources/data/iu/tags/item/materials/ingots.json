@@ -1,0 +1,8 @@
+{
+  "values": [
+    "ero:tin_ingot", "ero:zinc_ingot", "ero:aluminium_ingot", "ero:cobalt_ingot",
+    "ero:lead_ingot", "ero:nickel_ingot", "ero:silver_ingot", "ero:uranium_ingot",
+    "ero:steel_ingot", "ero:refined_steel_ingot", "ero:alloy_ingot", "ero:bronze_ingot",
+    "ero:irradiant_uranium_ingot", "minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:copper_ingot"
+  ]
+}

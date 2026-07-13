@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:deep_zinc_ore",
+    "result":  {
+                   "id":  "ero:purified_zinc_dust",
+                   "count":  3
+               },
+    "energy":  600,
+    "time":  250
+}

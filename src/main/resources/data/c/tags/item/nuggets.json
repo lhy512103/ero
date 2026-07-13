@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "ero:tin_nugget",
+    "ero:zinc_nugget",
+    "ero:aluminium_nugget",
+    "ero:cobalt_nugget",
+    "ero:lead_nugget",
+    "ero:nickel_nugget",
+    "ero:silver_nugget",
+    "ero:uranium_nugget",
+    "ero:steel_nugget",
+    "ero:refined_steel_nugget"
+  ]
+}

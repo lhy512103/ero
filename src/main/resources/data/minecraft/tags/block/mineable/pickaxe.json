@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "ero:tin_ore",
+    "ero:zinc_ore",
+    "ero:aluminium_ore",
+    "ero:cobalt_ore",
+    "ero:lead_ore",
+    "ero:nickel_ore",
+    "ero:silver_ore",
+    "ero:uranium_ore",
+    "ero:deep_tin_ore",
+    "ero:deep_zinc_ore",
+    "ero:deep_aluminium_ore",
+    "ero:deep_cobalt_ore",
+    "ero:deep_nickel_ore",
+    "ero:deep_silver_ore",
+    "ero:deep_uranium_ore",
+    "ero:tin_block",
+    "ero:zinc_block",
+    "ero:aluminium_block",
+    "ero:cobalt_block",
+    "ero:lead_block",
+    "ero:nickel_block",
+    "ero:silver_block",
+    "ero:uranium_block",
+    "ero:bronze_block",
+    "ero:machine_casing",
+    "ero:machine_casing_2"
+  ]
+}

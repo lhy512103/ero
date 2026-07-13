@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "ero:tin_ingot",
+    "ero:zinc_ingot",
+    "ero:aluminium_ingot",
+    "ero:cobalt_ingot",
+    "ero:lead_ingot",
+    "ero:nickel_ingot",
+    "ero:silver_ingot",
+    "ero:uranium_ingot",
+    "ero:steel_ingot",
+    "ero:bronze_ingot",
+    "ero:refined_steel_ingot",
+    "ero:alloy_ingot"
+  ]
+}

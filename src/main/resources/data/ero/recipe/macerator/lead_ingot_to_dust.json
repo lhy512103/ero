@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "ero:lead_ingot",
+    "result":  {
+                   "id":  "ero:purified_lead_dust",
+                   "count":  1
+               },
+    "energy":  200,
+    "time":  100
+}

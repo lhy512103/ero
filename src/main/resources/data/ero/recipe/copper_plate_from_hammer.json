@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "#iu:forge_hammer"
+  ],
+  "result": {
+    "id": "ero:copper_plate",
+    "count": 1
+  }
+}

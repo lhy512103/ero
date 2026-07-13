@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:gold_ingot",
+    "#iu:cutter"
+  ],
+  "result": {
+    "id": "ero:gold_cable",
+    "count": 1
+  }
+}

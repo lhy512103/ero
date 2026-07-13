@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "electric_furnace",
+    "input":  "ero:purified_tin_dust",
+    "result":  {
+                   "id":  "ero:tin_ingot",
+                   "count":  1
+               },
+    "energy":  200,
+    "time":  200
+}

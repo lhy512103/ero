@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "extractor",
+    "input":  "ero:raw_latex",
+    "result":  {
+                   "id":  "ero:rubber",
+                   "count":  2
+               },
+    "energy":  200,
+    "time":  150
+}

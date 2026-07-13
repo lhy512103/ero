@@ -1,0 +1,11 @@
+{
+    "type":  "ero:machine",
+    "machine_type":  "macerator",
+    "input":  "minecraft:diamond",
+    "result":  {
+                   "id":  "ero:diamond_dust",
+                   "count":  1
+               },
+    "energy":  400,
+    "time":  150
+}
