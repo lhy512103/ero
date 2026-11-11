@@ -4,17 +4,8 @@
   "input": "iuce:purified_cobalt_dust",
   "result": {
     "id": "iuce:cobalt_ingot",
-    "count": 1
+    "count": 3
   },
-  "extra_results": [
-    {
-      "result": {
-        "id": "iuce:cobalt_nugget",
-        "count": 3
-      },
-      "chance": 1.0
-    }
-  ],
   "energy": 480,
   "time": 120
 }

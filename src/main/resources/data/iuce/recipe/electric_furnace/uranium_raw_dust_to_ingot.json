@@ -4,7 +4,7 @@
   "input": "iuce:crushed_uranium_dust",
   "result": {
     "id": "iuce:uranium_ingot",
-    "count": 1
+    "count": 2
   },
   "energy": 640,
   "time": 160

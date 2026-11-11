@@ -4,17 +4,8 @@
   "input": "iuce:purified_uranium_dust",
   "result": {
     "id": "iuce:uranium_ingot",
-    "count": 1
+    "count": 3
   },
-  "extra_results": [
-    {
-      "result": {
-        "id": "iuce:uranium_nugget",
-        "count": 3
-      },
-      "chance": 1.0
-    }
-  ],
   "energy": 480,
   "time": 120
 }

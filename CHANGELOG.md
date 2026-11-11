@@ -18,6 +18,8 @@
 12. Fixed: Adjacent generators and storage units now supply machines without requiring cables.
 13. Fixed: Storage charging slots accept electric tools and correctly save transferred energy.
 14. Added: Both wrenches rotate machines, toggle cable connections, and dismantle blocks while sneaking.
+15. Added: Electric furnaces support furnace, blast furnace, and smoker recipes.
+16. Improved: Electric furnaces produce two ingots from crushed dust and three from purified dust.
 
 ### 中文
 
@@ -35,3 +37,5 @@
 12. 修复：发电设备和储电箱可直接为相邻机器供电。
 13. 修复：储电箱充电槽可放入电动工具并正确保存充入的电量。
 14. 新增：两种扳手可调整机器朝向、切换线缆连接，并在潜行时拆卸方块。
+15. 新增：电炉支持熔炉、高炉和烟熏炉配方。
+16. 优化：粗粉经电炉产出两锭，纯净粉产出三锭。

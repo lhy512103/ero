@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -66,7 +66,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
 
     /** 缓存的原版熔炼配方 */
     @Nullable
-    private SmeltingRecipe cachedSmeltingRecipe;
+    private AbstractCookingRecipe cachedAbstractCookingRecipe;
     /** 缓存的自定义机器配方 */
     @Nullable
     private MachineRecipe cachedMachineRecipe;
@@ -74,6 +74,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
     private ItemStack cachedOutput = ItemStack.EMPTY;
     /** 缓存的输入 ItemResource，用于检测输入变化 */
     private ItemResource cachedInputResource = ItemResource.EMPTY;
+    private Object cachedRecipeMap;
 
     /** 缓存的超频器数量 */
     private int cachedOverclockerCount = -1;
@@ -91,6 +92,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
                 setChanged();
+                if (index >= 2) cachedOverclockerCount = -1;
             }
         };
     }
@@ -118,23 +120,30 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
 
         if (!inputResource.isEmpty() && inputAmount > 0) {
             // 仅在输入变化时重新查找配方
-            if (!inputResource.equals(cachedInputResource)) {
+            Object recipeMap = RecipeHelper.getRecipeManager(level).recipeMap();
+            if (!inputResource.equals(cachedInputResource) || cachedRecipeMap != recipeMap) {
+                progress = 0;
+                cachedRecipeMap = recipeMap;
                 ItemStack inputStack = inputResource.toStack(1);
                 cachedInputResource = inputResource;
 
                 // 优先查找自定义机器配方，然后查找原版熔炼配方
                 cachedMachineRecipe = RecipeHelper.findMachineRecipe(level, "electric_furnace", inputStack);
                 if (cachedMachineRecipe != null) {
-                    cachedSmeltingRecipe = null;
+                    cachedAbstractCookingRecipe = null;
                     cachedOutput = cachedMachineRecipe.getOutput().copy();
                 } else {
-                    cachedSmeltingRecipe = findSmeltingRecipe(inputStack);
-                    cachedOutput = cachedSmeltingRecipe != null
-                        ? cachedSmeltingRecipe.assemble(new SingleRecipeInput(inputStack))
+                    cachedAbstractCookingRecipe = findAbstractCookingRecipe(inputStack);
+                    cachedOutput = cachedAbstractCookingRecipe != null
+                        ? cachedAbstractCookingRecipe.assemble(new SingleRecipeInput(inputStack))
                         : ItemStack.EMPTY;
                 }
             }
 
+            if (!cachedOutput.isEmpty() && !canOutputAccept(cachedOutput)) {
+                updateRunningState();
+                return;
+            }
             if (!cachedOutput.isEmpty()) {
                 // 计算感应炉加成
                 int inductionCount = getAdjacentInductionCount();
@@ -153,7 +162,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                     processTime = cachedMachineRecipe.getProcessTime();
                     energyPerTick = cachedMachineRecipe.getEnergyPerTick();
                 } else {
-                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(BASE_PROCESS_TIME, cachedOverclockerCount);
+                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(cachedAbstractCookingRecipe.cookingTime(), cachedOverclockerCount);
                     energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(BASE_ENERGY_CONSUMPTION, cachedOverclockerCount);
                 }
 
@@ -186,11 +195,11 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
             } else {
                 progress = 0;
                 cachedOutput = ItemStack.EMPTY;
-                cachedInputResource = ItemResource.EMPTY;
+                // Cache misses too: do not scan every recipe again on every tick.
             }
         } else if (inputResource.isEmpty() || inputAmount <= 0) {
             progress = 0;
-            cachedSmeltingRecipe = null;
+            cachedAbstractCookingRecipe = null;
             cachedMachineRecipe = null;
             cachedOutput = ItemStack.EMPTY;
             cachedInputResource = ItemResource.EMPTY;
@@ -318,8 +327,8 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
      * 查找原版熔炼配方
      */
     @Nullable
-    private SmeltingRecipe findSmeltingRecipe(ItemStack input) {
-        return RecipeHelper.findSmeltingRecipe(level, input);
+    private AbstractCookingRecipe findAbstractCookingRecipe(ItemStack input) {
+        return RecipeHelper.findCookingRecipe(level, input);
     }
 
     /**
@@ -336,7 +345,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         // 输出槽已有物品，检查是否相同且未满
         ItemStack existingStack = outputResource.toStack(1);
         if (ItemStack.isSameItemSameComponents(existingStack, output)) {
-            return outputAmount < existingStack.getMaxStackSize();
+            return outputAmount + output.getCount() <= existingStack.getMaxStackSize();
         }
 
         return false;
@@ -461,7 +470,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
 
         itemHandler.deserialize(input);
         // 重置缓存
-        cachedSmeltingRecipe = null;
+        cachedAbstractCookingRecipe = null;
         cachedMachineRecipe = null;
         cachedOutput = ItemStack.EMPTY;
         cachedInputResource = ItemResource.EMPTY;

@@ -80,12 +80,18 @@ public class MachineRecipeCache {
     /**
      * 惰性初始化缓存
      */
-    private void initCacheIfNeeded() {
-        if (initialized) return;
-        initialized = true;
+    private Object recipeMapIdentity;
 
-        RecipeManager recipeManager = getRecipeManager();
+    private void initCacheIfNeeded() {
+        initCacheIfNeeded(getRecipeManager());
+    }
+
+    private void initCacheIfNeeded(RecipeManager recipeManager) {
         if (recipeManager == null) return;
+        if (initialized && recipeMapIdentity == recipeManager.recipeMap()) return;
+        clear();
+        recipeMapIdentity = recipeManager.recipeMap();
+        initialized = true;
 
         Collection<RecipeHolder<MachineRecipe>> allRecipes =
             recipeManager.recipeMap().byType(ModRecipes.MACHINE_TYPE.get());
@@ -134,13 +140,13 @@ public class MachineRecipeCache {
      */
     public MachineRecipe findRecipe(Level level, ItemStack input) {
         if (input.isEmpty()) return null;
-        initCacheIfNeeded();
+        initCacheIfNeeded(recipe.RecipeHelper.getRecipeManager(level));
 
         // 快速路径：按 Item 查找
         List<RecipeHolder<MachineRecipe>> candidates = itemIndex.get(input.getItem());
         if (candidates != null) {
             for (RecipeHolder<MachineRecipe> holder : candidates) {
-                if (holder.value().getInput().test(input)) {
+                if (!holder.value().hasDualInput() && holder.value().getInput().test(input)) {
                     return holder.value();
                 }
             }
@@ -148,7 +154,7 @@ public class MachineRecipeCache {
 
         // 回退路径：遍历复杂配方
         for (RecipeHolder<MachineRecipe> holder : complexRecipes) {
-            if (holder.value().getInput().test(input)) {
+            if (!holder.value().hasDualInput() && holder.value().getInput().test(input)) {
                 return holder.value();
             }
         }
@@ -166,7 +172,7 @@ public class MachineRecipeCache {
      */
     public MachineRecipe findRecipe(Level level, ItemStack input1, ItemStack input2) {
         if (input1.isEmpty() || input2.isEmpty()) return null;
-        initCacheIfNeeded();
+        initCacheIfNeeded(recipe.RecipeHelper.getRecipeManager(level));
 
         // 快速路径：按 input1 的 Item 查找
         List<RecipeHolder<MachineRecipe>> candidates = itemIndex.get(input1.getItem());
