@@ -15,10 +15,8 @@ import recipe.CraftingRecipe;
 import recipe.MachineRecipe;
 import recipe.ModRecipes;
 import recipe.OptionalCraftingRecipe;
-import item.ModItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.types.IRecipeHolderType;
 import mezz.jei.api.recipe.types.IRecipeType;
@@ -50,6 +48,9 @@ public class EroJeiPlugin implements IModPlugin {
     static {
         registerMachineType("macerator", "打粉机", ModBlocks.MACERATOR);
         registerMachineType("compressor", "压缩机", ModBlocks.COMPRESSOR);
+        registerMachineType("metal_former_rolling", "金属成型机 · 辊压", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_cutting", "金属成型机 · 切割", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_extruding", "金属成型机 · 挤压", ModBlocks.METAL_FORMER);
         registerMachineType("extractor", "提取机", ModBlocks.EXTRACTOR);
         registerMachineType("electric_furnace", "电炉", ModBlocks.ELECTRIC_FURNACE);
         registerMachineType("electrolyzer", "电解机", ModBlocks.ELECTROLYZER);
@@ -146,10 +147,6 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 强制 JEI 识别到 Minecraft 已显示模组名，避免 JEI 为物品额外添加重复的模组名行
         forceModNameOverride(rt);
-
-        // 隐藏模组水物品（仅用于 GUI 流体显示，不应出现在 JEI 中）
-        rt.getIngredientManager().removeIngredientsAtRuntime(
-            VanillaTypes.ITEM_STACK, List.of(new net.minecraft.world.item.ItemStack(ModItems.WATER.get())));
     }
 
     /**
@@ -224,6 +221,13 @@ public class EroJeiPlugin implements IModPlugin {
         registration.addRecipeClickArea(CompressorScreen.class,
             79, 36, 16, 22,
             MACHINE_TYPES.get("compressor").recipeType);
+
+        // 金属成型机 — 进度箭头 (79, 36, 16x22)，三种模式的配方一起显示
+        registration.addRecipeClickArea(machine.metal_former.screen.MetalFormerScreen.class,
+            79, 36, 16, 22,
+            MACHINE_TYPES.get("metal_former_rolling").recipeType,
+            MACHINE_TYPES.get("metal_former_cutting").recipeType,
+            MACHINE_TYPES.get("metal_former_extruding").recipeType);
 
         // 提取机 — 进度箭头 (79, 36, 16x22)
         registration.addRecipeClickArea(ExtractorScreen.class,

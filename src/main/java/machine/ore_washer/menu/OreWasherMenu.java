@@ -39,7 +39,8 @@ public class OreWasherMenu extends AbstractContainerMenu {
         int input1Slot = 0;
         int input2Slot = 1;
         int outputSlot = 2;
-        int upgradeStart = 3;
+        int extraOutputSlot = 3;
+        int upgradeStart = 4;
 
         // 输入槽 1 (51, 54)、输入槽 2 (51, 23)
         addSlot(new ResourceHandlerSlot(blockEntity.getItemHandler(),
@@ -50,6 +51,10 @@ public class OreWasherMenu extends AbstractContainerMenu {
         // 输出槽 (99, 39)
         addSlot(new ResourceHandlerSlot(blockEntity.getItemHandler(),
             blockEntity.getItemHandler()::set, outputSlot, 99, 39));
+
+        // 副产槽 (99, 62)
+        addSlot(new ResourceHandlerSlot(blockEntity.getItemHandler(),
+            blockEntity.getItemHandler()::set, extraOutputSlot, 99, 62));
 
         // 升级插件槽 1-4: (152, 9) (152, 28) (152, 47) (152, 66)
         addSlot(new UpgradeSlot(blockEntity.getItemHandler(),
@@ -110,7 +115,7 @@ public class OreWasherMenu extends AbstractContainerMenu {
         if (slot != null && slot.hasItem()) {
             ItemStack slotStack = slot.getItem();
             result = slotStack.copy();
-            int machineSlots = 7; // 2 input + 1 output + 4 upgrades
+            int machineSlots = 8; // 2 input + 1 output + 1 extra output + 4 upgrades
             if (index < machineSlots) {
                 // 从机器槽位移动到玩家物品栏
                 if (!this.moveItemStackTo(slotStack, machineSlots, machineSlots + 36, true)) return ItemStack.EMPTY;
@@ -118,7 +123,7 @@ public class OreWasherMenu extends AbstractContainerMenu {
                 // 从玩家物品栏移动到机器槽位
                 if (slotStack.getItem() instanceof UpgradeItem) {
                     // 尝试放入升级槽
-                    if (!this.moveItemStackTo(slotStack, 3, machineSlots, false)) {
+                    if (!this.moveItemStackTo(slotStack, 4, machineSlots, false)) {
                         // 升级槽满了，尝试放入输入槽
                         if (!this.moveItemStackTo(slotStack, 0, 2, false)) return ItemStack.EMPTY;
                     }
@@ -153,6 +158,6 @@ public class OreWasherMenu extends AbstractContainerMenu {
      */
     public String getFluidTranslationKey() {
         ItemStack fluidItem = blockEntity.getFluidItem();
-        return fluidItem.isEmpty() ? "tooltip.ero.empty_fluid" : fluidItem.getItem().getDescriptionId();
+        return fluidItem.isEmpty() ? "tooltip.iuce.empty_fluid" : fluidItem.getItem().getDescriptionId();
     }
 }

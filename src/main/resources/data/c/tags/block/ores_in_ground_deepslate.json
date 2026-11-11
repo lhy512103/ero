@@ -1,12 +1,12 @@
 {
   "replace": false,
   "values": [
-    "ero:deep_tin_ore",
-    "ero:deep_zinc_ore",
-    "ero:deep_aluminium_ore",
-    "ero:deep_cobalt_ore",
-    "ero:deep_nickel_ore",
-    "ero:deep_silver_ore",
-    "ero:deep_uranium_ore"
+    "iuce:deep_tin_ore",
+    "iuce:deep_zinc_ore",
+    "iuce:deep_aluminium_ore",
+    "iuce:deep_cobalt_ore",
+    "iuce:deep_nickel_ore",
+    "iuce:deep_silver_ore",
+    "iuce:deep_uranium_ore"
   ]
 }

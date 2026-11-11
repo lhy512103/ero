@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "planter",
+  "input": "minecraft:sweet_berries",
+  "input_count": 1,
+  "input2": "minecraft:dirt",
+  "input2_count": 1,
+  "result": { "id": "minecraft:sweet_berries", "count": 3 },
+  "energy": 600,
+  "time": 300
+}

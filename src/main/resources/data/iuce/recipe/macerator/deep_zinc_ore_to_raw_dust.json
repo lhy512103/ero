@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "iuce:deep_zinc_ore",
+  "result": {
+    "id": "iuce:crushed_zinc_dust",
+    "count": 3
+  },
+  "energy": 1000,
+  "time": 250
+}

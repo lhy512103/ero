@@ -1,14 +1,14 @@
 {
   "replace": false,
   "values": [
-    "ero:tin_block",
-    "ero:zinc_block",
-    "ero:aluminium_block",
-    "ero:cobalt_block",
-    "ero:lead_block",
-    "ero:nickel_block",
-    "ero:silver_block",
-    "ero:uranium_block",
-    "ero:bronze_block"
+    "iuce:tin_block",
+    "iuce:zinc_block",
+    "iuce:aluminium_block",
+    "iuce:cobalt_block",
+    "iuce:lead_block",
+    "iuce:nickel_block",
+    "iuce:silver_block",
+    "iuce:uranium_block",
+    "iuce:bronze_block"
   ]
 }

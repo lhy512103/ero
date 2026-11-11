@@ -1,0 +1,13 @@
+{
+  "parent": "block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "iuce:block/rubber/rubber_leaves",
+    "north": "iuce:block/rubber/rubber_leaves",
+    "south": "iuce:block/rubber/rubber_leaves",
+    "east": "iuce:block/rubber/rubber_leaves",
+    "west": "iuce:block/rubber/rubber_leaves",
+    "up": "iuce:block/rubber/rubber_leaves",
+    "down": "iuce:block/rubber/rubber_leaves"
+  }
+}

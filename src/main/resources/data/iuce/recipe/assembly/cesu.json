@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:lead_plate",
+      "iuce:copper_coil",
+      "iuce:lead_plate"
+    ],
+    [
+      "iuce:advanced_re_battery",
+      "iuce:batbox",
+      "iuce:advanced_re_battery"
+    ],
+    [
+      "iuce:lead_plate",
+      "iuce:dense_bronze_plate",
+      "iuce:lead_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:cesu",
+    "count": 1
+  }
+}

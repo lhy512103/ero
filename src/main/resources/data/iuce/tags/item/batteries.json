@@ -1,0 +1,6 @@
+{
+  "values": [
+    "iuce:re_battery", "iuce:advanced_re_battery", "iuce:energy_crystal",
+    "iuce:lapotron_crystal", "iuce:single_use_battery"
+  ]
+}

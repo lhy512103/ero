@@ -25,6 +25,7 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.MACERATOR.get());
         register(event, ModBlockEntities.ELECTRIC_FURNACE.get());
         register(event, ModBlockEntities.COMPRESSOR.get());
+        register(event, ModBlockEntities.METAL_FORMER.get());
         register(event, ModBlockEntities.EXTRACTOR.get());
         register(event, ModBlockEntities.INDUCTION_FURNACE.get());
         register(event, ModBlockEntities.ORE_WASHER.get());

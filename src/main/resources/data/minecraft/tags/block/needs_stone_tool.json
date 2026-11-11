@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "ero:tin_ore",
-    "ero:zinc_ore",
-    "ero:aluminium_ore",
-    "ero:deep_tin_ore",
-    "ero:deep_zinc_ore",
-    "ero:deep_aluminium_ore"
+    "iuce:tin_ore",
+    "iuce:zinc_ore",
+    "iuce:aluminium_ore",
+    "iuce:deep_tin_ore",
+    "iuce:deep_zinc_ore",
+    "iuce:deep_aluminium_ore"
   ]
 }

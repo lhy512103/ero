@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:stone",
+      "iuce:electric_motor",
+      "minecraft:stone"
+    ],
+    [
+      "minecraft:stone",
+      "iuce:machine_casing",
+      "minecraft:stone"
+    ],
+    [
+      "minecraft:stone",
+      "iuce:circuit",
+      "minecraft:stone"
+    ]
+  ],
+  "result": {
+    "id": "iuce:compressor",
+    "count": 1
+  }
+}

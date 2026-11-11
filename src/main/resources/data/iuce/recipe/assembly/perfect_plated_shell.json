@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:nickel_plate", "iuce:nickel_plate", "iuce:nickel_plate"],
+    ["iuce:nickel_plate", "iuce:advanced_plated_shell", "iuce:nickel_plate"],
+    ["iuce:nickel_plate", "iuce:nickel_plate", "iuce:nickel_plate"]
+  ],
+  "result": { "id": "iuce:perfect_plated_shell", "count": 1 }
+}

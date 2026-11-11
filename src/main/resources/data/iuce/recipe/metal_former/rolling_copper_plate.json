@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "metal_former_rolling",
+  "input": "minecraft:copper_ingot",
+  "result": {
+    "id": "iuce:copper_plate",
+    "count": 1
+  },
+  "energy": 320,
+  "time": 80
+}

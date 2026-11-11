@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "minecraft:deepslate_copper_ore",
+  "result": {
+    "id": "iuce:copper_dust",
+    "count": 3
+  },
+  "energy": 1000,
+  "time": 250
+}

@@ -1,0 +1,8 @@
+{
+  "values": [
+    "iuce:tin_ingot", "iuce:zinc_ingot", "iuce:aluminium_ingot", "iuce:cobalt_ingot",
+    "iuce:lead_ingot", "iuce:nickel_ingot", "iuce:silver_ingot", "iuce:uranium_ingot",
+    "iuce:steel_ingot", "iuce:refined_steel_ingot", "iuce:alloy_ingot", "iuce:bronze_ingot",
+    "iuce:irradiant_uranium_ingot", "minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:copper_ingot"
+  ]
+}

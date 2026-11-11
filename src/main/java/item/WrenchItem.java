@@ -94,6 +94,6 @@ public class WrenchItem extends Item {
     public void appendHoverText(ItemStack stack, Item.@Nullable TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
         int damage = stack.getOrDefault(net.minecraft.core.component.DataComponents.DAMAGE, 0);
         int remaining = MAX_DAMAGE - damage;
-        builder.accept(Component.translatable("item.ero.wrench.durability", remaining, MAX_DAMAGE));
+        builder.accept(Component.translatable("item.iuce.wrench.durability", remaining, MAX_DAMAGE));
     }
 }

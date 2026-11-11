@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "iuce:coal_block_item",
+  "result": {
+    "id": "minecraft:diamond",
+    "count": 1
+  },
+  "energy": 38400,
+  "time": 1200
+}

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:circuit",
+      ""
+    ],
+    [
+      "iuce:heating_coil",
+      "iuce:machine_casing",
+      "iuce:heating_coil"
+    ],
+    [
+      "",
+      "minecraft:furnace",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:electric_furnace",
+    "count": 1
+  }
+}

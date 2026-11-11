@@ -71,10 +71,10 @@ public class SingularySolarGeneratorBlockEntity extends MachineBlockEntity imple
         this.voltage = EUVoltage.LuV;
 
 
-        this.generationRate = 268435456;
+        this.generationRate = 32768;
 
 
-        this.energyStorage = new EUEnergyStorageImpl(33554432000L, voltage);
+        this.energyStorage = new EUEnergyStorageImpl(4096000, voltage);
 
 
     }

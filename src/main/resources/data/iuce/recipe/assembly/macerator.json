@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:flint",
+      "iuce:circuit",
+      "minecraft:flint"
+    ],
+    [
+      "iuce:iron_gear",
+      "iuce:machine_casing",
+      "iuce:iron_gear"
+    ],
+    [
+      "",
+      "iuce:electric_motor",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:macerator",
+    "count": 1
+  }
+}

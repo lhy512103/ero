@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "minecraft:lapis_lazuli",
+      "iuce:advanced_circuit",
+      "minecraft:lapis_lazuli"
+    ],
+    [
+      "iuce:dense_lapis_plate",
+      "iuce:energy_crystal",
+      "iuce:dense_lapis_plate"
+    ],
+    [
+      "minecraft:lapis_lazuli",
+      "iuce:advanced_circuit",
+      "minecraft:lapis_lazuli"
+    ]
+  ],
+  "result": {
+    "id": "iuce:lapotron_crystal",
+    "count": 1
+  }
+}

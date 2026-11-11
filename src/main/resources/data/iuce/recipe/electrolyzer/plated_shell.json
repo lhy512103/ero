@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electrolyzer",
+  "input": "iuce:machine_casing",
+  "result": {
+    "id": "iuce:plated_shell",
+    "count": 1
+  },
+  "energy": 12800,
+  "time": 400
+}

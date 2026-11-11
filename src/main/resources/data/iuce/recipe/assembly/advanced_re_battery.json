@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:lead_plate",
+      "iuce:circuit",
+      "iuce:lead_plate"
+    ],
+    [
+      "iuce:bronze_dust",
+      "iuce:re_battery",
+      "iuce:bronze_dust"
+    ],
+    [
+      "iuce:lead_plate",
+      "iuce:re_battery",
+      "iuce:lead_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:advanced_re_battery",
+    "count": 1
+  }
+}

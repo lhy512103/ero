@@ -80,7 +80,7 @@ public class NetworkSavedData extends SavedData {
     );
 
     public static final SavedDataType<NetworkSavedData> TYPE = new SavedDataType<>(
-        Identifier.fromNamespaceAndPath("ero", DATA_NAME),
+        Identifier.fromNamespaceAndPath("iuce", DATA_NAME),
         NetworkSavedData::new,
         codec(),
         null

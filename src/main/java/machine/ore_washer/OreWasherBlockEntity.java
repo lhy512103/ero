@@ -47,6 +47,7 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
     private static final int INPUT1_SLOT = 0;
     private static final int INPUT2_SLOT = 1;
     private static final int OUTPUT_SLOT = 2;
+    private static final int EXTRA_OUTPUT_SLOT = 3;
     private static final long BASE_ENERGY_CONSUMPTION = 2;
     private static final int BASE_PROCESS_TIME = 200;
 
@@ -77,8 +78,8 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
         this.voltage = EUVoltage.LV;
         this.energyStorage = new EUEnergyStorageImpl(2000, voltage);
 
-        // 2 输入槽 + 1 输出槽 + 4 升级槽
-        this.itemHandler = new ItemStacksResourceHandler(7) {
+        // 2 输入槽 + 1 输出槽 + 1 副产槽 + 4 升级槽
+        this.itemHandler = new ItemStacksResourceHandler(8) {
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
                 setChanged();
@@ -129,7 +130,7 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
                 int processTime = OverclockerUpgradeItem.getOverclockedProcessTime(
                     cachedRecipe.getProcessTime(), cachedOverclockerCount);
                 long energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(
-                    cachedRecipe.getEnergyCost(), cachedOverclockerCount);
+                    cachedRecipe.getEnergyPerTick(), cachedOverclockerCount);
                 maxProgress = processTime;
 
                 // 检查水量是否足够
@@ -206,6 +207,15 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
             // 插入输出
             int inserted = itemHandler.insert(OUTPUT_SLOT, outputResource, outputStack.getCount(), tx);
             if (inserted <= 0) return false;
+
+            // 副产物（概率产出，副产槽满则丢弃）
+            if (cachedRecipe.hasExtraResults() && level != null) {
+                for (MachineRecipe.ExtraResult extra : cachedRecipe.getExtraResults()) {
+                    if (level.getRandom().nextFloat() >= extra.chance()) continue;
+                    ItemStack extraStack = extra.create();
+                    itemHandler.insert(EXTRA_OUTPUT_SLOT, ItemResource.of(extraStack), extraStack.getCount(), tx);
+                }
+            }
 
             tx.commit();
         }
@@ -286,7 +296,7 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
     public int getUpgradeSlotCount() { return 4; }
 
     @Override
-    public int getUpgradeSlotStart() { return 3; } // 2 input + 1 output
+    public int getUpgradeSlotStart() { return 4; } // 2 input + 1 output + 1 extra output
 
     // FluidProvider 接口实现
     @Override

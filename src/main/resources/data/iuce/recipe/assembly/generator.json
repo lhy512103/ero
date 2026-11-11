@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["", "iuce:re_battery", ""],
+    ["", "iuce:machine_casing", ""],
+    ["", "minecraft:furnace", ""]
+  ],
+  "result": { "id": "iuce:generator", "count": 1 }
+}

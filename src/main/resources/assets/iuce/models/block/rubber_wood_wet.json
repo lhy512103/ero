@@ -1,0 +1,31 @@
+{
+  "textures": {
+    "particle": "iuce:block/rubber/rubber_wood_sides",
+    "bark": "iuce:block/rubber/rubber_wood_sides",
+    "end": "iuce:block/rubber/rubber_wood_wet_bottomtop",
+    "resin": "iuce:block/rubber/rubber_wood_wet_front"
+  },
+  "elements": [
+    {
+      "name": "bark",
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "down":  { "uv": [0, 0, 16, 16], "texture": "#end",  "cullface": "down" },
+        "up":    { "uv": [0, 0, 16, 16], "texture": "#end",  "cullface": "up" },
+        "north": { "uv": [0, 0, 16, 16], "texture": "#bark", "cullface": "north" },
+        "south": { "uv": [0, 0, 16, 16], "texture": "#bark", "cullface": "south" },
+        "west":  { "uv": [0, 0, 16, 16], "texture": "#bark", "cullface": "west" },
+        "east":  { "uv": [0, 0, 16, 16], "texture": "#bark", "cullface": "east" }
+      }
+    },
+    {
+      "name": "resin_overlay",
+      "from": [0, 0, 0],
+      "to": [16, 16, 0.5],
+      "faces": {
+        "north": { "uv": [0, 0, 16, 16], "texture": "#resin" }
+      }
+    }
+  ]
+}

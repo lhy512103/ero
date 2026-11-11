@@ -40,7 +40,7 @@ public class FissionControllerBlockEntity extends MachineBlockEntity implements 
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.ero.fission_controller");
+        return Component.translatable("block.iuce.fission_controller");
     }
 
     @Nullable

@@ -17,7 +17,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 @Mod(Ero.MOD_ID)
 public class Ero {
-    public static final String MOD_ID = "ero";
+    public static final String MOD_ID = "iuce";
 
     private static MachineNetwork machineNetwork;
 

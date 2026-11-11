@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:advanced_solar_glass", "iuce:advanced_solar_glass", "iuce:advanced_solar_glass"],
+    ["iuce:energium_dust", "iuce:energium_dust", "iuce:energium_dust"],
+    ["iuce:advanced_solar_glass", "iuce:advanced_solar_glass", "iuce:advanced_solar_glass"]
+  ],
+  "result": { "id": "iuce:hybrid_solar_glass", "count": 3 }
+}

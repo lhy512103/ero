@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:water_bucket",
+    "minecraft:lapis_lazuli"
+  ],
+  "result": {
+    "id": "iuce:coolant_bucket",
+    "count": 1
+  }
+}

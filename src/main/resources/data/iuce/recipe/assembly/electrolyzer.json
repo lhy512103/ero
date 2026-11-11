@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:electrode",
+      "iuce:empty_cell",
+      "iuce:electrode"
+    ],
+    [
+      "iuce:insulated_gold_cable",
+      "iuce:machine_casing_2",
+      "iuce:insulated_gold_cable"
+    ],
+    [
+      "iuce:advanced_circuit",
+      "iuce:dense_gold_plate",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:electrolyzer",
+    "count": 1
+  }
+}

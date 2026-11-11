@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * 通用合成配方，同时支持 {@code ero:crafting}（工业工作台）和 {@code ero:standard_crafting}（原版工作台）。
+ * 通用合成配方，同时支持 {@code iuce:crafting}（工业工作台）和 {@code iuce:standard_crafting}（原版工作台）。
  * <p>
  * 通过 {@link #isStandardCrafting()} 区分两种模式：
  * <ul>

@@ -43,6 +43,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> MACERATOR = registerBlockItem(ModBlocks.MACERATOR);
     public static final DeferredItem<BlockItem> ELECTRIC_FURNACE = registerBlockItem(ModBlocks.ELECTRIC_FURNACE);
     public static final DeferredItem<BlockItem> COMPRESSOR = registerBlockItem(ModBlocks.COMPRESSOR);
+    public static final DeferredItem<BlockItem> METAL_FORMER = registerBlockItem(ModBlocks.METAL_FORMER);
     public static final DeferredItem<BlockItem> GEOTHERMAL_GENERATOR = registerBlockItem(ModBlocks.GEOTHERMAL_GENERATOR);
     public static final DeferredItem<BlockItem> INDUCTION_FURNACE = registerBlockItem(ModBlocks.INDUCTION_FURNACE);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);

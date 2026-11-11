@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:dense_lead_plate",
+      "minecraft:glass",
+      "iuce:dense_lead_plate"
+    ],
+    [
+      "minecraft:glass",
+      "iuce:machine_casing_2",
+      "minecraft:glass"
+    ],
+    [
+      "iuce:dense_lead_plate",
+      "minecraft:glass",
+      "iuce:dense_lead_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:reactor_casing_side",
+    "count": 4
+  }
+}

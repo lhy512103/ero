@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:hopper",
+    "iuce:circuit",
+    "iuce:empty_cell",
+    "iuce:electric_motor"
+  ],
+  "result": {
+    "id": "iuce:fluid_ejector_upgrade",
+    "count": 1
+  }
+}

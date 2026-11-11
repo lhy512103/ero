@@ -116,6 +116,10 @@ public class MaceratorBlockEntity extends MachineBlockEntity implements EnergyDi
                     progress[i] = 0;
                     continue;
                 }
+                if (inputAmount < recipe.getInputCount()) {
+                    progress[i] = 0;
+                    continue;
+                }
 
                 // 使用缓存的超频器数量
                 if (cachedOverclockerCount < 0) {
@@ -123,7 +127,7 @@ public class MaceratorBlockEntity extends MachineBlockEntity implements EnergyDi
                 }
                 int overclockerCount = cachedOverclockerCount;
                 int overclockedProcessTime = OverclockerUpgradeItem.getOverclockedProcessTime(recipe.getProcessTime(), overclockerCount);
-                long overclockedEnergyConsumption = OverclockerUpgradeItem.getOverclockedEnergyConsumption(recipe.getEnergyCost(), overclockerCount);
+                long overclockedEnergyConsumption = OverclockerUpgradeItem.getOverclockedEnergyConsumption(recipe.getEnergyPerTick(), overclockerCount);
                 maxProgress[i] = overclockedProcessTime;
 
                 long consumed = energyStorage.removeEnergy(overclockedEnergyConsumption);
@@ -139,7 +143,7 @@ public class MaceratorBlockEntity extends MachineBlockEntity implements EnergyDi
                     try (Transaction tx = Transaction.openRoot()) {
                         int inserted = itemHandler.insert(outputSlot, outputResource, outputStack.getCount(), tx);
                         if (inserted > 0) {
-                            itemHandler.extract(inputSlot, inputResource, 1, tx);
+                            itemHandler.extract(inputSlot, inputResource, recipe.getInputCount(), tx);
                             tx.commit();
                         }
                     }

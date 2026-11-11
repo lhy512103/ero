@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "iuce:block/machine/induction_furnace/side",
+    "top": "iuce:block/machine/induction_furnace/top_1",
+    "front": "iuce:block/machine/induction_furnace/induction_furnace",
+    "side": "iuce:block/machine/induction_furnace/side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"texture": "#front", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "east": {"texture": "#side", "cullface": "east"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "up": {"texture": "#top", "cullface": "up"},
+        "down": {"texture": "#top", "cullface": "down"}
+      }
+    }
+  ]
+}

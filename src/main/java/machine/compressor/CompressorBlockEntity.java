@@ -118,13 +118,17 @@ public class CompressorBlockEntity extends MachineBlockEntity implements EnergyD
                     progress[i] = 0;
                     continue;
                 }
+                if (inputAmount < recipe.getInputCount()) {
+                    progress[i] = 0;
+                    continue;
+                }
 
                 if (cachedOverclockerCount < 0) {
                     cachedOverclockerCount = OverclockerUpgradeItem.countOverclockers(this);
                 }
                 int overclockerCount = cachedOverclockerCount;
                 int overclockedProcessTime = OverclockerUpgradeItem.getOverclockedProcessTime(recipe.getProcessTime(), overclockerCount);
-                long overclockedEnergyConsumption = OverclockerUpgradeItem.getOverclockedEnergyConsumption(recipe.getEnergyCost(), overclockerCount);
+                long overclockedEnergyConsumption = OverclockerUpgradeItem.getOverclockedEnergyConsumption(recipe.getEnergyPerTick(), overclockerCount);
                 maxProgress[i] = overclockedProcessTime;
 
                 long consumed = energyStorage.removeEnergy(overclockedEnergyConsumption);
@@ -140,7 +144,7 @@ public class CompressorBlockEntity extends MachineBlockEntity implements EnergyD
                     try (Transaction tx = Transaction.openRoot()) {
                         int inserted = itemHandler.insert(outputSlot, outputResource, outputStack.getCount(), tx);
                         if (inserted > 0) {
-                            itemHandler.extract(inputSlot, inputResource, 1, tx);
+                            itemHandler.extract(inputSlot, inputResource, recipe.getInputCount(), tx);
                             tx.commit();
                         }
                     }

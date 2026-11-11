@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "minecraft:copper_ingot",
+  "result": {
+    "id": "iuce:copper_dust",
+    "count": 1
+  },
+  "energy": 400,
+  "time": 100
+}

@@ -79,7 +79,9 @@ public class RecipeHelper {
         for (ItemStack stack : inputs) {
             copyList.add(stack.copy());
         }
-        CraftingInput craftingInput = CraftingInput.of(inputs.size(), 1, copyList);
+        // 工业工作台传入 9 格（3x3，行优先）；按 3x3 构造才能让有序配方的包围盒对得上
+        boolean grid3x3 = inputs.size() == 9;
+        CraftingInput craftingInput = CraftingInput.of(grid3x3 ? 3 : inputs.size(), grid3x3 ? 3 : 1, copyList);
 
         Optional<RecipeHolder<CraftingRecipe>> result = recipeManager.getRecipeFor(
             ModRecipes.ERO_CRAFTING_TYPE.get(), craftingInput, level

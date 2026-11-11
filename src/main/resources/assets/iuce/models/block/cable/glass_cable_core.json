@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "texture": "iuce:block/cable/glass_1_cable",
+    "particle": "iuce:block/cable/glass_1_cable"
+  },
+  "elements": [
+    {
+      "from": [6, 6, 6],
+      "to": [10, 10, 10],
+      "faces": {
+        "north": { "texture": "#texture" },
+        "south": { "texture": "#texture" },
+        "east":  { "texture": "#texture" },
+        "west":  { "texture": "#texture" },
+        "up":    { "texture": "#texture" },
+        "down":  { "texture": "#texture" }
+      }
+    }
+  ]
+}

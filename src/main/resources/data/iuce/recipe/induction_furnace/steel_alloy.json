@@ -1,0 +1,13 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "alloy_furnace",
+  "input": "minecraft:iron_ingot",
+  "input_count": 4,
+  "input2": "iuce:coal_ball",
+  "result": {
+    "id": "iuce:steel_ingot",
+    "count": 4
+  },
+  "energy": 12800,
+  "time": 400
+}

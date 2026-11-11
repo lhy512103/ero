@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
+    ["iuce:coal_dust", "iuce:coal_dust", "iuce:coal_dust"],
+    ["minecraft:glass", "minecraft:glass", "minecraft:glass"]
+  ],
+  "result": { "id": "iuce:basic_solar_glass", "count": 3 }
+}

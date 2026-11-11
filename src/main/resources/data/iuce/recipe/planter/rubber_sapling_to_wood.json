@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "planter",
+  "input": "iuce:rubber_sapling",
+  "input_count": 1,
+  "input2": "minecraft:dirt",
+  "input2_count": 1,
+  "result": { "id": "iuce:rubber_wood", "count": 4 },
+  "energy": 1200,
+  "time": 600
+}

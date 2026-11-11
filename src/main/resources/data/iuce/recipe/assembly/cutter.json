@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["iuce:iron_plate", "", "iuce:iron_plate"],
+    ["", "minecraft:iron_ingot", ""],
+    ["minecraft:stick", "", "minecraft:stick"]
+  ],
+  "result": { "id": "iuce:cutter", "count": 1 }
+}

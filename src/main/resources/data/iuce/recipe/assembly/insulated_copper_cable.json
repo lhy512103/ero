@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:copper_cable",
+    "iuce:rubber"
+  ],
+  "result": {
+    "id": "iuce:insulated_copper_cable",
+    "count": 1
+  }
+}

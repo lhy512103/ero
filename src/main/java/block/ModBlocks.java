@@ -104,6 +104,8 @@ public class ModBlocks {
         p -> new MachineBlock(p, ElectricFurnaceBlockEntity::new, ModBlockEntities.ELECTRIC_FURNACE), machineProperties());
     public static final DeferredBlock<MachineBlock> COMPRESSOR = BLOCKS.registerBlock("compressor",
         p -> new MachineBlock(p, CompressorBlockEntity::new, ModBlockEntities.COMPRESSOR), machineProperties());
+    public static final DeferredBlock<MachineBlock> METAL_FORMER = BLOCKS.registerBlock("metal_former",
+        p -> new MachineBlock(p, machine.metal_former.MetalFormerBlockEntity::new, ModBlockEntities.METAL_FORMER), machineProperties());
     public static final DeferredBlock<GeothermalGeneratorBlock> GEOTHERMAL_GENERATOR = BLOCKS.registerBlock("geothermal_generator",
         GeothermalGeneratorBlock::new, machineProperties());
     public static final DeferredBlock<InductionFurnaceBlock> INDUCTION_FURNACE = BLOCKS.registerBlock("induction_furnace",
@@ -126,6 +128,20 @@ public class ModBlocks {
         p -> new MachineBlock(p, ExtractorBlockEntity::new, ModBlockEntities.EXTRACTOR), machineProperties());
     public static final DeferredBlock<MachineBlock> PLANTER = BLOCKS.registerBlock("planter",
         p -> new MachineBlock(p, PlanterBlockEntity::new, ModBlockEntities.PLANTER), machineProperties());
+
+    // 冷却液流体方块
+    public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> COOLANT_BLOCK =
+        BLOCKS.register("coolant", () -> new net.minecraft.world.level.block.LiquidBlock(
+            init.ModFluids.COOLANT.get(),
+            BlockBehaviour.Properties.of()
+                .mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_BLUE)
+                .replaceable()
+                .noCollision()
+                .strength(100.0F)
+                .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)
+                .noLootTable()
+                .liquid()
+                .sound(SoundType.EMPTY)) {});
     // 太阳能发电机 (Solar Generators) - 保留到奇异
     public static final DeferredBlock<MachineBlock> SOLAR_GENERATOR = BLOCKS.registerBlock("solar_generator",
         p -> new MachineBlock(p, SolarGeneratorBlockEntity::new, ModBlockEntities.SOLAR_GENERATOR), machineProperties());

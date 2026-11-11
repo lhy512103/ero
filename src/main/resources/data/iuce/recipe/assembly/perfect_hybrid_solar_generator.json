@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:perfect_hybrid_solar_glass",
+      "iuce:perfect_hybrid_solar_glass",
+      "iuce:perfect_hybrid_solar_glass"
+    ],
+    [
+      "iuce:hybrid_solar_generator",
+      "iuce:perfect_plated_shell",
+      "iuce:hybrid_solar_generator"
+    ],
+    [
+      "iuce:lapotron_crystal",
+      "iuce:machine_upgrade_2",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:perfect_hybrid_solar_generator",
+    "count": 1
+  }
+}

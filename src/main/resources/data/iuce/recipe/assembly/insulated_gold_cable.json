@@ -1,0 +1,8 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:gold_cable",
+    "iuce:rubber"
+  ],
+  "result": { "id": "iuce:insulated_gold_cable", "count": 1 }
+}

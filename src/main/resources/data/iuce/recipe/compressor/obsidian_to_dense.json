@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "minecraft:obsidian",
+  "input_count": 9,
+  "result": {
+    "id": "iuce:dense_obsidian_plate",
+    "count": 1
+  },
+  "energy": 9600,
+  "time": 600
+}

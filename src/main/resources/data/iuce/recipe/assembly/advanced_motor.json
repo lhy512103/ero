@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:steel_plate",
+      "iuce:copper_coil",
+      "iuce:steel_plate"
+    ],
+    [
+      "iuce:magnet",
+      "iuce:cobalt_stick",
+      "iuce:magnet"
+    ],
+    [
+      "iuce:steel_plate",
+      "iuce:electric_motor",
+      "iuce:steel_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:advanced_motor",
+    "count": 1
+  }
+}

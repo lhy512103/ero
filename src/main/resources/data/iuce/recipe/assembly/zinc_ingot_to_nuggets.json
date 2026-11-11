@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:zinc_ingot"
+  ],
+  "result": {
+    "id": "iuce:zinc_nugget",
+    "count": 9
+  }
+}

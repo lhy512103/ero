@@ -124,7 +124,7 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
                 int baseProcessTime = OverclockerUpgradeItem.getOverclockedProcessTime(
                     cachedRecipe.getProcessTime(), cachedOverclockerCount);
                 long baseEnergyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(
-                    cachedRecipe.getEnergyCost(), cachedOverclockerCount);
+                    cachedRecipe.getEnergyPerTick(), cachedOverclockerCount);
 
                 // 时间阶段加成
                 float speedMult = getTimeSpeedMultiplier();

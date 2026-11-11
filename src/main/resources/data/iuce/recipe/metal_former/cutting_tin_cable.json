@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "metal_former_cutting",
+  "input": "iuce:tin_plate",
+  "result": {
+    "id": "iuce:tin_cable",
+    "count": 4
+  },
+  "energy": 320,
+  "time": 80
+}

@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["", "minecraft:crafting_table", ""],
+    ["iuce:copper_plate", "iuce:machine_casing", "iuce:copper_plate"],
+    ["minecraft:redstone", "iuce:circuit", "minecraft:redstone"]
+  ],
+  "result": { "id": "iuce:industrial_workbench", "count": 1 }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:basic_solar_glass", "iuce:basic_solar_glass", "iuce:basic_solar_glass"],
+    ["iuce:purified_silver_dust", "iuce:purified_silver_dust", "iuce:purified_silver_dust"],
+    ["iuce:basic_solar_glass", "iuce:basic_solar_glass", "iuce:basic_solar_glass"]
+  ],
+  "result": { "id": "iuce:advanced_solar_glass", "count": 3 }
+}

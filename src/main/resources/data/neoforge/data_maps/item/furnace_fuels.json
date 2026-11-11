@@ -1,0 +1,10 @@
+{
+  "values": {
+    "iuce:coal_fuel": {
+      "burn_time": 4800
+    },
+    "iuce:coal_ball": {
+      "burn_time": 12800
+    }
+  }
+}

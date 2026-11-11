@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:circuit",
+      ""
+    ],
+    [
+      "iuce:iron_gear",
+      "iuce:machine_casing",
+      "iuce:iron_gear"
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:electric_motor",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:metal_former",
+    "count": 1
+  }
+}

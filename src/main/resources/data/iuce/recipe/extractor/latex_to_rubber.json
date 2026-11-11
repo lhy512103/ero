@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "extractor",
+  "input": "iuce:raw_latex",
+  "result": {
+    "id": "iuce:rubber",
+    "count": 3
+  },
+  "energy": 400,
+  "time": 100
+}

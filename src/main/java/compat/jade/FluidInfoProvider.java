@@ -26,7 +26,7 @@ import snownee.jade.api.view.ProgressView;
 public class FluidInfoProvider implements StreamServerDataProvider<BlockAccessor, FluidInfoProvider.Data> {
 
     public static final FluidInfoProvider INSTANCE = new FluidInfoProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "fluid_info");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "fluid_info");
 
     /** 蓝色 (ARGB) */
     private static final int WATER_BLUE = 0xFF3366CC;

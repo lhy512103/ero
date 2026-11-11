@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "iuce:item/battery/energy_crystal_0"
+  },
+  "overrides": [
+    {"predicate": {"level": 0}, "model": "iuce:item/energy_crystal0"},
+    {"predicate": {"level": 0.25}, "model": "iuce:item/energy_crystal1"},
+    {"predicate": {"level": 0.5}, "model": "iuce:item/energy_crystal2"},
+    {"predicate": {"level": 0.75}, "model": "iuce:item/energy_crystal3"},
+    {"predicate": {"level": 1}, "model": "iuce:item/energy_crystal4"}
+  ]
+}

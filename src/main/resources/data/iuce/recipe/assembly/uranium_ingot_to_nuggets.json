@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:uranium_ingot"
+  ],
+  "result": {
+    "id": "iuce:uranium_nugget",
+    "count": 9
+  }
+}

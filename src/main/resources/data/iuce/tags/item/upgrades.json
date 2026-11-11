@@ -1,0 +1,7 @@
+{
+  "values": [
+    "iuce:ejector_upgrade", "iuce:energy_storage_upgrade", "iuce:fluid_ejector_upgrade",
+    "iuce:fluid_pulling_upgrade", "iuce:overclocker_upgrade", "iuce:overclocker_upgrade1",
+    "iuce:overclocker_upgrade2", "iuce:pulling_upgrade"
+  ]
+}

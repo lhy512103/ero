@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "minecraft:redstone",
+      "iuce:silver_plate",
+      "minecraft:redstone"
+    ],
+    [
+      "iuce:alloy_ingot",
+      "iuce:circuit",
+      "iuce:alloy_ingot"
+    ],
+    [
+      "minecraft:lapis_lazuli",
+      "minecraft:glowstone_dust",
+      "minecraft:lapis_lazuli"
+    ]
+  ],
+  "result": {
+    "id": "iuce:advanced_circuit",
+    "count": 1
+  }
+}

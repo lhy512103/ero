@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:cobalt_ingot"
+  ],
+  "result": {
+    "id": "iuce:cobalt_nugget",
+    "count": 9
+  }
+}

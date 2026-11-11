@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:re_battery",
+    "iuce:circuit",
+    "#minecraft:planks"
+  ],
+  "result": { "id": "iuce:energy_storage_upgrade", "count": 1 }
+}

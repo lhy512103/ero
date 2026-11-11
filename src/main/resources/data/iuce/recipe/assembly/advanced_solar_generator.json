@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:advanced_solar_glass",
+      "iuce:advanced_solar_glass",
+      "iuce:advanced_solar_glass"
+    ],
+    [
+      "iuce:solar_generator",
+      "iuce:basic_plated_shell",
+      "iuce:solar_generator"
+    ],
+    [
+      "iuce:advanced_re_battery",
+      "iuce:machine_upgrade_0",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:advanced_solar_generator",
+    "count": 1
+  }
+}

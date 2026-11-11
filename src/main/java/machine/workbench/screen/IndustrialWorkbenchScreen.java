@@ -9,9 +9,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class IndustrialWorkbenchScreen extends AbstractContainerScreen<IndustrialWorkbenchMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/industrial_workbench.png");
-    private static final Identifier ARROW_D_ON = Identifier.parse("ero:textures/gui/com/arrow_d_on.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/industrial_workbench.png");
+    private static final Identifier ARROW_D_ON = Identifier.parse("iuce:textures/gui/com/arrow_d_on.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
 
     public IndustrialWorkbenchScreen(IndustrialWorkbenchMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 200);

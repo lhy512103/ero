@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:silver_ingot",
+    "iuce:forge_hammer"
+  ],
+  "result": {
+    "id": "iuce:silver_stick",
+    "count": 1
+  }
+}

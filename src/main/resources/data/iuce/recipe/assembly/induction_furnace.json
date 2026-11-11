@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:dense_copper_plate",
+      "iuce:heating_coil",
+      "iuce:dense_copper_plate"
+    ],
+    [
+      "iuce:heating_coil",
+      "iuce:electric_furnace",
+      "iuce:heating_coil"
+    ],
+    [
+      "iuce:circuit",
+      "iuce:machine_casing",
+      "iuce:circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:induction_furnace",
+    "count": 1
+  }
+}

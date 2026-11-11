@@ -151,7 +151,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                 long energyPerTick;
                 if (cachedMachineRecipe != null) {
                     processTime = cachedMachineRecipe.getProcessTime();
-                    energyPerTick = cachedMachineRecipe.getEnergyCost();
+                    energyPerTick = cachedMachineRecipe.getEnergyPerTick();
                 } else {
                     processTime = OverclockerUpgradeItem.getOverclockedProcessTime(BASE_PROCESS_TIME, cachedOverclockerCount);
                     energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(BASE_ENERGY_CONSUMPTION, cachedOverclockerCount);
@@ -292,6 +292,15 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                 if (inserted > 0) {
                     itemHandler.extract(INPUT_SLOT, inputResource, 1, tx);
                     processed++;
+
+                    // 概率副产（尽力插入输出槽，放不下则舍弃，不阻塞主产物）
+                    if (cachedMachineRecipe != null && cachedMachineRecipe.hasExtraResults() && level != null) {
+                        for (MachineRecipe.ExtraResult extra : cachedMachineRecipe.getExtraResults()) {
+                            if (level.getRandom().nextFloat() >= extra.chance()) continue;
+                            ItemStack extraStack = extra.create();
+                            itemHandler.insert(OUTPUT_SLOT, ItemResource.of(extraStack), extraStack.getCount(), tx);
+                        }
+                    }
                 } else {
                     break;
                 }

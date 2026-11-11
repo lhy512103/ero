@@ -23,7 +23,7 @@ import snownee.jade.api.view.ProgressView;
 public class CableEnergyProvider implements StreamServerDataProvider<BlockAccessor, CableEnergyProvider.Data> {
 
     public static final CableEnergyProvider INSTANCE = new CableEnergyProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "cable_energy");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "cable_energy");
 
     private static final int DARK_RED = 0xFFAA0000;
 

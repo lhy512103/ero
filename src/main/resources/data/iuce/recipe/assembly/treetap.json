@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "#minecraft:planks",
+      ""
+    ],
+    [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ],
+    [
+      "#minecraft:planks",
+      "",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:treetap",
+    "count": 1
+  }
+}

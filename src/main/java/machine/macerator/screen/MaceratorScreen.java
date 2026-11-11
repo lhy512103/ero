@@ -9,9 +9,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class MaceratorScreen extends AbstractContainerScreen<MaceratorMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/macerator.png");
-    private static final Identifier ARROW_ON = Identifier.parse("ero:textures/gui/com/arrow_on.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/macerator.png");
+    private static final Identifier ARROW_ON = Identifier.parse("iuce:textures/gui/com/arrow_on.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
 
     public MaceratorScreen(MaceratorMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);

@@ -1,0 +1,16 @@
+{
+  "values": [
+    "iuce:tin_plate",
+    "iuce:iron_plate",
+    "iuce:zinc_plate",
+    "iuce:aluminium_plate",
+    "iuce:cobalt_plate",
+    "iuce:lead_plate",
+    "iuce:nickel_plate",
+    "iuce:silver_plate",
+    "iuce:gold_plate",
+    "iuce:copper_plate",
+    "iuce:bronze_plate",
+    "iuce:steel_plate"
+  ]
+}

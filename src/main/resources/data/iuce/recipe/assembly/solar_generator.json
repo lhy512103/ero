@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["iuce:basic_solar_glass", "iuce:basic_solar_glass", "iuce:basic_solar_glass"],
+    ["iuce:circuit", "iuce:machine_casing", "iuce:circuit"],
+    ["iuce:insulated_copper_cable", "iuce:generator", "iuce:insulated_copper_cable"]
+  ],
+  "result": { "id": "iuce:solar_generator", "count": 1 }
+}

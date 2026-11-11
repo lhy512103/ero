@@ -11,9 +11,9 @@ import java.util.List;
 
 public class GeneratorScreen extends AbstractContainerScreen<GeneratorMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/generator/generator.png");
-    private static final Identifier ARROW_D_ON = Identifier.parse("ero:textures/gui/com/arrow_d_on.png");
-    private static final Identifier ENERGY_PROGRESS_ON = Identifier.parse("ero:textures/gui/com/energy_progress_on.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/generator/generator.png");
+    private static final Identifier ARROW_D_ON = Identifier.parse("iuce:textures/gui/com/arrow_d_on.png");
+    private static final Identifier ENERGY_PROGRESS_ON = Identifier.parse("iuce:textures/gui/com/energy_progress_on.png");
 
     private static final int ENERGY_X = 136;
     private static final int ENERGY_Y = 26;

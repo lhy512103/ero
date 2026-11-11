@@ -23,8 +23,8 @@ public class PerfectHybridSolarGeneratorBlockEntity extends MachineBlockEntity i
     public PerfectHybridSolarGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PERFECT_HYBRID_SOLAR_GENERATOR.get(), pos, state);
         this.voltage = EUVoltage.EV;
-        this.generationRate = 131072;
-        this.energyStorage = new EUEnergyStorageImpl(16384000, voltage);
+        this.generationRate = 512;
+        this.energyStorage = new EUEnergyStorageImpl(64000, voltage);
     }
     @Override
     public void tick() {

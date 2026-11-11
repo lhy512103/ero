@@ -11,10 +11,10 @@ import java.util.List;
 
 public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/crop_planter.png");
-    private static final Identifier ENERGY_PROGRESS = Identifier.parse("ero:textures/gui/com/energy_progress_on_5.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
-    private static final Identifier SOLAR_ON = Identifier.parse("ero:textures/gui/com/solar_on.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/crop_planter.png");
+    private static final Identifier ENERGY_PROGRESS = Identifier.parse("iuce:textures/gui/com/energy_progress_on_5.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
+    private static final Identifier SOLAR_ON = Identifier.parse("iuce:textures/gui/com/solar_on.png");
 
     public PlanterScreen(PlanterMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);

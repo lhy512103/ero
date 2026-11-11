@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:singulary_solar_glass", "iuce:singulary_solar_glass", "iuce:singulary_solar_glass"],
+    ["iuce:quantum_solar_generator", "iuce:photon_plated_shell", "iuce:quantum_solar_generator"],
+    ["iuce:lapotron_crystal", "iuce:mfsu", "iuce:lapotron_crystal"]
+  ],
+  "result": { "id": "iuce:singulary_solar_generator", "count": 1 }
+}

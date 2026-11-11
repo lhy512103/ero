@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["#minecraft:planks", "iuce:insulated_copper_cable", "#minecraft:planks"],
+    ["iuce:re_battery", "iuce:re_battery", "iuce:re_battery"],
+    ["#minecraft:planks", "#minecraft:planks", "#minecraft:planks"]
+  ],
+  "result": { "id": "iuce:batbox", "count": 1 }
+}

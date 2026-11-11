@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:dense_lead_plate",
+      "iuce:refined_steel_ingot",
+      "iuce:dense_lead_plate"
+    ],
+    [
+      "iuce:refined_steel_ingot",
+      "iuce:machine_casing_2",
+      "iuce:refined_steel_ingot"
+    ],
+    [
+      "iuce:dense_lead_plate",
+      "iuce:refined_steel_ingot",
+      "iuce:dense_lead_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:reactor_casing",
+    "count": 4
+  }
+}

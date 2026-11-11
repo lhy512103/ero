@@ -41,6 +41,7 @@ public class EroJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, MaceratorBlockEntity.class);
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, ElectricFurnaceBlockEntity.class);
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, CompressorBlockEntity.class);
+        registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, machine.metal_former.MetalFormerBlockEntity.class);
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, ExtractorBlockEntity.class);
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, InductionFurnaceBlockEntity.class);
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, OreWasherBlockEntity.class);

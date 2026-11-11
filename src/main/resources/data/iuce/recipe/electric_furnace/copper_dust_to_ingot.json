@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electric_furnace",
+  "input": "iuce:copper_dust",
+  "result": {
+    "id": "minecraft:copper_ingot",
+    "count": 1
+  },
+  "energy": 480,
+  "time": 120
+}

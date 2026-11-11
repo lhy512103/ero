@@ -11,8 +11,8 @@ import java.util.List;
 
 public class StorageScreen extends AbstractContainerScreen<StorageMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/battery_box.png");
-    private static final Identifier ENERGY_BAR = Identifier.parse("ero:textures/gui/com/energy_progress_on_2.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/battery_box.png");
+    private static final Identifier ENERGY_BAR = Identifier.parse("iuce:textures/gui/com/energy_progress_on_2.png");
 
     // 能量条坐标（贴图中的深色区域）
     private static final int ENERGY_X = 64;

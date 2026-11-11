@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:insulated_copper_cable",
+      "iuce:copper_coil",
+      "iuce:insulated_copper_cable"
+    ],
+    [
+      "iuce:tin_plate",
+      "iuce:iron_stick",
+      "iuce:tin_plate"
+    ],
+    [
+      "",
+      "minecraft:redstone",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:electric_motor",
+    "count": 1
+  }
+}

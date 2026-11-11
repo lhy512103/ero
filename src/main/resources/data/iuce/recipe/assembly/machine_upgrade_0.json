@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "minecraft:redstone",
+      "iuce:tin_plate",
+      "minecraft:redstone"
+    ],
+    [
+      "iuce:iron_gear",
+      "iuce:circuit",
+      "iuce:iron_gear"
+    ],
+    [
+      "minecraft:redstone",
+      "iuce:tin_plate",
+      "minecraft:redstone"
+    ]
+  ],
+  "result": {
+    "id": "iuce:machine_upgrade_0",
+    "count": 1
+  }
+}

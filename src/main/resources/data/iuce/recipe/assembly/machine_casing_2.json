@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:steel_plate",
+      "iuce:aluminium_stick",
+      "iuce:steel_plate"
+    ],
+    [
+      "iuce:aluminium_plate",
+      "iuce:machine_casing",
+      "iuce:aluminium_plate"
+    ],
+    [
+      "iuce:steel_plate",
+      "iuce:dense_iron_plate",
+      "iuce:steel_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:machine_casing_2",
+    "count": 1
+  }
+}

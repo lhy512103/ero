@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "planter",
+  "input": "minecraft:cactus",
+  "input_count": 1,
+  "input2": "minecraft:sand",
+  "input2_count": 1,
+  "result": { "id": "minecraft:cactus", "count": 2 },
+  "energy": 1000,
+  "time": 500
+}

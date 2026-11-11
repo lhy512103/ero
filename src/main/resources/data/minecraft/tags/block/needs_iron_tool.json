@@ -1,12 +1,12 @@
 {
   "replace": false,
   "values": [
-    "ero:cobalt_ore",
-    "ero:lead_ore",
-    "ero:nickel_ore",
-    "ero:silver_ore",
-    "ero:deep_cobalt_ore",
-    "ero:deep_nickel_ore",
-    "ero:deep_silver_ore"
+    "iuce:cobalt_ore",
+    "iuce:lead_ore",
+    "iuce:nickel_ore",
+    "iuce:silver_ore",
+    "iuce:deep_cobalt_ore",
+    "iuce:deep_nickel_ore",
+    "iuce:deep_silver_ore"
   ]
 }

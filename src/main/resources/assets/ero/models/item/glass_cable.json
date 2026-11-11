@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "ero:item/cable/glass_1_cable_item"
-  }
-}

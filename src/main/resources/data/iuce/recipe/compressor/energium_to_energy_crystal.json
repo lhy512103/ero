@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "iuce:energium_dust",
+  "input_count": 9,
+  "result": {
+    "id": "iuce:energy_crystal",
+    "count": 1
+  },
+  "energy": 12800,
+  "time": 600
+}

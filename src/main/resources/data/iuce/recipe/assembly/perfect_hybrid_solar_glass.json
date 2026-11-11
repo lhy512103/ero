@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:hybrid_solar_glass", "iuce:hybrid_solar_glass", "iuce:hybrid_solar_glass"],
+    ["iuce:diamond_dust", "iuce:diamond_dust", "iuce:diamond_dust"],
+    ["iuce:hybrid_solar_glass", "iuce:hybrid_solar_glass", "iuce:hybrid_solar_glass"]
+  ],
+  "result": { "id": "iuce:perfect_hybrid_solar_glass", "count": 3 }
+}

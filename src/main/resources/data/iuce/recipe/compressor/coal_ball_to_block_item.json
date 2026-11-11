@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "iuce:coal_ball",
+  "input_count": 8,
+  "result": {
+    "id": "iuce:coal_block_item",
+    "count": 1
+  },
+  "energy": 6400,
+  "time": 400
+}

@@ -19,28 +19,28 @@ public class ModRecipes {
 
     // === 机器配方类型 ===
     public static final Supplier<RecipeType<MachineRecipe>> MACHINE_TYPE =
-        RECIPE_TYPES.register("machine", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("ero:machine")));
+        RECIPE_TYPES.register("machine", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:machine")));
 
     public static final Supplier<RecipeSerializer<MachineRecipe>> MACHINE_SERIALIZER =
         RECIPE_SERIALIZERS.register("machine", MachineRecipeSerializer::create);
 
     // === 工业合成配方类型 ===
     public static final Supplier<RecipeType<CraftingRecipe>> ERO_CRAFTING_TYPE =
-        RECIPE_TYPES.register("crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("ero:crafting")));
+        RECIPE_TYPES.register("crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:crafting")));
 
     public static final Supplier<RecipeSerializer<CraftingRecipe>> ERO_CRAFTING_SERIALIZER =
         RECIPE_SERIALIZERS.register("crafting", () -> CraftingRecipeSerializer.forType(ERO_CRAFTING_TYPE.get()).create());
 
     // === 普通合成配方类型 ===
     public static final Supplier<RecipeType<CraftingRecipe>> STANDARD_CRAFTING_TYPE =
-        RECIPE_TYPES.register("standard_crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("ero:standard_crafting")));
+        RECIPE_TYPES.register("standard_crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:standard_crafting")));
 
     public static final Supplier<RecipeSerializer<CraftingRecipe>> STANDARD_CRAFTING_SERIALIZER =
         RECIPE_SERIALIZERS.register("standard_crafting", () -> CraftingRecipeSerializer.forType(STANDARD_CRAFTING_TYPE.get()).create());
 
     // === 可选合成配方类型（适配工业工作台）===
     public static final Supplier<RecipeType<OptionalCraftingRecipe>> OPTIONAL_CRAFTING_TYPE =
-        RECIPE_TYPES.register("optional_crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("ero:optional_crafting")));
+        RECIPE_TYPES.register("optional_crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:optional_crafting")));
 
     public static final Supplier<RecipeSerializer<OptionalCraftingRecipe>> OPTIONAL_CRAFTING_SERIALIZER =
         RECIPE_SERIALIZERS.register("optional_crafting", () -> OptionalCraftingRecipeSerializer.forType(OPTIONAL_CRAFTING_TYPE.get()).create());

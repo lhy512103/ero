@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:energy_crystal",
+      "iuce:aluminium_plate",
+      "iuce:energy_crystal"
+    ],
+    [
+      "iuce:aluminium_stick",
+      "iuce:machine_upgrade_1",
+      "iuce:aluminium_stick"
+    ],
+    [
+      "iuce:advanced_circuit",
+      "iuce:advanced_motor",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:machine_upgrade_2",
+    "count": 1
+  }
+}

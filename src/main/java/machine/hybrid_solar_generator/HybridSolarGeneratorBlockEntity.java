@@ -71,10 +71,10 @@ public class HybridSolarGeneratorBlockEntity extends MachineBlockEntity implemen
         this.voltage = EUVoltage.HV;
 
 
-        this.generationRate = 65536;
+        this.generationRate = 64;
 
 
-        this.energyStorage = new EUEnergyStorageImpl(8192000, voltage);
+        this.energyStorage = new EUEnergyStorageImpl(8000, voltage);
 
 
     }

@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:silver_block"
+  ],
+  "result": {
+    "id": "iuce:silver_ingot",
+    "count": 9
+  }
+}

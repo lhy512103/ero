@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "iuce:block/reactor_casing_back" }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "minecraft:coal",
+  "result": {
+    "id": "iuce:coal_dust",
+    "count": 1
+  },
+  "energy": 320,
+  "time": 80
+}

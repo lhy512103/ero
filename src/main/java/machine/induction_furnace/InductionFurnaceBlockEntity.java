@@ -123,7 +123,7 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
 
             if (cachedRecipe != null && !cachedOutput.isEmpty()) {
                 int processTime = cachedRecipe.getProcessTime();
-                long energyPerTick = cachedRecipe.getEnergyCost();
+                long energyPerTick = cachedRecipe.getEnergyPerTick();
                 maxProgress = processTime;
 
                 // 检查输入数量是否足够

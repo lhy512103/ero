@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:quantum_solar_glass", "iuce:quantum_solar_glass", "iuce:quantum_solar_glass"],
+    ["iuce:perfect_hybrid_solar_generator", "iuce:photon_plated_shell", "iuce:perfect_hybrid_solar_generator"],
+    ["iuce:lapotron_crystal", "iuce:machine_upgrade_3", "iuce:lapotron_crystal"]
+  ],
+  "result": { "id": "iuce:quantum_solar_generator", "count": 1 }
+}

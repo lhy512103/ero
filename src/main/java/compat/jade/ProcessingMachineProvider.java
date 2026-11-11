@@ -27,7 +27,7 @@ import snownee.jade.api.view.ProgressView;
 public class ProcessingMachineProvider implements StreamServerDataProvider<BlockAccessor, ProcessingMachineProvider.Data> {
 
     public static final ProcessingMachineProvider INSTANCE = new ProcessingMachineProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "processing_machine");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "processing_machine");
 
     /** 暗红色 (ARGB) */
     private static final int DARK_RED = 0xFFAA0000;

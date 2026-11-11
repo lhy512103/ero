@@ -1,10 +1,11 @@
 {
   "replace": false,
   "values": [
-    "ero:aluminium_stick",
-    "ero:cobalt_stick",
-    "ero:nickel_stick",
-    "ero:silver_stick",
-    "ero:zinc_stick"
+    "iuce:aluminium_stick",
+    "iuce:cobalt_stick",
+    "iuce:nickel_stick",
+    "iuce:silver_stick",
+    "iuce:zinc_stick",
+    "iuce:iron_stick"
   ]
 }
