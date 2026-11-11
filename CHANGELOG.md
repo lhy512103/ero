@@ -22,6 +22,8 @@
 16. Improved: Electric furnaces produce two ingots from crushed dust and three from purified dust.
 17. Added: Industrial workbenches support vanilla crafting recipes and return containers such as empty buckets.
 18. Fixed: Industrial workbench JEI tabs now use the correct title, icon, and shaped-recipe layout.
+19. Added: Planters recognize more vanilla and modded crops and allow custom cultivation registrations.
+20. Improved: Crop discovery is cached on demand without scanning all items during startup.
 
 ### 中文
 
@@ -43,3 +45,5 @@
 16. 优化：粗粉经电炉产出两锭，纯净粉产出三锭。
 17. 新增：工业工作台支持原版合成配方并返还空桶等容器。
 18. 修复：工业工作台JEI分类名称、图标和有序配方布局错误。
+19. 新增：种植机自动识别更多原版及模组作物，并支持自定义培育注册。
+20. 优化：作物按需识别并缓存，避免进入游戏时扫描全部物品。

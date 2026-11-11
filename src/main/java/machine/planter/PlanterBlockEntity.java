@@ -66,6 +66,9 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
     private ItemResource cachedInput1Resource = ItemResource.EMPTY;
     private ItemResource cachedInput2Resource = ItemResource.EMPTY;
     private int cachedOverclockerCount = -1;
+    private CropRegistry.Profile cachedProfile;
+    private Object cachedRecipeMap;
+    private long cachedCropRevision = -1;
 
     public PlanterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PLANTER.get(), pos, state);
@@ -77,6 +80,7 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
             @Override
             protected void onContentsChanged(int index, net.minecraft.world.item.ItemStack previousContents) {
                 setChanged();
+                if (index >= 3) cachedOverclockerCount = -1;
             }
         };
     }
@@ -99,11 +103,16 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
 
         if (!input1Resource.isEmpty() && input1Amount > 0) {
             ItemResource input2Resource = itemHandler.getResource(SOIL_SLOT);
-            ItemStack input1Stack = input1Resource.toStack(1);
-            ItemStack input2Stack = input2Resource.isEmpty() ? ItemStack.EMPTY : input2Resource.toStack(1);
-
-            // 仅在输入变化时重新查找配方
-            if (!input1Resource.equals(cachedInput1Resource) || !input2Resource.equals(cachedInput2Resource)) {
+            Object recipeMap = RecipeHelper.getRecipeManager(level).recipeMap();
+            // Resolve only when input, datapacks, or extension registrations change.
+            if (!input1Resource.equals(cachedInput1Resource) || !input2Resource.equals(cachedInput2Resource)
+                    || cachedRecipeMap != recipeMap || cachedCropRevision != CropRegistry.revision()) {
+                progress = 0;
+                cachedRecipeMap = recipeMap;
+                cachedCropRevision = CropRegistry.revision();
+                cachedProfile = null;
+                ItemStack input1Stack = input1Resource.toStack(1);
+                ItemStack input2Stack = input2Resource.isEmpty() ? ItemStack.EMPTY : input2Resource.toStack(1);
                 cachedInput1Resource = input1Resource;
                 cachedInput2Resource = input2Resource;
 
@@ -112,19 +121,31 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
                 } else {
                     cachedRecipe = RecipeHelper.findMachineRecipe(level, "planter", input1Stack, input2Stack);
                 }
-                cachedOutput = cachedRecipe != null ? cachedRecipe.getOutput().copy() : ItemStack.EMPTY;
+                if (cachedRecipe == null && !input2Resource.isEmpty()) {
+                    cachedRecipe = RecipeHelper.findMachineRecipe(level, "planter", input1Stack);
+                }
+                if (cachedRecipe == null) {
+                    cachedProfile = CropRegistry.resolve((net.minecraft.server.level.ServerLevel) level, worldPosition, input1Stack).orElse(null);
+                }
+                cachedOutput = cachedRecipe != null ? cachedRecipe.getOutput().copy()
+                    : cachedProfile != null ? cachedProfile.result() : ItemStack.EMPTY;
             }
 
-            if (!cachedOutput.isEmpty() && cachedRecipe != null) {
+            if (!cachedOutput.isEmpty() && (cachedRecipe != null || cachedProfile != null)) {
+                ItemResource currentOutput = itemHandler.getResource(OUTPUT_SLOT);
+                if ((!currentOutput.isEmpty() && !currentOutput.equals(ItemResource.of(cachedOutput)))
+                        || itemHandler.getAmountAsInt(OUTPUT_SLOT) + cachedOutput.getCount() > cachedOutput.getMaxStackSize()) return;
+                if (cachedRecipe != null && (input1Amount < cachedRecipe.getInputCount()
+                        || (cachedRecipe.hasDualInput() && itemHandler.getAmountAsInt(SOIL_SLOT) < cachedRecipe.getInput2Count()))) return;
                 // 使用缓存的超频器数量
                 if (cachedOverclockerCount < 0) {
                     cachedOverclockerCount = OverclockerUpgradeItem.countOverclockers(this);
                 }
 
                 int baseProcessTime = OverclockerUpgradeItem.getOverclockedProcessTime(
-                    cachedRecipe.getProcessTime(), cachedOverclockerCount);
+                    cachedRecipe != null ? cachedRecipe.getProcessTime() : cachedProfile.ticks(), cachedOverclockerCount);
                 long baseEnergyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(
-                    cachedRecipe.getEnergyPerTick(), cachedOverclockerCount);
+                    cachedRecipe != null ? cachedRecipe.getEnergyPerTick() : cachedProfile.energyPerTick(), cachedOverclockerCount);
 
                 // 时间阶段加成
                 float speedMult = getTimeSpeedMultiplier();
@@ -134,6 +155,7 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
                 maxProgress = processTime;
 
                 // 尝试消耗能量
+                if (energyStorage.getEnergyStored() < energyPerTick) return;
                 long consumed = energyStorage.removeEnergy(energyPerTick);
                 if (consumed <= 0) {
                     if (wasWorking) {
@@ -170,7 +192,7 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
     }
 
     private boolean tryProcessOutput() {
-        if (cachedOutput.isEmpty() || cachedRecipe == null) return false;
+        if (cachedOutput.isEmpty() || (cachedRecipe == null && cachedProfile == null)) return false;
 
         ItemStack outputStack = cachedOutput;
         ItemResource outputResource = ItemResource.of(outputStack);
@@ -184,11 +206,16 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
 
             // 消耗培育槽输入
             ItemResource input1Resource = itemHandler.getResource(CULTIVATION_SLOT);
-            int extracted1 = itemHandler.extract(CULTIVATION_SLOT, input1Resource, cachedRecipe.getInputCount(), tx);
-            if (extracted1 < cachedRecipe.getInputCount()) return false;
+            if (cachedRecipe != null) {
+                int extracted1 = itemHandler.extract(CULTIVATION_SLOT, input1Resource, cachedRecipe.getInputCount(), tx);
+                if (extracted1 < cachedRecipe.getInputCount()) return false;
+            } else if (input1Resource.isEmpty()) {
+                return false;
+            }
+            // Automatic cultivation keeps one planted seed as a catalyst; explicit JSON controls consumption.
 
             // 消耗土壤槽输入（如果有）
-            if (cachedRecipe.hasDualInput()) {
+            if (cachedRecipe != null && cachedRecipe.hasDualInput()) {
                 ItemResource input2Resource = itemHandler.getResource(SOIL_SLOT);
                 int extracted2 = itemHandler.extract(SOIL_SLOT, input2Resource, cachedRecipe.getInput2Count(), tx);
                 if (extracted2 < cachedRecipe.getInput2Count()) return false;
@@ -196,7 +223,7 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
 
             // 插入输出
             int inserted = itemHandler.insert(OUTPUT_SLOT, outputResource, outputStack.getCount(), tx);
-            if (inserted <= 0) return false;
+            if (inserted != outputStack.getCount()) return false;
 
             tx.commit();
         }
