@@ -8,7 +8,9 @@ import energy.EUEnergyStorage;
 import energy.EUEnergyStorageImpl;
 import energy.EUVoltage;
 import machine.workbench.menu.IndustrialWorkbenchMenu;
-import recipe.CraftingRecipe;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import recipe.RecipeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -50,6 +52,8 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     @Nullable
     private CraftingRecipe cachedRecipe = null;
     private ItemStack cachedOutput = ItemStack.EMPTY;
+    private boolean recipeChecked;
+    private Object cachedRecipeMap;
 
     private static final Component DISPLAY_NAME = Component.literal("工业工作台");
 
@@ -66,6 +70,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
                 // 输入变化时重置配方缓存
                 if (index >= CRAFTING_START && index < CRAFTING_START + CRAFTING_SIZE) {
                     cachedRecipe = null;
+                    recipeChecked = false;
                     cachedOutput = ItemStack.EMPTY;
                     progress = 0;
                 }
@@ -83,7 +88,9 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
         processPowerSlot();
 
         // 查找配方
-        if (cachedRecipe == null) {
+        Object recipeMap = RecipeHelper.getRecipeManager(level).recipeMap();
+        if (!recipeChecked || cachedRecipeMap != recipeMap) {
+            cachedRecipeMap = recipeMap;
             findRecipe();
         }
 
@@ -105,6 +112,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
                 if (tryCraft()) {
                     progress = 0;
                     cachedRecipe = null;
+                    recipeChecked = false;
                     cachedOutput = ItemStack.EMPTY;
                 }
             }
@@ -136,14 +144,26 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
             ItemResource res = itemHandler.getResource(CRAFTING_START + i);
             inputs.add(res.isEmpty() ? ItemStack.EMPTY : res.toStack(1));
         }
+        CraftingInput input = CraftingInput.of(3, 3, inputs);
         cachedRecipe = RecipeHelper.findCraftingRecipe(level, inputs);
-        cachedOutput = cachedRecipe != null ? cachedRecipe.getOutput().copy() : ItemStack.EMPTY;
+        if (cachedRecipe == null) {
+            cachedRecipe = RecipeHelper.getRecipeManager(level).getRecipeFor(RecipeType.CRAFTING, input, level)
+                .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
+        }
+        cachedOutput = cachedRecipe != null ? cachedRecipe.assemble(input) : ItemStack.EMPTY;
+        recipeChecked = true;
     }
 
     private boolean tryCraft() {
         if (cachedRecipe == null || cachedOutput.isEmpty()) return false;
 
         ItemResource outputResource = ItemResource.of(cachedOutput);
+        int outputCount = cachedOutput.getCount();
+        List<ItemStack> grid = new ArrayList<>(CRAFTING_SIZE);
+        for (int i = 0; i < CRAFTING_SIZE; i++) grid.add(itemHandler.getResource(i).toStack(itemHandler.getAmountAsInt(i)));
+        CraftingInput.Positioned positioned = CraftingInput.ofPositioned(3, 3, grid);
+        if (!cachedRecipe.matches(positioned.input(), level)) { recipeChecked = false; return false; }
+        var remainders = cachedRecipe.getRemainingItems(positioned.input());
         // 记录合成前每个槽的物品类型，用于自动补充
         ItemResource[] slotResources = new ItemResource[CRAFTING_SIZE];
         for (int i = 0; i < CRAFTING_SIZE; i++) {
@@ -167,9 +187,23 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
             }
 
             // 插入输出
-            int inserted = itemHandler.insert(OUTPUT_SLOT, outputResource, cachedOutput.getCount(), tx);
-            if (inserted <= 0) return false;
+            int inserted = itemHandler.insert(OUTPUT_SLOT, outputResource, outputCount, tx);
+            if (inserted != outputCount) return false;
 
+            // Return remainders to their original (untrimmed) grid slot, then the buffer.
+            // If there is no room, abort the whole craft; never delete containers or duplicate output.
+            for (int i = 0; i < remainders.size(); i++) {
+                ItemStack remainder = remainders.get(i);
+                if (remainder.isEmpty()) continue;
+                int x = i % positioned.input().width() + positioned.left();
+                int y = i / positioned.input().width() + positioned.top();
+                ItemResource resource = ItemResource.of(remainder);
+                int left = remainder.getCount() - itemHandler.insert(x + y * 3, resource, remainder.getCount(), tx);
+                for (int slot = EXTRA_INVENTORY_START; slot < EXTRA_INVENTORY_START + EXTRA_INVENTORY_SIZE && left > 0; slot++) {
+                    left -= itemHandler.insert(slot, resource, left, tx);
+                }
+                if (left != 0) return false;
+            }
             tx.commit();
         }
 

@@ -33,11 +33,19 @@ public class EroCraftingRecipeCategory extends AbstractRecipeCategory<RecipeHold
         CraftingRecipe recipe = holder.value();
         List<Ingredient> inputs = recipe.getInputs();
 
-        int gridW = inputs.size() == 4 ? 2 : 3;
-        for (int i = 0; i < inputs.size(); i++) {
-            int x = 2 + (i % gridW) * 18;
-            int y = 2 + (i / gridW) * 18;
-            builder.addInputSlot(x, y).add(inputs.get(i));
+        if (recipe.isShaped()) {
+            boolean[] empty = recipe.getEmptySlots();
+            int ingredient = 0;
+            for (int i = 0; i < empty.length; i++) {
+                if (empty[i]) continue;
+                int x = 2 + (i % recipe.getGridWidth()) * 18;
+                int y = 2 + (i / recipe.getGridWidth()) * 18;
+                builder.addInputSlot(x, y).add(inputs.get(ingredient++));
+            }
+        } else {
+            for (int i = 0; i < inputs.size(); i++) {
+                builder.addInputSlot(2 + (i % 3) * 18, 2 + (i / 3) * 18).add(inputs.get(i));
+            }
         }
 
         builder.addOutputSlot(95, 20).add(recipe.getOutput());

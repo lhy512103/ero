@@ -20,6 +20,8 @@
 14. Added: Both wrenches rotate machines, toggle cable connections, and dismantle blocks while sneaking.
 15. Added: Electric furnaces support furnace, blast furnace, and smoker recipes.
 16. Improved: Electric furnaces produce two ingots from crushed dust and three from purified dust.
+17. Added: Industrial workbenches support vanilla crafting recipes and return containers such as empty buckets.
+18. Fixed: Industrial workbench JEI tabs now use the correct title, icon, and shaped-recipe layout.
 
 ### 中文
 
@@ -39,3 +41,5 @@
 14. 新增：两种扳手可调整机器朝向、切换线缆连接，并在潜行时拆卸方块。
 15. 新增：电炉支持熔炉、高炉和烟熏炉配方。
 16. 优化：粗粉经电炉产出两锭，纯净粉产出三锭。
+17. 新增：工业工作台支持原版合成配方并返还空桶等容器。
+18. 修复：工业工作台JEI分类名称、图标和有序配方布局错误。

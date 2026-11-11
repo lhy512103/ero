@@ -95,7 +95,7 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
         registration.addRecipeCategories(
-            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "合成", net.minecraft.world.item.Items.CRAFTING_TABLE),
+            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "工业工作台", ModBlocks.INDUSTRIAL_WORKBENCH.get()),
             new OptionalCraftingRecipeCategory(registration.getJeiHelpers(), OPTIONAL_CRAFTING_RECIPE_TYPE.get(), "可选合成", ModBlocks.INDUSTRIAL_WORKBENCH.get())
         );
     }
@@ -190,6 +190,10 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 工业合成
         registration.addCraftingStation(CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.SMELTING, ModBlocks.ELECTRIC_FURNACE.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.BLASTING, ModBlocks.ELECTRIC_FURNACE.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.SMOKING, ModBlocks.ELECTRIC_FURNACE.get());
 
         // 可选合成
         registration.addCraftingStation(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
@@ -205,7 +209,10 @@ public class EroJeiPlugin implements IModPlugin {
         // 电炉 — 进度箭头 (79, 36, 16x22)
         registration.addRecipeClickArea(ElectricFurnaceScreen.class,
             79, 36, 16, 22,
-            MACHINE_TYPES.get("electric_furnace").recipeType);
+            MACHINE_TYPES.get("electric_furnace").recipeType,
+            mezz.jei.api.constants.RecipeTypes.SMELTING,
+            mezz.jei.api.constants.RecipeTypes.BLASTING,
+            mezz.jei.api.constants.RecipeTypes.SMOKING);
 
         // 合金炉 — 进度箭头 (80, 36, 16x22)
         registration.addRecipeClickArea(InductionFurnaceScreen.class,
@@ -247,7 +254,7 @@ public class EroJeiPlugin implements IModPlugin {
         // 工业工作台 — 箭头 (90, 32, 22x15)
         registration.addRecipeClickArea(IndustrialWorkbenchScreen.class,
             90, 32, 22, 15,
-            CRAFTING_RECIPE_TYPE.get());
+            CRAFTING_RECIPE_TYPE.get(), mezz.jei.api.constants.RecipeTypes.CRAFTING);
     }
 
     /** 机器类型条目 */
