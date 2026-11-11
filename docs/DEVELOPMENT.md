@@ -10,7 +10,7 @@
 
 The regression source set is loaded only with `-PregressionTests` and is not included in the release JAR. Tests use the separate `run-regression` directory; client smoke tests use `run-smoke`. Neither uses the normal development world's saves.
 
-The ten IUCE GameTests cover adjacent energy conservation, storage output, cable disconnection, charging across all storage tiers, transactional item energy rollback, both wrenches, cooking/powder recipes, crafting remainders, and crop discovery/extensions. Vanilla may add its own tests to the reported total.
+The thirteen IUCE GameTests cover real-tick power delivery (adjacent, through cables, and from high-tier sources to low-tier machines), adjacent energy conservation, storage output, cable disconnection, charging across all storage tiers, transactional item energy rollback, both wrenches, cooking/powder recipes, crafting remainders, and crop discovery/extensions. Vanilla may add its own tests to the reported total.
 
 ## Verification record
 

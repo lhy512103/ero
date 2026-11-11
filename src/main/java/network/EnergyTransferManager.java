@@ -3,7 +3,6 @@ package network;
 import blockentity.MachineBlockEntity;
 import blockentity.cable.CableBlockEntity;
 import energy.EUCapability;
-import energy.EUEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -96,7 +95,8 @@ public final class EnergyTransferManager {
                     if (!(loadedEntity(level, route.target()) instanceof MachineBlockEntity targetMachine)) continue;
                     EUCapability target = targetMachine.getEUCapability(route.side());
                     if (target == null || !target.canReceive() || target.canExtract() != (pass == 1)) continue;
-                    if (!EUEnergyHelper.isVoltageCompatible(target.getVoltage(), source.getVoltage())) continue;
+                    // No voltage gate: IUCE has no transformers, and the amount below is already capped by
+                    // the source rate, the target rate and every cable on the path.
                     long amount = Math.min(source.getMaxTransferRate() - sent.getOrDefault(sourcePos, 0L),
                         target.getMaxTransferRate() - received.getOrDefault(route.target(), 0L));
                     for (Path path = route.path(); path != null && amount > 0; path = path.parent()) {

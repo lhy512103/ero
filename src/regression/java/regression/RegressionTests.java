@@ -55,6 +55,9 @@ public final class RegressionTests {
         TESTS.put("furnace_vanilla_and_powder_recipes", RegressionTests::furnace);
         TESTS.put("workbench_shaped_shapeless_and_remainders", RegressionTests::workbench);
         TESTS.put("planter_discovery_and_extension", RegressionTests::planter);
+        TESTS.put("live_adjacent_energy", RegressionTests::liveAdjacent);
+        TESTS.put("live_cable_energy", RegressionTests::liveCable);
+        TESTS.put("live_high_tier_energy", RegressionTests::liveHighTier);
     }
     public static void register(IEventBus bus) {
         var functions = DeferredRegister.<Consumer<GameTestHelper>>create(Registries.TEST_FUNCTION, "iuce");
@@ -232,5 +235,36 @@ public final class RegressionTests {
         check(helper, planter.getItemHandler().getResource(2).getItem() == Items.DIRT, "Registered extension must run through planter tick");
         check(helper, planter.getItemHandler().getAmountAsInt(0) == 1, "Automatic cultivation must keep its planted seed");
         helper.succeed();
+    }
+
+    /** Real server ticks only: proves the level-tick hook drives transfer, not a direct manager call. */
+    private static void liveAdjacent(GameTestHelper helper) {
+        var source = machine(helper, 1, ModBlocks.GENERATOR.get());
+        var target = machine(helper, 2, ModBlocks.MACERATOR.get());
+        energy(source).setEnergy(4000);
+        helper.succeedWhen(() -> check(helper, energy(target).getEnergyStored() > 0,
+            "Adjacent machine received no power from real server ticks"));
+    }
+    private static void liveCable(GameTestHelper helper) {
+        var source = machine(helper, 1, ModBlocks.GENERATOR.get());
+        helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.COPPER_CABLE.get());
+        helper.setBlock(new BlockPos(3, 1, 1), ModBlocks.COPPER_CABLE.get());
+        var target = machine(helper, 4, ModBlocks.MACERATOR.get());
+        energy(source).setEnergy(4000);
+        helper.succeedWhen(() -> check(helper, energy(target).getEnergyStored() > 0,
+            "Machine behind cables received no power from real server ticks"));
+    }
+
+    /** High-tier sources must still feed low-tier machines (there are no transformers). */
+    private static void liveHighTier(GameTestHelper helper) {
+        var storage = machine(helper, 1, ModBlocks.MFSU.get());
+        helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.IRON_CABLE.get());
+        var target = machine(helper, 3, ModBlocks.MACERATOR.get());
+        var solar = machine(helper, 5, ModBlocks.SINGULARY_SOLAR_GENERATOR.get());
+        var direct = machine(helper, 6, ModBlocks.COMPRESSOR.get());
+        energy(storage).setEnergy(100000);
+        energy(solar).setEnergy(100000);
+        helper.succeedWhen(() -> check(helper, energy(target).getEnergyStored() > 0 && energy(direct).getEnergyStored() > 0,
+            "LV machines received no power from high-tier storage/generators"));
     }
 }

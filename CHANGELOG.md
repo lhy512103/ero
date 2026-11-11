@@ -24,6 +24,7 @@
 18. Fixed: Industrial workbench JEI tabs now use the correct title, icon, and shaped-recipe layout.
 19. Added: Planters recognize more vanilla and modded crops and allow custom cultivation registrations.
 20. Improved: Crop discovery is cached on demand without scanning all items during startup.
+21. Fixed: High-tier generators and storage units could not power lower-tier machines or cables.
 
 ### 中文
 
@@ -47,3 +48,4 @@
 18. 修复：工业工作台JEI分类名称、图标和有序配方布局错误。
 19. 新增：种植机自动识别更多原版及模组作物，并支持自定义培育注册。
 20. 优化：作物按需识别并缓存，避免进入游戏时扫描全部物品。
+21. 修复：高等级发电设备和储电箱无法为低等级机器及线缆供电的问题。
