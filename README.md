@@ -24,4 +24,4 @@ Industrial Upgrade Community Edition — NeoForge mod for Minecraft 26.1.2.
 ./gradlew runClient
 ```
 
-See [MISSING_RECIPES.md](MISSING_RECIPES.md) for the current materials/machines acquisition inventory.
+See [CHANGELOG.md](CHANGELOG.md) for player-facing updates and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for regression tests, runtime profiles, wrench controls, and crop compatibility registration.

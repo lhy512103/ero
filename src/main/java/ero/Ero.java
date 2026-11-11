@@ -24,6 +24,13 @@ public class Ero {
     public Ero(ModContainer container) {
         IEventBus modEventBus = container.getEventBus();
         ModRegistries.registerAll(modEventBus);
+        if (Boolean.getBoolean("iuce.regressionTests")) {
+            try {
+                Class.forName("regression.RegressionTests").getMethod("register", IEventBus.class).invoke(null, modEventBus);
+            } catch (ReflectiveOperationException error) {
+                throw new IllegalStateException("Regression test source set is missing", error);
+            }
+        }
 
         // 注册流体
         ModFluids.register(modEventBus);
