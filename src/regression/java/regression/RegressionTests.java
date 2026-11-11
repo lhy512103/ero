@@ -228,6 +228,13 @@ public final class RegressionTests {
         for (var item : new net.minecraft.world.item.Item[]{Items.WHEAT_SEEDS, Items.CARROT, Items.NETHER_WART, Items.COCOA_BEANS, Items.SWEET_BERRIES, Items.SUGAR_CANE, Items.CACTUS, Items.MELON_SEEDS}) {
             check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(item)).isPresent(), "Expected native crop support: " + item);
         }
+        for (var item : new net.minecraft.world.item.Item[]{Items.POPPY, Items.BROWN_MUSHROOM, Items.LILY_PAD, Items.VINE, Items.SUNFLOWER, Items.SEA_PICKLE, Items.CRIMSON_FUNGUS}) {
+            check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(item)).isPresent(), "Expected plant propagation support: " + item);
+        }
+        check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(Items.OAK_SAPLING)).orElseThrow().result().getItem() == Items.OAK_LOG, "Saplings must grow into their logs");
+        check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(Items.MANGROVE_PROPAGULE)).orElseThrow().result().getItem() == Items.MANGROVE_LOG, "Propagules must grow into mangrove logs");
+        for (var item : new net.minecraft.world.item.Item[]{Items.GRASS_BLOCK, Items.MOSS_BLOCK, Items.NETHERRACK})
+            check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(item)).isEmpty(), "Soil blocks must not be cultivated: " + item);
         check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(Items.COBBLESTONE)).isEmpty(), "Non-crops must not be cultivated");
         CropRegistry.register(Items.AMETHYST_SHARD, new ItemStack(Items.DIRT), 20, 2);
         put(planter.getItemHandler(), 0, new ItemStack(Items.AMETHYST_SHARD));

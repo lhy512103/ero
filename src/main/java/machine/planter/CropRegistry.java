@@ -71,6 +71,7 @@ public final class CropRegistry {
         if (seed.is(Items.GLOW_BERRIES)) return fixed(Items.GLOW_BERRIES, 1, 300);
         if (!(seed.getItem() instanceof BlockItem item)) return Optional.empty();
         Block block = item.getBlock();
+        if (block instanceof SaplingBlock || block instanceof NetherFungusBlock) return tree(seed.getItem());
         BlockState mature = block.defaultBlockState();
         int stages = 0;
         if (block instanceof CropBlock crop) {
@@ -90,7 +91,13 @@ public final class CropRegistry {
         }
         if (block instanceof SugarCaneBlock || block instanceof CactusBlock || block instanceof BambooStalkBlock
                 || block instanceof KelpBlock) return fixed(seed.getItem(), 1, 400);
-        if (stages == 0) return Optional.empty();
+        if (stages == 0) {
+            // Plants without growth stages (flowers, mushrooms, vines, lily pads...) propagate themselves slowly.
+            boolean plant = block instanceof VegetationBlock || block instanceof VineBlock
+                || block instanceof GrowingPlantBlock || block instanceof MultifaceSpreadeableBlock
+                || block instanceof ChorusFlowerBlock || block instanceof BigDripleafBlock;
+            return plant ? fixed(seed.getItem(), 1, 600) : Optional.empty();
+        }
         // Only four native loot queries on FIRST use of a seed, never every tick or during startup.
         // Prefer a common non-seed product; rare drops (e.g. poisonous potatoes) are not mass-produced.
         Map<ItemResource, Integer> frequency = new LinkedHashMap<>();
@@ -112,6 +119,21 @@ public final class CropRegistry {
         if (product == null) return Optional.empty();
         // Fixed one-product yield: growth-stage scaling changes time, never grants rare-loot multipliers.
         return Optional.of(new Profile(product, 1, Math.clamp(stages * 25, 100, 1200), 2));
+    }
+    /** Saplings and fungi yield their wood, found by naming convention so modded trees work too. */
+    private static Optional<Profile> tree(Item sapling) {
+        var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(sapling);
+        String path = id.getPath();
+        for (String suffix : new String[]{"_sapling", "_propagule", "_fungus"}) {
+            if (!path.endsWith(suffix)) continue;
+            String base = path.substring(0, path.length() - suffix.length());
+            for (String wood : new String[]{"_log", "_stem", "_wood"}) {
+                var target = net.minecraft.resources.Identifier.fromNamespaceAndPath(id.getNamespace(), base + wood);
+                var found = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(target);
+                if (found.isPresent()) return fixed(found.get(), 1, 600);
+            }
+        }
+        return fixed(sapling, 1, 600);
     }
     private static Optional<Profile> fixed(ItemLike item, int count, int ticks) {
         return Optional.of(new Profile(ItemResource.of(new ItemStack(item)), count, ticks, 2));

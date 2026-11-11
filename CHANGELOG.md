@@ -25,6 +25,7 @@
 19. Added: Planters recognize more vanilla and modded crops and allow custom cultivation registrations.
 20. Improved: Crop discovery is cached on demand without scanning all items during startup.
 21. Fixed: High-tier generators and storage units could not power lower-tier machines or cables.
+22. Added: Planters grow saplings into logs and propagate flowers, mushrooms, vines, and other plants.
 
 ### 中文
 
@@ -49,3 +50,4 @@
 19. 新增：种植机自动识别更多原版及模组作物，并支持自定义培育注册。
 20. 优化：作物按需识别并缓存，避免进入游戏时扫描全部物品。
 21. 修复：高等级发电设备和储电箱无法为低等级机器及线缆供电的问题。
+22. 新增：种植机可将树苗培育为原木，并可繁殖花、蘑菇、藤蔓等植物。
