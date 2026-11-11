@@ -65,7 +65,7 @@ public final class EUCapabilityRegistry {
         event.registerItem(Capabilities.Energy.ITEM,
             (stack, ctx) -> {
                 if (stack.getItem() instanceof RechargeableBatteryItem battery) {
-                    return battery.createEnergyHandler(stack);
+                    return new RechargeableBatteryItem.BatteryEnergyHandler(ctx, battery.getCapacity(), battery.getMaxTransfer());
                 }
                 return null;
             },
@@ -79,7 +79,7 @@ public final class EUCapabilityRegistry {
         long toolCapacity = 10_000L;
         long toolTransfer = 1_000L;
         event.registerItem(Capabilities.Energy.ITEM,
-            (stack, ctx) -> new RechargeableBatteryItem.BatteryEnergyHandler(stack, toolCapacity, toolTransfer),
+            (stack, ctx) -> new RechargeableBatteryItem.BatteryEnergyHandler(ctx, toolCapacity, toolTransfer),
             ModItems.ELECTRIC_TREETAP.get(),
             ModItems.ELECTRIC_WRENCH.get(),
             ModItems.ELECTRIC_HOE.get()

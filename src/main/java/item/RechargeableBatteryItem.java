@@ -144,12 +144,16 @@ public class RechargeableBatteryItem extends Item {
      * 电池能量处理器实现
      */
     public static class BatteryEnergyHandler implements EnergyHandler {
-        private final ItemStack stack;
+        private final net.neoforged.neoforge.transfer.access.ItemAccess access;
         private final long capacity;
         private final long maxTransfer;
 
         public BatteryEnergyHandler(ItemStack stack, long capacity, long maxTransfer) {
-            this.stack = stack;
+            this(net.neoforged.neoforge.transfer.access.ItemAccess.forStack(stack), capacity, maxTransfer);
+        }
+
+        public BatteryEnergyHandler(net.neoforged.neoforge.transfer.access.ItemAccess access, long capacity, long maxTransfer) {
+            this.access = access;
             this.capacity = capacity;
             this.maxTransfer = maxTransfer;
         }
@@ -161,11 +165,14 @@ public class RechargeableBatteryItem extends Item {
 
         @Override
         public long getAmountAsLong() {
-            return getEnergy(stack);
+            return access.getResource().isEmpty() ? 0 : getEnergy(access.getResource().toStack());
         }
 
         @Override
         public int insert(int maxAmount, TransactionContext transaction) {
+            if (maxAmount < 0) throw new IllegalArgumentException("Negative energy amount");
+            if (access.getAmount() != 1) return 0;
+            ItemStack stack = access.getResource().toStack();
             long current = getEnergy(stack);
             long space = capacity - current;
             long toInsert = Math.min(maxAmount, Math.min(maxTransfer, space));
@@ -174,11 +181,15 @@ public class RechargeableBatteryItem extends Item {
 
             // 直接修改能量值
             setEnergy(stack, current + toInsert);
-            return (int) toInsert;
+            return access.exchange(net.neoforged.neoforge.transfer.item.ItemResource.of(stack), 1, transaction) == 1
+                ? (int) toInsert : 0;
         }
 
         @Override
         public int extract(int maxAmount, TransactionContext transaction) {
+            if (maxAmount < 0) throw new IllegalArgumentException("Negative energy amount");
+            if (access.getAmount() != 1) return 0;
+            ItemStack stack = access.getResource().toStack();
             long current = getEnergy(stack);
             long toExtract = Math.min(maxAmount, Math.min(maxTransfer, current));
 
@@ -186,7 +197,8 @@ public class RechargeableBatteryItem extends Item {
 
             // 直接修改能量值
             setEnergy(stack, current - toExtract);
-            return (int) toExtract;
+            return access.exchange(net.neoforged.neoforge.transfer.item.ItemResource.of(stack), 1, transaction) == 1
+                ? (int) toExtract : 0;
         }
     }
 }

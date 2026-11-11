@@ -48,8 +48,13 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
 
         // 确保机器已注册到网络管理器（处理世界重载情况）
         if (!registeredToNetwork && level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().registerMachine(this);
+            network.EnergyTransferManager.register(this);
             registeredToNetwork = true;
+        }
+
+        if (level != null && !level.isClientSide() && level.tickRateManager().runsNormally()
+                && this instanceof machine.StorageGuiProvider storage) {
+            energy.ItemCharging.charge(storage.getEnergyStorage(), storage.getItemHandler(), tickCount);
         }
 
         // 服务器冻结时跳过机器处理，避免无意义运算
@@ -197,7 +202,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     public void onPlace() {
         if (level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().registerMachine(this);
+            network.EnergyTransferManager.register(this);
             registeredToNetwork = true;
         }
     }
@@ -207,10 +212,17 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     public void onRemove() {
         if (level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().unregisterMachine(this);
+            network.EnergyTransferManager.remove(this);
             // 移除所有物流连接
             removeAllLogisticsLinks();
         }
+    }
+
+    @Override
+    public void setRemoved() {
+        network.EnergyTransferManager.remove(this);
+        registeredToNetwork = false;
+        super.setRemoved();
     }
 
     @Nullable

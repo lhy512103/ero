@@ -11,6 +11,6 @@ import net.minecraft.world.level.Level;
 public class MachineNetwork {
 
     public void tick(Level level) {
-        NetworkManager.getInstance().tick(level);
+        EnergyTransferManager.tick(level);
     }
 }

@@ -15,6 +15,8 @@
 9. Fixed: The industrial workbench could not match shaped recipes.
 10. Removed: Ingot-to-purified-dust macerator recipes and electrolyzer ore-washing recipes.
 11. Fixed: Coolant block registration could prevent the mod from loading.
+12. Fixed: Adjacent generators and storage units now supply machines without requiring cables.
+13. Fixed: Storage charging slots accept electric tools and correctly save transferred energy.
 
 ### 中文
 
@@ -29,3 +31,5 @@
 9. 修复：工业工作台无法识别有序配方的问题。
 10. 移除：打粉机的锭磨纯净粉配方和电解机的洗矿配方。
 11. 修复：冷却液方块注册失败导致模组无法加载的问题。
+12. 修复：发电设备和储电箱可直接为相邻机器供电。
+13. 修复：储电箱充电槽可放入电动工具并正确保存充入的电量。
