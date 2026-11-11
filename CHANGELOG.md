@@ -17,6 +17,7 @@
 11. Fixed: Coolant block registration could prevent the mod from loading.
 12. Fixed: Adjacent generators and storage units now supply machines without requiring cables.
 13. Fixed: Storage charging slots accept electric tools and correctly save transferred energy.
+14. Added: Both wrenches rotate machines, toggle cable connections, and dismantle blocks while sneaking.
 
 ### 中文
 
@@ -33,3 +34,4 @@
 11. 修复：冷却液方块注册失败导致模组无法加载的问题。
 12. 修复：发电设备和储电箱可直接为相邻机器供电。
 13. 修复：储电箱充电槽可放入电动工具并正确保存充入的电量。
+14. 新增：两种扳手可调整机器朝向、切换线缆连接，并在潜行时拆卸方块。
