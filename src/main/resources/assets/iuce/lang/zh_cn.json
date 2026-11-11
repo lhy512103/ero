@@ -244,5 +244,9 @@
   "item.iuce.bronze_gear": "青铜齿轮",
   "item.iuce.bronze_rotor": "青铜转子",
   "item.iuce.magnet": "磁铁",
-  "item.iuce.electrode": "电极"
+  "item.iuce.electrode": "电极",
+  "block.iuce.transformer": "变压器",
+  "message.iuce.transformer.output": "输出电压：%s（%s EU/t），吞吐 %s EU/t",
+  "death.attack.iuce.electric": "%1$s 触电身亡",
+  "death.attack.iuce.electric.player": "%1$s 在与 %2$s 战斗时触电身亡"
 }

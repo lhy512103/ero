@@ -26,6 +26,7 @@
     "iuce:uranium_block",
     "iuce:bronze_block",
     "iuce:machine_casing",
-    "iuce:machine_casing_2"
+    "iuce:machine_casing_2",
+    "iuce:transformer"
   ]
 }

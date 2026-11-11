@@ -73,6 +73,11 @@ public class ModBlockEntities {
             new BlockEntityType<>(InductionFurnaceBlockEntity::new, false, ModBlocks.INDUCTION_FURNACE.get())
         );
 
+    public static final Supplier<BlockEntityType<machine.transformer.TransformerBlockEntity>> TRANSFORMER =
+        BLOCK_ENTITIES.register("transformer", () ->
+            new BlockEntityType<>(machine.transformer.TransformerBlockEntity::new, false, ModBlocks.TRANSFORMER.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

@@ -244,5 +244,9 @@
   "item.iuce.bronze_gear": "Bronze Gear",
   "item.iuce.bronze_rotor": "Bronze Rotor",
   "item.iuce.magnet": "Magnet",
-  "item.iuce.electrode": "Electrode"
+  "item.iuce.electrode": "Electrode",
+  "block.iuce.transformer": "Transformer",
+  "message.iuce.transformer.output": "Output: %s (%s EU/t), throughput %s EU/t",
+  "death.attack.iuce.electric": "%1$s was electrocuted",
+  "death.attack.iuce.electric.player": "%1$s was electrocuted whilst fighting %2$s"
 }

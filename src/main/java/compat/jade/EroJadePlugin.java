@@ -48,6 +48,7 @@ public class EroJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(ProcessingMachineProvider.INSTANCE, ElectrolyzerBlockEntity.class);
 
         // 储能机器 - 显示能量条
+        registration.registerBlockDataProvider(MachineEnergyProvider.INSTANCE, machine.transformer.TransformerBlockEntity.class);
         registration.registerBlockDataProvider(MachineEnergyProvider.INSTANCE, BatboxBlockEntity.class);
         registration.registerBlockDataProvider(MachineEnergyProvider.INSTANCE, CesuBlockEntity.class);
         registration.registerBlockDataProvider(MachineEnergyProvider.INSTANCE, MfeBlockEntity.class);

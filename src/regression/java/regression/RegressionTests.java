@@ -58,6 +58,8 @@ public final class RegressionTests {
         TESTS.put("live_adjacent_energy", RegressionTests::liveAdjacent);
         TESTS.put("live_cable_energy", RegressionTests::liveCable);
         TESTS.put("live_high_tier_energy", RegressionTests::liveHighTier);
+        TESTS.put("transformer_storage_rules", RegressionTests::transformerStorage);
+        TESTS.put("transformer_wet_shock", RegressionTests::transformerShock);
     }
     public static void register(IEventBus bus) {
         var functions = DeferredRegister.<Consumer<GameTestHelper>>create(Registries.TEST_FUNCTION, "iuce");
@@ -262,16 +264,66 @@ public final class RegressionTests {
             "Machine behind cables received no power from real server ticks"));
     }
 
-    /** High-tier sources must still feed low-tier machines (there are no transformers). */
+    /** High-tier sources need a transformer to reach low-tier machines; direct connections are refused. */
     private static void liveHighTier(GameTestHelper helper) {
+        var direct = machine(helper, 0, ModBlocks.COMPRESSOR.get());
         var storage = machine(helper, 1, ModBlocks.MFSU.get());
         helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.IRON_CABLE.get());
-        var target = machine(helper, 3, ModBlocks.MACERATOR.get());
-        var solar = machine(helper, 5, ModBlocks.SINGULARY_SOLAR_GENERATOR.get());
-        var direct = machine(helper, 6, ModBlocks.COMPRESSOR.get());
+        var transformer = (machine.transformer.TransformerBlockEntity) machine(helper, 3, ModBlocks.TRANSFORMER.get());
+        var target = machine(helper, 4, ModBlocks.MACERATOR.get());
         energy(storage).setEnergy(100000);
-        energy(solar).setEnergy(100000);
-        helper.succeedWhen(() -> check(helper, energy(target).getEnergyStored() > 0 && energy(direct).getEnergyStored() > 0,
-            "LV machines received no power from high-tier storage/generators"));
+        helper.runAfterDelay(40, () -> {
+            check(helper, energy(target).getEnergyStored() > 0, "Transformer must step EV storage down to an LV machine");
+            check(helper, energy(direct).getEnergyStored() == 0, "EV storage must not feed an LV machine directly");
+            check(helper, transformer.getHazardVoltage() == energy.EUVoltage.EV, "Transformer must remember its input voltage");
+            check(helper, helper.getBlockState(new BlockPos(3, 1, 1)).getValue(MachineBlock.RUNNING), "Working transformer must show its active state");
+            helper.succeed();
+        });
+    }
+    /** Transformer -> same-tier storage is allowed, but storage can never charge itself back through it. */
+    private static void transformerStorage(GameTestHelper helper) {
+        var source = machine(helper, 1, ModBlocks.MFE.get());
+        var transformer = (machine.transformer.TransformerBlockEntity) machine(helper, 2, ModBlocks.TRANSFORMER.get());
+        var batbox = machine(helper, 3, ModBlocks.BATBOX.get());
+        var cesu = machine(helper, 5, ModBlocks.CESU.get());
+        var lower = (machine.transformer.TransformerBlockEntity) machine(helper, 6, ModBlocks.TRANSFORMER.get());
+        var sink = machine(helper, 7, ModBlocks.BATBOX.get());
+        lower.setOutputVoltage(energy.EUVoltage.MV);
+        energy(source).setEnergy(50000);
+        energy(cesu).setEnergy(50000);
+        helper.runAfterDelay(40, () -> {
+            check(helper, energy(batbox).getEnergyStored() > 0, "LV transformer must charge an LV storage unit");
+            check(helper, lower.getEnergyStorage().getEnergyStored() == 0, "MV storage must not push into an MV-output transformer");
+            check(helper, energy(sink).getEnergyStored() == 0, "MV transformer output must not charge an LV storage unit");
+            long total = energy(source).getEnergyStored() + transformer.getEnergyStorage().getEnergyStored() + energy(batbox).getEnergyStored();
+            check(helper, total == 50000, "Transforming must conserve energy exactly, got " + total);
+            helper.succeed();
+        });
+    }
+    /** Wet creatures near a live transformer are shocked; damage and stun scale with voltage. */
+    private static void transformerShock(GameTestHelper helper) {
+        var transformer = (machine.transformer.TransformerBlockEntity) machine(helper, 1, ModBlocks.TRANSFORMER.get());
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+            helper.setBlock(new BlockPos(6 + dx, 1, 2 + dz), net.minecraft.world.level.block.Blocks.STONE);
+            if (dx != 0 || dz != 0) helper.setBlock(new BlockPos(6 + dx, 2, 2 + dz), net.minecraft.world.level.block.Blocks.STONE);
+        }
+        helper.setBlock(new BlockPos(6, 2, 2), net.minecraft.world.level.block.Blocks.WATER);
+        var wet = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.PIG, new BlockPos(6, 2, 2));
+        var dry = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.PIG, new BlockPos(9, 2, 2));
+        helper.setBlock(new BlockPos(9, 1, 2), net.minecraft.world.level.block.Blocks.STONE);
+        var T = machine.transformer.TransformerBlockEntity.class;
+        check(helper, machine.transformer.TransformerBlockEntity.shockDamage(energy.EUVoltage.EV) > machine.transformer.TransformerBlockEntity.shockDamage(energy.EUVoltage.LV)
+            && machine.transformer.TransformerBlockEntity.stunTicks(energy.EUVoltage.EV) > machine.transformer.TransformerBlockEntity.stunTicks(energy.EUVoltage.LV),
+            "Shock damage and stun must scale with voltage");
+        helper.runAfterDelay(50, () -> {
+            check(helper, wet.getHealth() == wet.getMaxHealth(), "An unpowered transformer must be harmless");
+            transformer.getEnergyStorage().receiveEnergy(100, false);
+        });
+        helper.runAfterDelay(99, () -> {
+            check(helper, wet.getHealth() < wet.getMaxHealth(), "A wet creature near a live transformer must be shocked");
+            check(helper, wet.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "A shocked creature must be stunned");
+            check(helper, dry.getHealth() == dry.getMaxHealth(), "A dry creature must not be shocked");
+            helper.succeed();
+        });
     }
 }

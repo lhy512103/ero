@@ -32,6 +32,7 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.ELECTROLYZER.get());
 
         // 储能箱
+        register(event, ModBlockEntities.TRANSFORMER.get());
         register(event, ModBlockEntities.BATBOX.get());
         register(event, ModBlockEntities.CESU.get());
         register(event, ModBlockEntities.MFE.get());

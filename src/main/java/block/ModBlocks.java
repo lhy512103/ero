@@ -110,6 +110,8 @@ public class ModBlocks {
         GeothermalGeneratorBlock::new, machineProperties());
     public static final DeferredBlock<InductionFurnaceBlock> INDUCTION_FURNACE = BLOCKS.registerBlock("induction_furnace",
         InductionFurnaceBlock::new, machineProperties());
+    public static final DeferredBlock<TransformerBlock> TRANSFORMER = BLOCKS.registerBlock("transformer",
+        TransformerBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

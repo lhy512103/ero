@@ -3,6 +3,7 @@ package network;
 import blockentity.MachineBlockEntity;
 import blockentity.cable.CableBlockEntity;
 import energy.EUCapability;
+import machine.transformer.TransformerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -21,6 +22,28 @@ public final class EnergyTransferManager {
     private record Path(BlockPos pos, long limit, Path parent) {}
     private record Route(BlockPos target, Direction side, Path path) {}
     private record Step(BlockPos pos, Path path) {}
+    private enum Kind { GENERATOR, STORAGE, TRANSFORMER, CONSUMER }
+    /** Ordered so transformers are filled before they emit, and nothing can charge in a loop. */
+    private static final Kind[][] PASSES = {
+        {Kind.GENERATOR, Kind.CONSUMER}, {Kind.GENERATOR, Kind.TRANSFORMER}, {Kind.GENERATOR, Kind.STORAGE},
+        {Kind.STORAGE, Kind.CONSUMER}, {Kind.STORAGE, Kind.TRANSFORMER},
+        {Kind.TRANSFORMER, Kind.CONSUMER}, {Kind.TRANSFORMER, Kind.STORAGE},
+    };
+    private static Kind kind(MachineBlockEntity machine, EUCapability capability) {
+        if (machine instanceof TransformerBlockEntity) return Kind.TRANSFORMER;
+        if (capability.canReceive()) return capability.canExtract() ? Kind.STORAGE : Kind.CONSUMER;
+        return Kind.GENERATOR;
+    }
+    /**
+     * Voltage rules: a machine or storage unit accepts power at or below its own tier; anything higher
+     * needs a transformer. A transformer accepts only tiers above its output, and charges storage only
+     * of exactly its output tier, so storage -> transformer -> storage can never form a cycle.
+     */
+    public static boolean voltageAllows(Kind sourceKind, energy.EUVoltage source, Kind targetKind, energy.EUVoltage target) {
+        if (targetKind == Kind.TRANSFORMER) return source.isHigherThan(target);
+        if (sourceKind == Kind.TRANSFORMER && targetKind == Kind.STORAGE) return source == target;
+        return !source.isHigherThan(target);
+    }
     private EnergyTransferManager() {}
 
     public static void register(MachineBlockEntity machine) {
@@ -82,21 +105,21 @@ public final class EnergyTransferManager {
         List<BlockPos> sources = new ArrayList<>(state.machines);
         if (sources.isEmpty()) return;
         Collections.rotate(sources, (int) Math.floorMod(level.getGameTime(), sources.size()));
-        // Generators feed consumers first, then storage; storage only feeds consumers (no charge loops).
-        for (int pass = 0; pass < 3; pass++) {
+        // Generators feed consumers, transformers, then storage; storage feeds consumers and transformers;
+        // transformers feed consumers and same-tier storage.
+        for (Kind[] pass : PASSES) {
             for (BlockPos sourcePos : sources) {
                 if (!(loadedEntity(level, sourcePos) instanceof MachineBlockEntity sourceMachine)) continue;
                 EUCapability source = sourceMachine.getEUCapability(null);
                 if (source == null || !source.canExtract() || source.getEnergyStored() <= 0) continue;
-                boolean storageSource = source.canReceive();
-                if (storageSource != (pass == 2)) continue;
+                Kind sourceKind = kind(sourceMachine, source);
+                if (sourceKind != pass[0]) continue;
                 List<Route> routes = state.routes.computeIfAbsent(sourcePos, pos -> findRoutes(level, pos));
                 for (Route route : routes) {
                     if (!(loadedEntity(level, route.target()) instanceof MachineBlockEntity targetMachine)) continue;
                     EUCapability target = targetMachine.getEUCapability(route.side());
-                    if (target == null || !target.canReceive() || target.canExtract() != (pass == 1)) continue;
-                    // No voltage gate: IUCE has no transformers, and the amount below is already capped by
-                    // the source rate, the target rate and every cable on the path.
+                    if (target == null || !target.canReceive() || kind(targetMachine, target) != pass[1]) continue;
+                    if (!voltageAllows(sourceKind, source.getVoltage(), pass[1], target.getVoltage())) continue;
                     long amount = Math.min(source.getMaxTransferRate() - sent.getOrDefault(sourcePos, 0L),
                         target.getMaxTransferRate() - received.getOrDefault(route.target(), 0L));
                     for (Path path = route.path(); path != null && amount > 0; path = path.parent()) {
@@ -112,6 +135,8 @@ public final class EnergyTransferManager {
                     sent.merge(sourcePos, accepted, Long::sum);
                     received.merge(route.target(), accepted, Long::sum);
                     for (Path path = route.path(); path != null; path = path.parent()) cableUsed.merge(path.pos(), accepted, Long::sum);
+                    if (targetMachine instanceof TransformerBlockEntity transformer) transformer.noteInput(source.getVoltage());
+                    if (sourceMachine instanceof TransformerBlockEntity transformer) transformer.markActive();
                     sourceMachine.setChanged();
                     targetMachine.setChanged();
                 }

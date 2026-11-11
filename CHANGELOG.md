@@ -24,8 +24,10 @@
 18. Fixed: Industrial workbench JEI tabs now use the correct title, icon, and shaped-recipe layout.
 19. Added: Planters recognize more vanilla and modded crops and allow custom cultivation registrations.
 20. Improved: Crop discovery is cached on demand without scanning all items during startup.
-21. Fixed: High-tier generators and storage units could not power lower-tier machines or cables.
+21. Added: A Transformer that steps higher voltages down to a selectable LV, MV, HV, or EV output.
 22. Added: Planters grow saplings into logs and propagate flowers, mushrooms, vines, and other plants.
+23. Improved: Machines and storage units only accept power at or below their own voltage tier, so higher-tier sources need a Transformer.
+24. Added: Live Transformers shock and stun creatures standing in water or rain within 10 blocks, scaling with voltage.
 
 ### 中文
 
@@ -49,5 +51,7 @@
 18. 修复：工业工作台JEI分类名称、图标和有序配方布局错误。
 19. 新增：种植机自动识别更多原版及模组作物，并支持自定义培育注册。
 20. 优化：作物按需识别并缓存，避免进入游戏时扫描全部物品。
-21. 修复：高等级发电设备和储电箱无法为低等级机器及线缆供电的问题。
+21. 新增：变压器，可将高电压降为可切换的低压、中压、高压或超高压输出。
 22. 新增：种植机可将树苗培育为原木，并可繁殖花、蘑菇、藤蔓等植物。
+23. 优化：机器和储电箱只接受不高于自身电压等级的电力，高等级电源需经变压器降压。
+24. 新增：带电变压器会电击并定身周围 10 格内处于水中或淋雨的生物，强度随电压等级提高。

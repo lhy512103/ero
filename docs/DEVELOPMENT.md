@@ -10,7 +10,7 @@
 
 The regression source set is loaded only with `-PregressionTests` and is not included in the release JAR. Tests use the separate `run-regression` directory; client smoke tests use `run-smoke`. Neither uses the normal development world's saves.
 
-The thirteen IUCE GameTests cover real-tick power delivery (adjacent, through cables, and from high-tier sources to low-tier machines), adjacent energy conservation, storage output, cable disconnection, charging across all storage tiers, transactional item energy rollback, both wrenches, cooking/powder recipes, crafting remainders, and crop discovery/extensions. Vanilla may add its own tests to the reported total.
+The fifteen IUCE GameTests cover real-tick power delivery (adjacent, through cables, and from high-tier sources to low-tier machines through a transformer), transformer voltage rules and energy conservation, the wet-creature shock hazard, adjacent energy conservation, storage output, cable disconnection, charging across all storage tiers, transactional item energy rollback, both wrenches, cooking/powder recipes, crafting remainders, and crop discovery/extensions. Vanilla may add its own tests to the reported total.
 
 ## Verification record
 
@@ -83,3 +83,11 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - 持扳手潜行右键：拆卸机器或线缆，并掉落机器内部物品；机器内部电量和加工进度不保留。
 - 电动扳手转向或切换连接消耗 50 EU，拆卸消耗 500 EU；可放入储电箱的充电槽充电。
 - 工业工作台支持原版有序、无序配方及空桶等余物；余物无处存放时整次合成取消，不删除材料或复制产物。
+
+## 电压规则与变压器
+
+- 机器和储电箱只接受**不高于**自身电压等级的电源；更高等级的电源必须经变压器降压，否则不传输（不会爆炸）。
+- 变压器只接受高于其输出等级的输入，空手右键在 LV / MV / HV / EV 间切换输出；每 tick 吞吐为输出电压的 4 倍，1:1 无损耗。
+- 变压器只给**同等级**储电箱充电，因此「储电箱 → 变压器 → 储电箱」不会形成循环。
+- 传输顺序见 `EnergyTransferManager.PASSES`：发电机 → 机器 / 变压器 / 储电箱，储电箱 → 机器 / 变压器，变压器 → 机器 / 储电箱。
+- 变压器内有电时每 40 tick 电击一次周围 10 格内处于水中或淋雨的生物（创造模式玩家除外）：伤害 = 电压等级序号（LV 1 … EV 4，取输入侧与输出侧较高者），定身时间 = 20 + 10 × 序号 tick。伤害类型为 `iuce:electric`。
