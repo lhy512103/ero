@@ -32,6 +32,7 @@
 26. Added: A built-in guide book with searchable pages, live recipes, process diagrams, and multiblock previews.
 27. Added: Press G to open the guide, or hover a mod item and press G to jump to its page.
 28. Added: New players receive a guide book the first time they join a world.
+29. Improved: The guide book is now a thick 3D book when held or dropped, with a redrawn inventory icon.
 
 ### 中文
 
@@ -63,3 +64,4 @@
 26. 新增：内置指南，支持搜索、实时配方、流程图和多方块结构预览。
 27. 新增：按 G 打开指南，悬停模组物品按 G 可直接跳到对应页面。
 28. 新增：玩家首次进入世界时会获得一本指南。
+29. 优化：指南在手持和掉落时显示为有厚度的立体书本，并重绘了物品栏图标。

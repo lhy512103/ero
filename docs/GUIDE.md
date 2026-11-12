@@ -106,4 +106,4 @@ items: iuce:macerator       # 逗号分隔；这些物品按 G 时跳到本页
 .\gradlew.bat runClient -PsmokeTest -PregressionTests -PguideShots -PguideWorld=<run-smoke/saves 下的存档名>
 ```
 
-会自动打开每一页并截图到 `run-smoke/screenshots/guide_*.png`，然后退出。只截部分页面：`-PguideShots=welcome,power/solar`。不带 `-PguideWorld` 时停在标题界面截图，此时配方卡片为空。截图工具在 `regression` 源集里，不会进入发布的 JAR。
+会自动打开每一页并截图到 `run-smoke/screenshots/guide_*.png`，然后退出。只截部分页面：`-PguideShots=welcome,power/solar`。不带 `-PguideWorld` 时停在标题界面截图，此时配方卡片为空。`-PguideShots=hand` 改为把指南拿在手上，截第一人称和第三人称各一张，用来检查物品模型。截图工具在 `regression` 源集里，不会进入发布的 JAR。

@@ -48,6 +48,10 @@ public final class GuideShots {
             System.out.println("[GuideShots] capturing " + pages.size() + " pages, world=" + inWorld);
             settle = 0;
         }
+        if ("hand".equals(System.getProperty("iuce.guideShots"))) {
+            handShots(minecraft);
+            return;
+        }
         if (index >= pages.size()) {
             if (++settle > 20) minecraft.stop();
             return;
@@ -69,6 +73,35 @@ public final class GuideShots {
         } else {
             index++;
             settle = 0;
+        }
+    }
+
+    /** {@code -PguideShots=hand}: puts the guide book in the player's hand and captures first/third person views. */
+    private static void handShots(Minecraft minecraft) {
+        settle++;
+        var server = minecraft.getSingleplayerServer();
+        if (server == null || minecraft.player == null) { minecraft.stop(); return; }
+        if (settle == 1) {
+            var uuid = minecraft.player.getUUID();
+            server.execute(() -> {
+                var player = server.getPlayerList().getPlayer(uuid);
+                if (player == null) return;
+                var book = new net.minecraft.world.item.ItemStack(item.ModItems.GUIDE.get());
+                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, book);
+                player.drop(book.copy(), false);
+            });
+            minecraft.setScreen(null);
+            minecraft.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+        } else if (settle == 30) {
+            Screenshot.grab(minecraft.gameDirectory, "guide_hand_first.png", minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (settle == 34) {
+            minecraft.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+        } else if (settle == 50) {
+            Screenshot.grab(minecraft.gameDirectory, "guide_hand_third.png", minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (settle == 54) {
+            minecraft.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+        } else if (settle > 70) {
+            minecraft.stop();
         }
     }
 }
