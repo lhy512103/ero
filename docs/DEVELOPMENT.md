@@ -6,6 +6,7 @@
 .\gradlew.bat build
 .\gradlew.bat runGameTestServer -PregressionTests
 .\gradlew.bat runClient -PsmokeTest
+.\gradlew.bat validateContent
 ```
 
 The regression source set is loaded only with `-PregressionTests` and is not included in the release JAR. Tests use the separate `run-regression` directory; client smoke tests use `run-smoke`. Neither uses the normal development world's saves.
@@ -96,3 +97,18 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 ## 内置指南
 
 页面格式、指令、多方块结构数据和截图自检命令见 [GUIDE.md](GUIDE.md)。
+
+## 内容校验
+
+`tools/validate_content.py`（只用 Python 标准库）静态检查全部数据与资源，`gradlew check` 和 `gradlew build` 会自动运行它：
+
+- 所有资源 JSON 能解析；
+- 配方：物品 ID 存在、同一机器没有输入相同的两条配方、每个物品都能做出来、每个物品都有用途；
+- 资源：每个物品都有模型定义，以及中英文名称；
+- 指南：页面里的物品 ID、页面链接、结构引用都能对上。
+
+新增「终端物品」（机器、工具、装饰等不作为原料的东西）时，把它加进脚本里的 `TERMINAL`；新增机器类型时更新 `STATION`。
+
+- 没装 Python 的机器：`gradlew build -PskipContentValidation`；Python 不叫 `python` 时：`-PpythonCommand=python3`。
+- `python tools/validate_content.py --verbose` 额外打印每个物品最早能在第几轮做出来。
+- `python tools/dump_recipes.py` 把全部配方按一行一条打印出来，调数值时用。

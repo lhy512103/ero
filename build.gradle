@@ -241,6 +241,19 @@ publishing {
     }
 }
 
+// Static checks over recipes, assets and guide pages (tools/validate_content.py, needs Python 3).
+// Runs as part of `check`; use -PskipContentValidation on machines without Python.
+tasks.register('validateContent', Exec) {
+    group = 'verification'
+    description = 'Validates recipes, item assets, translations and guide pages.'
+    commandLine providers.gradleProperty('pythonCommand').getOrElse('python'), 'tools/validate_content.py', projectDir.absolutePath
+    inputs.dir('src/main/resources')
+    inputs.files('tools/validate_content.py', 'src/main/java/item/ModItems.java', 'src/main/java/block/ModBlocks.java', 'src/main/java/block/ModBlockItems.java')
+    outputs.upToDateWhen { true }
+    enabled = !providers.gradleProperty('skipContentValidation').isPresent()
+}
+tasks.named('check') { dependsOn 'validateContent' }
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
