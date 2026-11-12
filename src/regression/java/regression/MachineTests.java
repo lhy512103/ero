@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("overclocker_tiers_differ", MachineTests::overclockerTiers);
         tests.put("blocks_drop_themselves_and_contents", MachineTests::drops);
         tests.put("automation_item_and_fluid_access", MachineTests::automation);
         tests.put("hoppers_feed_and_drain_machines", MachineTests::hoppers);
@@ -616,5 +617,31 @@ final class MachineTests {
             check(helper, machines == 1, "A broken machine must drop itself once, got " + machines);
             helper.succeed();
         });
+    }
+
+    /** Basic, advanced and ultimate overclockers have their own factors and can be mixed. */
+    private static void overclockerTiers(GameTestHelper helper) {
+        Case c = byName("macerator");
+        var tiers = java.util.List.of(ModItems.OVERCLOCKER_UPGRADE.get(), ModItems.OVERCLOCKER_UPGRADE_1.get(), ModItems.OVERCLOCKER_UPGRADE_2.get());
+        double[] time = {0.75, 0.60, 0.45};
+        double[] energy = {1.5, 1.8, 2.2};
+        for (int tier = 0; tier < 3; tier++) {
+            MachineBlockEntity machine = prepare(helper, c, 1 + tier * 2, 1);
+            put(machine.getItemHandler(), machine.getUpgradeSlotStart(), new ItemStack(tiers.get(tier)));
+            var effect = item.OverclockerUpgradeItem.effect(machine);
+            check(helper, Math.abs(effect.time() - time[tier]) < 1e-9 && Math.abs(effect.energy() - energy[tier]) < 1e-9,
+                "Tier " + tier + " overclocker has the wrong factors: " + effect);
+            int took = runUntil(machine, c, c.outputCount(), c.ticks() + 10);
+            int expected = (int) Math.round(c.ticks() * time[tier]);
+            check(helper, took > 0 && Math.abs(took - expected) <= 2, "Tier " + tier + " overclocker took " + took + " ticks, expected about " + expected);
+        }
+        MachineBlockEntity mixed = prepare(helper, c, 7, 1);
+        int start = mixed.getUpgradeSlotStart();
+        for (int i = 0; i < 3; i++) put(mixed.getItemHandler(), start + i, new ItemStack(tiers.get(i)));
+        var effect = item.OverclockerUpgradeItem.effect(mixed);
+        check(helper, Math.abs(effect.time() - 0.75 * 0.60 * 0.45) < 1e-9 && Math.abs(effect.energy() - 1.5 * 1.8 * 2.2) < 1e-9,
+            "Mixed tiers must multiply: " + effect);
+        check(helper, effect.time(1) == 1 && effect.energy(10) == 59, "Overclocked values must round and never drop below one tick");
+        helper.succeed();
     }
 }

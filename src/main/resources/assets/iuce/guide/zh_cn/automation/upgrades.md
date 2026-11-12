@@ -10,19 +10,17 @@ items: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upg
 
 ## 超频
 
-每个超频升级让加工时间 ×0.75、耗电 ×1.5，效果相乘，最多 4 个生效。
+超频升级有三档，每装一个都把加工时间和每 tick 耗电各乘上一个系数，效果相乘；每台机器最多 4 个生效，不同档可以混装。
 
-| 数量 | 加工时间 | 每 tick 耗电 |
-| --- | --- | --- |
-| 1 | 75% | 1.5 倍 |
-| 2 | 56% | 2.25 倍 |
-| 3 | 42% | 3.4 倍 |
-| 4 | 32% | 5 倍 |
+| 升级 | 加工时间 | 每 tick 耗电 | 装满 4 个 |
+| --- | --- | --- | --- |
+| {item:iuce:overclocker_upgrade} | ×0.75 | ×1.5 | 时间 32%，耗电 5 倍 |
+| {item:iuce:overclocker_upgrade1} | ×0.60 | ×1.8 | 时间 13%，耗电 10.5 倍 |
+| {item:iuce:overclocker_upgrade2} | ×0.45 | ×2.2 | 时间 4%，耗电 23 倍 |
+
+档位越高，同样的产量总耗电反而越少：基础款每件多花 12%，终极款基本不多花。
 
 {recipe: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upgrade2}
-
-> [!NOTE]
-> 三种超频升级目前的效果相同，先做最便宜的基础款即可。
 
 > [!WARN]
 > 超频后的机器每 tick 耗电可能超过铜质导线的 32 EU 上限，记得换粗一点的导线。

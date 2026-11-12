@@ -48,6 +48,7 @@
 42. Added: Breaking a machine drops the items and upgrades stored inside it.
 43. Optimized: Machine titles, tooltips, messages and JEI category names now follow the game language instead of always being Chinese.
 44. Fixed: JEI showed no IUCE recipes when playing on a multiplayer server.
+45. Optimized: The three overclocker upgrades now differ (time ×0.75 / ×0.60 / ×0.45, energy ×1.5 / ×1.8 / ×2.2) and can be mixed in one machine.
 
 ### 中文
 
@@ -95,3 +96,4 @@
 42. 新增：机器被破坏时会掉出内部存放的物品和升级。
 43. 优化：机器标题、提示、消息和 JEI 分类名称会跟随游戏语言显示，不再固定为中文。
 44. 修复：在多人服务器中 JEI 不显示本模组配方的问题。
+45. 优化：三种超频升级效果不再相同（时间 ×0.75 / ×0.60 / ×0.45，耗电 ×1.5 / ×1.8 / ×2.2），可在同一台机器里混装。

@@ -144,8 +144,8 @@
   "item.iuce.fluid_ejector_upgrade": "Fluid Output Upgrade",
   "item.iuce.fluid_pulling_upgrade": "Fluid Input Upgrade",
   "item.iuce.overclocker_upgrade": "Overclocker Upgrade",
-  "item.iuce.overclocker_upgrade1": "Overclocker Upgrade MK1",
-  "item.iuce.overclocker_upgrade2": "Overclocker Upgrade MK2",
+  "item.iuce.overclocker_upgrade1": "Advanced Overclocker Upgrade",
+  "item.iuce.overclocker_upgrade2": "Ultimate Overclocker Upgrade",
   "item.iuce.pulling_upgrade": "Pulling Upgrade",
   "item.iuce.aluminium_stick": "Aluminium Rod",
   "item.iuce.cobalt_stick": "Cobalt Rod",
@@ -381,5 +381,8 @@
   "info.iuce.industrial_workbench.2": "casing upgrades, the solar ladder and other key recipes can only be made here.",
   "info.iuce.industrial_workbench.3": "Circuits crafted here come out ×2 (hand-crafting the same materials gives 1).",
   "info.iuce.industrial_workbench.4": "It needs power to work.",
-  "jei.iuce.optional_crafting": "Optional Crafting"
+  "jei.iuce.optional_crafting": "Optional Crafting",
+  "tooltip.iuce.overclocker.time": "Processing time ×%s",
+  "tooltip.iuce.overclocker.energy": "Energy per tick ×%s",
+  "tooltip.iuce.overclocker.max": "Up to %s take effect per machine; tiers can be mixed"
 }

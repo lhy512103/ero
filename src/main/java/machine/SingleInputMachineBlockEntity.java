@@ -48,7 +48,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
 
     private final MachineRecipe[] cachedRecipes;
     private final ItemResource[] cachedInputResources;
-    private int cachedOverclockerCount = -1;
+    @javax.annotation.Nullable private OverclockerUpgradeItem.Effect overclock;
 
     protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
                                             int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime) {
@@ -60,7 +60,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
         this.itemHandler = new ItemStacksResourceHandler(processSlots * 2 + upgradeSlots) {
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
-                if (index >= 2 * SingleInputMachineBlockEntity.this.processSlots) cachedOverclockerCount = -1;
+                if (index >= 2 * SingleInputMachineBlockEntity.this.processSlots) overclock = null;
                 setChanged();
             }
         };
@@ -111,9 +111,9 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
                     continue;
                 }
 
-                if (cachedOverclockerCount < 0) cachedOverclockerCount = OverclockerUpgradeItem.countOverclockers(this);
-                maxProgress[i] = OverclockerUpgradeItem.getOverclockedProcessTime(recipe.getProcessTime(), cachedOverclockerCount);
-                long energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(recipe.getEnergyPerTick(), cachedOverclockerCount);
+                if (overclock == null) overclock = OverclockerUpgradeItem.effect(this);
+                maxProgress[i] = overclock.time(recipe.getProcessTime());
+                long energyPerTick = overclock.energy(recipe.getEnergyPerTick());
 
                 if (energyStorage.removeEnergy(energyPerTick) <= 0) continue;
 
@@ -191,7 +191,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
         System.arraycopy(savedProgress, 0, progress, 0, Math.min(processSlots, savedProgress.length));
         System.arraycopy(savedMaxProgress, 0, maxProgress, 0, Math.min(processSlots, savedMaxProgress.length));
         itemHandler.deserialize(input);
-        cachedOverclockerCount = -1;
+        overclock = null;
     }
 
     @Override protected boolean canReceiveEU() { return true; }

@@ -115,8 +115,8 @@
   "item.iuce.fluid_ejector_upgrade": "流体输出升级",
   "item.iuce.fluid_pulling_upgrade": "流体输入升级",
   "item.iuce.overclocker_upgrade": "超频升级",
-  "item.iuce.overclocker_upgrade1": "超频升级MK1",
-  "item.iuce.overclocker_upgrade2": "超频升级MK2",
+  "item.iuce.overclocker_upgrade1": "高级超频升级",
+  "item.iuce.overclocker_upgrade2": "终极超频升级",
   "item.iuce.pulling_upgrade": "抽取升级",
   "item.iuce.rubber": "橡胶",
   "item.iuce.raw_latex": "生乳胶",
@@ -381,5 +381,8 @@
   "info.iuce.industrial_workbench.2": "外壳升级、太阳能阶梯等关键配方只能在此合成。",
   "info.iuce.industrial_workbench.3": "电路在此合成产出 ×2（同样材料，手搓只有 1 个）。",
   "info.iuce.industrial_workbench.4": "需要供电才能工作。",
-  "jei.iuce.optional_crafting": "可选合成"
+  "jei.iuce.optional_crafting": "可选合成",
+  "tooltip.iuce.overclocker.time": "加工时间 ×%s",
+  "tooltip.iuce.overclocker.energy": "每 tick 耗电 ×%s",
+  "tooltip.iuce.overclocker.max": "每台机器最多 %s 个生效，可混装"
 }

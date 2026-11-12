@@ -36,7 +36,7 @@ public abstract class PoweredMachineBlockEntity extends MachineBlockEntity imple
     private final int upgradeStart;
     private final int upgradeCount;
     private final int baseProcessTime;
-    private int overclockers = -1;
+    @javax.annotation.Nullable private OverclockerUpgradeItem.Effect overclock;
 
     /**
      * @param slots        total item slots, upgrade slots included
@@ -54,24 +54,24 @@ public abstract class PoweredMachineBlockEntity extends MachineBlockEntity imple
         this.itemHandler = new ItemStacksResourceHandler(slots) {
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
-                if (index >= PoweredMachineBlockEntity.this.upgradeStart) overclockers = -1;
+                if (index >= PoweredMachineBlockEntity.this.upgradeStart) overclock = null;
                 setChanged();
             }
         };
     }
 
-    /** Number of installed overclockers, recounted only after an upgrade slot changes. */
-    protected int overclockerCount() {
-        if (overclockers < 0) overclockers = OverclockerUpgradeItem.countOverclockers(this);
-        return overclockers;
+    /** Combined effect of the installed overclockers, recomputed only after an upgrade slot changes. */
+    protected OverclockerUpgradeItem.Effect overclock() {
+        if (overclock == null) overclock = OverclockerUpgradeItem.effect(this);
+        return overclock;
     }
 
     protected int overclockedTime(int ticks) {
-        return OverclockerUpgradeItem.getOverclockedProcessTime(ticks, overclockerCount());
+        return overclock().time(ticks);
     }
 
     protected long overclockedEnergy(long energyPerTick) {
-        return OverclockerUpgradeItem.getOverclockedEnergyConsumption(energyPerTick, overclockerCount());
+        return overclock().energy(energyPerTick);
     }
 
     /** Makes the block's RUNNING state follow {@link #isWorking()}. */
@@ -125,7 +125,7 @@ public abstract class PoweredMachineBlockEntity extends MachineBlockEntity imple
         progress = input.getInt("progress").orElse(0);
         maxProgress = input.getInt("maxProgress").orElse(baseProcessTime);
         itemHandler.deserialize(input);
-        overclockers = -1;
+        overclock = null;
         loadExtra(input);
     }
 }
