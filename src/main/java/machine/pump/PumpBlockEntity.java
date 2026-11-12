@@ -8,6 +8,7 @@ import energy.EUEnergyStorage;
 import energy.EUEnergyStorageImpl;
 import energy.EUVoltage;
 import fluid.FluidProvider;
+import fluid.MachineTank;
 import item.FluidEjectorUpgradeItem;
 import machine.ore_washer.OreWasherBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -55,7 +56,7 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
     private final ItemStacksResourceHandler itemHandler;
 
     /** 内部存储的水量（mB） */
-    private int storedWater = 0;
+    private final MachineTank tank = MachineTank.of(Fluids.WATER, MAX_STORED_WATER, this::setChanged);
     
     /** 流体输入速率（mB/tick） */
     private static final int PASSIVE_ABSORB_RATE = 100;
@@ -95,7 +96,7 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
         active = false;
 
         // 水槽已满，不工作
-        if (storedWater >= MAX_STORED_WATER) {
+        if (tank.getSpace() <= 0) {
             if (wasActive) {
                 updateRunningState();
                 setChanged();
@@ -132,12 +133,10 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
 
         // 无限水模式：瞬间吸收满（如果未满）
         if (isInfinite) {
-            if (storedWater < MAX_STORED_WATER) {
-                storedWater = MAX_STORED_WATER;
-            }
+            tank.fill(Fluids.WATER, tank.getSpace());
         } else {
             // 非无限水模式：每次吸收一桶水（1000 mB）并消耗一个水方块
-            storedWater = Math.min(storedWater + 1000, MAX_STORED_WATER);
+            tank.fill(Fluids.WATER, 1000);
             removeOneAdjacentWaterSource();
         }
 
@@ -220,58 +219,36 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
      * 向相邻机器输出水（持续输出，遍历所有方向）
      */
     private void outputWaterToAdjacent() {
-        if (level == null || storedWater <= 0) return;
-        
+        if (level == null) return;
         for (Direction direction : Direction.values()) {
-            if (storedWater <= 0) break;
-            
-            BlockPos adjPos = worldPosition.relative(direction);
-            BlockEntity be = level.getBlockEntity(adjPos);
-            
-            // 向洗矿机输出（每次1000 mB）
-            if (be instanceof OreWasherBlockEntity washer) {
-                if (storedWater >= 1000 && washer.addWaterBucket()) {
-                    storedWater -= 1000;
-                }
-            }
-            // 向FluidProvider接口的机器输出
-            else if (be instanceof FluidProvider provider) {
-                int maxTransfer = Math.min(storedWater, 1000); // 每次最多传输1000 mB
-                int transferred = provider.insertFluid(maxTransfer);
-                if (transferred > 0) {
-                    storedWater -= transferred;
-                }
+            if (tank.isEmpty()) break;
+            BlockEntity be = level.getBlockEntity(worldPosition.relative(direction));
+            if (!(be instanceof FluidProvider provider) || provider.getTankFluid() != Fluids.WATER) continue;
+            if (be instanceof OreWasherBlockEntity) {
+                // 洗矿机按整桶接收
+                if (tank.getAmount() >= 1000 && provider.addBucket()) tank.drain(1000);
+            } else {
+                int accepted = provider.insertFluid(Math.min(tank.getAmount(), 1000));
+                if (accepted > 0) tank.drain(accepted);
             }
         }
     }
-    
+
     /**
      * 流体输入 - 从相邻的FluidProvider中提取流体
      */
     private void passiveAbsorbWater() {
         if (level == null || level.isClientSide()) return;
-        
-        // 从相邻的FluidProvider中提取流体
         for (Direction direction : Direction.values()) {
-            if (storedWater >= MAX_STORED_WATER) break;
-            
-            BlockPos adjPos = worldPosition.relative(direction);
-            BlockEntity be = level.getBlockEntity(adjPos);
-            if (be instanceof FluidProvider provider) {
-                // 计算需要提取的量
-                int needed = MAX_STORED_WATER - storedWater;
-                int extractAmount = Math.min(needed, PASSIVE_ABSORB_RATE);
-                
-                // 从提供者中提取流体
-                int extracted = provider.extractFluid(extractAmount);
-                if (extracted > 0) {
-                    storedWater += extracted;
-                    setChanged();
-                }
+            if (tank.getSpace() <= 0) break;
+            BlockEntity be = level.getBlockEntity(worldPosition.relative(direction));
+            if (be instanceof FluidProvider provider && provider.getTankFluid() == Fluids.WATER) {
+                int extracted = provider.extractFluid(Math.min(tank.getSpace(), PASSIVE_ABSORB_RATE));
+                if (extracted > 0) tank.fill(Fluids.WATER, extracted);
             }
         }
     }
-    
+
     /**
      * 无限水处理
      */
@@ -282,9 +259,7 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
         int adjacentSourceBlocks = countAdjacentWaterSourceBlocks();
         if (adjacentSourceBlocks >= 2) {
             // 无限水源，每tick自动补充
-            if (storedWater + INFINITE_WATER_RATE <= MAX_STORED_WATER) {
-                storedWater += INFINITE_WATER_RATE;
-            }
+            if (tank.getSpace() >= INFINITE_WATER_RATE) tank.fill(Fluids.WATER, INFINITE_WATER_RATE);
         }
     }
 
@@ -300,22 +275,10 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
         }
     }
 
-    /**
-     * 尝试添加一桶水（水桶交互）
-     *
-     * @return 是否成功添加
-     */
-    public boolean addWaterBucket() {
-        if (storedWater + 1000 > MAX_STORED_WATER) {
-            return false;
-        }
-        storedWater += 1000;
-        setChanged();
-        return true;
-    }
-
     /** 获取当前存储的水量（mB） */
-    public int getStoredWater() { return storedWater; }
+    @Override public MachineTank getTank() { return tank; }
+
+    public int getStoredWater() { return tank.getAmount(); }
 
     /** 获取最大存储水量（mB） */
     public int getMaxStoredWater() { return MAX_STORED_WATER; }
@@ -372,7 +335,7 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putLong("energy", energyStorage.getEnergyStored());
-        output.putInt("storedWater", storedWater);
+        tank.save(output, "tank");
         output.putInt("absorbTicks", absorbTicks);
         output.putBoolean("active", active);
         itemHandler.serialize(output);
@@ -382,68 +345,11 @@ public class PumpBlockEntity extends MachineBlockEntity implements EnergyDisplay
     public void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         input.getLong("energy").ifPresent(energy -> energyStorage.setEnergy(energy));
-        storedWater = input.getInt("storedWater").orElse(0);
+        tank.load(input, "tank", "storedWater", Fluids.WATER, 1);
         absorbTicks = input.getInt("absorbTicks").orElse(0);
         active = input.getBooleanOr("active", false);
         itemHandler.deserialize(input);
     }
     
-    /**
-     * 实现FluidProvider接口
-     * 尝试从提供者中提取指定数量的流体
-     * 
-     * @param maxAmount 最大提取量（mB）
-     * @return 实际提取的流体量（mB）
-     */
-    @Override
-    public int extractFluid(int maxAmount) {
-        int extractAmount = Math.min(maxAmount, storedWater);
-        if (extractAmount > 0) {
-            storedWater -= extractAmount;
-            setChanged();
-        }
-        return extractAmount;
-    }
-    
-    /**
-     * 实现FluidProvider接口
-     * 尝试向提供者中输入指定数量的流体
-     * 
-     * @param maxAmount 最大输入量（mB）
-     * @return 实际输入的流体量（mB）
-     */
-    @Override
-    public int insertFluid(int maxAmount) {
-        int insertAmount = Math.min(maxAmount, MAX_STORED_WATER - storedWater);
-        if (insertAmount > 0) {
-            storedWater += insertAmount;
-            setChanged();
-        }
-        return insertAmount;
-    }
-    
-    /**
-     * 实现FluidProvider接口
-     * 获取当前存储的流体量（mB）
-     */
-    @Override
-    public int getStoredFluid() {
-        return storedWater;
-    }
-    
-    /**
-     * 实现FluidProvider接口
-     * 获取最大存储流体量（mB）
-     */
-    @Override
-    public int getMaxStoredFluid() {
-        return MAX_STORED_WATER;
-    }
 
-    private static final ItemStack WATER_BUCKET_STACK = new ItemStack(Items.WATER_BUCKET);
-
-    @Override
-    public ItemStack getFluidItem() {
-        return storedWater > 0 ? WATER_BUCKET_STACK : ItemStack.EMPTY;
-    }
 }

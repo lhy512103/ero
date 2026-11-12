@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("fluid_tanks_and_legacy_saves", MachineTests::tanks);
         for (String name : CASE_NAMES)
             tests.put("machine_" + name + "_overclocker_added_later", helper -> lateOverclock(helper, byName(name)));
         tests.put("transfer_respects_slot_roles", MachineTests::slotRoles);
@@ -374,6 +375,62 @@ final class MachineTests {
         int expected = (int) Math.round(c.ticks() * 0.75 * 0.75);
         check(helper, second > 0 && Math.abs(second - expected) <= 2,
             c.name() + ": second batch with late overclockers took " + second + " ticks, expected about " + expected);
+        helper.succeed();
+    }
+
+    /** Tanks hold real fluids, reject the wrong one, and worlds saved before tanks existed still load. */
+    private static void tanks(GameTestHelper helper) {
+        var registries = helper.getLevel().registryAccess();
+        var water = net.minecraft.world.level.material.Fluids.WATER;
+        var lava = net.minecraft.world.level.material.Fluids.LAVA;
+
+        MachineBlockEntity washer = place(helper, 1, ModBlocks.ORE_WASHER.get());
+        var washerTank = ((FluidProvider) washer).getTank();
+        check(helper, washerTank.fill(lava, 1000) == 0, "A water tank must reject lava");
+        check(helper, washerTank.fill(water, 20000) == 16000 && washerTank.getAmount() == 16000, "A tank must stop at its capacity");
+        check(helper, washerTank.getResource().getFluid() == water, "The tank must report the fluid it holds");
+        check(helper, !((FluidProvider) washer).addBucket(), "A full tank must refuse another bucket");
+        check(helper, washerTank.drain(15000) == 15000 && ((FluidProvider) washer).addBucket() && washerTank.getAmount() == 2000,
+            "Buckets must add exactly 1000 mB");
+
+        // legacy ore washer save: a bare millibucket count
+        CompoundTag old = washer.saveWithoutMetadata(registries);
+        old.remove("tank");
+        old.putInt("storedWater", 5000);
+        MachineBlockEntity loaded = place(helper, 3, ModBlocks.ORE_WASHER.get());
+        loaded.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, old));
+        check(helper, ((FluidProvider) loaded).getStoredFluid() == 5000, "An old ore washer save must keep its water");
+
+        // geothermal: one bucket burns for exactly 1000 ticks; old saves counted whole buckets
+        var geo = (GeothermalGeneratorBlockEntity) place(helper, 5, ModBlocks.GEOTHERMAL_GENERATOR.get());
+        check(helper, geo.getTank().fill(water, 1000) == 0, "The geothermal generator must reject water");
+        check(helper, geo.addLavaBucket() && geo.addLavaBucket(), "The geothermal generator must accept lava buckets");
+        long produced = 0;
+        for (int i = 0; i < 2100; i++) {
+            long before = energy(geo).getEnergyStored();
+            geo.tick();
+            produced += energy(geo).getEnergyStored() - before;
+            energy(geo).setEnergy(0);
+        }
+        check(helper, produced == 2 * 1000 * 20, "Two lava buckets must yield 40000 EU, got " + produced);
+        check(helper, geo.getStoredLava() == 0, "The lava must be used up");
+
+        CompoundTag oldGeo = geo.saveWithoutMetadata(registries);
+        oldGeo.remove("tank");
+        oldGeo.putInt("storedLava", 3);
+        oldGeo.putInt("lavaTickRemaining", 400);
+        var loadedGeo = (GeothermalGeneratorBlockEntity) place(helper, 7, ModBlocks.GEOTHERMAL_GENERATOR.get());
+        loadedGeo.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, oldGeo));
+        check(helper, loadedGeo.getStoredLava() == 3 && loadedGeo.getTank().getAmount() == 2000,
+            "An old geothermal save with 3 buckets (one burning) must load as 2 buckets plus the burning one");
+        produced = 0;
+        for (int i = 0; i < 2500; i++) {
+            long before = energy(loadedGeo).getEnergyStored();
+            loadedGeo.tick();
+            produced += energy(loadedGeo).getEnergyStored() - before;
+            energy(loadedGeo).setEnergy(0);
+        }
+        check(helper, produced == (400 + 2000) * 20L, "The migrated lava must burn for its remaining 2400 ticks, got " + produced / 20);
         helper.succeed();
     }
 }

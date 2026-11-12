@@ -94,7 +94,7 @@ public class PumpBlock extends MachineBlock implements SimpleWaterloggedBlock {
         if (stack.is(Items.WATER_BUCKET)) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof PumpBlockEntity pump) {
-                if (pump.addWaterBucket()) {
+                if (pump.addBucket()) {
                     stack.shrink(1);
                     ItemStack emptyBucket = new ItemStack(Items.BUCKET);
                     if (!player.getInventory().add(emptyBucket)) {

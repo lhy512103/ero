@@ -45,7 +45,7 @@ public class OreWasherBlock extends MachineBlock {
         if (stack.is(Items.WATER_BUCKET)) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof OreWasherBlockEntity washer) {
-                if (washer.addWaterBucket()) {
+                if (washer.addBucket()) {
                     stack.shrink(1);
                     ItemStack emptyBucket = new ItemStack(Items.BUCKET);
                     if (!player.getInventory().add(emptyBucket)) {

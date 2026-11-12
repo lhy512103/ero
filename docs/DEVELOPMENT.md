@@ -130,3 +130,11 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - 发电机、地热发电机、泵、工业工作台还没有迁移：泵和地热会在流体系统里重写，工作台会在装配台改造里重写。
 
 每台加工机在 `MachineTests` 里有一组测试（加工、断电、超频、后装超频、存档往返）。新增机器时在 `cases()` 和 `CASE_NAMES` 里各加一项。
+
+## 流体
+
+- `fluid.MachineTank`：机器内部的流体储罐（单格、固定容量、可限定流体种类），本身就是标准的 NeoForge 流体接口。
+- `fluid.FluidProvider`：带一个储罐的机器实现它；`insertFluid` / `extractFluid` / `addBucket` 是机器之间和流体升级使用的简化接口，默认实现都落在储罐上。
+- 洗矿机、电解机、泵用水罐（16 000 mB），地热发电机用熔岩罐（64 桶）。
+- 旧存档兼容：以前这些机器只存一个数字（`storedWater`、`storedFluid`、`storedLava`），读档时找不到储罐数据就按旧字段换算。地热发电机旧存档里「正在烧的那一桶」仍计在桶数里，换算时会扣掉。
+- 储罐目前还没有对外开放给其他模组的管道，这是阶段 0.6 的内容。

@@ -3,6 +3,8 @@ package machine.electrolyzer;
 import blockentity.ModBlockEntities;
 import energy.EUVoltage;
 import fluid.FluidProvider;
+import fluid.MachineTank;
+import net.minecraft.world.level.material.Fluids;
 import machine.ElectrolyzerGuiProvider;
 import machine.PoweredMachineBlockEntity;
 import machine.electrolyzer.menu.ElectrolyzerMenu;
@@ -13,7 +15,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -38,10 +39,9 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     private static final int MAX_STORED_FLUID = 16000;
     private static final int WATER_PER_OPERATION = 1000;
     private static final Component DISPLAY_NAME = Component.literal("电解机");
-    private static final ItemStack WATER_STACK = new ItemStack(Items.WATER_BUCKET);
 
-    /** 内部存储的水量（mB） */
-    private int storedFluid = 0;
+    /** 内部水箱 */
+    private final MachineTank tank = MachineTank.of(Fluids.WATER, MAX_STORED_FLUID, this::setChanged);
 
     @Nullable
     private MachineRecipe cachedRecipe;
@@ -83,12 +83,12 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
         long energyPerTick = overclockedEnergy(cachedRecipe.getEnergyPerTick());
 
         // 水不够时不开始新的一轮；已经开始的继续做完
-        if (storedFluid < WATER_PER_OPERATION && progress == 0) return;
+        if (tank.getAmount() < WATER_PER_OPERATION && progress == 0) return;
         if (energyStorage.removeEnergy(energyPerTick) <= 0) return;
 
         progress++;
         if (progress >= maxProgress && tryProcessOutput()) {
-            storedFluid -= WATER_PER_OPERATION;
+            tank.drain(WATER_PER_OPERATION);
             progress = 0;
             setChanged();
         }
@@ -126,14 +126,13 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     private void pullFluidFromAdjacent() {
         if (level == null || level.isClientSide()) return;
         for (Direction direction : Direction.values()) {
-            if (storedFluid >= MAX_STORED_FLUID) break;
+            if (tank.getSpace() <= 0) break;
             BlockEntity be = level.getBlockEntity(worldPosition.relative(direction));
             if (be instanceof FluidProvider provider && provider.getStoredFluid() > 0) {
-                int extracted = provider.extractFluid(Math.min(MAX_STORED_FLUID - storedFluid, 1000));
-                if (extracted > 0) {
-                    storedFluid += extracted;
-                    setChanged();
-                }
+                // 先确认自己装得下，再从对方取，避免水在途中丢失
+                int wanted = Math.min(tank.getSpace(), 1000);
+                int extracted = provider.getTankFluid() == Fluids.WATER ? provider.extractFluid(wanted) : 0;
+                if (extracted > 0) tank.fill(Fluids.WATER, extracted);
             }
         }
     }
@@ -150,35 +149,17 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     @Override public int[] getInputSlots() { return new int[]{INPUT_SLOT}; }
     @Override public int[] getOutputSlots() { return new int[]{OUTPUT1_SLOT, OUTPUT2_SLOT, OUTPUT3_SLOT}; }
 
-    @Override public int getStoredFluid() { return storedFluid; }
-    @Override public int getMaxStoredFluid() { return MAX_STORED_FLUID; }
+    @Override public MachineTank getTank() { return tank; }
 
-    @Override
-    public int extractFluid(int maxAmount) {
-        int extracted = Math.min(maxAmount, storedFluid);
-        storedFluid -= extracted;
-        setChanged();
-        return extracted;
-    }
-
-    @Override
-    public int insertFluid(int maxAmount) {
-        int canInsert = Math.min(maxAmount, MAX_STORED_FLUID - storedFluid);
-        storedFluid += canInsert;
-        setChanged();
-        return canInsert;
-    }
-
-    @Override public ItemStack getFluidItem() { return storedFluid > 0 ? WATER_STACK : ItemStack.EMPTY; }
 
     @Override
     protected void saveExtra(ValueOutput output) {
-        output.putInt("storedFluid", storedFluid);
+        tank.save(output, "tank");
     }
 
     @Override
     protected void loadExtra(ValueInput input) {
-        storedFluid = input.getInt("storedFluid").orElse(0);
+        tank.load(input, "tank", "storedFluid", Fluids.WATER, 1);
         cachedRecipe = null;
         cachedInputResource = ItemResource.EMPTY;
     }

@@ -3,6 +3,8 @@ package machine.ore_washer;
 import blockentity.ModBlockEntities;
 import energy.EUVoltage;
 import fluid.FluidProvider;
+import fluid.MachineTank;
+import net.minecraft.world.level.material.Fluids;
 import machine.OreWasherGuiProvider;
 import machine.PoweredMachineBlockEntity;
 import machine.ore_washer.menu.OreWasherMenu;
@@ -12,7 +14,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -36,10 +37,9 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
     private static final int MAX_STORED_WATER = 16000;
     private static final int WATER_PER_OPERATION = 1000;
     private static final Component DISPLAY_NAME = Component.literal("洗矿机");
-    private static final ItemStack WATER_BUCKET_STACK = new ItemStack(Items.WATER_BUCKET);
 
-    /** 内部存储的水量（mB） */
-    private int storedWater = 0;
+    /** 内部水箱 */
+    private final MachineTank tank = MachineTank.of(Fluids.WATER, MAX_STORED_WATER, this::setChanged);
 
     @Nullable
     private MachineRecipe cachedRecipe;
@@ -80,7 +80,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
                 long energyPerTick = overclockedEnergy(cachedRecipe.getEnergyPerTick());
 
                 // 水不够时不开始新的一轮；已经开始的继续做完
-                boolean stalled = (storedWater < WATER_PER_OPERATION && progress == 0)
+                boolean stalled = (tank.getAmount() < WATER_PER_OPERATION && progress == 0)
                     || energyStorage.removeEnergy(energyPerTick) <= 0;
                 if (stalled) {
                     if (wasWorking) {
@@ -92,7 +92,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
 
                 progress++;
                 if (progress >= maxProgress && tryProcessOutput()) {
-                    storedWater -= WATER_PER_OPERATION;
+                    tank.drain(WATER_PER_OPERATION);
                     progress = 0;
                 }
             } else {
@@ -163,45 +163,20 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
         return new OreWasherMenu(containerId, playerInventory, this);
     }
 
-    /** 尝试添加一桶水，返回是否成功 */
-    public boolean addWaterBucket() {
-        if (storedWater + 1000 > MAX_STORED_WATER) return false;
-        storedWater += 1000;
-        setChanged();
-        return true;
-    }
+    @Override public MachineTank getTank() { return tank; }
 
-    public int getStoredWater() { return storedWater; }
+    public int getStoredWater() { return tank.getAmount(); }
     public int getMaxStoredWater() { return MAX_STORED_WATER; }
 
-    @Override
-    public int extractFluid(int maxAmount) {
-        int extracted = Math.min(maxAmount, storedWater);
-        storedWater -= extracted;
-        setChanged();
-        return extracted;
-    }
-
-    @Override
-    public int insertFluid(int maxAmount) {
-        int canInsert = Math.min(maxAmount, MAX_STORED_WATER - storedWater);
-        storedWater += canInsert;
-        setChanged();
-        return canInsert;
-    }
-
-    @Override public int getStoredFluid() { return storedWater; }
-    @Override public int getMaxStoredFluid() { return MAX_STORED_WATER; }
-    @Override public ItemStack getFluidItem() { return storedWater > 0 ? WATER_BUCKET_STACK : ItemStack.EMPTY; }
 
     @Override
     protected void saveExtra(ValueOutput output) {
-        output.putInt("storedWater", storedWater);
+        tank.save(output, "tank");
     }
 
     @Override
     protected void loadExtra(ValueInput input) {
-        storedWater = input.getInt("storedWater").orElse(0);
+        tank.load(input, "tank", "storedWater", Fluids.WATER, 1);
         clearCache();
     }
 }
