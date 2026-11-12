@@ -69,6 +69,8 @@
 63. Added: Jade shows when a machine is underpowered or stopped by a full by-product slot.
 64. Added: Factory Hub, which rates your factory with stars for keeping it supplied with products minute after minute.
 65. Added: One-star and two-star ratings, with a rating screen showing the wanted products, stock and progress.
+66. Added: Plate, wire and rod molds; the mold placed in the Metal Former decides what it makes, replacing the mode button.
+67. Optimized: Existing Metal Formers receive the mold matching their previous mode when the world is loaded.
 
 ### 中文
 
@@ -137,3 +139,5 @@
 63. 新增：Jade 会提示机器供电不足或被副产物堵住。
 64. 新增：工厂中枢，根据产线能否持续不断地供应产品给工厂评星。
 65. 新增：一星和二星评级，评级界面会显示认可的产品、库存和进度。
+66. 新增：板材、导线、棍材三种模具，金属成型机放入哪种模具就做哪种产品，取代原来的模式按钮。
+67. 优化：读取旧存档时，已有的金属成型机会自动获得与原模式对应的模具。

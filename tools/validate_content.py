@@ -72,6 +72,7 @@ TERMINAL = set(STATION.values()) | {
     "insulated_copper_cable", "insulated_tin_cable", "insulated_gold_cable", "insulated_hv_cable",
     "fission_controller", "fission_controller_front", "reactor_casing", "reactor_casing_back", "reactor_casing_side",
     "wrench", "cutter", "forge_hammer", "treetap", "electric_wrench", "electric_treetap", "electric_hoe", "guide",
+    "plate_mold", "wire_mold", "rod_mold",
     "ejector_upgrade", "pulling_upgrade", "fluid_ejector_upgrade", "fluid_pulling_upgrade", "energy_storage_upgrade",
     "overclocker_upgrade", "overclocker_upgrade1", "overclocker_upgrade2",
     "coal_fuel", "single_use_battery", "irradiant_uranium_ingot", "coolant_bucket",

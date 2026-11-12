@@ -64,11 +64,12 @@ final class MachineTests {
             List.of(stack(ModItems.IRON_PLATE, 9)), ModItems.DENSE_IRON_PLATE.get(), 1, 300));
         list.add(of("extractor", ModBlocks.EXTRACTOR, new int[]{0}, 1,
             List.of(stack(ModItems.RAW_LATEX, 1)), ModItems.RUBBER.get(), 3, 100));
-        list.add(of("metal_former_rolling", ModBlocks.METAL_FORMER, new int[]{0}, 1,
-            List.of(new ItemStack(Items.IRON_INGOT)), ModItems.IRON_PLATE.get(), 1, 80));
+        list.add(new Case("metal_former_rolling", ModBlocks.METAL_FORMER, new int[]{0}, 1,
+            List.of(new ItemStack(Items.IRON_INGOT)), ModItems.IRON_PLATE.get(), 1, 80, 0,
+            machine -> mold(machine, ModItems.PLATE_MOLD.get())));
         list.add(new Case("metal_former_extruding", ModBlocks.METAL_FORMER, new int[]{0}, 1,
             List.of(new ItemStack(Items.IRON_INGOT)), ModItems.IRON_STICK.get(), 2, 100, 0,
-            machine -> ((MetalFormerBlockEntity) machine).setMode(2)));
+            machine -> mold(machine, ModItems.ROD_MOLD.get())));
         list.add(of("electric_furnace", ModBlocks.ELECTRIC_FURNACE, new int[]{0}, 1,
             List.of(stack(ModItems.PURIFIED_TIN_DUST, 1)), ModItems.TIN_INGOT.get(), 3, 120));
         list.add(of("induction_furnace", ModBlocks.INDUCTION_FURNACE, new int[]{0, 1}, 2,
@@ -105,6 +106,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("metal_former_molds", MachineTests::molds);
         tests.put("factory_hub_rates_sustained_supply", MachineTests::factoryHub);
         tests.put("underpowered_machine_slows_down", MachineTests::underpowered);
         tests.put("full_byproduct_slot_stops_machine", MachineTests::byproductBlocks);
@@ -901,6 +903,62 @@ final class MachineTests {
         check(helper, tag.contains("Stock") && tag.contains("Minutes"), "The hub must save its progress");
         data.setStars(owner, 0);
         helper.setBlock(pos, Blocks.AIR);
+        helper.succeed();
+    }
+
+    private static void mold(MachineBlockEntity machine, Item mold) {
+        machine.getItemHandler().set(MetalFormerBlockEntity.MOLD_SLOT,
+            mold == null ? ItemResource.EMPTY : ItemResource.of(new ItemStack(mold)), mold == null ? 0 : 1);
+    }
+
+    private static void power(MachineBlockEntity machine, int ticks) {
+        for (int i = 0; i < ticks; i++) {
+            energy(machine).setEnergy(energy(machine).getMaxEnergyStored());
+            machine.tick();
+        }
+    }
+
+    /** The mold decides what the metal former makes; old saves that stored a mode number get the matching mold. */
+    private static void molds(GameTestHelper helper) {
+        MachineBlockEntity former = place(helper, 1, ModBlocks.METAL_FORMER.get());
+        var inventory = former.getItemHandler();
+        put(inventory, 0, new ItemStack(Items.IRON_INGOT, 2));
+        power(former, 140);
+        check(helper, amount(former, 1) == 0 && amount(former, 0) == 2, "Without a mold the metal former must do nothing");
+
+        mold(former, ModItems.PLATE_MOLD.get());
+        power(former, 90);
+        check(helper, inventory.getResource(1).getItem() == ModItems.IRON_PLATE.get() && amount(former, 1) == 1,
+            "The plate mold must make a plate");
+        inventory.set(1, ItemResource.EMPTY, 0);
+        mold(former, ModItems.ROD_MOLD.get());
+        power(former, 110);
+        check(helper, inventory.getResource(1).getItem() == ModItems.IRON_STICK.get() && amount(former, 1) == 2,
+            "The rod mold must make rods");
+
+        var handler = helper.getLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            former.getBlockPos(), net.minecraft.core.Direction.UP);
+        check(helper, handler != null && handler.size() == 2, "Pipes must not see the mold slot");
+        check(helper, insert(handler, new ItemStack(ModItems.WIRE_MOLD.get())) == 0 || amount(former, 0) == 1,
+            "A mold piped in is just an input, never a mold change");
+        inventory.set(0, ItemResource.EMPTY, 0);
+        inventory.set(1, ItemResource.EMPTY, 0);
+
+        // a save from before molds existed: six slots and a mode number
+        mold(former, null);
+        var registries = helper.getLevel().registryAccess();
+        CompoundTag old = former.saveWithoutMetadata(registries);
+        old.putInt("mode", 1);
+        var stacks = old.getListOrEmpty("stacks");
+        if (stacks.size() == 7) stacks.remove(6);
+        MachineBlockEntity loaded = place(helper, 3, ModBlocks.METAL_FORMER.get());
+        loaded.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, old));
+        check(helper, loaded.getItemHandler().size() == 7, "An old save must not shrink the inventory, size " + loaded.getItemHandler().size());
+        check(helper, loaded.getItemHandler().getResource(MetalFormerBlockEntity.MOLD_SLOT).getItem() == ModItems.WIRE_MOLD.get(),
+            "An old save in cutting mode must load with a wire mold");
+        put(loaded.getItemHandler(), 0, new ItemStack(ModItems.COPPER_PLATE.get()));
+        power(loaded, 120);
+        check(helper, amount(loaded, 1) == 4, "The migrated machine must keep cutting wires, made " + amount(loaded, 1));
         helper.succeed();
     }
 }

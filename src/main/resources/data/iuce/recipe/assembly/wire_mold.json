@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "iuce:forge_hammer",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:iron_cable",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:wire_mold",
+    "count": 1
+  }
+}

@@ -318,7 +318,6 @@
   "tooltip.iuce.planter.phase.4": "Night",
   "tooltip.iuce.planter.progress": "Growth: %s / %s",
   "tooltip.iuce.planter.speed": "%s · %sx speed",
-  "tooltip.iuce.metal_former.mode": "Mode: %s (click to switch)",
   "tooltip.iuce.metal_former.mode.0": "Rolling",
   "tooltip.iuce.metal_former.mode.1": "Cutting",
   "tooltip.iuce.metal_former.mode.2": "Extruding",
@@ -334,7 +333,7 @@
   "info.iuce.compressor.3": "Use the Metal Former for plates, rods and wires.",
   "info.iuce.compressor.4": "Voltage tier: LV (32 EU/t). Accepts overclocker, ejector and other upgrades.",
   "info.iuce.metal_former.title": "Metal Former",
-  "info.iuce.metal_former.1": "Three modes (click the button right of the arrow):",
+  "info.iuce.metal_former.1": "The mold in the slot right of the arrow decides the product:",
   "info.iuce.metal_former.2": "Rolling: ingot → plate 1:1 (the forge hammer needs 2 ingots);",
   "info.iuce.metal_former.3": "Cutting: plate → 4 wires (the cutter makes only 2);",
   "info.iuce.metal_former.4": "Extruding: ingot → 2 rods (the forge hammer makes only 1).",
@@ -401,5 +400,11 @@
   "gui.iuce.hub.item": "Stock %s / %s, uses %s per minute",
   "gui.iuce.hub.grace": "Supply interrupted! One more minute resets the count",
   "gui.iuce.hub.hint": "Right-click with a product, or feed by chute or conveyor",
-  "message.iuce.hub.promoted": "%s's factory reached %s stars!"
+  "message.iuce.hub.promoted": "%s's factory reached %s stars!",
+  "item.iuce.plate_mold": "Plate Mold",
+  "item.iuce.wire_mold": "Wire Mold",
+  "item.iuce.rod_mold": "Rod Mold",
+  "tooltip.iuce.mold": "For the Metal Former: %s",
+  "tooltip.iuce.mold.reusable": "Not used up",
+  "tooltip.iuce.metal_former.no_mold": "Needs a mold to work"
 }

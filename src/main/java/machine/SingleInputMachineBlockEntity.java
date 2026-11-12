@@ -43,6 +43,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
     protected final int processSlots;
     protected final int upgradeSlots;
     protected final ItemStacksResourceHandler itemHandler;
+    private final MachineInventory inventory;
     protected final int[] progress;
     protected final int[] maxProgress;
 
@@ -55,18 +56,20 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
 
     protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
                                             int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime) {
+        this(type, pos, state, voltage, processSlots, upgradeSlots, bufferCapacity, baseProcessTime, 0);
+    }
+
+    /** @param extraSlots machine-specific slots placed after the upgrade slots (hidden from automation) */
+    protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
+                                            int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime,
+                                            int extraSlots) {
         super(type, pos, state);
         this.voltage = voltage;
         this.processSlots = processSlots;
         this.upgradeSlots = upgradeSlots;
         this.energyStorage = new EUEnergyStorageImpl(bufferCapacity, voltage);
-        this.itemHandler = new ItemStacksResourceHandler(processSlots * 2 + upgradeSlots) {
-            @Override
-            protected void onContentsChanged(int index, ItemStack previousContents) {
-                if (index >= 2 * SingleInputMachineBlockEntity.this.processSlots) overclock = null;
-                setChanged();
-            }
-        };
+        this.inventory = new MachineInventory(processSlots * 2 + upgradeSlots + extraSlots);
+        this.itemHandler = inventory;
         this.progress = new int[processSlots];
         this.maxProgress = new int[processSlots];
         this.cachedRecipes = new MachineRecipe[processSlots];
@@ -76,6 +79,33 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
 
     /** The {@code machine_type} of the recipes this machine runs right now. */
     protected abstract String recipeType();
+
+    /** Called after the contents of an item slot changed. */
+    protected void slotChanged(int index) { }
+
+    private final class MachineInventory extends ItemStacksResourceHandler {
+        private final int slots;
+
+        MachineInventory(int slots) {
+            super(slots);
+            this.slots = slots;
+        }
+
+        @Override
+        protected void onContentsChanged(int index, ItemStack previousContents) {
+            if (index >= 2 * processSlots) overclock = null;
+            slotChanged(index);
+            setChanged();
+        }
+
+        /** Saves written before a machine gained slots hold a shorter list; pad it back to full size. */
+        void restoreSize() {
+            if (size() >= slots) return;
+            net.minecraft.core.NonNullList<ItemStack> stacks = net.minecraft.core.NonNullList.withSize(slots, ItemStack.EMPTY);
+            for (int slot = 0; slot < size(); slot++) stacks.set(slot, getResource(slot).toStack(getAmountAsInt(slot)));
+            setStacks(stacks);
+        }
+    }
 
     /** Drops all progress and cached recipes, e.g. after the recipe type changed. */
     protected void resetProcessing() {
@@ -206,6 +236,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
         System.arraycopy(savedProgress, 0, progress, 0, Math.min(processSlots, savedProgress.length));
         System.arraycopy(savedMaxProgress, 0, maxProgress, 0, Math.min(processSlots, savedMaxProgress.length));
         itemHandler.deserialize(input);
+        inventory.restoreSize();
         overclock = null;
     }
 

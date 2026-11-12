@@ -318,7 +318,6 @@
   "tooltip.iuce.planter.phase.4": "夜晚",
   "tooltip.iuce.planter.progress": "培育进度: %s / %s",
   "tooltip.iuce.planter.speed": "%s · %s 倍速度",
-  "tooltip.iuce.metal_former.mode": "模式：%s（点击切换）",
   "tooltip.iuce.metal_former.mode.0": "辊压",
   "tooltip.iuce.metal_former.mode.1": "切割",
   "tooltip.iuce.metal_former.mode.2": "挤压",
@@ -334,7 +333,7 @@
   "info.iuce.compressor.3": "锭压板 / 拉棍 / 切线请使用金属成型机。",
   "info.iuce.compressor.4": "电压等级：LV (32 EU/t)。可安装超频、弹出等升级。",
   "info.iuce.metal_former.title": "金属成型机",
-  "info.iuce.metal_former.1": "三种模式（点击箭头右侧按钮切换）：",
+  "info.iuce.metal_former.1": "放进箭头右侧槽里的模具决定做什么：",
   "info.iuce.metal_former.2": "辊压：锭 → 板 1:1（锻造锤需 2 锭）；",
   "info.iuce.metal_former.3": "切割：板 → 4 根导线（剪线钳只有 2 根）；",
   "info.iuce.metal_former.4": "挤压：锭 → 2 根金属棍（锻造锤只有 1 根）。",
@@ -401,5 +400,11 @@
   "gui.iuce.hub.item": "库存 %s / %s，每分钟消耗 %s",
   "gui.iuce.hub.grace": "供应中断！再断一分钟将重新计时",
   "gui.iuce.hub.hint": "手持产品右键中枢，或用滑槽、传送带送入",
-  "message.iuce.hub.promoted": "%s 的工厂升到了 %s 星！"
+  "message.iuce.hub.promoted": "%s 的工厂升到了 %s 星！",
+  "item.iuce.plate_mold": "板材模具",
+  "item.iuce.wire_mold": "导线模具",
+  "item.iuce.rod_mold": "棍材模具",
+  "tooltip.iuce.mold": "放入金属成型机：%s",
+  "tooltip.iuce.mold.reusable": "不会消耗",
+  "tooltip.iuce.metal_former.no_mold": "放入模具才能加工"
 }
