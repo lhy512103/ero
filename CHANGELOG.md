@@ -63,6 +63,7 @@
 57. Added: A conveyor fed only from one side is shown as a curve.
 58. Optimized: The placement preview now shows the half-transparent block with a white frame and a yellow direction arrow.
 59. Added: Machine recipes can be encoded into Applied Energistics processing patterns with one click from JEI.
+60. Added: Conveyors descend: a belt fed from one block higher turns into a down ramp.
 
 ### 中文
 
@@ -125,3 +126,4 @@
 57. 新增：只从侧面进料的传送带会显示为弯道。
 58. 优化：摆放预览改为半透明方块模型，带白色线框和黄色方向箭头。
 59. 新增：机器配方可在 JEI 中一键编码为应用能源的处理样板。
+60. 新增：传送带可以下坡，被高一格的传送带送料时会自动变成下行斜坡。

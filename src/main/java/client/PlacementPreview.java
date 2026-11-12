@@ -55,7 +55,7 @@ public final class PlacementPreview {
             boolean conveyor = block instanceof ConveyorBlock;
             Direction facing = conveyor ? state.getValue(ConveyorBlock.FACING) : state.getValue(ChuteBlock.FACING);
             VoxelShape frame = state.getShape(event.getLevel(), pos);
-            VoxelShape arrow = arrow(facing, conveyor ? (state.getValue(ConveyorBlock.ASCENDING) ? 14 : 6.5) : 8);
+            VoxelShape arrow = arrow(facing, conveyor ? (state.getValue(ConveyorBlock.ASCENDING) || state.getValue(ConveyorBlock.DESCENDING) ? 14 : 6.5) : 8);
 
             List<BlockStateModelPart> parts = new ArrayList<>();
             minecraft.getModelManager().getBlockStateModelSet().get(state)

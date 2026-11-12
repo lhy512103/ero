@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("conveyor_descends", MachineTests::conveyorDown);
         tests.put("conveyor_turns_and_climbs", MachineTests::conveyorRoute);
         tests.put("chute_moves_items_down", MachineTests::chute);
         tests.put("conveyor_carries_items_into_container", MachineTests::conveyor);
@@ -783,5 +784,21 @@ final class MachineTests {
         var target = helper.getBlockEntity(new BlockPos(3, 2, 2), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
         helper.spawnItem(Items.IRON_INGOT, 0.5f, 1.4f, 1.5f);
         helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must climb the ramp, take the turn and reach the container"));
+    }
+
+    /** A belt fed from one block higher becomes a down ramp and carries the item on. */
+    private static void conveyorDown(GameTestHelper helper) {
+        var east = net.minecraft.core.Direction.EAST;
+        helper.setBlock(new BlockPos(0, 1, 1), Blocks.STONE);
+        belt(helper, 0, 2, 1, east);
+        belt(helper, 1, 1, 1, east);
+        belt(helper, 2, 1, 1, east);
+        helper.setBlock(new BlockPos(3, 1, 1), Blocks.BARREL);
+        check(helper, helper.getBlockState(new BlockPos(1, 1, 1)).getValue(block.ConveyorBlock.DESCENDING), "The belt below a higher feeding belt must become a down ramp");
+        check(helper, !helper.getBlockState(new BlockPos(2, 1, 1)).getValue(block.ConveyorBlock.DESCENDING)
+            && !helper.getBlockState(new BlockPos(0, 2, 1)).getValue(block.ConveyorBlock.DESCENDING), "Other belts must stay flat");
+        var target = helper.getBlockEntity(new BlockPos(3, 1, 1), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        helper.spawnItem(Items.IRON_INGOT, 0.5f, 2.4f, 1.5f);
+        helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must ride down the ramp and reach the container"));
     }
 }
