@@ -59,6 +59,10 @@
 53. Added: Conveyors climb by turning into a ramp when the next belt is one block higher, and can be rotated with a wrench.
 54. Added: Holding a conveyor or chute shows a placement preview with a direction arrow.
 55. Optimized: JEI machine pages are more compact and show the by-product chance as a badge on its slot.
+56. Fixed: Conveyor ramps did not line up with the belts below and above them.
+57. Added: A conveyor fed only from one side is shown as a curve.
+58. Optimized: The placement preview now shows the half-transparent block with a white frame and a yellow direction arrow.
+59. Added: Machine recipes can be encoded into Applied Energistics processing patterns with one click from JEI.
 
 ### 中文
 
@@ -117,3 +121,7 @@
 53. 新增：下一格传送带高一格时传送带会自动变成斜坡爬升，并可用扳手转向。
 54. 新增：手持传送带或滑槽时显示摆放预览和方向箭头。
 55. 优化：JEI 机器配方页排版更紧凑，副产物概率显示为槽位角标。
+56. 修复：传送带斜坡与上下两格传送带接不上的问题。
+57. 新增：只从侧面进料的传送带会显示为弯道。
+58. 优化：摆放预览改为半透明方块模型，带白色线框和黄色方向箭头。
+59. 新增：机器配方可在 JEI 中一键编码为应用能源的处理样板。

@@ -775,6 +775,11 @@ final class MachineTests {
         check(helper, helper.getBlockState(new BlockPos(1, 1, 1)).getValue(block.ConveyorBlock.ASCENDING), "The belt under a higher belt must become a ramp");
         check(helper, !helper.getBlockState(new BlockPos(0, 1, 1)).getValue(block.ConveyorBlock.ASCENDING)
             && !helper.getBlockState(new BlockPos(2, 2, 1)).getValue(block.ConveyorBlock.ASCENDING), "Other belts must stay flat");
+        check(helper, helper.getBlockState(new BlockPos(3, 2, 1)).getValue(block.ConveyorBlock.SHAPE) == block.ConveyorShape.RIGHT,
+            "A belt fed only from its right side must become a curve");
+        check(helper, helper.getBlockState(new BlockPos(2, 2, 1)).getValue(block.ConveyorBlock.SHAPE) == block.ConveyorShape.STRAIGHT
+            && helper.getBlockState(new BlockPos(1, 1, 1)).getValue(block.ConveyorBlock.SHAPE) == block.ConveyorShape.STRAIGHT,
+            "Belts fed from behind (also by a ramp) must stay straight");
         var target = helper.getBlockEntity(new BlockPos(3, 2, 2), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
         helper.spawnItem(Items.IRON_INGOT, 0.5f, 1.4f, 1.5f);
         helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must climb the ramp, take the turn and reach the container"));

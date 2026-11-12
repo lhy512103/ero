@@ -34,7 +34,8 @@ import java.util.Map;
  * Conveyor I: carries loose items (and nudges mobs) along its facing and feeds them into the
  * machine or container at its end. It has no block entity and needs no power.
  * <ul>
- * <li>Turns: a belt simply hands its items to the next belt, whichever way that one faces.</li>
+ * <li>Turns: a belt simply hands its items to the next belt, whichever way that one faces; a belt fed
+ * only from one side shows a curved surface.</li>
  * <li>Climbing: a belt whose next belt sits one block higher turns into a ramp by itself.</li>
  * <li>Descending: items drop off the end onto the belt below.</li>
  * </ul>
@@ -44,6 +45,8 @@ public class ConveyorBlock extends Block {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     /** True when the belt it feeds is one block higher: this belt is a ramp. */
     public static final BooleanProperty ASCENDING = BooleanProperty.create("ascending");
+    /** Straight, or curved because items only arrive from the left or right. */
+    public static final EnumProperty<ConveyorShape> SHAPE = EnumProperty.create("shape", ConveyorShape.class);
     /** Blocks per tick the belt asks for (ground friction makes the real speed about 1.5 blocks per second). */
     public static final double SPEED = 0.125;
     private static final VoxelShape FLAT = Block.box(0, 0, 0, 16, 4, 16);
@@ -69,7 +72,8 @@ public class ConveyorBlock extends Block {
 
     public ConveyorBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(ASCENDING, false));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(ASCENDING, false)
+            .setValue(SHAPE, ConveyorShape.STRAIGHT));
     }
 
     @Override
@@ -77,7 +81,7 @@ public class ConveyorBlock extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, ASCENDING);
+        builder.add(FACING, ASCENDING, SHAPE);
     }
 
     /** Runs the way the player looks; sneaking reverses it. */
@@ -85,25 +89,51 @@ public class ConveyorBlock extends Block {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
         if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) facing = facing.getOpposite();
-        return defaultBlockState().setValue(FACING, facing)
-            .setValue(ASCENDING, feedsHigherBelt(context.getLevel(), context.getClickedPos(), facing));
+        return shaped(context.getLevel(), context.getClickedPos(), defaultBlockState().setValue(FACING, facing));
     }
 
     private static boolean feedsHigherBelt(BlockGetter level, BlockPos pos, Direction facing) {
         return level.getBlockState(pos.relative(facing).above()).getBlock() instanceof ConveyorBlock;
     }
 
-    /** Recomputes whether the belt at {@code pos} is a ramp. */
+    /** True when a belt next to {@code pos} on that side (level with it, or the ramp one below) runs towards it. */
+    private static boolean fedFrom(BlockGetter level, BlockPos pos, Direction side) {
+        BlockPos neighbour = pos.relative(side);
+        for (BlockPos candidate : new BlockPos[]{neighbour, neighbour.below()}) {
+            BlockState state = level.getBlockState(candidate);
+            if (state.getBlock() instanceof ConveyorBlock && state.getValue(FACING) == side.getOpposite()) return true;
+        }
+        return false;
+    }
+
+    /** The state a belt facing like {@code state} takes at {@code pos}, given the belts around it. */
+    public static BlockState shaped(BlockGetter level, BlockPos pos, BlockState state) {
+        Direction facing = state.getValue(FACING);
+        ConveyorShape shape = ConveyorShape.STRAIGHT;
+        if (!fedFrom(level, pos, facing.getOpposite())) {
+            boolean left = fedFrom(level, pos, facing.getCounterClockWise());
+            boolean right = fedFrom(level, pos, facing.getClockWise());
+            if (left != right) shape = left ? ConveyorShape.LEFT : ConveyorShape.RIGHT;
+        }
+        return state.setValue(ASCENDING, feedsHigherBelt(level, pos, facing)).setValue(SHAPE, shape);
+    }
+
+    /** Recomputes ramp and curve of the belt at {@code pos}. */
     private static void refresh(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof ConveyorBlock)) return;
-        boolean ascending = feedsHigherBelt(level, pos, state.getValue(FACING));
-        if (state.getValue(ASCENDING) != ascending) level.setBlock(pos, state.setValue(ASCENDING, ascending), Block.UPDATE_ALL);
+        BlockState updated = shaped(level, pos, state);
+        if (updated != state) level.setBlock(pos, updated, Block.UPDATE_ALL);
     }
 
-    /** A belt appearing or disappearing changes the belts one step below it. */
+    /** A belt appearing, turning or disappearing changes the belts beside it, one step below and one step above. */
     private static void refreshAround(Level level, BlockPos pos) {
-        for (Direction direction : Direction.Plane.HORIZONTAL) refresh(level, pos.relative(direction).below());
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos side = pos.relative(direction);
+            refresh(level, side);
+            refresh(level, side.below());
+            refresh(level, side.above());
+        }
     }
 
     @Override
