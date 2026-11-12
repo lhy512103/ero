@@ -44,6 +44,27 @@ public final class CropRegistry {
         revision++;
     }
     public static long revision() { return revision; }
+
+    /** A seed the planter can grow without a data recipe, with the product of one cycle. */
+    public record Entry(ItemStack seed, Profile profile) {}
+
+    /**
+     * Every item the planter can cultivate automatically, in registry order. Used by recipe viewers;
+     * it walks the item registry once, so call it when recipes are (re)loaded rather than every tick.
+     */
+    public static List<Entry> listAll(ServerLevel level, BlockPos pos) {
+        List<Entry> out = new ArrayList<>();
+        for (Item item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+            ItemStack seed = new ItemStack(item);
+            if (seed.isEmpty()) continue;
+            try {
+                resolve(level, pos, seed).ifPresent(profile -> out.add(new Entry(seed, profile)));
+            } catch (RuntimeException ignored) {
+                // A modded block that cannot report drops out of world must not break the listing.
+            }
+        }
+        return out;
+    }
     public static Optional<Profile> resolve(ServerLevel level, BlockPos pos, ItemStack seed) {
         Object map = level.recipeAccess().recipeMap();
         if (recipeMapIdentity != map) { CACHE.clear(); recipeMapIdentity = map; }

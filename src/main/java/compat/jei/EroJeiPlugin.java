@@ -126,6 +126,8 @@ public class EroJeiPlugin implements IModPlugin {
                 .filter(holder -> holder.value().matchesMachine(machineType))
                 .toList();
 
+            if (machineType.equals("planter")) recipes = withAutomaticCrops(server, recipes);
+
             LOGGER.info("[Ero JEI] 机器类型 '{}': {} 个配方", machineType, recipes.size());
             registration.addRecipes(mt.recipeType, recipes);
         }
@@ -139,6 +141,37 @@ public class EroJeiPlugin implements IModPlugin {
         List<RecipeHolder<OptionalCraftingRecipe>> optionalRecipes = List.copyOf(recipeManager.recipeMap().byType(ModRecipes.OPTIONAL_CRAFTING_TYPE.get()));
         LOGGER.info("[Ero JEI] 可选合成配方: {} 个", optionalRecipes.size());
         registration.addRecipes(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), optionalRecipes);
+    }
+
+    /**
+     * Adds every crop the planter recognises automatically (vanilla and modded) to its JEI page,
+     * skipping seeds that already have a data recipe. The crop list is computed on the server thread
+     * because it queries block loot tables.
+     */
+    private static List<RecipeHolder<MachineRecipe>> withAutomaticCrops(net.minecraft.server.MinecraftServer server,
+                                                                       List<RecipeHolder<MachineRecipe>> dataRecipes) {
+        List<RecipeHolder<MachineRecipe>> all = new java.util.ArrayList<>(dataRecipes);
+        try {
+            var level = server.overworld();
+            List<machine.planter.CropRegistry.Entry> crops = server.submit(
+                () -> machine.planter.CropRegistry.listAll(level, net.minecraft.core.BlockPos.ZERO)).join();
+            int added = 0;
+            for (machine.planter.CropRegistry.Entry crop : crops) {
+                net.minecraft.world.item.ItemStack seed = crop.seed();
+                if (dataRecipes.stream().anyMatch(holder -> holder.value().getInput().test(seed))) continue;
+                var profile = crop.profile();
+                Identifier itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(seed.getItem());
+                Identifier id = Identifier.fromNamespaceAndPath(Ero.MOD_ID, "planter_auto/" + itemId.getNamespace() + "/" + itemId.getPath());
+                MachineRecipe recipe = new MachineRecipe("planter", net.minecraft.world.item.crafting.Ingredient.of(seed.getItem()),
+                    profile.result(), profile.energyPerTick() * profile.ticks(), profile.ticks());
+                all.add(new RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, id), recipe));
+                added++;
+            }
+            LOGGER.info("[Ero JEI] 种植机自动识别作物: {} 种", added);
+        } catch (RuntimeException error) {
+            LOGGER.warn("[Ero JEI] 无法列出种植机自动识别的作物", error);
+        }
+        return all;
     }
 
     /** Opens the JEI recipe view for an item (used by the built-in guide). */

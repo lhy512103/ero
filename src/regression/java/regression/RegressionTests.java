@@ -239,6 +239,11 @@ public final class RegressionTests {
         for (var item : new net.minecraft.world.item.Item[]{Items.GRASS_BLOCK, Items.MOSS_BLOCK, Items.NETHERRACK})
             check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(item)).isEmpty(), "Soil blocks must not be cultivated: " + item);
         check(helper, CropRegistry.resolve(helper.getLevel(), planter.getBlockPos(), new ItemStack(Items.COBBLESTONE)).isEmpty(), "Non-crops must not be cultivated");
+        var listed = CropRegistry.listAll(helper.getLevel(), planter.getBlockPos());
+        check(helper, listed.size() >= 60, "Recipe viewers must be able to list every automatic crop, got " + listed.size());
+        for (var item : new net.minecraft.world.item.Item[]{Items.WHEAT_SEEDS, Items.OAK_SAPLING, Items.POPPY, Items.SUGAR_CANE, Items.BROWN_MUSHROOM})
+            check(helper, listed.stream().anyMatch(entry -> entry.seed().getItem() == item), "Crop listing must include " + item);
+        check(helper, listed.stream().noneMatch(entry -> entry.seed().getItem() == Items.COBBLESTONE), "Crop listing must not include non-plants");
         CropRegistry.register(Items.AMETHYST_SHARD, new ItemStack(Items.DIRT), 20, 2);
         put(planter.getItemHandler(), 0, new ItemStack(Items.AMETHYST_SHARD));
         for (int i = 0; i < 22; i++) { energy(planter).setEnergy(1000); planter.tick(); }
