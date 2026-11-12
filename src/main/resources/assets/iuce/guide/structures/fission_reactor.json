@@ -1,0 +1,25 @@
+{
+  "palette": {
+    "C": "iuce:reactor_casing",
+    "S": "iuce:reactor_casing_side",
+    "B": "iuce:reactor_casing_back",
+    "F": "iuce:fission_controller"
+  },
+  "layers": [
+    [
+      "CCC",
+      "CCC",
+      "CCC"
+    ],
+    [
+      "CBC",
+      "S S",
+      "CFC"
+    ],
+    [
+      "CCC",
+      "CCC",
+      "CCC"
+    ]
+  ]
+}

@@ -50,6 +50,9 @@ public class Ero {
 
         // 注册数据包同步事件 - 请求将自定义配方类型同步到客户端
         NeoForge.EVENT_BUS.addListener(Ero::onDatapackSync);
+
+        // 首次进入世界时赠送一本指南
+        NeoForge.EVENT_BUS.addListener(Ero::onPlayerLogin);
     }
 
     public static MachineNetwork getMachineNetwork() {
@@ -66,6 +69,16 @@ public class Ero {
         if (machineNetwork != null) {
             machineNetwork.tick(event.getLevel());
         }
+    }
+
+    private static void onPlayerLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+        var player = event.getEntity();
+        var data = player.getPersistentData();
+        var persisted = data.getCompoundOrEmpty(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        if (persisted.getBooleanOr("iuce_guide_given", false)) return;
+        persisted.putBoolean("iuce_guide_given", true);
+        data.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, persisted);
+        player.getInventory().placeItemBackInInventory(new net.minecraft.world.item.ItemStack(item.ModItems.GUIDE.get()));
     }
 
     private static void onDatapackSync(OnDatapackSyncEvent event) {

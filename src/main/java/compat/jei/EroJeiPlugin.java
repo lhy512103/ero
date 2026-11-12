@@ -141,6 +141,20 @@ public class EroJeiPlugin implements IModPlugin {
         registration.addRecipes(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), optionalRecipes);
     }
 
+    /** Opens the JEI recipe view for an item (used by the built-in guide). */
+    public static boolean showRecipes(net.minecraft.world.item.ItemStack stack, boolean uses) {
+        if (jeiRuntime == null || stack.isEmpty()) return false;
+        var focus = jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(
+            uses ? mezz.jei.api.recipe.RecipeIngredientRole.INPUT : mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT,
+            mezz.jei.api.constants.VanillaTypes.ITEM_STACK, stack);
+        jeiRuntime.getRecipesGui().show(focus);
+        return true;
+    }
+
+    public static boolean searchHasFocus() {
+        return jeiRuntime != null && jeiRuntime.getIngredientListOverlay().hasKeyboardFocus();
+    }
+
     @Override
     public void onRuntimeAvailable(IJeiRuntime rt) {
         jeiRuntime = rt;

@@ -29,6 +29,9 @@
 23. Improved: Machines and storage units only accept power at or below their own voltage tier, so higher-tier sources need a Transformer.
 24. Added: Live Transformers shock and stun creatures standing in water or rain within 10 blocks, scaling with voltage.
 25. Fixed: Looking at a machine holding more energy than its capacity could crash the game with Jade installed.
+26. Added: A built-in guide book with searchable pages, live recipes, process diagrams, and multiblock previews.
+27. Added: Press G to open the guide, or hover a mod item and press G to jump to its page.
+28. Added: New players receive a guide book the first time they join a world.
 
 ### 中文
 
@@ -57,3 +60,6 @@
 23. 优化：机器和储电箱只接受不高于自身电压等级的电力，高等级电源需经变压器降压。
 24. 新增：带电变压器会电击并定身周围 10 格内处于水中或淋雨的生物，强度随电压等级提高。
 25. 修复：安装 Jade 时查看电量超过容量的机器可能导致游戏崩溃的问题。
+26. 新增：内置指南，支持搜索、实时配方、流程图和多方块结构预览。
+27. 新增：按 G 打开指南，悬停模组物品按 G 可直接跳到对应页面。
+28. 新增：玩家首次进入世界时会获得一本指南。

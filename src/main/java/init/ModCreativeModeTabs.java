@@ -60,6 +60,7 @@ public class ModCreativeModeTabs {
         ModBlockItems.RUBBER_LEAVES,
         ModBlockItems.RUBBER_SAPLING,
         // 工具
+        ModItems.GUIDE,
         ModItems.CUTTER,
         ModItems.FORGE_HAMMER,
         ModItems.TREETAP,

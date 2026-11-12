@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:book",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "iuce:guide",
+    "count": 1
+  }
+}

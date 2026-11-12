@@ -34,6 +34,14 @@ public class EroClient {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         container.getEventBus().addListener(EroClient::registerScreens);
         container.getEventBus().addListener(EroClient::registerFluidModels);
+        client.guide.Guide.init(container.getEventBus());
+        if (System.getProperty("iuce.guideShots") != null) {
+            try {
+                Class.forName("regression.GuideShots").getMethod("register").invoke(null);
+            } catch (ReflectiveOperationException error) {
+                throw new IllegalStateException("Guide screenshot tool needs -PregressionTests", error);
+            }
+        }
 
         // 移除模组物品 tooltip 底部的模组名标签（模组名在渲染阶段追加，需在 GatherComponents 中处理）
         NeoForge.EVENT_BUS.addListener(EroClient::onGatherTooltipComponents);

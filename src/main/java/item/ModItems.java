@@ -150,6 +150,7 @@ public class ModItems {
     public static final DeferredItem<Item> MACHINE_UPGRADE_3 = registerSimpleItem("machine_upgrade_3");
 
     // 工具 (Tools)
+    public static final DeferredItem<GuideItem> GUIDE = registerItem("guide", GuideItem::new);
     public static final DeferredItem<CutterItem> CUTTER = registerItem("cutter", CutterItem::new);
     public static final DeferredItem<ForgeHammerItem> FORGE_HAMMER = registerItem("forge_hammer", ForgeHammerItem::new);
     public static final DeferredItem<TreetapItem> TREETAP = registerItem("treetap", TreetapItem::new);

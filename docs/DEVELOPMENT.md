@@ -91,3 +91,7 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - 变压器只给**同等级**储电箱充电，因此「储电箱 → 变压器 → 储电箱」不会形成循环。
 - 传输顺序见 `EnergyTransferManager.PASSES`：发电机 → 机器 / 变压器 / 储电箱，储电箱 → 机器 / 变压器，变压器 → 机器 / 储电箱。
 - 变压器内有电时每 40 tick 电击一次周围 10 格内处于水中或淋雨的生物（创造模式玩家除外）：伤害 = 电压等级序号（LV 1 … EV 4，取输入侧与输出侧较高者），定身时间 = 20 + 10 × 序号 tick。伤害类型为 `iuce:electric`。
+
+## 内置指南
+
+页面格式、指令、多方块结构数据和截图自检命令见 [GUIDE.md](GUIDE.md)。

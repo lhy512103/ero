@@ -77,6 +77,15 @@ neoForge {
             if (providers.gradleProperty('smokeTest').isPresent()) {
                 gameDirectory = file('run-smoke')
             }
+            // Development only: screenshot every guide page (see docs/GUIDE.md).
+            if (providers.gradleProperty('guideShots').isPresent()) {
+                systemProperty 'iuce.guideShots', providers.gradleProperty('guideShots').get() ?: 'true'
+                programArguments.addAll '--width', '1280', '--height', '720'
+                if (providers.gradleProperty('guideWorld').isPresent()) {
+                    systemProperty 'iuce.guideShots.world', 'true'
+                    programArguments.addAll '--quickPlaySingleplayer', providers.gradleProperty('guideWorld').get()
+                }
+            }
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
