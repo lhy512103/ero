@@ -96,6 +96,13 @@ public final class EUCapabilityRegistry {
                 }
                 return null;
             });
+        // Standard item / fluid access for hoppers and other mods' pipes.
+        event.registerBlockEntity(Capabilities.Item.BLOCK, type,
+            (blockEntity, direction) -> blockEntity instanceof blockentity.MachineBlockEntity be
+                ? be.getAutomationItemHandler() : null);
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, type,
+            (blockEntity, direction) -> blockEntity instanceof fluid.FluidProvider provider
+                ? provider.getTank() : null);
     }
 
     private static void registerCable(RegisterCapabilitiesEvent event,

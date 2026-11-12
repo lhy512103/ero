@@ -120,6 +120,31 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         return range(getUpgradeSlotStart() / 2, getUpgradeSlotStart());
     }
 
+    @Nullable
+    private AutomationItemHandler automationItems;
+
+    /** Extra filter for items arriving from hoppers and pipes; {@code slot} is one of {@link #getInputSlots()}. */
+    public boolean acceptsAutomationInput(int slot, net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        return true;
+    }
+
+    /**
+     * The inventory view for hoppers and other mods' pipes (inputs in, outputs out, upgrades hidden),
+     * or null when the machine has no input or output slots.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getAutomationItemHandler() {
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null) return null;
+        if (automationItems == null) {
+            int[] inputs = getInputSlots();
+            int[] outputs = getOutputSlots();
+            if (inputs.length == 0 && outputs.length == 0) return null;
+            automationItems = new AutomationItemHandler(this, inventory, inputs, outputs);
+        }
+        return automationItems;
+    }
+
     protected static int[] range(int from, int to) {
         int[] slots = new int[Math.max(0, to - from)];
         for (int i = 0; i < slots.length; i++) slots[i] = from + i;

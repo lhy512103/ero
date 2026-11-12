@@ -105,6 +105,8 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("automation_item_and_fluid_access", MachineTests::automation);
+        tests.put("hoppers_feed_and_drain_machines", MachineTests::hoppers);
         tests.put("recipe_fluids_and_catalyst", MachineTests::recipeFluids);
         tests.put("fluid_tanks_and_legacy_saves", MachineTests::tanks);
         for (String name : CASE_NAMES)
@@ -484,5 +486,99 @@ final class MachineTests {
         check(helper, amount(machine, washer.outputSlot()) == washer.outputCount() && tank.getAmount() == 500,
             "The washer must not start a wash with less water than the recipe needs");
         helper.succeed();
+    }
+
+    private static int insert(net.neoforged.neoforge.transfer.ResourceHandler<ItemResource> handler, ItemStack stack) {
+        try (var tx = Transaction.openRoot()) {
+            int inserted = handler.insert(ItemResource.of(stack), stack.getCount(), tx);
+            tx.commit();
+            return inserted;
+        }
+    }
+
+    private static int extract(net.neoforged.neoforge.transfer.ResourceHandler<ItemResource> handler, ItemStack stack) {
+        try (var tx = Transaction.openRoot()) {
+            int extracted = handler.extract(ItemResource.of(stack), stack.getCount(), tx);
+            tx.commit();
+            return extracted;
+        }
+    }
+
+    /** Other mods see machines through the standard capabilities: inputs in, outputs out, upgrades hidden. */
+    private static void automation(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var itemCap = net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK;
+        var fluidCap = net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK;
+        var side = net.minecraft.core.Direction.UP;
+
+        MachineBlockEntity macerator = place(helper, 1, ModBlocks.MACERATOR.get());
+        var items = level.getCapability(itemCap, macerator.getBlockPos(), side);
+        check(helper, items != null && items.size() == 2, "The macerator must expose exactly its input and output slot");
+        check(helper, insert(items, new ItemStack(ModBlocks.TIN_ORE.get(), 3)) == 3 && amount(macerator, 0) == 3,
+            "Inserted items must land in the input slot");
+        check(helper, extract(items, new ItemStack(ModBlocks.TIN_ORE.get(), 3)) == 0, "Inputs must not be extractable");
+        put(macerator.getItemHandler(), 1, new ItemStack(ModItems.CRUSHED_TIN_DUST.get(), 2));
+        check(helper, extract(items, new ItemStack(ModItems.CRUSHED_TIN_DUST.get(), 2)) == 2 && amount(macerator, 1) == 0,
+            "Products must be extractable");
+        put(macerator.getItemHandler(), macerator.getUpgradeSlotStart(), new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get()));
+        check(helper, extract(items, new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get())) == 0, "Upgrades must not be extractable");
+        check(helper, insert(items, new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get())) == 0
+            || amount(macerator, macerator.getUpgradeSlotStart() + 1) == 0, "Automation must never fill upgrade slots");
+
+        MachineBlockEntity generator = place(helper, 3, ModBlocks.GENERATOR.get());
+        var fuel = level.getCapability(itemCap, generator.getBlockPos(), side);
+        check(helper, fuel != null && insert(fuel, new ItemStack(Items.DIRT, 4)) == 0, "The generator must refuse non-fuel items");
+        check(helper, insert(fuel, new ItemStack(Items.COAL, 4)) == 4, "The generator must accept fuel");
+        check(helper, amount(generator, 2) == 0, "Automation must not reach the generator's charging slot");
+
+        MachineBlockEntity storage = place(helper, 5, ModBlocks.BATBOX.get());
+        check(helper, level.getCapability(itemCap, storage.getBlockPos(), side) == null, "Storage units expose no item slots");
+
+        MachineBlockEntity bench = place(helper, 7, ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        var stock = level.getCapability(itemCap, bench.getBlockPos(), side);
+        check(helper, stock != null && insert(stock, new ItemStack(Items.IRON_INGOT, 8)) == 8, "The workbench must accept materials");
+        for (int slot = 0; slot < 9; slot++) check(helper, amount(bench, slot) == 0, "Materials must go to the stock, not the crafting grid");
+
+        var water = net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER);
+        var lava = net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.LAVA);
+        MachineBlockEntity washer = place(helper, 9, ModBlocks.ORE_WASHER.get());
+        var tank = level.getCapability(fluidCap, washer.getBlockPos(), side);
+        check(helper, tank != null, "The ore washer must expose its tank");
+        try (var tx = Transaction.openRoot()) {
+            check(helper, tank.insert(lava, 1000, tx) == 0, "The washer tank must refuse lava from pipes");
+            check(helper, tank.insert(water, 2500, tx) == 2500, "The washer tank must accept water from pipes");
+            tx.commit();
+        }
+        check(helper, ((FluidProvider) washer).getStoredFluid() == 2500, "Piped water must reach the washer");
+        try (var tx = Transaction.openRoot()) {
+            tank.insert(water, 1000, tx);
+        }
+        check(helper, ((FluidProvider) washer).getStoredFluid() == 2500, "An aborted transfer must leave the tank unchanged");
+        check(helper, level.getCapability(fluidCap, macerator.getBlockPos(), side) == null, "Machines without a tank expose no fluid handler");
+        helper.succeed();
+    }
+
+    /** A vanilla hopper on top feeds a machine and one underneath collects its products. */
+    private static void hoppers(GameTestHelper helper) {
+        BlockPos machinePos = new BlockPos(1, 2, 1);
+        helper.setBlock(machinePos, ModBlocks.EXTRACTOR.get());
+        MachineBlockEntity machine = helper.getBlockEntity(machinePos, MachineBlockEntity.class);
+        machine.onPlace();
+        helper.setBlock(machinePos.above(), Blocks.HOPPER);
+        helper.setBlock(machinePos.below(), Blocks.HOPPER);
+        var top = helper.getBlockEntity(machinePos.above(), net.minecraft.world.level.block.entity.HopperBlockEntity.class);
+        var bottom = helper.getBlockEntity(machinePos.below(), net.minecraft.world.level.block.entity.HopperBlockEntity.class);
+        // Products are preloaded so the test fits the time limit: a full process cycle is 100 ticks,
+        // and hoppers move one item every 8 ticks.
+        top.setItem(0, new ItemStack(ModItems.RAW_LATEX.get(), 2));
+        put(machine.getItemHandler(), 1, new ItemStack(ModItems.RUBBER.get(), 6));
+        helper.succeedWhen(() -> {
+            int rubber = 0;
+            for (int slot = 0; slot < bottom.getContainerSize(); slot++) {
+                if (bottom.getItem(slot).is(ModItems.RUBBER.get())) rubber += bottom.getItem(slot).getCount();
+            }
+            check(helper, top.isEmpty() && amount(machine, 0) == 2, "The hopper above must feed the machine's input slot");
+            check(helper, rubber == 6 && amount(machine, 1) == 0, "The hopper below must collect all 6 rubber, has " + rubber);
+        });
     }
 }

@@ -259,6 +259,13 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     public int getCraftingSize() { return CRAFTING_SIZE; }
     public int getOutputSlot() { return OUTPUT_SLOT; }
     public int getBatterySlot() { return BATTERY_SLOT; }
+/** 外部送来的原料进原料仓（合成后自动补料），成品从输出槽取走 */
+    @Override
+    public int[] getInputSlots() { return range(EXTRA_INVENTORY_START, EXTRA_INVENTORY_START + EXTRA_INVENTORY_SIZE); }
+
+    @Override
+    public int[] getOutputSlots() { return new int[]{OUTPUT_SLOT}; }
+
     public int getExtraInventoryStart() { return EXTRA_INVENTORY_START; }
     public int getExtraInventorySize() { return EXTRA_INVENTORY_SIZE; }
     public int getProgress() { return progress; }

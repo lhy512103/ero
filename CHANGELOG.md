@@ -43,6 +43,7 @@
 37. Fixed: Ejector upgrades could push a machine's raw materials, such as Planter soil, instead of its products.
 38. Fixed: Overclocker upgrades added to a running Ore Washer or Electrolyzer only took effect after reloading the world.
 39. Fixed: The Geothermal Generator kept producing power for up to a second after its lava ran out.
+40. Added: Hoppers and other mods' pipes can feed machines, collect their products, and fill or drain their tanks.
 
 ### 中文
 
@@ -85,3 +86,4 @@
 37. 修复：弹出升级会把机器的原料（如种植机的土壤）当成产物送走的问题。
 38. 修复：给运行中的洗矿机或电解机加装超频升级后要重进世界才生效的问题。
 39. 修复：地热发电机的熔岩烧完后仍会继续发电最多一秒的问题。
+40. 新增：漏斗和其他模组的管道可以给机器送料、取走产物，并为储罐注入或抽出流体。

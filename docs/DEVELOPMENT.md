@@ -153,3 +153,12 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - `fluid_output`、`catalyst`（在场但不消耗的物品，如模具、菌种）：格式和网络同步已支持，但**目前还没有机器使用**。校验脚本会对写了这两个字段的配方报错，避免它们被悄悄忽略；等有机器支持时，把机器类型加进 `tools/validate_content.py` 的 `USES_FLUID_OUTPUT` / `USES_CATALYST`。
 - 流体用 `FluidStackTemplate` 保存：数据包加载时流体还不能构造成 `FluidStack`。
 - 物品输入仍然最多两种、主产物一种加若干概率副产物；更多输入和多个主产物留到第一台需要它的机器再加。
+
+## 对外接口（漏斗与其他模组）
+
+所有登记了能量接口的机器，同时开放标准的物品和流体接口（`EUCapabilityRegistry.register`）：
+
+- **物品**：`MachineBlockEntity.getAutomationItemHandler()` 返回一个受限视图（`AutomationItemHandler`）：只能往 `getInputSlots()` 里放、只能从 `getOutputSlots()` 里取，升级槽不可见。没有输入输出槽的机器（储电箱、泵、变压器）不开放物品接口。
+- **额外过滤**：重写 `acceptsAutomationInput`。发电机只收燃料，充电槽不对外开放；工业工作台的外部原料进原料仓，不进合成格。
+- **流体**：实现了 `FluidProvider` 的机器直接开放它的 `MachineTank`，储罐自带流体种类过滤。
+- 目前各个面的行为相同，没有按面区分输入输出。

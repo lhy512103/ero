@@ -439,6 +439,18 @@ public class GeneratorBlockEntity extends MachineBlockEntity implements EnergyDi
 
 
 
+    /** 槽 0、1 是燃料槽；槽 2 是充电槽，不对漏斗和管道开放 */
+    @Override
+    public int[] getInputSlots() { return new int[]{0, 1}; }
+
+    @Override
+    public int[] getOutputSlots() { return new int[0]; }
+
+    @Override
+    public boolean acceptsAutomationInput(int slot, ItemResource resource) {
+        return getFuelBurnTime(resource.toStack(1)) > 0;
+    }
+
     private int getFuelBurnTime(ItemStack fuel) {
 
 
