@@ -120,6 +120,15 @@ public class MachineBlock extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
 
+            // 空手潜行右键：切换“产物退回进料面”
+            if (player.isShiftKeyDown() && blockEntity instanceof MachineBlockEntity returning
+                    && returning.getItemHandler() != null && returning.getOutputSlots().length > 0) {
+                returning.setReturnProducts(!returning.isReturningProducts());
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    returning.isReturningProducts() ? "message.iuce.return_products.on" : "message.iuce.return_products.off"));
+                return InteractionResult.SUCCESS;
+            }
+
             // // Shift+右键切换时间模式（测试模式，需要消耗能量）
             // if (player.isShiftKeyDown() && blockEntity instanceof PlanterBlockEntity planter) {
             //     PlanterBlockEntity.TimeMode before = planter.getTimeMode();

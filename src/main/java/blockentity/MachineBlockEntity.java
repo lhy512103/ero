@@ -59,6 +59,8 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
             return;
         }
 
+        if (returnProducts && tickCount % 10 == 0 && level != null && !level.isClientSide()) returnProductsToFeeder();
+
         // 性能节流：根据当前性能状态和机器优先级决定是否跳过此tick
         if (level != null && !level.isClientSide()) {
             if (!TickThrottler.getInstance().shouldTick(getMachinePriority(), tickCount)) {
@@ -117,8 +119,53 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         return range(getUpgradeSlotStart() / 2, getUpgradeSlotStart());
     }
 
+    /** One view per face (index 6 = no face), created on demand. */
+    private final AutomationItemHandler[] automationItems = new AutomationItemHandler[7];
+
+    /** When set, finished products are pushed back into the inventory that last fed this machine. */
+    private boolean returnProducts;
+    /** The face raw materials last arrived through; null until something has been piped in. */
     @Nullable
-    private AutomationItemHandler automationItems;
+    private Direction feedSide;
+
+    public boolean isReturningProducts() { return returnProducts; }
+
+    public void setReturnProducts(boolean value) {
+        returnProducts = value;
+        setChanged();
+    }
+
+    @Nullable
+    public Direction getFeedSide() { return feedSide; }
+
+    void noteFeedSide(Direction side) {
+        if (feedSide != side) {
+            feedSide = side;
+            setChanged();
+        }
+    }
+
+    /** Moves products to the inventory on the feeding side, e.g. back into an AE2 pattern provider. */
+    private void returnProductsToFeeder() {
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null || feedSide == null) return;
+        int[] outputs = getOutputSlots();
+        boolean any = false;
+        for (int slot : outputs) any |= inventory.getAmountAsInt(slot) > 0;
+        if (!any) return;
+        var target = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            worldPosition.relative(feedSide), feedSide.getOpposite());
+        if (target == null) return;
+        for (int slot : outputs) {
+            int amount = inventory.getAmountAsInt(slot);
+            if (amount <= 0) continue;
+            ItemResource resource = inventory.getResource(slot);
+            try (var transaction = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                int accepted = target.insert(resource, amount, transaction);
+                if (accepted > 0 && inventory.extract(slot, resource, accepted, transaction) == accepted) transaction.commit();
+            }
+        }
+    }
 
     /** Extra filter for items arriving from hoppers and pipes; {@code slot} is one of {@link #getInputSlots()}. */
     public boolean acceptsAutomationInput(int slot, net.neoforged.neoforge.transfer.item.ItemResource resource) {
@@ -131,15 +178,22 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     @Nullable
     public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getAutomationItemHandler() {
+        return getAutomationItemHandler(null);
+    }
+
+    /** The view for one face; which face items arrive through is remembered as the feeding side. */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getAutomationItemHandler(@Nullable Direction side) {
         ItemStacksResourceHandler inventory = getItemHandler();
         if (inventory == null) return null;
-        if (automationItems == null) {
+        int index = side == null ? 6 : side.get3DDataValue();
+        if (automationItems[index] == null) {
             int[] inputs = getInputSlots();
             int[] outputs = getOutputSlots();
             if (inputs.length == 0 && outputs.length == 0) return null;
-            automationItems = new AutomationItemHandler(this, inventory, inputs, outputs);
+            automationItems[index] = new AutomationItemHandler(this, inventory, inputs, outputs, side);
         }
-        return automationItems;
+        return automationItems[index];
     }
 
     protected static int[] range(int from, int to) {
@@ -225,6 +279,8 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putLong("TickCount", tickCount);
+        output.putBoolean("ReturnProducts", returnProducts);
+        output.putInt("FeedSide", feedSide == null ? -1 : feedSide.get3DDataValue());
     }
 
     @Override
@@ -232,6 +288,9 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         super.loadAdditional(input);
         // 不再重置 tickCount，使用 registeredToNetwork 标志控制注册
         registeredToNetwork = false;
+        returnProducts = input.getBooleanOr("ReturnProducts", false);
+        int side = input.getIntOr("FeedSide", -1);
+        feedSide = side < 0 || side > 5 ? null : Direction.from3DDataValue(side);
     }
 
     /**

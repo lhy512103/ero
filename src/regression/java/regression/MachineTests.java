@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("products_return_to_feeding_side", MachineTests::returnProducts);
         tests.put("overclocker_tiers_differ", MachineTests::overclockerTiers);
         tests.put("blocks_drop_themselves_and_contents", MachineTests::drops);
         tests.put("automation_item_and_fluid_access", MachineTests::automation);
@@ -643,5 +644,38 @@ final class MachineTests {
             "Mixed tiers must multiply: " + effect);
         check(helper, effect.time(1) == 1 && effect.energy(10) == 59, "Overclocked values must round and never drop below one tick");
         helper.succeed();
+    }
+
+    /** With the option on, products go back into the container the raw materials came from. */
+    private static void returnProducts(GameTestHelper helper) {
+        BlockPos machinePos = new BlockPos(1, 2, 1);
+        helper.setBlock(machinePos, ModBlocks.EXTRACTOR.get());
+        MachineBlockEntity machine = helper.getBlockEntity(machinePos, MachineBlockEntity.class);
+        machine.onPlace();
+        helper.setBlock(machinePos.above(), Blocks.BARREL);
+        helper.setBlock(machinePos.below(), Blocks.BARREL);
+        var feeder = helper.getBlockEntity(machinePos.above(), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        var other = helper.getBlockEntity(machinePos.below(), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+
+        check(helper, !machine.isReturningProducts() && machine.getFeedSide() == null, "The option must be off by default");
+        var top = helper.getLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            machine.getBlockPos(), net.minecraft.core.Direction.UP);
+        check(helper, insert(top, new ItemStack(ModItems.RAW_LATEX.get(), 2)) == 2, "The machine must accept materials from above");
+        check(helper, machine.getFeedSide() == net.minecraft.core.Direction.UP, "The machine must remember the feeding side");
+        machine.setReturnProducts(true);
+
+        var tag = machine.saveWithoutMetadata(helper.getLevel().registryAccess());
+        check(helper, tag.getBooleanOr("ReturnProducts", false) && tag.getIntOr("FeedSide", -1) == 1, "The option and the side must be saved");
+
+        // processing takes longer than a test may run, so the products are preloaded
+        put(machine.getItemHandler(), 1, new ItemStack(ModItems.RUBBER.get(), 6));
+        helper.succeedWhen(() -> {
+            int rubber = 0;
+            for (int slot = 0; slot < feeder.getContainerSize(); slot++) {
+                if (feeder.getItem(slot).is(ModItems.RUBBER.get())) rubber += feeder.getItem(slot).getCount();
+            }
+            check(helper, rubber == 6, "All 6 rubber must return to the feeding barrel, it has " + rubber);
+            check(helper, other.isEmpty(), "Nothing may go to the other side");
+        });
     }
 }

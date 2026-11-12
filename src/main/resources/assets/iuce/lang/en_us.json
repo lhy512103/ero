@@ -384,5 +384,9 @@
   "jei.iuce.optional_crafting": "Optional Crafting",
   "tooltip.iuce.overclocker.time": "Processing time ×%s",
   "tooltip.iuce.overclocker.energy": "Energy per tick ×%s",
-  "tooltip.iuce.overclocker.max": "Up to %s take effect per machine; tiers can be mixed"
+  "tooltip.iuce.overclocker.max": "Up to %s take effect per machine; tiers can be mixed",
+  "message.iuce.return_products.on": "Return products to feeder: ON (products go back to the container that supplied the materials)",
+  "message.iuce.return_products.off": "Return products to feeder: OFF",
+  "jei.iuce.chance": "%s%% chance",
+  "jei.iuce.catalyst": "Not consumed"
 }

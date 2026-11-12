@@ -49,6 +49,8 @@
 43. Optimized: Machine titles, tooltips, messages and JEI category names now follow the game language instead of always being Chinese.
 44. Fixed: JEI showed no IUCE recipes when playing on a multiplayer server.
 45. Optimized: The three overclocker upgrades now differ (time ×0.75 / ×0.60 / ×0.45, energy ×1.5 / ×1.8 / ×2.2) and can be mixed in one machine.
+46. Added: Sneak-right-click a machine with an empty hand to make it return products to the container that fed it, so one AE2 pattern provider can both supply and collect.
+47. Optimized: JEI machine pages now show input amounts, fluids, by-products with their chance, and the energy and time per operation.
 
 ### 中文
 
@@ -97,3 +99,5 @@
 43. 优化：机器标题、提示、消息和 JEI 分类名称会跟随游戏语言显示，不再固定为中文。
 44. 修复：在多人服务器中 JEI 不显示本模组配方的问题。
 45. 优化：三种超频升级效果不再相同（时间 ×0.75 / ×0.60 / ×0.45，耗电 ×1.5 / ×1.8 / ×2.2），可在同一台机器里混装。
+46. 新增：空手潜行右键机器可开启“产物退回进料面”，一个应用能源样板供应器即可同时发料和回收。
+47. 优化：JEI 机器配方页会显示原料数量、流体、副产物及概率，以及每次加工的耗电和时间。

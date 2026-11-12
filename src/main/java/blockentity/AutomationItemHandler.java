@@ -19,12 +19,16 @@ public final class AutomationItemHandler implements ResourceHandler<ItemResource
     private final ItemStacksResourceHandler inventory;
     private final int[] inputs;
     private final int[] outputs;
+    /** The face this view was handed out for; null for the side-less view. */
+    @javax.annotation.Nullable private final net.minecraft.core.Direction side;
 
-    AutomationItemHandler(MachineBlockEntity machine, ItemStacksResourceHandler inventory, int[] inputs, int[] outputs) {
+    AutomationItemHandler(MachineBlockEntity machine, ItemStacksResourceHandler inventory, int[] inputs, int[] outputs,
+                          @javax.annotation.Nullable net.minecraft.core.Direction side) {
         this.machine = machine;
         this.inventory = inventory;
         this.inputs = inputs;
         this.outputs = outputs;
+        this.side = side;
     }
 
     private boolean isInput(int index) { return index >= 0 && index < inputs.length; }
@@ -53,7 +57,9 @@ public final class AutomationItemHandler implements ResourceHandler<ItemResource
     @Override
     public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
         if (!isValid(index, resource)) return 0;
-        return inventory.insert(slot(index), resource, amount, transaction);
+        int inserted = inventory.insert(slot(index), resource, amount, transaction);
+        if (inserted > 0 && side != null) machine.noteFeedSide(side);
+        return inserted;
     }
 
     @Override
