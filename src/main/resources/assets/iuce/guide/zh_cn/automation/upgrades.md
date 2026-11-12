@@ -6,7 +6,7 @@ icon: iuce:overclocker_upgrade
 items: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upgrade2, iuce:ejector_upgrade, iuce:pulling_upgrade, iuce:fluid_ejector_upgrade, iuce:fluid_pulling_upgrade, iuce:coolant_cell, iuce:empty_cell, iuce:coolant_bucket
 ---
 
-大多数机器界面右侧有 4 个升级槽，每格放 1 个升级。
+大多数机器界面右侧有 4 个升级槽，每格放 1 个升级。手持升级**右键机器**可以直接装上，也可以在界面里放进升级槽。
 
 ## 超频
 
@@ -29,7 +29,7 @@ items: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upg
 
 ## 物品传输
 
-物品升级要先**绑定目标机器**：手持升级，潜行右键目标机器，然后把升级放进本机的升级槽。目标必须是模组机器，距离不超过 8 格。
+物品升级要先**绑定目标机器**：手持升级，潜行右键目标机器，然后右键本机装上（或在界面里放进升级槽）。目标必须是模组机器，距离不超过 8 格。
 
 | 升级 | 作用 |
 | --- | --- |
@@ -42,7 +42,7 @@ items: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upg
 
 ## 流体传输
 
-流体升级不用绑定：手持升级右键机器即可装上，对紧贴的机器生效。
+流体升级不用绑定，装上后对紧贴的机器生效。
 
 | 升级 | 作用 |
 | --- | --- |

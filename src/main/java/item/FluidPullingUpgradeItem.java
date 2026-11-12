@@ -38,64 +38,7 @@ public class FluidPullingUpgradeItem extends UpgradeItem {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        if (context.getLevel().isClientSide()) {
-            return InteractionResult.PASS;
-        }
-
-        Player player = context.getPlayer();
-        if (player == null) {
-            return InteractionResult.PASS;
-        }
-
-        // Shift+右键执行绑定逻辑
-        if (player.isShiftKeyDown()) {
-            return super.useOn(context);
-        }
-
-        // 普通右键：尝试放入升级槽
-        BlockPos pos = context.getClickedPos();
-        BlockEntity blockEntity = context.getLevel().getBlockEntity(pos);
-
-        if (blockEntity instanceof MachineBlockEntity machine) {
-            ItemStacksResourceHandler itemHandler = machine.getItemHandler();
-            if (itemHandler != null) {
-                int upgradeSlotCount = machine.getUpgradeSlotCount();
-                int upgradeSlotStart = machine.getUpgradeSlotStart();
-
-                // 查找空的升级槽
-                for (int i = 0; i < upgradeSlotCount; i++) {
-                    int slotIndex = upgradeSlotStart + i;
-                    ItemResource resource = itemHandler.getResource(slotIndex);
-                    int amount = itemHandler.getAmountAsInt(slotIndex);
-
-                    if (resource.isEmpty() || amount <= 0) {
-                        // 找到空槽，放入升级物品
-                        ItemStack stack = context.getItemInHand();
-                        ItemResource upgradeResource = ItemResource.of(stack);
-                        try (Transaction tx = Transaction.openRoot()) {
-                            int inserted = itemHandler.insert(slotIndex, upgradeResource, 1, tx);
-                            if (inserted > 0) {
-                                tx.commit();
-                                stack.shrink(1);
-                                player.sendSystemMessage(
-                                    Component.literal("已安装流体输入升级").withStyle(ChatFormatting.GREEN)
-                                );
-                                return InteractionResult.SUCCESS;
-                            }
-                        }
-                    }
-                }
-
-                player.sendSystemMessage(
-                    Component.literal("没有空的升级槽").withStyle(ChatFormatting.RED)
-                );
-                return InteractionResult.FAIL;
-            }
-        }
-
-        return InteractionResult.PASS;
-    }
+    protected boolean needsBinding() { return false; }
 
     /**
      * 尝试从相邻机器中输入流体到本机器
@@ -150,6 +93,5 @@ public class FluidPullingUpgradeItem extends UpgradeItem {
         builder.accept(Component.literal("效果: 从相邻机器输入流体").withStyle(ChatFormatting.GREEN));
         builder.accept(Component.literal("传输速率: " + TRANSFER_AMOUNT + " mB/次").withStyle(ChatFormatting.YELLOW));
         builder.accept(Component.literal("传输间隔: " + (TRANSFER_INTERVAL / 20.0) + " 秒").withStyle(ChatFormatting.YELLOW));
-        builder.accept(Component.literal("使用方式: 右键机器安装").withStyle(ChatFormatting.GOLD));
     }
 }

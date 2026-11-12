@@ -33,6 +33,9 @@
 27. Added: Press G to open the guide, or hover a mod item and press G to jump to its page.
 28. Added: New players receive a guide book the first time they join a world.
 29. Improved: The guide book is now a thick 3D book when held or dropped, with a redrawn inventory icon.
+30. Fixed: Overclocker upgrades could not be placed in machine upgrade slots.
+31. Added: Right-click a machine with any upgrade to install it without opening the interface.
+32. Improved: Upgrades now stack up to 16 in the inventory.
 
 ### 中文
 
@@ -65,3 +68,6 @@
 27. 新增：按 G 打开指南，悬停模组物品按 G 可直接跳到对应页面。
 28. 新增：玩家首次进入世界时会获得一本指南。
 29. 优化：指南在手持和掉落时显示为有厚度的立体书本，并重绘了物品栏图标。
+30. 修复：超频升级无法放入机器升级槽的问题。
+31. 新增：手持任意升级右键机器即可直接安装，无需打开界面。
+32. 优化：升级在物品栏中可堆叠至 16 个。

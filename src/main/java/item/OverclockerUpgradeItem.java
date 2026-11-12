@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * 效果可叠加，每个超频升级减少 25% 处理时间，增加 50% 能量消耗。
  * </p>
  */
-public class OverclockerUpgradeItem extends Item {
+public class OverclockerUpgradeItem extends UpgradeItem {
 
     /** 处理时间减少倍数 (每个超频升级减少 25%) */
     public static final double SPEED_MULTIPLIER = 0.75;
@@ -30,8 +30,11 @@ public class OverclockerUpgradeItem extends Item {
     public static final int MAX_STACK = 4;
 
     public OverclockerUpgradeItem(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties);
     }
+
+    @Override
+    protected boolean needsBinding() { return false; }
 
     /**
      * 计算机器中超频升级的数量

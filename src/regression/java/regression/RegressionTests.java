@@ -60,6 +60,7 @@ public final class RegressionTests {
         TESTS.put("live_high_tier_energy", RegressionTests::liveHighTier);
         TESTS.put("transformer_storage_rules", RegressionTests::transformerStorage);
         TESTS.put("transformer_wet_shock", RegressionTests::transformerShock);
+        TESTS.put("upgrade_install_and_stacking", RegressionTests::upgrades);
     }
     public static void register(IEventBus bus) {
         var functions = DeferredRegister.<Consumer<GameTestHelper>>create(Registries.TEST_FUNCTION, "iuce");
@@ -325,5 +326,60 @@ public final class RegressionTests {
             check(helper, dry.getHealth() == dry.getMaxHealth(), "A dry creature must not be shocked");
             helper.succeed();
         });
+    }
+    /** Every upgrade type stacks, fits the upgrade slots, and installs by right-clicking a machine. */
+    private static void upgrades(GameTestHelper helper) {
+        var target = machine(helper, 1, ModBlocks.MACERATOR.get());
+        machine(helper, 3, ModBlocks.COMPRESSOR.get());
+        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        var menu = new machine.macerator.menu.MaceratorMenu(1, player.getInventory(), (machine.macerator.MaceratorBlockEntity) target);
+        var all = new net.minecraft.world.item.Item[]{ModItems.OVERCLOCKER_UPGRADE.get(), ModItems.OVERCLOCKER_UPGRADE_1.get(),
+            ModItems.OVERCLOCKER_UPGRADE_2.get(), ModItems.EJECTOR_UPGRADE.get(), ModItems.PULLING_UPGRADE.get(),
+            ModItems.FLUID_EJECTOR_UPGRADE.get(), ModItems.FLUID_PULLING_UPGRADE.get()};
+        int firstUpgradeSlot = -1;
+        for (int i = 0; i < menu.slots.size(); i++) if (menu.slots.get(i) instanceof UpgradeSlot) { firstUpgradeSlot = i; break; }
+        check(helper, firstUpgradeSlot >= 0, "Macerator menu must expose upgrade slots");
+        for (var item : all) {
+            var stack = new ItemStack(item, 16);
+            check(helper, stack.getMaxStackSize() == 16, "Upgrades must stack: " + item);
+            check(helper, menu.slots.get(firstUpgradeSlot).mayPlace(stack), "Upgrade slot must accept " + item);
+            check(helper, menu.slots.get(firstUpgradeSlot).getMaxStackSize(stack) == 1, "An upgrade slot holds one upgrade");
+        }
+        check(helper, !menu.slots.get(firstUpgradeSlot).mayPlace(new ItemStack(Items.DIRT)), "Upgrade slots must reject other items");
+
+        // right-click installs one from a stack, before the GUI opens
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get(), 3));
+        var result = player.getMainHandItem().onItemUseFirst(context(helper, player, 1, Direction.NORTH));
+        int start = target.getUpgradeSlotStart();
+        check(helper, result == InteractionResult.SUCCESS && target.getItemHandler().getResource(start).getItem() == ModItems.OVERCLOCKER_UPGRADE.get()
+            && target.getItemHandler().getAmountAsInt(start) == 1, "Right-clicking a machine must install one overclocker");
+        check(helper, player.getMainHandItem().getCount() == 2, "Installing must consume exactly one upgrade");
+
+        // an unbound ejector is refused; a bound one installs
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.EJECTOR_UPGRADE.get()));
+        check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 1, Direction.NORTH)) == InteractionResult.FAIL
+            && target.getItemHandler().getAmountAsInt(start + 1) == 0, "An unbound ejector upgrade must not install");
+        player.setShiftKeyDown(true);
+        check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 3, Direction.NORTH)) == InteractionResult.PASS,
+            "Sneaking must fall through to binding");
+        player.getMainHandItem().useOn(context(helper, player, 3, Direction.NORTH));
+        check(helper, UpgradeItem.getBoundPos(player.getMainHandItem()) != null, "Sneak + right-click must bind the target machine");
+        player.setShiftKeyDown(false);
+        check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 3, Direction.NORTH)) == InteractionResult.FAIL,
+            "An upgrade must not install into its own target");
+        check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 1, Direction.NORTH)) == InteractionResult.SUCCESS
+            && target.getItemHandler().getResource(start + 1).getItem() == ModItems.EJECTOR_UPGRADE.get(), "A bound ejector upgrade must install");
+        check(helper, UpgradeItem.getBoundPos(target.getItemHandler().getResource(start + 1).toStack(1)) != null, "The installed upgrade must keep its binding");
+
+        // fill the remaining slots, then a further install is refused
+        for (var item : new net.minecraft.world.item.Item[]{ModItems.FLUID_PULLING_UPGRADE.get(), ModItems.OVERCLOCKER_UPGRADE_2.get()}) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+            check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 1, Direction.NORTH)) == InteractionResult.SUCCESS, "Must install " + item);
+        }
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get()));
+        check(helper, player.getMainHandItem().onItemUseFirst(context(helper, player, 1, Direction.NORTH)) == InteractionResult.FAIL
+            && player.getMainHandItem().getCount() == 1, "A machine with full upgrade slots must refuse more");
+        check(helper, OverclockerUpgradeItem.countOverclockers(target) == 2, "Installed overclockers must be counted");
+        helper.succeed();
     }
 }

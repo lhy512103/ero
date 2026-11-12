@@ -28,7 +28,51 @@ import java.util.function.Consumer;
 public class UpgradeItem extends Item {
 
     public UpgradeItem(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties.stacksTo(16));
+    }
+
+    /** Whether this upgrade must be bound to a target machine (sneak + right-click) before it does anything. */
+    protected boolean needsBinding() { return true; }
+
+    /**
+     * Runs before the block is activated, so right-clicking a machine installs the upgrade
+     * instead of opening the machine's GUI. Sneaking is left to {@link #useOn} for binding.
+     */
+    @Override
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        Player player = context.getPlayer();
+        if (player == null || player.isShiftKeyDown()) return InteractionResult.PASS;
+        if (!(context.getLevel().getBlockEntity(context.getClickedPos()) instanceof MachineBlockEntity machine)) return InteractionResult.PASS;
+        var inventory = machine.getItemHandler();
+        if (inventory == null || machine.getUpgradeSlotCount() <= 0) return InteractionResult.PASS;
+        if (context.getLevel().isClientSide()) return InteractionResult.SUCCESS;
+        if (needsBinding()) {
+            BlockPos bound = getBoundPos(stack);
+            if (bound == null) {
+                player.sendOverlayMessage(Component.literal("请先潜行右键目标机器进行绑定").withStyle(ChatFormatting.YELLOW));
+                return InteractionResult.FAIL;
+            }
+            if (bound.equals(context.getClickedPos())) {
+                player.sendOverlayMessage(Component.literal("不能安装到它所绑定的目标机器上").withStyle(ChatFormatting.YELLOW));
+                return InteractionResult.FAIL;
+            }
+        }
+        var resource = net.neoforged.neoforge.transfer.item.ItemResource.of(stack);
+        int start = machine.getUpgradeSlotStart();
+        for (int slot = start; slot < start + machine.getUpgradeSlotCount(); slot++) {
+            if (inventory.getAmountAsInt(slot) > 0) continue;
+            try (var transaction = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                if (inventory.insert(slot, resource, 1, transaction) != 1) continue;
+                transaction.commit();
+            }
+            Component name = stack.getHoverName();
+            if (!player.hasInfiniteMaterials()) stack.shrink(1);
+            machine.setChanged();
+            player.sendOverlayMessage(Component.literal("已安装：").withStyle(ChatFormatting.GREEN).append(name));
+            return InteractionResult.SUCCESS;
+        }
+        player.sendOverlayMessage(Component.literal("没有空的升级槽").withStyle(ChatFormatting.RED));
+        return InteractionResult.FAIL;
     }
     @Override
     public InteractionResult useOn(UseOnContext context) {
@@ -37,7 +81,7 @@ public class UpgradeItem extends Item {
         }
 
         Player player = context.getPlayer();
-        if (player == null || !player.isShiftKeyDown()) {
+        if (player == null || !player.isShiftKeyDown() || !needsBinding()) {
             return InteractionResult.PASS;
         }
 
@@ -81,9 +125,10 @@ public class UpgradeItem extends Item {
                 builder.accept(Component.literal("位置: ").withStyle(ChatFormatting.GRAY)
                     .append(Component.literal(x + ", " + y + ", " + z).withStyle(ChatFormatting.YELLOW)));
             }
-        } else {
+        } else if (needsBinding()) {
             builder.accept(Component.literal("Shift+右键机器以绑定").withStyle(ChatFormatting.DARK_GRAY));
         }
+        builder.accept(Component.literal("右键机器直接安装").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     /**
