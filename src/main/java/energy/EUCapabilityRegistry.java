@@ -57,6 +57,12 @@ public final class EUCapabilityRegistry {
         // 大机器的仓口
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
         register(event, ModBlockEntities.ENERGY_HATCH.get());
+        // 电动修理台、电灯、能量转换器
+        register(event, ModBlockEntities.REPAIR_BENCH.get());
+        register(event, ModBlockEntities.LAMP.get());
+        register(event, ModBlockEntities.CONVERTER.get());
+        // 物流接口本身就是整个管网仓库的入口：漏斗、其他模组的管道、应用能源的存储总线都可以接在它上面
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.LOGISTICS_PORT.get(), (port, direction) -> port.networkInventory());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());

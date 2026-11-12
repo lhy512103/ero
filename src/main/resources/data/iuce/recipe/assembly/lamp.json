@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:glass",
+      "minecraft:glass",
+      "minecraft:glass"
+    ],
+    [
+      "minecraft:glass",
+      "iuce:copper_cable",
+      "minecraft:glass"
+    ],
+    [
+      "",
+      "iuce:iron_plate",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:lamp",
+    "count": 4
+  }
+}

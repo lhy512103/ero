@@ -56,6 +56,11 @@ public class LogisticsPortBlockEntity extends BlockEntity {
         return level == null ? null : level.getCapability(Capabilities.Item.BLOCK, targetPos(), facing().getOpposite());
     }
 
+    private final logistics.NetworkInventory networkInventory = new logistics.NetworkInventory(this);
+
+    /** Everything stored in this interface's network, as one container. */
+    public ResourceHandler<ItemResource> networkInventory() { return networkInventory; }
+
     public boolean passes(ItemResource resource) { return filter == null || resource.getItem() == filter; }
     public boolean supplies() { return mode != RECEIVE; }
     public boolean receives() { return mode != SUPPLY; }

@@ -441,5 +441,15 @@
   "message.iuce.plant.idle": "已成型，等待原料（并行 %s）",
   "message.iuce.plant.blocked": "输出仓已满，停机",
   "message.iuce.plant.starved": "供电不足，降速运行 %s%%",
-  "message.iuce.plant.working": "加工中 %s%%"
+  "message.iuce.plant.working": "加工中 %s%%",
+  "block.iuce.energy_hatch_hv": "能源仓（HV）",
+  "block.iuce.mill_controller": "轧制联合机控制器",
+  "block.iuce.repair_bench": "电动修理台",
+  "block.iuce.lamp": "电灯",
+  "block.iuce.converter": "能量转换器",
+  "message.iuce.plant.no_mold": "已成型，但还没放模具：手持模具右键控制器",
+  "message.iuce.plant.filled": "已补上 %s 块厂房外壳",
+  "message.iuce.repair.working": "修理中：%s　%s / %s",
+  "message.iuce.repair.done": "修好了，空手右键取回",
+  "message.iuce.repair.empty": "手持损坏的工具或护甲右键放入"
 }

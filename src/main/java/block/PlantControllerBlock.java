@@ -3,10 +3,14 @@ package block;
 import blockentity.ModBlockEntities;
 import blockentity.PlantControllerBlockEntity;
 import com.mojang.serialization.MapCodec;
+import item.MoldItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -25,7 +29,12 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
 
-/** Controller of a large machine. Its front faces outwards; right-click to see what the machine is doing or what is missing. */
+/**
+ * Controller of a large machine. Its front faces outwards.
+ * Right-click: what the machine is doing or what is missing. Right-click with plant casing: the
+ * casing is placed into every free position of the shell. Right-click a rolling mill with a mold:
+ * the mold is put in (the previous one comes back).
+ */
 public class PlantControllerBlock extends BaseEntityBlock {
     public static final MapCodec<PlantControllerBlock> CODEC = BlockBehaviour.simpleCodec(PlantControllerBlock::new);
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -62,8 +71,33 @@ public class PlantControllerBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+                                          InteractionHand hand, BlockHitResult hitResult) {
+        boolean casing = stack.is(ModBlocks.PLANT_CASING.get().asItem());
+        boolean mold = stack.getItem() instanceof MoldItem && state.is(ModBlocks.MILL_CONTROLLER.get());
+        if (!casing && !mold) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller)) return InteractionResult.SUCCESS;
+        if (casing) {
+            int placed = controller.fill(stack);
+            if (!player.hasInfiniteMaterials()) stack.shrink(placed);
+            controller.tick();
+            player.sendOverlayMessage(placed > 0 ? Component.translatable("message.iuce.plant.filled", placed) : controller.describe());
+        } else {
+            ItemStack old = controller.swapMold(stack);
+            if (!player.hasInfiniteMaterials()) stack.shrink(1);
+            if (!old.isEmpty() && !player.getInventory().add(old)) player.drop(old, false);
+            player.sendOverlayMessage(controller.describe());
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller) {
+            if (player.isShiftKeyDown() && !controller.getMold().isEmpty()) {
+                ItemStack old = controller.swapMold(ItemStack.EMPTY);
+                if (!player.getInventory().add(old)) player.drop(old, false);
+            }
             controller.markStructureDirty();
             controller.tick();
             player.sendOverlayMessage(controller.describe());

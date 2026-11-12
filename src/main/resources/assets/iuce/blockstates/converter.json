@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,running=false": {
+      "model": "iuce:block/converter"
+    },
+    "facing=north,running=true": {
+      "model": "iuce:block/converter"
+    },
+    "facing=east,running=false": {
+      "model": "iuce:block/converter"
+    },
+    "facing=east,running=true": {
+      "model": "iuce:block/converter"
+    },
+    "facing=south,running=false": {
+      "model": "iuce:block/converter"
+    },
+    "facing=south,running=true": {
+      "model": "iuce:block/converter"
+    },
+    "facing=west,running=false": {
+      "model": "iuce:block/converter"
+    },
+    "facing=west,running=true": {
+      "model": "iuce:block/converter"
+    }
+  }
+}

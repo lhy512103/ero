@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,formed=false": {
+      "model": "iuce:block/mill_controller",
+      "y": 0
+    },
+    "facing=north,formed=true": {
+      "model": "iuce:block/mill_controller_formed",
+      "y": 0
+    },
+    "facing=east,formed=false": {
+      "model": "iuce:block/mill_controller",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "iuce:block/mill_controller_formed",
+      "y": 90
+    },
+    "facing=south,formed=false": {
+      "model": "iuce:block/mill_controller",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "iuce:block/mill_controller_formed",
+      "y": 180
+    },
+    "facing=west,formed=false": {
+      "model": "iuce:block/mill_controller",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "iuce:block/mill_controller_formed",
+      "y": 270
+    }
+  }
+}

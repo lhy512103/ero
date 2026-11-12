@@ -106,6 +106,9 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("rolling_mill_molds_and_hatch_tiers", MachineTests::rollingMill);
+        tests.put("repair_bench_lamp_converter", MachineTests::utilities);
+        tests.put("interface_exposes_network_storage", MachineTests::networkStorage);
         tests.put("ore_plant_forms_and_processes", MachineTests::orePlant);
         tests.put("pipe_network_feeds_and_collects", MachineTests::pipeNetwork);
         tests.put("silo_and_fluid_tank", MachineTests::siloAndTank);
@@ -1103,6 +1106,129 @@ final class MachineTests {
         helper.setBlock(new BlockPos(4, 3, 2), ModBlocks.PLANT_CASING.get());
         controller.tick();
         check(helper, controller.isFormed(), "Putting the casing back must form the plant again");
+        helper.succeed();
+    }
+
+    private static int held(blockentity.HatchBlockEntity hatch, Item item) {
+        int total = 0;
+        for (int slot = 0; slot < hatch.getInventory().size(); slot++) {
+            if (hatch.getInventory().getResource(slot).getItem() == item) total += hatch.getInventory().getAmountAsInt(slot);
+        }
+        return total;
+    }
+
+    /** A 9-long mill is completed from the controller, follows its mold, and quadruples with an HV hatch. */
+    private static void rollingMill(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos controllerPos = new BlockPos(0, 1, 2);
+        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.ITEM_INPUT_HATCH.get());
+        helper.setBlock(new BlockPos(0, 1, 3), ModBlocks.ITEM_OUTPUT_HATCH.get());
+        helper.setBlock(new BlockPos(8, 1, 2), ModBlocks.ENERGY_HATCH.get());
+        level.setBlockAndUpdate(helper.absolutePos(controllerPos), ModBlocks.MILL_CONTROLLER.get().defaultBlockState()
+            .setValue(block.PlantControllerBlock.FACING, helper.getTestRotation().rotate(net.minecraft.core.Direction.WEST)));
+        var controller = helper.getBlockEntity(controllerPos, blockentity.PlantControllerBlockEntity.class);
+        controller.tick();
+        check(helper, !controller.isFormed(), "A controller with only its hatches must not form");
+
+        int placed = 0;
+        for (int round = 0; round < 5; round++) placed += controller.fill(new ItemStack(ModBlocks.PLANT_CASING.get(), 64));
+        check(helper, placed == 158, "Filling must place the 158 missing casing blocks of a 9-long mill, placed " + placed);
+        check(helper, helper.getBlockState(new BlockPos(4, 2, 2)).isAir(), "The inside of the mill must stay empty");
+        controller.tick();
+        check(helper, controller.isFormed() && controller.getLength() == 9 && controller.getParallel() == 16,
+            "The filled mill must form: length " + controller.getLength() + ", parallel " + controller.getParallel());
+
+        var input = helper.getBlockEntity(new BlockPos(0, 1, 1), blockentity.HatchBlockEntity.class);
+        var output = helper.getBlockEntity(new BlockPos(0, 1, 3), blockentity.HatchBlockEntity.class);
+        var iron = ItemResource.of(new ItemStack(Items.IRON_INGOT));
+        check(helper, !input.wants(iron), "Without a mold the mill must not ask for anything");
+        controller.swapMold(new ItemStack(ModItems.PLATE_MOLD.get()));
+        check(helper, input.wants(iron), "With a plate mold the mill must ask for ingots");
+        insert(input.external(), new ItemStack(Items.IRON_INGOT, 20));
+        for (int tick = 0; tick < blockentity.PlantControllerBlockEntity.DURATION + 15; tick++) {
+            var hatch = helper.getBlockEntity(new BlockPos(8, 1, 2), blockentity.EnergyHatchBlockEntity.class);
+            hatch.storage().setEnergy(hatch.storage().getMaxEnergyStored());
+            controller.tick();
+            if (tick == 20) controller.swapMold(new ItemStack(ModItems.WIRE_MOLD.get()));   // takes effect with the next batch
+        }
+        check(helper, held(output, ModItems.IRON_PLATE.get()) == 16,
+            "One batch must roll 16 ingots into 16 plates, got " + held(output, ModItems.IRON_PLATE.get()));
+        check(helper, held(input, Items.IRON_INGOT) == 0 && controller.isWorking(), "The next batch must start as soon as the first is delivered");
+
+        helper.setBlock(new BlockPos(8, 1, 2), ModBlocks.ENERGY_HATCH_HV.get());
+        controller.tick();
+        check(helper, controller.isFormed() && controller.getParallel() == 64, "An HV hatch must raise the parallel count to 64, is " + controller.getParallel());
+        for (int tick = 0; tick < blockentity.PlantControllerBlockEntity.DURATION + 15; tick++) {
+            var hatch = helper.getBlockEntity(new BlockPos(8, 1, 2), blockentity.EnergyHatchBlockEntity.class);
+            hatch.storage().setEnergy(hatch.storage().getMaxEnergyStored());
+            controller.tick();
+        }
+        check(helper, held(output, ModBlocks.IRON_CABLE.get().asItem()) == 16, "The wire mold must turn 4 ingots straight into 16 wires, got "
+            + held(output, ModBlocks.IRON_CABLE.get().asItem()));
+        helper.succeed();
+    }
+
+    private static void run(MachineBlockEntity machine, int ticks) {
+        for (int i = 0; i < ticks; i++) machine.tick();
+    }
+
+    /** The repair bench mends with power only, the lamp follows its supply, an idle converter keeps its charge. */
+    private static void utilities(GameTestHelper helper) {
+        var level = helper.getLevel();
+        MachineBlockEntity bench = place(helper, 1, ModBlocks.REPAIR_BENCH.get());
+        ItemStack pickaxe = new ItemStack(Items.IRON_PICKAXE);
+        pickaxe.setDamageValue(10);
+        bench.getItemHandler().set(0, ItemResource.of(pickaxe), 1);
+        run(bench, 20);
+        check(helper, bench.getItemHandler().getResource(0).toStack(1).getDamageValue() == 10, "Without power nothing is repaired");
+        energy(bench).setEnergy(4000);
+        run(bench, 15);
+        check(helper, amount(bench, 0) == 0 && amount(bench, 1) == 1 && !bench.getItemHandler().getResource(1).toStack(1).isDamaged(),
+            "The repaired tool must move to the output slot");
+        check(helper, energy(bench).getEnergyStored() == 4000 - 10 * blockentity.RepairBenchBlockEntity.COST, "Ten points of durability cost ten times the price");
+        check(helper, !bench.acceptsAutomationInput(0, ItemResource.of(new ItemStack(Items.IRON_PICKAXE)))
+            && bench.acceptsAutomationInput(0, ItemResource.of(pickaxe)), "Pipes may only bring damaged items");
+
+        MachineBlockEntity lamp = place(helper, 3, ModBlocks.LAMP.get());
+        run(lamp, 20);
+        check(helper, level.getBlockState(lamp.getBlockPos()).getLightEmission() == 0, "A lamp without power must be dark");
+        energy(lamp).setEnergy(200);
+        run(lamp, 20);
+        check(helper, level.getBlockState(lamp.getBlockPos()).getLightEmission() == 15, "A powered lamp must shine");
+        check(helper, energy(lamp).getEnergyStored() == 180, "A lamp uses 1 EU per tick");
+        energy(lamp).setEnergy(0);
+        run(lamp, 20);
+        check(helper, level.getBlockState(lamp.getBlockPos()).getLightEmission() == 0, "The lamp must go out when the power does");
+
+        MachineBlockEntity converter = place(helper, 5, ModBlocks.CONVERTER.get());
+        energy(converter).setEnergy(100);
+        run(converter, 5);
+        check(helper, energy(converter).getEnergyStored() == 100, "A converter with nothing to feed must keep its energy");
+        helper.succeed();
+    }
+
+    /** Whatever is attached to an interface sees and uses the stock of the whole network's storage. */
+    private static void networkStorage(GameTestHelper helper) {
+        var level = helper.getLevel();
+        helper.setBlock(new BlockPos(0, 1, 1), Blocks.BARREL);
+        var barrel = helper.getBlockEntity(new BlockPos(0, 1, 1), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        port(helper, 1, net.minecraft.core.Direction.WEST);
+        helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.PNEUMATIC_PIPE.get());
+        port(helper, 3, net.minecraft.core.Direction.EAST);
+        MachineBlockEntity macerator = place(helper, 4, ModBlocks.MACERATOR.get());
+        put(macerator.getItemHandler(), 1, new ItemStack(Items.DIAMOND, 3));
+        barrel.setItem(4, new ItemStack(Items.STICK, 10));
+
+        var view = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            helper.absolutePos(new BlockPos(3, 1, 1)), net.minecraft.core.Direction.UP);
+        check(helper, view != null && view.size() == barrel.getContainerSize(), "The view must cover the network's storage and nothing else");
+        check(helper, extract(view, new ItemStack(Items.DIAMOND, 1)) == 0, "What sits in a machine is not part of the stock");
+        check(helper, extract(view, new ItemStack(Items.STICK, 4)) == 4 && count(barrel, Items.STICK) == 6, "Taking from the view must take from the barrel");
+        check(helper, insert(view, new ItemStack(Items.FLINT, 5)) == 5 && count(barrel, Items.FLINT) == 5, "Putting into the view must store in the barrel");
+
+        helper.setBlock(new BlockPos(2, 1, 1), Blocks.AIR);
+        check(helper, level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            helper.absolutePos(new BlockPos(3, 1, 1)), net.minecraft.core.Direction.UP).size() == 0, "An interface cut off from the network sees no stock");
         helper.succeed();
     }
 }

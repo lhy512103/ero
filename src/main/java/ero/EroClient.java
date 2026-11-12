@@ -53,6 +53,8 @@ public class EroClient {
 
         // 手持传送带、滑槽时显示摆放预览和方向箭头
         NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
+        // 准星对着未成型的大机器控制器时，标出还缺的方块
+        NeoForge.EVENT_BUS.addListener(client.StructureProjection::onOutline);
     }
 
     private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {

@@ -135,6 +135,17 @@ public class ModBlocks {
         HatchBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> ENERGY_HATCH = BLOCKS.registerBlock("energy_hatch",
         p -> new MachineBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+    public static final DeferredBlock<MachineBlock> ENERGY_HATCH_HV = BLOCKS.registerBlock("energy_hatch_hv",
+        p -> new MachineBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> MILL_CONTROLLER = BLOCKS.registerBlock("mill_controller",
+        PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<RepairBenchBlock> REPAIR_BENCH = BLOCKS.registerBlock("repair_bench",
+        RepairBenchBlock::new, machineProperties());
+    public static final DeferredBlock<MachineBlock> LAMP = BLOCKS.registerBlock("lamp",
+        p -> new MachineBlock(p, blockentity.LampBlockEntity::new, ModBlockEntities.LAMP),
+        () -> machineProperties().get().destroyTime(0.5f).lightLevel(state -> state.getValue(MachineBlock.RUNNING) ? 15 : 0));
+    public static final DeferredBlock<MachineBlock> CONVERTER = BLOCKS.registerBlock("converter",
+        p -> new MachineBlock(p, blockentity.ConverterBlockEntity::new, ModBlockEntities.CONVERTER), machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

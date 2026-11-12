@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,running=false": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=north,running=true": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=east,running=false": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=east,running=true": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=south,running=false": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=south,running=true": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=west,running=false": {
+      "model": "iuce:block/energy_hatch_hv"
+    },
+    "facing=west,running=true": {
+      "model": "iuce:block/energy_hatch_hv"
+    }
+  }
+}

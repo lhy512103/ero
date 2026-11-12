@@ -105,7 +105,7 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<PlantControllerBlockEntity>> PLANT_CONTROLLER =
         BLOCK_ENTITIES.register("plant_controller", () ->
-            new BlockEntityType<>(PlantControllerBlockEntity::new, false, ModBlocks.PLANT_CONTROLLER.get())
+            new BlockEntityType<>(PlantControllerBlockEntity::new, false, ModBlocks.PLANT_CONTROLLER.get(), ModBlocks.MILL_CONTROLLER.get())
         );
 
     public static final Supplier<BlockEntityType<HatchBlockEntity>> ITEM_HATCH =
@@ -115,7 +115,22 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<EnergyHatchBlockEntity>> ENERGY_HATCH =
         BLOCK_ENTITIES.register("energy_hatch", () ->
-            new BlockEntityType<>(EnergyHatchBlockEntity::new, false, ModBlocks.ENERGY_HATCH.get())
+            new BlockEntityType<>(EnergyHatchBlockEntity::new, false, ModBlocks.ENERGY_HATCH.get(), ModBlocks.ENERGY_HATCH_HV.get())
+        );
+
+    public static final Supplier<BlockEntityType<RepairBenchBlockEntity>> REPAIR_BENCH =
+        BLOCK_ENTITIES.register("repair_bench", () ->
+            new BlockEntityType<>(RepairBenchBlockEntity::new, false, ModBlocks.REPAIR_BENCH.get())
+        );
+
+    public static final Supplier<BlockEntityType<LampBlockEntity>> LAMP =
+        BLOCK_ENTITIES.register("lamp", () ->
+            new BlockEntityType<>(LampBlockEntity::new, false, ModBlocks.LAMP.get())
+        );
+
+    public static final Supplier<BlockEntityType<ConverterBlockEntity>> CONVERTER =
+        BLOCK_ENTITIES.register("converter", () ->
+            new BlockEntityType<>(ConverterBlockEntity::new, false, ModBlocks.CONVERTER.get())
         );
 
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =

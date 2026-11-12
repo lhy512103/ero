@@ -77,6 +77,11 @@
     "iuce:plant_controller",
     "iuce:item_input_hatch",
     "iuce:item_output_hatch",
-    "iuce:energy_hatch"
+    "iuce:energy_hatch",
+    "iuce:energy_hatch_hv",
+    "iuce:mill_controller",
+    "iuce:repair_bench",
+    "iuce:lamp",
+    "iuce:converter"
   ]
 }

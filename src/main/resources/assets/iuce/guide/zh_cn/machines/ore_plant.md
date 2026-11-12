@@ -21,6 +21,8 @@ items: iuce:plant_controller, iuce:plant_casing, iuce:item_input_hatch, iuce:ite
 - 控制器的屏幕朝外。
 - **仓口可以替换任意一块外壳**，至少各要一个：{item:iuce:energy_hatch}、{item:iuce:item_input_hatch}、{item:iuce:item_output_hatch}。想要更大的缓冲就多放几个。
 - 搭好后右键控制器：成型了屏幕会变绿；没成型会告诉你哪里不对。
+- **搭建投影**：先放控制器，准星对着它，还缺方块的位置会用黄色线框标出来，放错方块的位置是红色。
+- **一键补外壳**：手持 {item:iuce:plant_casing} 右键控制器，会把手里的外壳自动放到所有空着的位置。仓口先摆好，剩下的交给它。
 
 {recipe: iuce:plant_casing, iuce:plant_controller}
 
@@ -34,7 +36,7 @@ items: iuce:plant_controller, iuce:plant_casing, iuce:item_input_hatch, iuce:ite
 
 ## 供电
 
-能源仓是中压（MV）设备，每 tick 最多收 128 EU。满负荷加工矿石时要的电比这多，联合厂会按实际供电降速，不会停。多放几个能源仓、各接一路电，就能跑满。
+能源仓是中压（MV）设备，每 tick 最多收 128 EU。满负荷加工矿石时要的电比这多，联合厂会按实际供电降速，不会停。多放几个能源仓、各接一路电，就能跑满。换成 {item:iuce:energy_hatch_hv} 则并行数从 16 变成 64，见 [轧制联合机](machines/rolling_mill)。
 
 > [!WARN]
 > 输出仓放不下一整批产物时联合厂会停机等待，不会丢东西。记得把成品运走。

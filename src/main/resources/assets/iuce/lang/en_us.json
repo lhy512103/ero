@@ -441,5 +441,15 @@
   "message.iuce.plant.idle": "Formed, waiting for materials (parallel %s)",
   "message.iuce.plant.blocked": "Output hatch full: stopped",
   "message.iuce.plant.starved": "Underpowered: running slowly, %s%%",
-  "message.iuce.plant.working": "Working, %s%%"
+  "message.iuce.plant.working": "Working, %s%%",
+  "block.iuce.energy_hatch_hv": "Energy Hatch (HV)",
+  "block.iuce.mill_controller": "Rolling Mill Controller",
+  "block.iuce.repair_bench": "Electric Repair Bench",
+  "block.iuce.lamp": "Electric Lamp",
+  "block.iuce.converter": "Energy Converter",
+  "message.iuce.plant.no_mold": "Formed, but no mold yet: right-click the controller with a mold",
+  "message.iuce.plant.filled": "Placed %s plant casing blocks",
+  "message.iuce.repair.working": "Repairing: %s   %s / %s",
+  "message.iuce.repair.done": "Repaired: take it with an empty hand",
+  "message.iuce.repair.empty": "Right-click with a damaged tool or armour piece"
 }

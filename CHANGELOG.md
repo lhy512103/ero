@@ -79,6 +79,13 @@
 73. Added: Ore Processing Plant, a 5×5×5 multiblock that crushes, washes and smelts in one step, 16 at a time and at half the energy per item.
 74. Added: Plant Casing, Item Input Hatch, Item Output Hatch and Energy Hatch for building large machines.
 75. Added: Logistics interfaces on hatches feed a large machine what it can process and carry its products away.
+76. Added: Rolling Mill, a multiblock 9 to 17 blocks long whose mold decides between plates, wires and rods; a longer mill runs more at once.
+77. Added: HV Energy Hatch, which raises a large machine from 16 to 64 parallel operations.
+78. Added: Aiming at an unfinished large machine's controller outlines the blocks still missing, and right-clicking it with Plant Casing places them.
+79. Added: Electric Repair Bench, which restores the durability of any tool or armour with electricity.
+80. Added: Electric Lamp.
+81. Added: Energy Converter, which turns EU into Forge Energy for other mods' machines.
+82. Added: A logistics interface works as a container holding its whole network's stored items, so hoppers, other pipes or an Applied Energistics storage bus can use it.
 
 ### 中文
 
@@ -157,3 +164,10 @@
 73. 新增：选矿联合厂，5×5×5 的多方块大机器，打粉、洗矿、熔炼一步完成，一次 16 份，单件耗电减半。
 74. 新增：厂房外壳、物品输入仓、物品输出仓和能源仓，用于搭建大机器。
 75. 新增：物流接口贴在仓口上，会给大机器送去它能加工的原料并运走产物。
+76. 新增：轧制联合机，长 9 到 17 格的多方块大机器，放入的模具决定出板、导线还是棍，越长并行越多。
+77. 新增：高压能源仓，可把大机器的并行数从 16 提高到 64。
+78. 新增：准星对着未完成的大机器控制器会标出还缺的方块，手持厂房外壳右键控制器可一键补齐。
+79. 新增：电动修理台，用电修复任何工具和护甲的耐久。
+80. 新增：电灯。
+81. 新增：能量转换器，把 EU 转换成其他模组通用的能量。
+82. 新增：物流接口可当作容器使用，里面是整个管网的库存，漏斗、其他管道或应用能源的存储总线都能接入。

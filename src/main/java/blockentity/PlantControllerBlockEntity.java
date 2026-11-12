@@ -4,12 +4,16 @@ import block.ModBlocks;
 import block.PlantControllerBlock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import item.MoldItem;
 import multiblock.MultiblockManager;
 import multiblock.ProcessChain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,18 +29,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controller of the ore processing plant, a 5x5x5 shell of plant casing with the controller in the
- * middle of the front face, one block above the floor. Hatches may replace any casing block.
- * <p>
+ * Controller of a large machine: a hollow shell of plant casing, 5 wide and 5 high, with the
+ * controller in the middle of the front face one block above the floor. Hatches may replace any
+ * casing block.
+ * <ul>
+ * <li>Ore processing plant: 5 long; crushes, washes and smelts.</li>
+ * <li>Rolling mill: 9 to 17 long; the mold put into the controller decides between plates, wires
+ * and rods, and every extra block of length adds to the parallel count (up to double).</li>
+ * </ul>
  * The controller is the only part that does any work. Running sixteen operations side by side is
  * one batch whose amounts are multiplied by sixteen, not sixteen batches. The structure is checked
  * when the controller is placed or loaded and again only after a block inside its box changed.
- * </p>
  */
 public class PlantControllerBlockEntity extends BlockEntity {
     /** Ticks one batch takes at full power. */
     public static final int DURATION = 100;
-    private static final String[] STEPS = {"macerator", "ore_washer", "electric_furnace"};
+    public static final int MILL_MIN = 9, MILL_MAX = 17;
+    private static final String[] ORE_STEPS = {"macerator", "ore_washer", "electric_furnace"};
+    private static final String[][] MILL_STEPS = {
+        {"metal_former_rolling"}, {"metal_former_rolling", "metal_former_cutting"}, {"metal_former_extruding"}};
+    private static final String[] NO_STEPS = {};
 
     private record Pending(ItemResource item, int count) {
         static final Codec<Pending> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -46,9 +58,11 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     private boolean structureDirty = true;
     private boolean formed;
+    private int length, parallel;
     private Component problem = Component.translatable("message.iuce.plant.unchecked");
     private final List<BlockPos> energyHatches = new ArrayList<>(), inputHatches = new ArrayList<>(), outputHatches = new ArrayList<>();
 
+    private ItemResource mold = ItemResource.EMPTY;
     private final List<Pending> pending = new ArrayList<>();
     private int progress, idleTicks;
     private long energyPerTick, paid;
@@ -61,17 +75,71 @@ public class PlantControllerBlockEntity extends BlockEntity {
     public boolean isFormed() { return formed; }
     public boolean isWorking() { return !pending.isEmpty(); }
     public int getProgress() { return progress; }
+    public int getParallel() { return parallel; }
+    public int getLength() { return length; }
+    public ItemResource getMold() { return mold; }
     public void markStructureDirty() { structureDirty = true; }
+
+    public boolean isMill() { return getBlockState().is(ModBlocks.MILL_CONTROLLER.get()); }
+
+    /** Swaps the mold of a rolling mill and returns the previous one (possibly empty). */
+    public ItemStack swapMold(ItemStack newMold) {
+        ItemStack old = mold.isEmpty() ? ItemStack.EMPTY : mold.toStack(1);
+        mold = newMold.isEmpty() ? ItemResource.EMPTY : ItemResource.of(newMold.copyWithCount(1));
+        setChanged();
+        return old;
+    }
+
+    private String[] steps() {
+        if (!isMill()) return ORE_STEPS;
+        return mold.getItem() instanceof MoldItem item && item.mode() < MILL_STEPS.length ? MILL_STEPS[item.mode()] : NO_STEPS;
+    }
+
+    // ------------------------------------------------------------------ geometry, shared with the client's projection
+
+    public static BlockPos at(BlockPos controller, Direction facing, int depth, int across, int up) {
+        Direction back = facing.getOpposite();
+        return controller.relative(back, depth).relative(back.getClockWise(), across).above(up);
+    }
+
+    public static boolean isShellBlock(BlockState state) {
+        return state.is(ModBlocks.PLANT_CASING.get()) || state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get())
+            || state.is(ModBlocks.ITEM_INPUT_HATCH.get()) || state.is(ModBlocks.ITEM_OUTPUT_HATCH.get());
+    }
+
+    /**
+     * Length of the structure a controller at {@code pos} belongs to. A mill ends at the first
+     * wall found behind its minimum length; when there is none yet, the minimum length is assumed.
+     */
+    public static int detectLength(BlockGetter level, BlockPos pos, Direction facing, boolean mill) {
+        if (!mill) return 5;
+        for (int depth = MILL_MIN - 1; depth < MILL_MAX; depth++) {
+            if (isShellBlock(level.getBlockState(at(pos, facing, depth, 0, 1)))) return depth + 1;
+        }
+        return MILL_MIN;
+    }
+
+    /** Every position of the shell, the controller's own excluded. */
+    public static List<BlockPos> shell(BlockPos pos, Direction facing, int length) {
+        List<BlockPos> positions = new ArrayList<>();
+        for (int depth = 0; depth < length; depth++) {
+            for (int across = -2; across <= 2; across++) {
+                for (int up = -1; up <= 3; up++) {
+                    boolean shell = depth == 0 || depth == length - 1 || Math.abs(across) == 2 || up == -1 || up == 3;
+                    if (shell && !(depth == 0 && across == 0 && up == 0)) positions.add(at(pos, facing, depth, across, up));
+                }
+            }
+        }
+        return positions;
+    }
 
     private Direction facing() { return getBlockState().getValue(PlantControllerBlock.FACING); }
 
-    private BlockPos at(int depth, int across, int up) {
-        Direction back = facing().getOpposite();
-        return worldPosition.relative(back, depth).relative(back.getClockWise(), across).above(up);
+    /** The largest box the structure can occupy, so that lengthening a mill is noticed too. */
+    public BoundingBox box() {
+        int longest = isMill() ? MILL_MAX : 5;
+        return BoundingBox.fromCorners(at(worldPosition, facing(), 0, -2, -1), at(worldPosition, facing(), longest - 1, 2, 3));
     }
-
-    /** The box the structure occupies, whether or not it is complete. */
-    public BoundingBox box() { return BoundingBox.fromCorners(at(0, -2, -1), at(4, 2, 3)); }
 
     @Override
     public void onLoad() {
@@ -85,10 +153,16 @@ public class PlantControllerBlockEntity extends BlockEntity {
         super.setRemoved();
     }
 
-    private void fail(Component reason) {
-        formed = false;
-        problem = reason;
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null && !mold.isEmpty()) {
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), mold.toStack(1));
+            mold = ItemResource.EMPTY;
+        }
     }
+
+    // ------------------------------------------------------------------ structure
 
     private void validate() {
         structureDirty = false;
@@ -97,9 +171,18 @@ public class PlantControllerBlockEntity extends BlockEntity {
         energyHatches.clear();
         inputHatches.clear();
         outputHatches.clear();
-        formed = check();
+        Component failure = check();
+        formed = failure == null;
+        if (!formed) problem = failure;
         if (formed) {
             for (BlockPos pos : inputHatches) if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) hatch.setController(worldPosition);
+            int tier = 0;
+            for (BlockPos pos : energyHatches) {
+                if (level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch) tier = Math.max(tier, hatch.parallel());
+            }
+            // a longer mill runs more at once: up to twice as many at full length
+            double stretch = isMill() ? 1 + (length - MILL_MIN) / (double) (MILL_MAX - MILL_MIN) : 1;
+            parallel = (int) (tier * stretch);
         }
         BlockState state = getBlockState();
         if (state.getValue(PlantControllerBlock.FORMED) != formed) {
@@ -107,38 +190,53 @@ public class PlantControllerBlockEntity extends BlockEntity {
         }
     }
 
-    private boolean check() {
-        for (int depth = 0; depth < 5; depth++) {
-            for (int across = -2; across <= 2; across++) {
-                for (int up = -1; up <= 3; up++) {
-                    boolean shell = depth == 0 || depth == 4 || Math.abs(across) == 2 || up == -1 || up == 3;
-                    if (!shell) continue;   // the inside is free space
-                    BlockPos pos = at(depth, across, up);
-                    if (pos.equals(worldPosition)) continue;
-                    if (!level.isLoaded(pos)) { fail(Component.translatable("message.iuce.plant.unloaded")); return false; }
-                    BlockState state = level.getBlockState(pos);
-                    if (state.is(ModBlocks.PLANT_CASING.get())) continue;
-                    if (state.is(ModBlocks.ENERGY_HATCH.get())) energyHatches.add(pos);
-                    else if (state.is(ModBlocks.ITEM_INPUT_HATCH.get())) inputHatches.add(pos);
-                    else if (state.is(ModBlocks.ITEM_OUTPUT_HATCH.get())) outputHatches.add(pos);
-                    else { fail(Component.translatable("message.iuce.plant.wrong_block", pos.toShortString())); return false; }
-                }
-            }
+    /** Returns what is wrong, or null when the structure is complete. */
+    private Component check() {
+        length = detectLength(level, worldPosition, facing(), isMill());
+        for (BlockPos pos : shell(worldPosition, facing(), length)) {
+            if (!level.isLoaded(pos)) return Component.translatable("message.iuce.plant.unloaded");
+            BlockState state = level.getBlockState(pos);
+            if (state.is(ModBlocks.PLANT_CASING.get())) continue;
+            if (state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get())) energyHatches.add(pos);
+            else if (state.is(ModBlocks.ITEM_INPUT_HATCH.get())) inputHatches.add(pos);
+            else if (state.is(ModBlocks.ITEM_OUTPUT_HATCH.get())) outputHatches.add(pos);
+            else return Component.translatable("message.iuce.plant.wrong_block", pos.toShortString());
         }
-        if (energyHatches.isEmpty()) { fail(Component.translatable("message.iuce.plant.no_energy_hatch")); return false; }
-        if (inputHatches.isEmpty()) { fail(Component.translatable("message.iuce.plant.no_input_hatch")); return false; }
-        if (outputHatches.isEmpty()) { fail(Component.translatable("message.iuce.plant.no_output_hatch")); return false; }
-        return true;
+        if (energyHatches.isEmpty()) return Component.translatable("message.iuce.plant.no_energy_hatch");
+        if (inputHatches.isEmpty()) return Component.translatable("message.iuce.plant.no_input_hatch");
+        if (outputHatches.isEmpty()) return Component.translatable("message.iuce.plant.no_output_hatch");
+        return null;
     }
 
-    /** True when the plant has a process for the item. */
+    /**
+     * Puts casing from the stack into every free position of the shell and returns how many were
+     * placed; the stack is not changed, the caller takes the blocks.
+     */
+    public int fill(ItemStack casing) {
+        if (level == null || !casing.is(ModBlocks.PLANT_CASING.get().asItem())) return 0;
+        int placed = 0;
+        int target = detectLength(level, worldPosition, facing(), isMill());
+        for (BlockPos pos : shell(worldPosition, facing(), target)) {
+            if (placed >= casing.getCount()) break;
+            if (!level.isLoaded(pos) || !level.getBlockState(pos).canBeReplaced()) continue;
+            level.setBlock(pos, ModBlocks.PLANT_CASING.get().defaultBlockState(), Block.UPDATE_ALL);
+            placed++;
+        }
+        structureDirty = true;
+        return placed;
+    }
+
+    // ------------------------------------------------------------------ work
+
+    /** True when the machine has a process for the item. */
     public boolean canProcess(ItemResource resource) {
-        return formed && level instanceof ServerLevel server && ProcessChain.get(server, STEPS, resource.getItem()).isPresent();
+        return formed && level instanceof ServerLevel server && ProcessChain.get(server, steps(), resource.getItem()).isPresent();
     }
 
     public Component describe() {
         if (!formed) return Component.translatable("message.iuce.plant.unformed", problem);
-        if (pending.isEmpty()) return Component.translatable("message.iuce.plant.idle", EnergyHatchBlockEntity.PARALLEL);
+        if (isMill() && mold.isEmpty()) return Component.translatable("message.iuce.plant.no_mold");
+        if (pending.isEmpty()) return Component.translatable("message.iuce.plant.idle", parallel);
         if (blocked) return Component.translatable("message.iuce.plant.blocked");
         return Component.translatable(starved ? "message.iuce.plant.starved" : "message.iuce.plant.working", progress * 100 / DURATION);
     }
@@ -185,21 +283,23 @@ public class PlantControllerBlockEntity extends BlockEntity {
     }
 
     private void tryStart(ServerLevel server) {
+        String[] steps = steps();
+        if (steps.length == 0 || parallel <= 0) return;
         List<ItemStacksResourceHandler> inputs = inventories(inputHatches);
         for (ItemStacksResourceHandler inventory : inputs) {
             for (int slot = 0; slot < inventory.size(); slot++) {
                 if (inventory.getAmountAsInt(slot) <= 0) continue;
                 ItemResource resource = inventory.getResource(slot);
-                var chain = ProcessChain.get(server, STEPS, resource.getItem());
+                var chain = ProcessChain.get(server, steps, resource.getItem());
                 if (chain.isEmpty()) continue;
                 long available = 0;
                 for (ItemStacksResourceHandler other : inputs) {
                     for (int i = 0; i < other.size(); i++) if (other.getResource(i).equals(resource)) available += other.getAmountAsInt(i);
                 }
-                int batches = (int) Math.min(EnergyHatchBlockEntity.PARALLEL, available / chain.get().inputCount());
+                int batches = (int) Math.min(parallel, available / chain.get().inputCount());
                 if (batches <= 0) continue;
 
-                // sixteen at once is the same work as one: only the amounts are multiplied
+                // many at once is the same work as one: only the amounts are multiplied
                 List<Pending> products = new ArrayList<>();
                 for (ProcessChain.Output output : chain.get().outputs()) {
                     double total = output.count() * batches;
@@ -260,6 +360,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         output.putLong("EnergyPerTick", energyPerTick);
         output.putLong("Paid", paid);
         output.store("Pending", Pending.CODEC.listOf(), pending);
+        output.store("Mold", ItemResource.OPTIONAL_CODEC, mold);
     }
 
     @Override
@@ -270,6 +371,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         paid = input.getLong("Paid").orElse(0L);
         pending.clear();
         input.read("Pending", Pending.CODEC.listOf()).ifPresent(pending::addAll);
+        mold = input.read("Mold", ItemResource.OPTIONAL_CODEC).orElse(ItemResource.EMPTY);
         structureDirty = true;
     }
 }

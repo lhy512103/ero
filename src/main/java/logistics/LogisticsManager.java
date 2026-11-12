@@ -48,16 +48,22 @@ public final class LogisticsManager {
     }
 
     private static final Map<Level, State> STATES = new WeakHashMap<>();
+    private static int version;
+
+    /** Changes whenever any network may have changed; lets callers drop what they cached about a network. */
+    public static int version() { return version; }
 
     public static void register(Level level, BlockPos pos) {
         if (level.isClientSide()) return;
         State state = STATES.computeIfAbsent(level, l -> new State());
         state.ports.add(pos.immutable());
         state.dirty = true;
+        version++;
     }
 
     /** Call whenever a pipe or interface appears, disappears or turns. */
     public static void invalidate(Level level) {
+        version++;
         State state = STATES.get(level);
         if (state != null) state.dirty = true;
     }
@@ -72,6 +78,15 @@ public final class LogisticsManager {
         if (state == null) return 0;
         if (state.dirty) rebuild(level, state);
         return state.networks.size();
+    }
+
+    /** The interfaces sharing a network with the one at {@code port}; empty when it is not joined to any other. */
+    public static List<BlockPos> networkOf(ServerLevel level, BlockPos port) {
+        State state = STATES.get(level);
+        if (state == null) return List.of();
+        if (state.dirty) rebuild(level, state);
+        for (List<BlockPos> network : state.networks) if (network.contains(port)) return network;
+        return List.of();
     }
 
     /** One round for every network of the level. */
