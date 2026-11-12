@@ -1,19 +1,35 @@
 {
   "variants": {
-    "facing=north": {
+    "ascending=false,facing=north": {
       "model": "iuce:block/conveyor",
       "y": 0
     },
-    "facing=east": {
+    "ascending=true,facing=north": {
+      "model": "iuce:block/conveyor_ramp",
+      "y": 0
+    },
+    "ascending=false,facing=east": {
       "model": "iuce:block/conveyor",
       "y": 90
     },
-    "facing=south": {
+    "ascending=true,facing=east": {
+      "model": "iuce:block/conveyor_ramp",
+      "y": 90
+    },
+    "ascending=false,facing=south": {
       "model": "iuce:block/conveyor",
       "y": 180
     },
-    "facing=west": {
+    "ascending=true,facing=south": {
+      "model": "iuce:block/conveyor_ramp",
+      "y": 180
+    },
+    "ascending=false,facing=west": {
       "model": "iuce:block/conveyor",
+      "y": 270
+    },
+    "ascending=true,facing=west": {
+      "model": "iuce:block/conveyor_ramp",
       "y": 270
     }
   }

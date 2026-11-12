@@ -50,6 +50,9 @@ public class EroClient {
         NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onScreenInit);
         NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onMouseClicked);
         NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onRenderForeground);
+
+        // 手持传送带、滑槽时显示摆放预览和方向箭头
+        NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
     }
 
     private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {

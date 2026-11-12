@@ -26,13 +26,13 @@ import java.util.List;
  */
 public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<MachineRecipe>> {
 
-    private static final int[][] INPUTS = {{1, 5}, {19, 5}, {1, 25}, {19, 25}};
-    private static final int[][] OUTPUTS = {{79, 5}, {97, 5}, {79, 25}, {97, 25}};
+    private static final int[][] INPUTS = {{1, 1}, {19, 1}, {37, 1}};
+    private static final int[][] OUTPUTS = {{85, 1}, {103, 1}, {121, 1}};
 
     private final IDrawableAnimated arrow;
 
     public MachineRecipeCategory(IJeiHelpers helpers, IRecipeType<RecipeHolder<MachineRecipe>> recipeType, String machineName, ItemLike iconItem) {
-        super(recipeType, Component.translatable(machineName), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 58);
+        super(recipeType, Component.translatable(machineName), helpers.getGuiHelper().createDrawableItemLike(iconItem), 138, 31);
         this.arrow = helpers.getGuiHelper().createAnimatedRecipeArrow(200);
     }
 
@@ -58,7 +58,7 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
                 .add(fluid.fluid().value(), fluid.amount());
             in++;
         }
-        if (recipe.getCatalyst().isPresent()) {
+        if (recipe.getCatalyst().isPresent() && in < INPUTS.length) {
             builder.addInputSlot(INPUTS[in][0], INPUTS[in][1]).setStandardSlotBackground()
                 .addItemStacks(stacks(recipe.getCatalyst().get(), 1))
                 .addRichTooltipCallback((view, tooltip) ->
@@ -66,12 +66,13 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
         }
 
         int out = 0;
-        builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1]).setOutputSlotBackground().add(recipe.getOutput());
+        builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1]).setStandardSlotBackground().add(recipe.getOutput());
         out++;
         for (MachineRecipe.ExtraResult extra : recipe.getExtraResults()) {
             if (out >= OUTPUTS.length) break;
             String percent = extra.chance() >= 1 ? "100" : String.valueOf(Math.round(extra.chance() * 100));
             builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1]).setStandardSlotBackground().add(extra.template().create())
+                .setOverlay(new ChanceBadge(percent + "%"), 0, 0)
                 .addRichTooltipCallback((view, tooltip) ->
                     tooltip.add(Component.translatable("jei.iuce.chance", percent).withStyle(ChatFormatting.YELLOW)));
             out++;
@@ -86,9 +87,26 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
     @Override
     public void draw(RecipeHolder<MachineRecipe> holder, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         MachineRecipe recipe = holder.value();
-        arrow.draw(graphics, 46, 5);
+        arrow.draw(graphics, 58, 1);
         String seconds = String.format(java.util.Locale.ROOT, "%.1f", recipe.getProcessTime() / 20.0);
         Component cost = Component.translatable("guide.iuce.recipe.cost", recipe.getEnergyCost(), seconds, recipe.getEnergyPerTick());
-        graphics.text(Minecraft.getInstance().font, cost, 1, 48, 0xFF555555, false);
+        graphics.text(Minecraft.getInstance().font, cost, 1, 22, 0xFF555555, false);
+    }
+
+    /** Small yellow percentage in the top-right corner of a by-product slot. */
+    private record ChanceBadge(String text) implements mezz.jei.api.gui.drawable.IDrawable {
+        @Override public int getWidth() { return 16; }
+
+        @Override public int getHeight() { return 16; }
+
+        @Override
+        public void draw(GuiGraphicsExtractor graphics, int x, int y) {
+            var font = Minecraft.getInstance().font;
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(x + 17, y - 1);
+            graphics.pose().scale(0.5f, 0.5f);
+            graphics.text(font, text, -font.width(text), 0, 0xFFFFE040, true);
+            graphics.pose().popMatrix();
+        }
     }
 }

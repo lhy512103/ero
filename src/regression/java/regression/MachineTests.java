@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("conveyor_turns_and_climbs", MachineTests::conveyorRoute);
         tests.put("chute_moves_items_down", MachineTests::chute);
         tests.put("conveyor_carries_items_into_container", MachineTests::conveyor);
         tests.put("workbench_remembers_recipe", MachineTests::workbenchMemory);
@@ -756,5 +757,26 @@ final class MachineTests {
         for (int i = 0; i < 20; i++) loaded.tick();
         for (int slot = 0; slot < 9; slot++) check(helper, amount(loaded, slot) == 0, "Unrelated stock must stay out of the grid");
         helper.succeed();
+    }
+
+    private static void belt(GameTestHelper helper, int x, int y, int z, net.minecraft.core.Direction direction) {
+        helper.getLevel().setBlockAndUpdate(helper.absolutePos(new BlockPos(x, y, z)), ModBlocks.CONVEYOR.get().defaultBlockState()
+            .setValue(block.ConveyorBlock.FACING, helper.getTestRotation().rotate(direction)));
+    }
+
+    /** A belt below a higher belt becomes a ramp, and a belt facing sideways makes the turn. */
+    private static void conveyorRoute(GameTestHelper helper) {
+        var east = net.minecraft.core.Direction.EAST;
+        belt(helper, 0, 1, 1, east);
+        belt(helper, 1, 1, 1, east);
+        belt(helper, 2, 2, 1, east);
+        belt(helper, 3, 2, 1, net.minecraft.core.Direction.SOUTH);
+        helper.setBlock(new BlockPos(3, 2, 2), Blocks.BARREL);
+        check(helper, helper.getBlockState(new BlockPos(1, 1, 1)).getValue(block.ConveyorBlock.ASCENDING), "The belt under a higher belt must become a ramp");
+        check(helper, !helper.getBlockState(new BlockPos(0, 1, 1)).getValue(block.ConveyorBlock.ASCENDING)
+            && !helper.getBlockState(new BlockPos(2, 2, 1)).getValue(block.ConveyorBlock.ASCENDING), "Other belts must stay flat");
+        var target = helper.getBlockEntity(new BlockPos(3, 2, 2), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        helper.spawnItem(Items.IRON_INGOT, 0.5f, 1.4f, 1.5f);
+        helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must climb the ramp, take the turn and reach the container"));
     }
 }

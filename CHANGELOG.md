@@ -56,6 +56,9 @@
 50. Added: The Industrial Workbench remembers its last recipe and resumes whenever its stock receives materials again.
 51. Optimized: The Industrial Workbench crafts in 2 seconds instead of 10.
 52. Optimized: The Generator, Metal Former and Industrial Workbench are much cheaper to build, so automation starts earlier.
+53. Added: Conveyors climb by turning into a ramp when the next belt is one block higher, and can be rotated with a wrench.
+54. Added: Holding a conveyor or chute shows a placement preview with a direction arrow.
+55. Optimized: JEI machine pages are more compact and show the by-product chance as a badge on its slot.
 
 ### 中文
 
@@ -111,3 +114,6 @@
 50. 新增：工业工作台会记住上一次的配方，原料仓再有原料时自动继续合成。
 51. 优化：工业工作台每次合成由 10 秒缩短为 2 秒。
 52. 优化：火力发电机、金属成型机和工业工作台的造价大幅降低，更早用上自动化。
+53. 新增：下一格传送带高一格时传送带会自动变成斜坡爬升，并可用扳手转向。
+54. 新增：手持传送带或滑槽时显示摆放预览和方向箭头。
+55. 优化：JEI 机器配方页排版更紧凑，副产物概率显示为槽位角标。

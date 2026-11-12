@@ -20,7 +20,8 @@ public final class WrenchActions {
         var pos = context.getClickedPos();
         var state = level.getBlockState(pos);
         var entity = level.getBlockEntity(pos);
-        if (!(entity instanceof MachineBlockEntity) && !(entity instanceof CableBlockEntity)) return InteractionResult.PASS;
+        boolean logistics = state.getBlock() instanceof block.ConveyorBlock || state.getBlock() instanceof block.ChuteBlock;
+        if (!(entity instanceof MachineBlockEntity) && !(entity instanceof CableBlockEntity) && !logistics) return InteractionResult.PASS;
         if (player == null || !level.mayInteract(player, pos)
                 || !player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand())) return InteractionResult.FAIL;
         boolean dismantle = player.isShiftKeyDown();
@@ -30,7 +31,8 @@ public final class WrenchActions {
             return InteractionResult.FAIL;
         }
         EnumProperty<Direction> facing = state.hasProperty(BlockStateProperties.FACING) ? BlockStateProperties.FACING
-            : state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? BlockStateProperties.HORIZONTAL_FACING : null;
+            : state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? BlockStateProperties.HORIZONTAL_FACING
+            : state.hasProperty(BlockStateProperties.FACING_HOPPER) ? BlockStateProperties.FACING_HOPPER : null;
         if (!dismantle && !(entity instanceof CableBlockEntity) && facing == null) return InteractionResult.PASS;
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (dismantle) {
