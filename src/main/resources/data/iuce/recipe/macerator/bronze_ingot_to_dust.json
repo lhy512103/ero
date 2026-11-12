@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "iuce:bronze_ingot",
+  "result": {
+    "id": "iuce:bronze_dust",
+    "count": 1
+  },
+  "energy": 400,
+  "time": 100
+}

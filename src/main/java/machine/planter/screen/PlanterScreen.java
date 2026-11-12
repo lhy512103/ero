@@ -11,10 +11,10 @@ import java.util.List;
 
 public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/crop_planter.png");
-    private static final Identifier ENERGY_PROGRESS = Identifier.parse("ero:textures/gui/com/energy_progress_on_5.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
-    private static final Identifier SOLAR_ON = Identifier.parse("ero:textures/gui/com/solar_on.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/crop_planter.png");
+    private static final Identifier ENERGY_PROGRESS = Identifier.parse("iuce:textures/gui/com/energy_progress_on_5.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
+    private static final Identifier SOLAR_ON = Identifier.parse("iuce:textures/gui/com/solar_on.png");
 
     public PlanterScreen(PlanterMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);
@@ -47,7 +47,7 @@ public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
             int progress = menu.getProgress();
             int maxProgress = menu.getMaxProgress();
             graphics.setComponentTooltipForNextFrame(this.font,
-                List.of(Component.literal("培育进度: " + progress + " / " + maxProgress)),
+                List.of(Component.translatable("tooltip.iuce.planter.progress", progress, maxProgress)),
                 mouseX, mouseY);
         }
         // solar_on 悬停显示游戏日时刻和阶段信息
@@ -60,7 +60,7 @@ public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
             graphics.setComponentTooltipForNextFrame(this.font,
                 List.of(
                     Component.literal(String.format("%02d:%02d", hours, minutes)),
-                    Component.literal(phase + " · " + speed + "x速度")),
+                    Component.translatable("tooltip.iuce.planter.speed", Component.translatable(phase), speed)),
                 mouseX, mouseY);
         }
     }

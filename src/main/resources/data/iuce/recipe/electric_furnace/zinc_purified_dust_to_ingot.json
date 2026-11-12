@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electric_furnace",
+  "input": "iuce:purified_zinc_dust",
+  "result": {
+    "id": "iuce:zinc_ingot",
+    "count": 3
+  },
+  "energy": 480,
+  "time": 120
+}

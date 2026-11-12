@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electric_furnace",
+  "input": "iuce:crushed_nickel_dust",
+  "result": {
+    "id": "iuce:nickel_ingot",
+    "count": 2
+  },
+  "energy": 640,
+  "time": 160
+}

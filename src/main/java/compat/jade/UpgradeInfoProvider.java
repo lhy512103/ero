@@ -31,7 +31,7 @@ import java.util.Map;
 public class UpgradeInfoProvider implements StreamServerDataProvider<BlockAccessor, UpgradeInfoProvider.Data> {
 
     public static final UpgradeInfoProvider INSTANCE = new UpgradeInfoProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "upgrade_info");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "upgrade_info");
 
     /** 升级插件信息，用逗号分隔的 "物品ID=数量" 字符串 */
     public record Data(String upgradeInfo) {

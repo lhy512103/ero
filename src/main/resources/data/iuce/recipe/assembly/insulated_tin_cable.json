@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:tin_cable",
+    "iuce:rubber"
+  ],
+  "result": {
+    "id": "iuce:insulated_tin_cable",
+    "count": 1
+  }
+}

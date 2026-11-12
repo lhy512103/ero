@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "iuce:nickel_ore",
+  "result": {
+    "id": "iuce:crushed_nickel_dust",
+    "count": 2
+  },
+  "energy": 800,
+  "time": 200
+}

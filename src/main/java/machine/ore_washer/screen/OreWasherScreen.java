@@ -11,10 +11,10 @@ import java.util.List;
 
 public class OreWasherScreen extends AbstractContainerScreen<OreWasherMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/ore_washing_plant.png");
-    private static final Identifier XIKUANG_ON = Identifier.parse("ero:textures/gui/com/xikuang_progress_on.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
-    private static final Identifier FLUID_ON = Identifier.parse("ero:textures/gui/com/energy_progress_on_3.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/ore_washing_plant.png");
+    private static final Identifier XIKUANG_ON = Identifier.parse("iuce:textures/gui/com/xikuang_progress_on.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
+    private static final Identifier FLUID_ON = Identifier.parse("iuce:textures/gui/com/energy_progress_on_3.png");
 
     private static final int FLUID_X = 123;
     private static final int FLUID_Y = 11;

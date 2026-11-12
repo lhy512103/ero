@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:empty_cell",
+      ""
+    ],
+    [
+      "iuce:tin_plate",
+      "iuce:machine_casing",
+      "iuce:tin_plate"
+    ],
+    [
+      "iuce:electric_motor",
+      "iuce:bronze_rotor",
+      "iuce:circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:pump",
+    "count": 1
+  }
+}

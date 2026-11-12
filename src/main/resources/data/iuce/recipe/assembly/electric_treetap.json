@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:treetap",
+    "iuce:re_battery",
+    "iuce:circuit",
+    "iuce:electric_motor"
+  ],
+  "result": {
+    "id": "iuce:electric_treetap",
+    "count": 1
+  }
+}

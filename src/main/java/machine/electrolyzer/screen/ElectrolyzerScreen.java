@@ -1,6 +1,5 @@
 package machine.electrolyzer.screen;
 
-import item.ModItems;
 import machine.electrolyzer.menu.ElectrolyzerMenu;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -13,10 +12,10 @@ import java.util.List;
 
 public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu> {
 
-    private static final Identifier TEXTURE = Identifier.parse("ero:textures/gui/machine/electrolyzer.png");
-    private static final Identifier ARROW_ON = Identifier.parse("ero:textures/gui/com/arrow_on_1.png");
-    private static final Identifier POWER_ON = Identifier.parse("ero:textures/gui/com/power_on.png");
-    private static final Identifier FLUID_ON = Identifier.parse("ero:textures/gui/com/energy_progress_on_4.png");
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/electrolyzer.png");
+    private static final Identifier ARROW_ON = Identifier.parse("iuce:textures/gui/com/arrow_on_1.png");
+    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
+    private static final Identifier FLUID_ON = Identifier.parse("iuce:textures/gui/com/energy_progress_on_4.png");
 
     private static final int FLUID_X = 19;
     private static final int FLUID_Y = 56;
@@ -106,7 +105,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
             int fluid = menu.getFluid();
             int maxFluid = menu.getMaxFluid();
             graphics.setComponentTooltipForNextFrame(this.font,
-                List.of(new ItemStack(ModItems.WATER.get()).getHoverName(),
+                List.of(net.minecraft.world.level.material.Fluids.WATER.getFluidType().getDescription(),
                     Component.literal(fluid + " / " + maxFluid + " mB")),
                 mouseX, mouseY);
         }

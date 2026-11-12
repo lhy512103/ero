@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:gold_plate",
+    "iuce:cutter"
+  ],
+  "result": {
+    "id": "iuce:gold_cable",
+    "count": 2
+  }
+}

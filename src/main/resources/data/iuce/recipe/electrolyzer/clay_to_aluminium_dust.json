@@ -1,0 +1,16 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electrolyzer",
+  "input": "minecraft:clay_ball",
+  "input_count": 4,
+  "result": {
+    "id": "iuce:purified_aluminium_dust",
+    "count": 1
+  },
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
+  "energy": 9600,
+  "time": 300
+}

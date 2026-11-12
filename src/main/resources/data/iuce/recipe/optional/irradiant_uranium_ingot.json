@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:energium_dust", "iuce:lapotron_crystal", "iuce:energium_dust"],
+    ["iuce:energium_dust", "iuce:uranium_ingot", "iuce:energium_dust"],
+    ["iuce:energium_dust", "iuce:energium_dust", "iuce:energium_dust"]
+  ],
+  "result": { "id": "iuce:irradiant_uranium_ingot", "count": 1 }
+}

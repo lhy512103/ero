@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:aluminium_plate", "iuce:aluminium_plate", "iuce:aluminium_plate"],
+    ["iuce:aluminium_plate", "iuce:basic_plated_shell", "iuce:aluminium_plate"],
+    ["iuce:aluminium_plate", "iuce:aluminium_plate", "iuce:aluminium_plate"]
+  ],
+  "result": { "id": "iuce:advanced_plated_shell", "count": 1 }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:copper_plate",
+    "iuce:cutter"
+  ],
+  "result": {
+    "id": "iuce:copper_cable",
+    "count": 2
+  }
+}

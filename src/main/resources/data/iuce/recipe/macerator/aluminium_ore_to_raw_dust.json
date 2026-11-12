@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "iuce:aluminium_ore",
+  "result": {
+    "id": "iuce:crushed_aluminium_dust",
+    "count": 2
+  },
+  "energy": 800,
+  "time": 200
+}

@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:copper_plate", "iuce:copper_plate", "iuce:copper_plate"],
+    ["iuce:copper_plate", "iuce:plated_shell", "iuce:copper_plate"],
+    ["iuce:copper_plate", "iuce:copper_plate", "iuce:copper_plate"]
+  ],
+  "result": { "id": "iuce:basic_plated_shell", "count": 1 }
+}

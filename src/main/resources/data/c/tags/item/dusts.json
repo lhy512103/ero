@@ -1,17 +1,17 @@
 {
   "replace": false,
   "values": [
-    "ero:purified_tin_dust",
-    "ero:purified_zinc_dust",
-    "ero:purified_aluminium_dust",
-    "ero:purified_cobalt_dust",
-    "ero:purified_lead_dust",
-    "ero:purified_nickel_dust",
-    "ero:purified_silver_dust",
-    "ero:purified_uranium_dust",
-    "ero:bronze_dust",
-    "ero:copper_dust",
-    "ero:diamond_dust",
-    "ero:coal_dust"
+    "iuce:crushed_tin_dust",
+    "iuce:crushed_zinc_dust",
+    "iuce:crushed_aluminium_dust",
+    "iuce:crushed_cobalt_dust",
+    "iuce:crushed_lead_dust",
+    "iuce:crushed_nickel_dust",
+    "iuce:crushed_silver_dust",
+    "iuce:crushed_uranium_dust",
+    "iuce:bronze_dust",
+    "iuce:copper_dust",
+    "iuce:diamond_dust",
+    "iuce:coal_dust"
   ]
 }

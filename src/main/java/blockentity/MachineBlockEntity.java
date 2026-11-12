@@ -7,9 +7,6 @@ import item.EjectorUpgradeItem;
 import item.FluidEjectorUpgradeItem;
 import item.FluidPullingUpgradeItem;
 import item.PullingUpgradeItem;
-import network.LogisticsLink;
-import network.LogisticsNetwork;
-import network.NetworkManager;
 import network.performance.MachinePriority;
 import network.performance.TickThrottler;
 import net.minecraft.core.BlockPos;
@@ -48,14 +45,21 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
 
         // 确保机器已注册到网络管理器（处理世界重载情况）
         if (!registeredToNetwork && level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().registerMachine(this);
+            network.EnergyTransferManager.register(this);
             registeredToNetwork = true;
+        }
+
+        if (level != null && !level.isClientSide() && level.tickRateManager().runsNormally()
+                && this instanceof machine.StorageGuiProvider storage) {
+            energy.ItemCharging.charge(storage.getEnergyStorage(), storage.getItemHandler(), tickCount);
         }
 
         // 服务器冻结时跳过机器处理，避免无意义运算
         if (level != null && !level.isClientSide() && !level.tickRateManager().runsNormally()) {
             return;
         }
+
+        if (returnProducts && tickCount % 10 == 0 && level != null && !level.isClientSide()) returnProductsToFeeder();
 
         // 性能节流：根据当前性能状态和机器优先级决定是否跳过此tick
         if (level != null && !level.isClientSide()) {
@@ -99,6 +103,103 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     public int getUpgradeSlotStart() {
         return 0;
+    }
+
+    /**
+     * Slots that accept raw materials. Item-transfer upgrades insert only into these.
+     * The default assumes the slots before the upgrade slots are split evenly into inputs then outputs;
+     * machines with a different layout must override both methods.
+     */
+    public int[] getInputSlots() {
+        return range(0, getUpgradeSlotStart() / 2);
+    }
+
+    /** Slots that hold products. Item-transfer upgrades extract only from these. */
+    public int[] getOutputSlots() {
+        return range(getUpgradeSlotStart() / 2, getUpgradeSlotStart());
+    }
+
+    /** One view per face (index 6 = no face), created on demand. */
+    private final AutomationItemHandler[] automationItems = new AutomationItemHandler[7];
+
+    /** When set, finished products are pushed back into the inventory that last fed this machine. */
+    private boolean returnProducts;
+    /** The face raw materials last arrived through; null until something has been piped in. */
+    @Nullable
+    private Direction feedSide;
+
+    public boolean isReturningProducts() { return returnProducts; }
+
+    public void setReturnProducts(boolean value) {
+        returnProducts = value;
+        setChanged();
+    }
+
+    @Nullable
+    public Direction getFeedSide() { return feedSide; }
+
+    void noteFeedSide(Direction side) {
+        if (feedSide != side) {
+            feedSide = side;
+            setChanged();
+        }
+    }
+
+    /** Moves products to the inventory on the feeding side, e.g. back into an AE2 pattern provider. */
+    private void returnProductsToFeeder() {
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null || feedSide == null) return;
+        int[] outputs = getOutputSlots();
+        boolean any = false;
+        for (int slot : outputs) any |= inventory.getAmountAsInt(slot) > 0;
+        if (!any) return;
+        var target = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+            worldPosition.relative(feedSide), feedSide.getOpposite());
+        if (target == null) return;
+        for (int slot : outputs) {
+            int amount = inventory.getAmountAsInt(slot);
+            if (amount <= 0) continue;
+            ItemResource resource = inventory.getResource(slot);
+            try (var transaction = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                int accepted = target.insert(resource, amount, transaction);
+                if (accepted > 0 && inventory.extract(slot, resource, accepted, transaction) == accepted) transaction.commit();
+            }
+        }
+    }
+
+    /** Extra filter for items arriving from hoppers and pipes; {@code slot} is one of {@link #getInputSlots()}. */
+    public boolean acceptsAutomationInput(int slot, net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        return true;
+    }
+
+    /**
+     * The inventory view for hoppers and other mods' pipes (inputs in, outputs out, upgrades hidden),
+     * or null when the machine has no input or output slots.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getAutomationItemHandler() {
+        return getAutomationItemHandler(null);
+    }
+
+    /** The view for one face; which face items arrive through is remembered as the feeding side. */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getAutomationItemHandler(@Nullable Direction side) {
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null) return null;
+        int index = side == null ? 6 : side.get3DDataValue();
+        if (automationItems[index] == null) {
+            int[] inputs = getInputSlots();
+            int[] outputs = getOutputSlots();
+            if (inputs.length == 0 && outputs.length == 0) return null;
+            automationItems[index] = new AutomationItemHandler(this, inventory, inputs, outputs, side);
+        }
+        return automationItems[index];
+    }
+
+    protected static int[] range(int from, int to) {
+        int[] slots = new int[Math.max(0, to - from)];
+        for (int i = 0; i < slots.length; i++) slots[i] = from + i;
+        return slots;
     }
 
     /**
@@ -157,32 +258,29 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
     }
 
     /**
-     * 创建物流连接（此机器作为目标/接收方）
+     * Drops everything held in the item slots when the block is broken (by hand, explosion or piston).
+     * The wrench dismantles differently: it collects the contents itself before removing the block.
      */
-    public LogisticsLink createLogisticsLink(MachineBlockEntity transportMachine) {
-        return LogisticsNetwork.getInstance().createLink(
-            this.worldPosition, transportMachine.getBlockPos()
-        );
-    }
-
-    /**
-     * 移除所有物流连接
-     */
-    public void removeAllLogisticsLinks() {
-        LogisticsNetwork.getInstance().removeMachineLinks(worldPosition);
-    }
-
-    /**
-     * 获取此机器的所有物流连接
-     */
-    public List<LogisticsLink> getLogisticsLinks() {
-        return LogisticsNetwork.getInstance().getMachineLinks(worldPosition);
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null || level == null) return;
+        for (int slot = 0; slot < inventory.size(); slot++) {
+            int amount = inventory.getAmountAsInt(slot);
+            if (amount <= 0) continue;
+            ItemResource resource = inventory.getResource(slot);
+            inventory.set(slot, ItemResource.EMPTY, 0);
+            net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), resource.toStack(amount));
+        }
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putLong("TickCount", tickCount);
+        output.putBoolean("ReturnProducts", returnProducts);
+        output.putInt("FeedSide", feedSide == null ? -1 : feedSide.get3DDataValue());
     }
 
     @Override
@@ -190,6 +288,9 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         super.loadAdditional(input);
         // 不再重置 tickCount，使用 registeredToNetwork 标志控制注册
         registeredToNetwork = false;
+        returnProducts = input.getBooleanOr("ReturnProducts", false);
+        int side = input.getIntOr("FeedSide", -1);
+        feedSide = side < 0 || side > 5 ? null : Direction.from3DDataValue(side);
     }
 
     /**
@@ -197,7 +298,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     public void onPlace() {
         if (level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().registerMachine(this);
+            network.EnergyTransferManager.register(this);
             registeredToNetwork = true;
         }
     }
@@ -207,10 +308,15 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
      */
     public void onRemove() {
         if (level != null && !level.isClientSide()) {
-            NetworkManager.getInstance().unregisterMachine(this);
-            // 移除所有物流连接
-            removeAllLogisticsLinks();
+            network.EnergyTransferManager.remove(this);
         }
+    }
+
+    @Override
+    public void setRemoved() {
+        network.EnergyTransferManager.remove(this);
+        registeredToNetwork = false;
+        super.setRemoved();
     }
 
     @Nullable

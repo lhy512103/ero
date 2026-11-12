@@ -28,16 +28,16 @@ public class ModItems {
     public static final DeferredItem<Item> ALLOY_INGOT = registerSimpleItem("alloy_ingot");
     public static final DeferredItem<Item> BRONZE_INGOT = registerSimpleItem("bronze_ingot");
 
-    // 粉 (Dusts) - 注册ID与纯净粉互换
-    public static final DeferredItem<Item> TIN_DUST = registerSimpleItem("purified_tin_dust");
+    // 粗粉 (Crushed Dusts) - 打粉机产物
+    public static final DeferredItem<Item> CRUSHED_TIN_DUST = registerSimpleItem("crushed_tin_dust");
     public static final DeferredItem<Item> COPPER_DUST = registerSimpleItem("copper_dust");
-    public static final DeferredItem<Item> ZINC_DUST = registerSimpleItem("purified_zinc_dust");
-    public static final DeferredItem<Item> ALUMINIUM_DUST = registerSimpleItem("purified_aluminium_dust");
-    public static final DeferredItem<Item> COBALT_DUST = registerSimpleItem("purified_cobalt_dust");
-    public static final DeferredItem<Item> LEAD_DUST = registerSimpleItem("purified_lead_dust");
-    public static final DeferredItem<Item> NICKEL_DUST = registerSimpleItem("purified_nickel_dust");
-    public static final DeferredItem<Item> SILVER_DUST = registerSimpleItem("purified_silver_dust");
-    public static final DeferredItem<Item> URANIUM_DUST = registerSimpleItem("purified_uranium_dust");
+    public static final DeferredItem<Item> CRUSHED_ZINC_DUST = registerSimpleItem("crushed_zinc_dust");
+    public static final DeferredItem<Item> CRUSHED_ALUMINIUM_DUST = registerSimpleItem("crushed_aluminium_dust");
+    public static final DeferredItem<Item> CRUSHED_COBALT_DUST = registerSimpleItem("crushed_cobalt_dust");
+    public static final DeferredItem<Item> CRUSHED_LEAD_DUST = registerSimpleItem("crushed_lead_dust");
+    public static final DeferredItem<Item> CRUSHED_NICKEL_DUST = registerSimpleItem("crushed_nickel_dust");
+    public static final DeferredItem<Item> CRUSHED_SILVER_DUST = registerSimpleItem("crushed_silver_dust");
+    public static final DeferredItem<Item> CRUSHED_URANIUM_DUST = registerSimpleItem("crushed_uranium_dust");
     public static final DeferredItem<Item> BRONZE_DUST = registerSimpleItem("bronze_dust");
     public static final DeferredItem<Item> DIAMOND_DUST = registerSimpleItem("diamond_dust");
     public static final DeferredItem<Item> ENERGIUM_DUST = registerSimpleItem("energium_dust");
@@ -48,15 +48,15 @@ public class ModItems {
     public static final DeferredItem<Item> COAL_BALL = registerSimpleItem("coal_ball");
     public static final DeferredItem<Item> COAL_BLOCK_ITEM = registerSimpleItem("coal_block_item");
 
-    // 纯净粉 (Purified Dusts) - 注册ID与粉互换
-    public static final DeferredItem<Item> PURIFIED_TIN_DUST = registerSimpleItem("tin_dust");
-    public static final DeferredItem<Item> PURIFIED_ZINC_DUST = registerSimpleItem("zinc_dust");
-    public static final DeferredItem<Item> PURIFIED_ALUMINIUM_DUST = registerSimpleItem("aluminium_dust");
-    public static final DeferredItem<Item> PURIFIED_COBALT_DUST = registerSimpleItem("cobalt_dust");
-    public static final DeferredItem<Item> PURIFIED_LEAD_DUST = registerSimpleItem("lead_dust");
-    public static final DeferredItem<Item> PURIFIED_NICKEL_DUST = registerSimpleItem("nickel_dust");
-    public static final DeferredItem<Item> PURIFIED_SILVER_DUST = registerSimpleItem("silver_dust");
-    public static final DeferredItem<Item> PURIFIED_URANIUM_DUST = registerSimpleItem("uranium_dust");
+    // 纯净粉 (Purified Dusts) - 洗矿机产物
+    public static final DeferredItem<Item> PURIFIED_TIN_DUST = registerSimpleItem("purified_tin_dust");
+    public static final DeferredItem<Item> PURIFIED_ZINC_DUST = registerSimpleItem("purified_zinc_dust");
+    public static final DeferredItem<Item> PURIFIED_ALUMINIUM_DUST = registerSimpleItem("purified_aluminium_dust");
+    public static final DeferredItem<Item> PURIFIED_COBALT_DUST = registerSimpleItem("purified_cobalt_dust");
+    public static final DeferredItem<Item> PURIFIED_LEAD_DUST = registerSimpleItem("purified_lead_dust");
+    public static final DeferredItem<Item> PURIFIED_NICKEL_DUST = registerSimpleItem("purified_nickel_dust");
+    public static final DeferredItem<Item> PURIFIED_SILVER_DUST = registerSimpleItem("purified_silver_dust");
+    public static final DeferredItem<Item> PURIFIED_URANIUM_DUST = registerSimpleItem("purified_uranium_dust");
 
     // 板 (Plates)
     public static final DeferredItem<Item> TIN_PLATE = registerSimpleItem("tin_plate");
@@ -69,6 +69,8 @@ public class ModItems {
     public static final DeferredItem<Item> SILVER_PLATE = registerSimpleItem("silver_plate");
     public static final DeferredItem<Item> GOLD_PLATE = registerSimpleItem("gold_plate");
     public static final DeferredItem<Item> COPPER_PLATE = registerSimpleItem("copper_plate");
+    public static final DeferredItem<Item> BRONZE_PLATE = registerSimpleItem("bronze_plate");
+    public static final DeferredItem<Item> STEEL_PLATE = registerSimpleItem("steel_plate");
 
     // 致密板 (Dense Plates)
     public static final DeferredItem<Item> DENSE_TIN_PLATE = registerSimpleItem("dense_tin_plate");
@@ -113,6 +115,18 @@ public class ModItems {
     public static final DeferredItem<Item> NICKEL_STICK = registerSimpleItem("nickel_stick");
     public static final DeferredItem<Item> SILVER_STICK = registerSimpleItem("silver_stick");
     public static final DeferredItem<Item> ZINC_STICK = registerSimpleItem("zinc_stick");
+    public static final DeferredItem<Item> IRON_STICK = registerSimpleItem("iron_stick");
+
+    // 机械零件 (Components) - 机器配方共用的中间件
+    public static final DeferredItem<Item> COPPER_COIL = registerSimpleItem("copper_coil");
+    public static final DeferredItem<Item> HEATING_COIL = registerSimpleItem("heating_coil");
+    public static final DeferredItem<Item> ELECTRIC_MOTOR = registerSimpleItem("electric_motor");
+    public static final DeferredItem<Item> ADVANCED_MOTOR = registerSimpleItem("advanced_motor");
+    public static final DeferredItem<Item> IRON_GEAR = registerSimpleItem("iron_gear");
+    public static final DeferredItem<Item> BRONZE_GEAR = registerSimpleItem("bronze_gear");
+    public static final DeferredItem<Item> BRONZE_ROTOR = registerSimpleItem("bronze_rotor");
+    public static final DeferredItem<Item> MAGNET = registerSimpleItem("magnet");
+    public static final DeferredItem<Item> ELECTRODE = registerSimpleItem("electrode");
 
     // 特殊锭 (Special Ingots)
     public static final DeferredItem<Item> IRRADIANT_URANIUM_INGOT = registerSimpleItem("irradiant_uranium_ingot");
@@ -136,6 +150,7 @@ public class ModItems {
     public static final DeferredItem<Item> MACHINE_UPGRADE_3 = registerSimpleItem("machine_upgrade_3");
 
     // 工具 (Tools)
+    public static final DeferredItem<GuideItem> GUIDE = registerItem("guide", GuideItem::new);
     public static final DeferredItem<CutterItem> CUTTER = registerItem("cutter", CutterItem::new);
     public static final DeferredItem<ForgeHammerItem> FORGE_HAMMER = registerItem("forge_hammer", ForgeHammerItem::new);
     public static final DeferredItem<TreetapItem> TREETAP = registerItem("treetap", TreetapItem::new);
@@ -147,8 +162,12 @@ public class ModItems {
     // 单元 (Cells)
     public static final DeferredItem<Item> EMPTY_CELL = registerSimpleItem("empty_cell");
     public static final DeferredItem<Item> COOLANT_CELL = registerSimpleItem("coolant_cell");
-    public static final DeferredItem<Item> COOLANT = registerSimpleItem("coolant");
-    public static final DeferredItem<Item> WATER = registerSimpleItem("water");
+
+    // 冷却液桶（冷却液为真正的流体，见 init.ModFluids）
+    public static final DeferredItem<net.minecraft.world.item.BucketItem> COOLANT_BUCKET =
+        ITEMS.registerItem("coolant_bucket",
+            props -> new net.minecraft.world.item.BucketItem(init.ModFluids.COOLANT.get(), props),
+            () -> new Item.Properties().craftRemainder(net.minecraft.world.item.Items.BUCKET).stacksTo(1));
 
     // 太阳能玻璃板 (Solar Glass Panels) - 保留到奇异
     public static final DeferredItem<Item> BASIC_SOLAR_GLASS = registerSimpleItem("basic_solar_glass");

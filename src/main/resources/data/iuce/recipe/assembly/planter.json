@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:glass",
+      "minecraft:glass",
+      "minecraft:glass"
+    ],
+    [
+      "minecraft:dirt",
+      "iuce:machine_casing",
+      "minecraft:dirt"
+    ],
+    [
+      "iuce:circuit",
+      "iuce:electric_motor",
+      "iuce:circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:planter",
+    "count": 1
+  }
+}

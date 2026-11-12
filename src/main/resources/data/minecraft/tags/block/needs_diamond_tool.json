@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "ero:uranium_ore",
-    "ero:deep_uranium_ore"
+    "iuce:uranium_ore",
+    "iuce:deep_uranium_ore"
   ]
 }

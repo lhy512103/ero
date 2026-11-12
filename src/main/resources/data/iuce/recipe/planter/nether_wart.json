@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "planter",
+  "input": "minecraft:nether_wart",
+  "input_count": 1,
+  "input2": "minecraft:soul_sand",
+  "input2_count": 1,
+  "result": { "id": "minecraft:nether_wart", "count": 2 },
+  "energy": 1000,
+  "time": 500
+}

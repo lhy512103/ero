@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "minecraft:deepslate_diamond_ore",
+  "result": {
+    "id": "iuce:diamond_dust",
+    "count": 2
+  },
+  "energy": 3600,
+  "time": 450
+}

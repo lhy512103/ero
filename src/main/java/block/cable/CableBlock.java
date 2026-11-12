@@ -181,14 +181,14 @@ public class CableBlock extends BaseEntityBlock {
                 cable.findOrCreateSharedStorage();
             }
             // 通知网络管理器：导线放置，可能需要合并网络
-            network.NetworkManager.getInstance().onCablePlaced(level, pos);
+            network.EnergyTransferManager.invalidate(level);
         }
     }
 
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
         // 通知网络管理器：导线移除，可能需要拆分网络
-        network.NetworkManager.getInstance().onCableRemoved(level, pos);
+        network.EnergyTransferManager.invalidate(level);
         // 重新分配共享存储
         CableBlockEntity.redistributeStorageOnRemoval(level, pos);
         super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);

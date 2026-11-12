@@ -1,0 +1,13 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "alloy_furnace",
+  "input": "iuce:copper_dust",
+  "input_count": 3,
+  "input2": "iuce:purified_tin_dust",
+  "result": {
+    "id": "iuce:bronze_ingot",
+    "count": 4
+  },
+  "energy": 4800,
+  "time": 300
+}

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:steel_nugget",
+      "iuce:steel_nugget",
+      "iuce:steel_nugget"
+    ],
+    [
+      "iuce:steel_nugget",
+      "iuce:steel_nugget",
+      "iuce:steel_nugget"
+    ],
+    [
+      "iuce:steel_nugget",
+      "iuce:steel_nugget",
+      "iuce:steel_nugget"
+    ]
+  ],
+  "result": {
+    "id": "iuce:steel_ingot",
+    "count": 1
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:tin_plate",
+    "iuce:cutter"
+  ],
+  "result": {
+    "id": "iuce:tin_cable",
+    "count": 2
+  }
+}

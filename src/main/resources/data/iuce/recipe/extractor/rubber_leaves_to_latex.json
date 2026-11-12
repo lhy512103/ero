@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "extractor",
+  "input": "iuce:rubber_leaves",
+  "input_count": 8,
+  "result": {
+    "id": "iuce:raw_latex",
+    "count": 1
+  },
+  "energy": 480,
+  "time": 120
+}

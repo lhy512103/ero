@@ -58,6 +58,11 @@ public class ModBlockEntities {
             new BlockEntityType<>(CompressorBlockEntity::new, false, ModBlocks.COMPRESSOR.get())
         );
 
+    public static final Supplier<BlockEntityType<machine.metal_former.MetalFormerBlockEntity>> METAL_FORMER =
+        BLOCK_ENTITIES.register("metal_former", () ->
+            new BlockEntityType<>(machine.metal_former.MetalFormerBlockEntity::new, false, ModBlocks.METAL_FORMER.get())
+        );
+
     public static final Supplier<BlockEntityType<GeothermalGeneratorBlockEntity>> GEOTHERMAL_GENERATOR =
         BLOCK_ENTITIES.register("geothermal_generator", () ->
             new BlockEntityType<>(GeothermalGeneratorBlockEntity::new, false, ModBlocks.GEOTHERMAL_GENERATOR.get())
@@ -66,6 +71,16 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<InductionFurnaceBlockEntity>> INDUCTION_FURNACE =
         BLOCK_ENTITIES.register("induction_furnace", () ->
             new BlockEntityType<>(InductionFurnaceBlockEntity::new, false, ModBlocks.INDUCTION_FURNACE.get())
+        );
+
+    public static final Supplier<BlockEntityType<machine.transformer.TransformerBlockEntity>> TRANSFORMER =
+        BLOCK_ENTITIES.register("transformer", () ->
+            new BlockEntityType<>(machine.transformer.TransformerBlockEntity::new, false, ModBlocks.TRANSFORMER.get())
+        );
+
+    public static final Supplier<BlockEntityType<ChuteBlockEntity>> CHUTE =
+        BLOCK_ENTITIES.register("chute", () ->
+            new BlockEntityType<>(ChuteBlockEntity::new, false, ModBlocks.CHUTE.get())
         );
 
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =

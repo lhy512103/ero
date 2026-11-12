@@ -1,0 +1,12 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    "iuce:fission_controller",
+    "iuce:reactor_casing_side",
+    "iuce:wrench"
+  ],
+  "result": {
+    "id": "iuce:fission_controller_front",
+    "count": 1
+  }
+}

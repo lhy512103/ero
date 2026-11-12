@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:tin_ingot"
+  ],
+  "result": {
+    "id": "iuce:tin_nugget",
+    "count": 9
+  }
+}

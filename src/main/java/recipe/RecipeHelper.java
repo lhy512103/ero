@@ -79,7 +79,9 @@ public class RecipeHelper {
         for (ItemStack stack : inputs) {
             copyList.add(stack.copy());
         }
-        CraftingInput craftingInput = CraftingInput.of(inputs.size(), 1, copyList);
+        // 工业工作台传入 9 格（3x3，行优先）；按 3x3 构造才能让有序配方的包围盒对得上
+        boolean grid3x3 = inputs.size() == 9;
+        CraftingInput craftingInput = CraftingInput.of(grid3x3 ? 3 : inputs.size(), grid3x3 ? 3 : 1, copyList);
 
         Optional<RecipeHolder<CraftingRecipe>> result = recipeManager.getRecipeFor(
             ModRecipes.ERO_CRAFTING_TYPE.get(), craftingInput, level
@@ -95,6 +97,18 @@ public class RecipeHelper {
      * @param input  输入物品
      * @return 匹配的熔炼配方，如果没有找到则返回 null
      */
+    public static net.minecraft.world.item.crafting.AbstractCookingRecipe findCookingRecipe(Level level, ItemStack input) {
+        if (level == null || input.isEmpty()) return null;
+        RecipeManager manager = getRecipeManager(level);
+        if (manager == null) return null;
+        SingleRecipeInput recipeInput = new SingleRecipeInput(input);
+        var blasting = manager.getRecipeFor(net.minecraft.world.item.crafting.RecipeType.BLASTING, recipeInput, level);
+        if (blasting.isPresent()) return blasting.get().value();
+        var smoking = manager.getRecipeFor(net.minecraft.world.item.crafting.RecipeType.SMOKING, recipeInput, level);
+        if (smoking.isPresent()) return smoking.get().value();
+        return findSmeltingRecipe(level, input);
+    }
+
     public static SmeltingRecipe findSmeltingRecipe(Level level, ItemStack input) {
         if (level == null || input.isEmpty()) return null;
 

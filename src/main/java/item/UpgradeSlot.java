@@ -28,6 +28,11 @@ public class UpgradeSlot extends ResourceHandlerSlot {
 
     @Override
     public int getMaxStackSize() {
-        return 1; // 升级物品最大堆叠数量为1
+        return 1; // 每个升级槽只放 1 个
+    }
+
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return 1; // 升级可在背包里堆叠，但放进槽里始终只取 1 个
     }
 }

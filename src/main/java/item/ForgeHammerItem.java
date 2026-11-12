@@ -41,6 +41,6 @@ public class ForgeHammerItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
         int damage = stack.getOrDefault(DataComponents.DAMAGE, 0);
         int remaining = MAX_DAMAGE - damage;
-        builder.accept(Component.translatable("item.ero.forge_hammer.durability", remaining, MAX_DAMAGE));
+        builder.accept(Component.translatable("item.iuce.forge_hammer.durability", remaining, MAX_DAMAGE));
     }
 }

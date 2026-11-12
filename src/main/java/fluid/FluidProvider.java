@@ -1,46 +1,42 @@
 package fluid;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 /**
- * 流体提供者接口
- * <p>
- * 实现此接口的方块实体可以向相邻方块提供流体，也可以接收流体。
- * </p>
+ * A machine with a single internal fluid tank. The amount-based methods are the simple API used
+ * between IUCE machines and by the fluid upgrades; the tank itself is also exposed to other mods
+ * as a standard fluid handler.
  */
 public interface FluidProvider {
 
-    /**
-     * 尝试从提供者中提取指定数量的流体
-     *
-     * @param maxAmount 最大提取量（mB）
-     * @return 实际提取的流体量（mB）
-     */
-    int extractFluid(int maxAmount);
+    /** The machine's tank. */
+    MachineTank getTank();
 
-    /**
-     * 尝试向提供者中输入指定数量的流体
-     *
-     * @param maxAmount 最大输入量（mB）
-     * @return 实际输入的流体量（mB）
-     */
-    int insertFluid(int maxAmount);
+    /** The fluid this machine works with; amount-based transfers always move this fluid. */
+    default Fluid getTankFluid() { return Fluids.WATER; }
 
-    /**
-     * 获取当前存储的流体量（mB）
-     */
-    int getStoredFluid();
+    /** Removes up to {@code maxAmount} mB and returns how much was removed. */
+    default int extractFluid(int maxAmount) { return getTank().drain(maxAmount); }
 
-    /**
-     * 获取最大存储流体量（mB）
-     */
-    int getMaxStoredFluid();
+    /** Adds up to {@code maxAmount} mB and returns how much was accepted. */
+    default int insertFluid(int maxAmount) { return getTank().fill(getTankFluid(), maxAmount); }
 
-    /**
-     * 获取当前存储流体对应的物品图标（用于 GUI 显示）
-     * <p>
-     * 返回 ItemStack.EMPTY 表示无流体或无对应物品
-     * </p>
-     */
-    ItemStack getFluidItem();
+    default int getStoredFluid() { return getTank().getAmount(); }
+
+    default int getMaxStoredFluid() { return getTank().getCapacity(); }
+
+    /** An item representing the stored fluid, for display. */
+    default ItemStack getFluidItem() {
+        if (getTank().isEmpty()) return ItemStack.EMPTY;
+        return new ItemStack(getTank().getResource().getFluid().getBucket());
+    }
+
+    /** Adds exactly one bucket if it fits; returns whether it did. */
+    default boolean addBucket() {
+        if (getTank().getSpace() < 1000) return false;
+        return getTank().fill(getTankFluid(), 1000) == 1000;
+    }
 }

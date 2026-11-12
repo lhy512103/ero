@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:hopper",
+    "iuce:circuit",
+    "minecraft:water_bucket",
+    "iuce:electric_motor"
+  ],
+  "result": {
+    "id": "iuce:fluid_pulling_upgrade",
+    "count": 1
+  }
+}

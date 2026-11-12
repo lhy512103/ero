@@ -1,0 +1,15 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electrolyzer",
+  "input": "iuce:diamond_dust",
+  "result": {
+    "id": "iuce:energium_dust",
+    "count": 2
+  },
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
+  "energy": 19200,
+  "time": 400
+}

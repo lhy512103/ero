@@ -1,0 +1,24 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "ore_washer",
+  "input": "iuce:crushed_tin_dust",
+  "result": {
+    "id": "iuce:purified_tin_dust",
+    "count": 1
+  },
+  "extra_results": [
+    {
+      "result": {
+        "id": "iuce:zinc_nugget",
+        "count": 1
+      },
+      "chance": 0.5
+    }
+  ],
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
+  "energy": 800,
+  "time": 160
+}

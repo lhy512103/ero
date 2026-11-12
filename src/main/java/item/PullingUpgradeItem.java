@@ -63,22 +63,13 @@ public class PullingUpgradeItem extends UpgradeItem {
 
         if (sourceHandler == null || targetHandler == null) return false;
 
-        int sourceUpgradeStart = source.getUpgradeSlotStart();
-        int targetUpgradeStart = target.getUpgradeSlotStart();
-
-        // 源机器输入槽范围：0 ~ sourceUpgradeStart/2-1
-        int sourceInputEnd = sourceUpgradeStart / 2 - 1;
-
-        // 目标机器输入槽范围：0 ~ targetUpgradeStart/2-1
-        int targetInputEnd = targetUpgradeStart / 2 - 1;
-
-        for (int srcSlot = 0; srcSlot <= sourceInputEnd; srcSlot++) {
+        for (int srcSlot : source.getInputSlots()) {
             ItemResource srcResource = sourceHandler.getResource(srcSlot);
             int srcAmount = sourceHandler.getAmountAsInt(srcSlot);
 
             if (srcResource.isEmpty() || srcAmount <= 0) continue;
 
-            for (int tgtSlot = 0; tgtSlot <= targetInputEnd; tgtSlot++) {
+            for (int tgtSlot : target.getInputSlots()) {
                 try (Transaction tx = Transaction.openRoot()) {
                     int extracted = sourceHandler.extract(srcSlot, srcResource, EjectorUpgradeItem.MAX_TRANSFER_COUNT, tx);
                     if (extracted > 0) {
@@ -108,10 +99,10 @@ public class PullingUpgradeItem extends UpgradeItem {
 
         BlockPos boundPos = getBoundPos(stack);
         if (boundPos != null) {
-            builder.accept(Component.literal("功能: 自动抽取目标机器输入槽物品").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("方向: 目标机器输入 → 当前机器输入").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("范围: " + EjectorUpgradeItem.MAX_RANGE + "格").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("间隔: 1秒").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.pulling_upgrade.1").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.pulling_upgrade.2").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.upgrade.range", EjectorUpgradeItem.MAX_RANGE).withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.upgrade.interval").withStyle(ChatFormatting.GRAY));
         }
     }
 }

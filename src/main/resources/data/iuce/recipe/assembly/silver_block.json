@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:silver_ingot",
+      "iuce:silver_ingot",
+      "iuce:silver_ingot"
+    ],
+    [
+      "iuce:silver_ingot",
+      "iuce:silver_ingot",
+      "iuce:silver_ingot"
+    ],
+    [
+      "iuce:silver_ingot",
+      "iuce:silver_ingot",
+      "iuce:silver_ingot"
+    ]
+  ],
+  "result": {
+    "id": "iuce:silver_block",
+    "count": 1
+  }
+}

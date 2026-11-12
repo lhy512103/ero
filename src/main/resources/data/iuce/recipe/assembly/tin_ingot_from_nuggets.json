@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:tin_nugget",
+      "iuce:tin_nugget",
+      "iuce:tin_nugget"
+    ],
+    [
+      "iuce:tin_nugget",
+      "iuce:tin_nugget",
+      "iuce:tin_nugget"
+    ],
+    [
+      "iuce:tin_nugget",
+      "iuce:tin_nugget",
+      "iuce:tin_nugget"
+    ]
+  ],
+  "result": {
+    "id": "iuce:tin_ingot",
+    "count": 1
+  }
+}

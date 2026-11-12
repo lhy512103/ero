@@ -1,0 +1,18 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:silver_stick"
+    ],
+    [
+      "iuce:coal_ball"
+    ],
+    [
+      "iuce:zinc_stick"
+    ]
+  ],
+  "result": {
+    "id": "iuce:electrode",
+    "count": 2
+  }
+}

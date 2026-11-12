@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electric_furnace",
+  "input": "iuce:purified_silver_dust",
+  "result": {
+    "id": "iuce:silver_ingot",
+    "count": 3
+  },
+  "energy": 480,
+  "time": 120
+}

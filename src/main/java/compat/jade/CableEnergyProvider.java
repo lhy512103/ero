@@ -23,7 +23,7 @@ import snownee.jade.api.view.ProgressView;
 public class CableEnergyProvider implements StreamServerDataProvider<BlockAccessor, CableEnergyProvider.Data> {
 
     public static final CableEnergyProvider INSTANCE = new CableEnergyProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "cable_energy");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "cable_energy");
 
     private static final int DARK_RED = 0xFFAA0000;
 
@@ -82,7 +82,7 @@ public class CableEnergyProvider implements StreamServerDataProvider<BlockAccess
                 data.energy() + " / " + data.capacity() + " EU (" + data.voltageName() + cableInfo + ", " + data.transferRate() + " EU/t)");
 
             ProgressView view = new ProgressView(
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());

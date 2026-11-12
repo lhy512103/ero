@@ -37,9 +37,8 @@ public class EquipmentChargeSlot extends ResourceHandlerSlot {
      */
     public static boolean isEnergyEquipment(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        // 检查物品是否具有能量能力且为装备类型
-        return stack.getEquipmentSlot() != null &&
-               hasEnergyCapability(stack);
+        // Tools and armor share these charging slots; capability, not equipment type, decides.
+        return ChargeSlot.isChargeableItem(stack);
     }
 
     /**

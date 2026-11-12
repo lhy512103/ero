@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:silver_plate", "iuce:cobalt_plate", "iuce:silver_plate"],
+    ["iuce:cobalt_plate", "iuce:perfect_plated_shell", "iuce:cobalt_plate"],
+    ["iuce:silver_plate", "iuce:lapotron_crystal", "iuce:silver_plate"]
+  ],
+  "result": { "id": "iuce:photon_plated_shell", "count": 1 }
+}

@@ -25,12 +25,14 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.MACERATOR.get());
         register(event, ModBlockEntities.ELECTRIC_FURNACE.get());
         register(event, ModBlockEntities.COMPRESSOR.get());
+        register(event, ModBlockEntities.METAL_FORMER.get());
         register(event, ModBlockEntities.EXTRACTOR.get());
         register(event, ModBlockEntities.INDUCTION_FURNACE.get());
         register(event, ModBlockEntities.ORE_WASHER.get());
         register(event, ModBlockEntities.ELECTROLYZER.get());
 
         // 储能箱
+        register(event, ModBlockEntities.TRANSFORMER.get());
         register(event, ModBlockEntities.BATBOX.get());
         register(event, ModBlockEntities.CESU.get());
         register(event, ModBlockEntities.MFE.get());
@@ -44,6 +46,9 @@ public final class EUCapabilityRegistry {
 
         // 工业工作台
         register(event, ModBlockEntities.INDUSTRIAL_WORKBENCH.get());
+
+        // 滑槽：任意面都可以放入和取出
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());
@@ -64,7 +69,7 @@ public final class EUCapabilityRegistry {
         event.registerItem(Capabilities.Energy.ITEM,
             (stack, ctx) -> {
                 if (stack.getItem() instanceof RechargeableBatteryItem battery) {
-                    return battery.createEnergyHandler(stack);
+                    return new RechargeableBatteryItem.BatteryEnergyHandler(ctx, battery.getCapacity(), battery.getMaxTransfer());
                 }
                 return null;
             },
@@ -78,7 +83,7 @@ public final class EUCapabilityRegistry {
         long toolCapacity = 10_000L;
         long toolTransfer = 1_000L;
         event.registerItem(Capabilities.Energy.ITEM,
-            (stack, ctx) -> new RechargeableBatteryItem.BatteryEnergyHandler(stack, toolCapacity, toolTransfer),
+            (stack, ctx) -> new RechargeableBatteryItem.BatteryEnergyHandler(ctx, toolCapacity, toolTransfer),
             ModItems.ELECTRIC_TREETAP.get(),
             ModItems.ELECTRIC_WRENCH.get(),
             ModItems.ELECTRIC_HOE.get()
@@ -94,6 +99,13 @@ public final class EUCapabilityRegistry {
                 }
                 return null;
             });
+        // Standard item / fluid access for hoppers and other mods' pipes.
+        event.registerBlockEntity(Capabilities.Item.BLOCK, type,
+            (blockEntity, direction) -> blockEntity instanceof blockentity.MachineBlockEntity be
+                ? be.getAutomationItemHandler(direction) : null);
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, type,
+            (blockEntity, direction) -> blockEntity instanceof fluid.FluidProvider provider
+                ? provider.getTank() : null);
     }
 
     private static void registerCable(RegisterCapabilitiesEvent event,

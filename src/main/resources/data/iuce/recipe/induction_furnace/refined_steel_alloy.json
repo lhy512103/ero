@@ -1,0 +1,13 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "alloy_furnace",
+  "input": "iuce:steel_ingot",
+  "input_count": 3,
+  "input2": "iuce:purified_nickel_dust",
+  "result": {
+    "id": "iuce:refined_steel_ingot",
+    "count": 3
+  },
+  "energy": 19200,
+  "time": 600
+}

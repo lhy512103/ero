@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:copper_cable",
+      "iuce:copper_cable",
+      "iuce:copper_cable"
+    ],
+    [
+      "iuce:copper_cable",
+      "iuce:iron_stick",
+      "iuce:copper_cable"
+    ],
+    [
+      "iuce:copper_cable",
+      "iuce:copper_cable",
+      "iuce:copper_cable"
+    ]
+  ],
+  "result": {
+    "id": "iuce:copper_coil",
+    "count": 1
+  }
+}

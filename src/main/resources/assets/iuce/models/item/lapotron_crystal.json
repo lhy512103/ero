@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "iuce:item/battery/lapotron_crystal_0"
+  },
+  "overrides": [
+    {"predicate": {"level": 0}, "model": "iuce:item/lapotron_crystal0"},
+    {"predicate": {"level": 0.25}, "model": "iuce:item/lapotron_crystal1"},
+    {"predicate": {"level": 0.5}, "model": "iuce:item/lapotron_crystal2"},
+    {"predicate": {"level": 0.75}, "model": "iuce:item/lapotron_crystal3"},
+    {"predicate": {"level": 1}, "model": "iuce:item/lapotron_crystal4"}
+  ]
+}

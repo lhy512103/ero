@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:insulated_gold_cable",
+      "iuce:energy_crystal",
+      "iuce:insulated_gold_cable"
+    ],
+    [
+      "iuce:energy_crystal",
+      "iuce:machine_casing_2",
+      "iuce:energy_crystal"
+    ],
+    [
+      "iuce:insulated_gold_cable",
+      "iuce:cesu",
+      "iuce:insulated_gold_cable"
+    ]
+  ],
+  "result": {
+    "id": "iuce:mfe",
+    "count": 1
+  }
+}

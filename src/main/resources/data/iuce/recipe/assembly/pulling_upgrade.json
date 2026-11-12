@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:hopper",
+    "iuce:circuit",
+    "iuce:iron_plate",
+    "iuce:electric_motor"
+  ],
+  "result": {
+    "id": "iuce:pulling_upgrade",
+    "count": 1
+  }
+}

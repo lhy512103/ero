@@ -1,0 +1,8 @@
+{
+  "values": [
+    "iuce:purified_tin_dust", "iuce:purified_zinc_dust", "iuce:purified_aluminium_dust", "iuce:purified_cobalt_dust",
+    "iuce:purified_lead_dust", "iuce:purified_nickel_dust", "iuce:purified_silver_dust", "iuce:purified_uranium_dust",
+    "iuce:bronze_dust", "iuce:diamond_dust", "iuce:energium_dust", "iuce:coal_dust",
+    "iuce:copper_dust"
+  ]
+}

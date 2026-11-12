@@ -23,8 +23,8 @@ public class OptionalCraftingRecipeSerializer {
         this.recipeType = recipeType;
         this.CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                Ingredient.CODEC.listOf().fieldOf("input").forGetter(OptionalCraftingRecipe::getRequiredInputs),
-                Ingredient.CODEC.listOf().optionalFieldOf("optional", List.of()).forGetter(OptionalCraftingRecipe::getOptionalInputs),
+                IngredientHelper.FLEXIBLE_CODEC.listOf().fieldOf("input").forGetter(OptionalCraftingRecipe::getRequiredInputs),
+                IngredientHelper.FLEXIBLE_CODEC.listOf().optionalFieldOf("optional", List.of()).forGetter(OptionalCraftingRecipe::getOptionalInputs),
                 ItemStackTemplate.CODEC.fieldOf("result").forGetter(OptionalCraftingRecipe::getOutputTemplate)
             ).apply(instance, OptionalCraftingRecipe::new)
         );

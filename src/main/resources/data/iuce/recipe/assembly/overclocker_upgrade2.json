@@ -1,0 +1,12 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    "iuce:overclocker_upgrade1",
+    "iuce:advanced_circuit",
+    "iuce:advanced_circuit",
+    "iuce:coolant_cell",
+    "iuce:coolant_cell",
+    "iuce:energy_crystal"
+  ],
+  "result": { "id": "iuce:overclocker_upgrade2", "count": 1 }
+}

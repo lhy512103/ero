@@ -1,13 +1,13 @@
-﻿{
+{
   "replace": false,
   "values": [
-    "ero:tin_ore",
-    "ero:zinc_ore",
-    "ero:aluminium_ore",
-    "ero:cobalt_ore",
-    "ero:lead_ore",
-    "ero:nickel_ore",
-    "ero:silver_ore",
-    "ero:uranium_ore"
+    "iuce:tin_ore",
+    "iuce:zinc_ore",
+    "iuce:aluminium_ore",
+    "iuce:cobalt_ore",
+    "iuce:lead_ore",
+    "iuce:nickel_ore",
+    "iuce:silver_ore",
+    "iuce:uranium_ore"
   ]
 }

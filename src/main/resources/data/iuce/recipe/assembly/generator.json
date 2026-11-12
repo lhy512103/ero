@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:insulated_copper_cable",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "minecraft:furnace",
+      "iuce:iron_plate"
+    ],
+    [
+      "",
+      "minecraft:redstone",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:generator",
+    "count": 1
+  }
+}

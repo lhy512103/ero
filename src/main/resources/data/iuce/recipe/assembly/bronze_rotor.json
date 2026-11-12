@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:bronze_plate",
+      "",
+      "iuce:bronze_plate"
+    ],
+    [
+      "",
+      "iuce:nickel_stick",
+      ""
+    ],
+    [
+      "iuce:bronze_plate",
+      "",
+      "iuce:bronze_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:bronze_rotor",
+    "count": 1
+  }
+}

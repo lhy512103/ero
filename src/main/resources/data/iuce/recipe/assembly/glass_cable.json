@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "minecraft:glass",
+      "minecraft:glass",
+      "minecraft:glass"
+    ],
+    [
+      "iuce:energy_crystal",
+      "iuce:silver_plate",
+      "iuce:energy_crystal"
+    ],
+    [
+      "iuce:advanced_circuit",
+      "iuce:silver_plate",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:glass_cable",
+    "count": 4
+  }
+}

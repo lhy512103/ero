@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "minecraft:glowstone_dust",
+      "iuce:bronze_gear",
+      "minecraft:glowstone_dust"
+    ],
+    [
+      "iuce:bronze_plate",
+      "iuce:machine_upgrade_0",
+      "iuce:bronze_plate"
+    ],
+    [
+      "minecraft:glowstone_dust",
+      "iuce:bronze_gear",
+      "minecraft:glowstone_dust"
+    ]
+  ],
+  "result": {
+    "id": "iuce:machine_upgrade_1",
+    "count": 1
+  }
+}

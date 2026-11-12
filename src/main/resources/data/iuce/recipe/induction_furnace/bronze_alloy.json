@@ -1,0 +1,13 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "alloy_furnace",
+  "input": "minecraft:copper_ingot",
+  "input_count": 3,
+  "input2": "iuce:tin_ingot",
+  "result": {
+    "id": "iuce:bronze_ingot",
+    "count": 3
+  },
+  "energy": 4800,
+  "time": 300
+}

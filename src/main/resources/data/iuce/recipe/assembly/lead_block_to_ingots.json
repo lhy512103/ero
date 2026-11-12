@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:lead_block"
+  ],
+  "result": {
+    "id": "iuce:lead_ingot",
+    "count": 9
+  }
+}

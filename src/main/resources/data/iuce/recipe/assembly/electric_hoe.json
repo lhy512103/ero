@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:iron_hoe",
+    "iuce:re_battery",
+    "iuce:circuit",
+    "iuce:electric_motor"
+  ],
+  "result": {
+    "id": "iuce:electric_hoe",
+    "count": 1
+  }
+}

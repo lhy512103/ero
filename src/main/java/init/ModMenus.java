@@ -49,6 +49,12 @@ public class ModMenus {
                 (machine.compressor.CompressorBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
         ));
 
+    public static final Supplier<MenuType<machine.metal_former.menu.MetalFormerMenu>> METAL_FORMER =
+        MENUS.register("metal_former", () -> IMenuTypeExtension.create(
+            (IContainerFactory<machine.metal_former.menu.MetalFormerMenu>) (id, inv, data) -> new machine.metal_former.menu.MetalFormerMenu(id, inv,
+                (machine.metal_former.MetalFormerBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
+        ));
+
     public static final Supplier<MenuType<ExtractorMenu>> EXTRACTOR =
         MENUS.register("extractor", () -> IMenuTypeExtension.create(
             (IContainerFactory<ExtractorMenu>) (id, inv, data) -> new ExtractorMenu(id, inv,

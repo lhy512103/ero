@@ -1,0 +1,7 @@
+{
+  "values": [
+    "iuce:tin_nugget", "iuce:zinc_nugget", "iuce:aluminium_nugget", "iuce:cobalt_nugget",
+    "iuce:lead_nugget", "iuce:nickel_nugget", "iuce:silver_nugget", "iuce:uranium_nugget",
+    "iuce:steel_nugget", "iuce:refined_steel_nugget"
+  ]
+}

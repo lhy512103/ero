@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:glass_cable",
+      "iuce:glass_cable",
+      "iuce:glass_cable"
+    ],
+    [
+      "iuce:lapotron_crystal",
+      "iuce:photon_plated_shell",
+      "iuce:lapotron_crystal"
+    ],
+    [
+      "iuce:advanced_circuit",
+      "iuce:photon_plated_shell",
+      "iuce:advanced_circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:singular_cable",
+    "count": 2
+  }
+}

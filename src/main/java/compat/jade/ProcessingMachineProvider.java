@@ -27,7 +27,7 @@ import snownee.jade.api.view.ProgressView;
 public class ProcessingMachineProvider implements StreamServerDataProvider<BlockAccessor, ProcessingMachineProvider.Data> {
 
     public static final ProcessingMachineProvider INSTANCE = new ProcessingMachineProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "processing_machine");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "processing_machine");
 
     /** 暗红色 (ARGB) */
     private static final int DARK_RED = 0xFFAA0000;
@@ -97,7 +97,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
             Component text = Component.literal(data.energy() + " / " + data.capacity() + " EU (" + data.voltageName() + ")");
 
             ProgressView energyView = new ProgressView(
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());
@@ -106,7 +106,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
 
             // 如果正在处理且有进度标签，显示文本进度
             if (data.processing() && !data.progressLabel().isEmpty()) {
-                Component progressText = Component.literal(data.progressLabel() + ": " + (int)(data.progress() * 100) + "%");
+                Component progressText = Component.translatable(data.progressLabel()).append(": " + (int)(data.progress() * 100) + "%");
                 tooltip.add(progressText);
             }
         }

@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:zinc_ingot",
+    "iuce:zinc_ingot",
+    "iuce:forge_hammer"
+  ],
+  "result": {
+    "id": "iuce:zinc_plate",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:advanced_circuit",
+      "iuce:reactor_casing",
+      "iuce:advanced_circuit"
+    ],
+    [
+      "iuce:lapotron_crystal",
+      "iuce:mfe",
+      "iuce:lapotron_crystal"
+    ],
+    [
+      "iuce:dense_steel_plate",
+      "iuce:reactor_casing",
+      "iuce:dense_steel_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:fission_controller",
+    "count": 1
+  }
+}

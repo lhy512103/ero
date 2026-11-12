@@ -1,0 +1,11 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    "iuce:reactor_casing",
+    "iuce:dense_obsidian_plate"
+  ],
+  "result": {
+    "id": "iuce:reactor_casing_back",
+    "count": 1
+  }
+}

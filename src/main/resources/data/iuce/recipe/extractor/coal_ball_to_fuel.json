@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "extractor",
+  "input": "iuce:coal_ball",
+  "result": {
+    "id": "iuce:coal_fuel",
+    "count": 4
+  },
+  "energy": 1200,
+  "time": 300
+}

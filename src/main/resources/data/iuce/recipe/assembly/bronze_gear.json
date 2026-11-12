@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:bronze_plate",
+      ""
+    ],
+    [
+      "iuce:bronze_plate",
+      "iuce:iron_gear",
+      "iuce:bronze_plate"
+    ],
+    [
+      "",
+      "iuce:bronze_plate",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:bronze_gear",
+    "count": 1
+  }
+}

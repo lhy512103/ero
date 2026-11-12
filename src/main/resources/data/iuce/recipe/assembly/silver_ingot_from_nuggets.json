@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:silver_nugget",
+      "iuce:silver_nugget",
+      "iuce:silver_nugget"
+    ],
+    [
+      "iuce:silver_nugget",
+      "iuce:silver_nugget",
+      "iuce:silver_nugget"
+    ],
+    [
+      "iuce:silver_nugget",
+      "iuce:silver_nugget",
+      "iuce:silver_nugget"
+    ]
+  ],
+  "result": {
+    "id": "iuce:silver_ingot",
+    "count": 1
+  }
+}

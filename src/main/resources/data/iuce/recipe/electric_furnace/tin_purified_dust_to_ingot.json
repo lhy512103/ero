@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electric_furnace",
+  "input": "iuce:purified_tin_dust",
+  "result": {
+    "id": "iuce:tin_ingot",
+    "count": 3
+  },
+  "energy": 480,
+  "time": 120
+}

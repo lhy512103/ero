@@ -1,0 +1,15 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "electrolyzer",
+  "input": "iuce:machine_casing",
+  "result": {
+    "id": "iuce:plated_shell",
+    "count": 1
+  },
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
+  "energy": 12800,
+  "time": 400
+}

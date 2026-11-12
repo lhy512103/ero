@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "minecraft:piston",
+      "iuce:iron_plate"
+    ],
+    [
+      "iuce:iron_stick",
+      "minecraft:redstone",
+      "iuce:iron_stick"
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:insulated_copper_cable",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:metal_former",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "iuce:bronze_plate",
+  "input_count": 9,
+  "result": {
+    "id": "iuce:dense_bronze_plate",
+    "count": 1
+  },
+  "energy": 3000,
+  "time": 300
+}

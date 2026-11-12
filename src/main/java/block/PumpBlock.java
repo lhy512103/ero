@@ -94,7 +94,7 @@ public class PumpBlock extends MachineBlock implements SimpleWaterloggedBlock {
         if (stack.is(Items.WATER_BUCKET)) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof PumpBlockEntity pump) {
-                if (pump.addWaterBucket()) {
+                if (pump.addBucket()) {
                     stack.shrink(1);
                     ItemStack emptyBucket = new ItemStack(Items.BUCKET);
                     if (!player.getInventory().add(emptyBucket)) {
@@ -133,7 +133,7 @@ public class PumpBlock extends MachineBlock implements SimpleWaterloggedBlock {
                                         player.drop(upgradeStack, false);
                                     }
                                     player.sendSystemMessage(
-                                        Component.literal("已取出升级").withStyle(ChatFormatting.YELLOW)
+                                        Component.translatable("message.iuce.upgrade.removed").withStyle(ChatFormatting.YELLOW)
                                     );
                                     return InteractionResult.SUCCESS;
                                 }
@@ -172,7 +172,7 @@ public class PumpBlock extends MachineBlock implements SimpleWaterloggedBlock {
                                     tx.commit();
                                     stack.shrink(1);
                                     player.sendSystemMessage(
-                                        Component.literal("已安装升级").withStyle(ChatFormatting.GREEN)
+                                        Component.translatable("message.iuce.upgrade.installed_simple").withStyle(ChatFormatting.GREEN)
                                     );
                                     return InteractionResult.SUCCESS;
                                 }
@@ -181,7 +181,7 @@ public class PumpBlock extends MachineBlock implements SimpleWaterloggedBlock {
                     }
 
                     player.sendSystemMessage(
-                        Component.literal("没有空的升级槽").withStyle(ChatFormatting.RED)
+                        Component.translatable("message.iuce.upgrade.no_slot").withStyle(ChatFormatting.RED)
                     );
                     return InteractionResult.FAIL;
                 }

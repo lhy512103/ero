@@ -26,7 +26,7 @@ import snownee.jade.api.view.ProgressView;
 public class FluidInfoProvider implements StreamServerDataProvider<BlockAccessor, FluidInfoProvider.Data> {
 
     public static final FluidInfoProvider INSTANCE = new FluidInfoProvider();
-    public static final Identifier UID = Identifier.fromNamespaceAndPath("ero", "fluid_info");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath("iuce", "fluid_info");
 
     /** 蓝色 (ARGB) */
     private static final int WATER_BLUE = 0xFF3366CC;
@@ -75,10 +75,10 @@ public class FluidInfoProvider implements StreamServerDataProvider<BlockAccessor
             float ratio = (float) data.fluid() / data.maxFluid();
             int buckets = data.fluid() / 1000;
             int maxBuckets = data.maxFluid() / 1000;
-            Component text = Component.literal(buckets + " / " + maxBuckets + " 桶 (" + data.fluid() + " mB)");
+            Component text = Component.translatable("tooltip.iuce.jade_fluid", buckets, maxBuckets, data.fluid());
 
             ProgressView progressView = new ProgressView(
-                    ProgressView.Part.of(ratio, WATER_BLUE),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), WATER_BLUE),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());

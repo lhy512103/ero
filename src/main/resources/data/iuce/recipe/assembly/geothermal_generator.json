@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:empty_cell",
+      "minecraft:glass",
+      "iuce:empty_cell"
+    ],
+    [
+      "iuce:empty_cell",
+      "iuce:dense_tin_plate",
+      "iuce:empty_cell"
+    ],
+    [
+      "iuce:heating_coil",
+      "iuce:generator",
+      "iuce:heating_coil"
+    ]
+  ],
+  "result": {
+    "id": "iuce:geothermal_generator",
+    "count": 1
+  }
+}

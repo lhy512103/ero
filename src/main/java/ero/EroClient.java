@@ -33,9 +33,34 @@ public class EroClient {
     public EroClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         container.getEventBus().addListener(EroClient::registerScreens);
+        container.getEventBus().addListener(EroClient::registerFluidModels);
+        client.guide.Guide.init(container.getEventBus());
+        if (System.getProperty("iuce.guideShots") != null) {
+            try {
+                Class.forName("regression.GuideShots").getMethod("register").invoke(null);
+            } catch (ReflectiveOperationException error) {
+                throw new IllegalStateException("Guide screenshot tool needs -PregressionTests", error);
+            }
+        }
 
         // 移除模组物品 tooltip 底部的模组名标签（模组名在渲染阶段追加，需在 GatherComponents 中处理）
         NeoForge.EVENT_BUS.addListener(EroClient::onGatherTooltipComponents);
+
+        // 机器 GUI 左上角 "i" 信息按钮
+        NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onMouseClicked);
+        NeoForge.EVENT_BUS.addListener(client.gui.component.MachineInfoPanel::onRenderForeground);
+
+        // 手持传送带、滑槽时显示摆放预览和方向箭头
+        NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
+    }
+
+    private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
+        event.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+            new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/coolant_still")),
+            new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/coolant_flow")),
+            null, null),
+            init.ModFluids.COOLANT, init.ModFluids.FLOWING_COOLANT);
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
@@ -43,6 +68,7 @@ public class EroClient {
         event.register(ModMenus.GENERATOR.get(), GeneratorScreen::new);
         event.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
         event.register(ModMenus.COMPRESSOR.get(), CompressorScreen::new);
+        event.register(ModMenus.METAL_FORMER.get(), machine.metal_former.screen.MetalFormerScreen::new);
         event.register(ModMenus.EXTRACTOR.get(), ExtractorScreen::new);
         event.register(ModMenus.INDUCTION_FURNACE.get(), InductionFurnaceScreen::new);
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);

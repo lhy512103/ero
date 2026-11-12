@@ -1,0 +1,9 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    ["", "iuce:tin_plate", ""],
+    ["iuce:tin_plate", "", "iuce:tin_plate"],
+    ["", "iuce:tin_plate", ""]
+  ],
+  "result": { "id": "iuce:empty_cell", "count": 4 }
+}

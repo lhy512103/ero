@@ -1,0 +1,56 @@
+---
+title: 机器升级
+category: automation
+order: 10
+icon: iuce:overclocker_upgrade
+items: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upgrade2, iuce:ejector_upgrade, iuce:pulling_upgrade, iuce:fluid_ejector_upgrade, iuce:fluid_pulling_upgrade, iuce:coolant_cell, iuce:empty_cell, iuce:coolant_bucket
+---
+
+大多数机器界面右侧有 4 个升级槽，每格放 1 个升级。手持升级**右键机器**可以直接装上，也可以在界面里放进升级槽。
+
+## 超频
+
+超频升级有三档，每装一个都把加工时间和每 tick 耗电各乘上一个系数，效果相乘；每台机器最多 4 个生效，不同档可以混装。
+
+| 升级 | 加工时间 | 每 tick 耗电 | 装满 4 个 |
+| --- | --- | --- | --- |
+| {item:iuce:overclocker_upgrade} | ×0.75 | ×1.5 | 时间 32%，耗电 5 倍 |
+| {item:iuce:overclocker_upgrade1} | ×0.60 | ×1.8 | 时间 13%，耗电 10.5 倍 |
+| {item:iuce:overclocker_upgrade2} | ×0.45 | ×2.2 | 时间 4%，耗电 23 倍 |
+
+档位越高，同样的产量总耗电反而越少：基础款每件多花 12%，终极款基本不多花。
+
+{recipe: iuce:overclocker_upgrade, iuce:overclocker_upgrade1, iuce:overclocker_upgrade2}
+
+> [!WARN]
+> 超频后的机器每 tick 耗电可能超过铜质导线的 32 EU 上限，记得换粗一点的导线。
+
+## 物品传输
+
+物品升级要先**绑定目标机器**：手持升级，潜行右键目标机器，然后右键本机装上（或在界面里放进升级槽）。目标必须是模组机器，距离不超过 8 格。
+
+| 升级 | 作用 |
+| --- | --- |
+| {item:iuce:ejector_upgrade} | 把本机的产物送进目标机器的输入槽 |
+| {item:iuce:pulling_upgrade} | 把目标机器输入槽里的原料取到本机 |
+
+每秒传送 1 个物品。
+
+{recipe: iuce:ejector_upgrade, iuce:pulling_upgrade}
+
+## 流体传输
+
+流体升级不用绑定，装上后对紧贴的机器生效。
+
+| 升级 | 作用 |
+| --- | --- |
+| {item:iuce:fluid_ejector_upgrade} | 把水箱里的水送给相邻机器 |
+| {item:iuce:fluid_pulling_upgrade} | 从相邻的泵或带水箱的机器取水 |
+
+{recipe: iuce:fluid_ejector_upgrade, iuce:fluid_pulling_upgrade}
+
+## 冷却单元
+
+{recipe: iuce:empty_cell, iuce:coolant_cell}
+
+冷却液由水桶加青金石混合得到，是超频升级的材料。

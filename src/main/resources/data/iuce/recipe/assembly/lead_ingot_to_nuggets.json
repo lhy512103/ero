@@ -1,0 +1,10 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:lead_ingot"
+  ],
+  "result": {
+    "id": "iuce:lead_nugget",
+    "count": 9
+  }
+}

@@ -2,6 +2,9 @@ package machine.geothermal_generator;
 
 import blockentity.EnergyDisplay;
 import blockentity.MachineBlockEntity;
+import fluid.FluidProvider;
+import fluid.MachineTank;
+import net.minecraft.world.level.material.Fluids;
 import blockentity.ModBlockEntities;
 import energy.EUEnergyStorage;
 import energy.EUEnergyStorageImpl;
@@ -28,7 +31,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * - 每桶岩浆持续时间：1000 ticks (50秒)
  * </p>
  */
-public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implements EnergyDisplay {
+public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implements EnergyDisplay, FluidProvider {
 
     /** 每桶岩浆持续的tick数 */
     private static final int TICKS_PER_BUCKET = 1000;
@@ -47,9 +50,11 @@ public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implement
 
     /** 是否正在发电 */
     private boolean active = false;
+    /** 最近一次检查时是否紧邻熔岩 */
+    private boolean nearLava = false;
 
-    /** 内部存储的岩浆桶数 (0-64) */
-    private int storedLava = 0;
+    /** 内部熔岩储罐（mB） */
+    private final MachineTank tank = MachineTank.of(Fluids.LAVA, MAX_STORED_LAVA * 1000, this::setChanged);
 
     /** 当前桶岩浆剩余的tick数 */
     private int lavaTickRemaining = 0;
@@ -89,23 +94,18 @@ public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implement
         boolean wasActive = active;
 
         // 优先从内部流体槽消耗岩浆发电
-        if (storedLava > 0 && !energyStorage.isFull()) {
+        if (hasFuel() && !energyStorage.isFull()) {
             active = true;
             energyStorage.addEnergy(generationRate);
 
+            if (lavaTickRemaining <= 0 && tank.drain(1000) == 1000) lavaTickRemaining = TICKS_PER_BUCKET;
             lavaTickRemaining--;
-            if (lavaTickRemaining <= 0) {
-                storedLava--;
-                if (storedLava > 0) {
-                    lavaTickRemaining = TICKS_PER_BUCKET;
-                }
-            }
             setChanged();
-        } else if (storedLava <= 0) {
+        } else if (!hasFuel()) {
             // 内部流体槽为空时，检测相邻岩浆源
-            if (tickCount % 20 == 0) {
-                active = isAdjacentToLava();
-            }
+            // 每秒检查一次周围是否有熔岩；烧完储罐后不会靠上一次的状态继续空转
+            if (tickCount % 20 == 0) nearLava = isAdjacentToLava();
+            active = nearLava;
             if (active && !energyStorage.isFull()) {
                 energyStorage.addEnergy(generationRate);
                 setChanged();
@@ -132,36 +132,19 @@ public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implement
         return false;
     }
 
-    /**
-     * 尝试添加一桶岩浆到内部流体槽
-     *
-     * @return 是否成功添加
-     */
-    public boolean addLavaBucket() {
-        if (storedLava >= MAX_STORED_LAVA) {
-            return false;
-        }
-        storedLava++;
-        if (lavaTickRemaining <= 0) {
-            lavaTickRemaining = TICKS_PER_BUCKET;
-        }
-        setChanged();
-        return true;
-    }
+    /** 是否还有可烧的熔岩：正在烧的那一桶，或储罐里至少一整桶 */
+    private boolean hasFuel() { return lavaTickRemaining > 0 || tank.getAmount() >= 1000; }
 
-    /**
-     * 获取当前存储的岩浆桶数
-     */
-    public int getStoredLava() {
-        return storedLava;
-    }
+    @Override public MachineTank getTank() { return tank; }
+    @Override public net.minecraft.world.level.material.Fluid getTankFluid() { return Fluids.LAVA; }
 
-    /**
-     * 获取最大存储桶数
-     */
-    public int getMaxStoredLava() {
-        return MAX_STORED_LAVA;
-    }
+    /** 尝试添加一桶熔岩，返回是否成功 */
+    public boolean addLavaBucket() { return addBucket(); }
+
+    /** 储罐里的熔岩桶数，正在烧的那一桶也算在内 */
+    public int getStoredLava() { return tank.getAmount() / 1000 + (lavaTickRemaining > 0 ? 1 : 0); }
+
+    public int getMaxStoredLava() { return MAX_STORED_LAVA; }
 
     @Override
     public String getMachineName() {
@@ -194,7 +177,7 @@ public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implement
         super.saveAdditional(output);
         output.putLong("energy", energyStorage.getEnergyStored());
         output.putBoolean("active", active);
-        output.putInt("storedLava", storedLava);
+        tank.save(output, "tank");
         output.putInt("lavaTickRemaining", lavaTickRemaining);
     }
 
@@ -203,8 +186,11 @@ public class GeothermalGeneratorBlockEntity extends MachineBlockEntity implement
         super.loadAdditional(input);
         input.getLong("energy").ifPresent(energy -> energyStorage.setEnergy(energy));
         active = input.getBooleanOr("active", false);
-        storedLava = input.getIntOr("storedLava", 0);
         lavaTickRemaining = input.getIntOr("lavaTickRemaining", 0);
+        // 旧存档按「桶数」记录，且正在烧的那一桶仍计在内
+        boolean legacy = input.child("tank").isEmpty();
+        tank.load(input, "tank", "storedLava", Fluids.LAVA, 1000);
+        if (legacy && lavaTickRemaining > 0) tank.drain(1000);
     }
 
     @Override protected boolean canReceiveEU() { return false; }

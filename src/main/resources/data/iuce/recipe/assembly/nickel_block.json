@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot"
+    ],
+    [
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot"
+    ],
+    [
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot",
+      "iuce:nickel_ingot"
+    ]
+  ],
+  "result": {
+    "id": "iuce:nickel_block",
+    "count": 1
+  }
+}

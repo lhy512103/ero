@@ -3,6 +3,7 @@ package machine.electric_furnace;
 import block.MachineBlock;
 import blockentity.EnergyDisplay;
 import blockentity.MachineBlockEntity;
+import machine.PoweredMachineBlockEntity;
 import blockentity.ProcessingDisplay;
 import blockentity.ModBlockEntities;
 import energy.EUEnergyStorageImpl;
@@ -23,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -51,22 +52,17 @@ import javax.annotation.Nullable;
  * - 可从感应炉抽取能量使用
  * </p>
  */
-public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements EnergyDisplay, ProcessingDisplay, MenuProvider {
+public class ElectricFurnaceBlockEntity extends PoweredMachineBlockEntity implements MenuProvider {
 
     private static final int INPUT_SLOT = 0;
     private static final int OUTPUT_SLOT = 1;
     private static final long BASE_ENERGY_CONSUMPTION = 2;
     private static final int BASE_PROCESS_TIME = 200;
 
-    private final EUEnergyStorageImpl energyStorage;
-    private final EUVoltage voltage;
-    private final ItemStacksResourceHandler itemHandler;
-    private int progress = 0;
-    private int maxProgress = BASE_PROCESS_TIME;
 
     /** 缓存的原版熔炼配方 */
     @Nullable
-    private SmeltingRecipe cachedSmeltingRecipe;
+    private AbstractCookingRecipe cachedAbstractCookingRecipe;
     /** 缓存的自定义机器配方 */
     @Nullable
     private MachineRecipe cachedMachineRecipe;
@@ -74,25 +70,15 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
     private ItemStack cachedOutput = ItemStack.EMPTY;
     /** 缓存的输入 ItemResource，用于检测输入变化 */
     private ItemResource cachedInputResource = ItemResource.EMPTY;
+    private Object cachedRecipeMap;
 
-    /** 缓存的超频器数量 */
-    private int cachedOverclockerCount = -1;
 
     /** 缓存的相邻感应炉数量 */
     private int cachedInductionCount = -1;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ELECTRIC_FURNACE.get(), pos, state);
-        this.voltage = EUVoltage.LV;
-        this.energyStorage = new EUEnergyStorageImpl(1000, voltage);
-
         // 1 输入槽 + 1 输出槽 + 4 升级槽
-        this.itemHandler = new ItemStacksResourceHandler(6) {
-            @Override
-            protected void onContentsChanged(int index, ItemStack previousContents) {
-                setChanged();
-            }
-        };
+        super(ModBlockEntities.ELECTRIC_FURNACE.get(), pos, state, EUVoltage.LV, 1000, 6, 2, BASE_PROCESS_TIME);
     }
 
     @Override
@@ -118,43 +104,46 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
 
         if (!inputResource.isEmpty() && inputAmount > 0) {
             // 仅在输入变化时重新查找配方
-            if (!inputResource.equals(cachedInputResource)) {
+            Object recipeMap = RecipeHelper.getRecipeManager(level).recipeMap();
+            if (!inputResource.equals(cachedInputResource) || cachedRecipeMap != recipeMap) {
+                progress = 0;
+                cachedRecipeMap = recipeMap;
                 ItemStack inputStack = inputResource.toStack(1);
                 cachedInputResource = inputResource;
 
                 // 优先查找自定义机器配方，然后查找原版熔炼配方
                 cachedMachineRecipe = RecipeHelper.findMachineRecipe(level, "electric_furnace", inputStack);
                 if (cachedMachineRecipe != null) {
-                    cachedSmeltingRecipe = null;
+                    cachedAbstractCookingRecipe = null;
                     cachedOutput = cachedMachineRecipe.getOutput().copy();
                 } else {
-                    cachedSmeltingRecipe = findSmeltingRecipe(inputStack);
-                    cachedOutput = cachedSmeltingRecipe != null
-                        ? cachedSmeltingRecipe.assemble(new SingleRecipeInput(inputStack))
+                    cachedAbstractCookingRecipe = findAbstractCookingRecipe(inputStack);
+                    cachedOutput = cachedAbstractCookingRecipe != null
+                        ? cachedAbstractCookingRecipe.assemble(new SingleRecipeInput(inputStack))
                         : ItemStack.EMPTY;
                 }
             }
 
+            if (!cachedOutput.isEmpty() && !canOutputAccept(cachedOutput)) {
+                updateRunningState();
+                return;
+            }
             if (!cachedOutput.isEmpty()) {
                 // 计算感应炉加成
                 int inductionCount = getAdjacentInductionCount();
                 double speedMultiplier = 1.0 + inductionCount * InductionFurnaceBlockEntity.SPEED_BOOST_PER_FURNACE;
                 int parallelCount = 1 + inductionCount * InductionFurnaceBlockEntity.PARALLEL_PER_FURNACE;
 
-                // 使用缓存的超频器数量
-                if (cachedOverclockerCount < 0) {
-                    cachedOverclockerCount = OverclockerUpgradeItem.countOverclockers(this);
-                }
 
                 // 自定义配方使用配方的时间和能量，原版配方使用默认值
                 int processTime;
                 long energyPerTick;
                 if (cachedMachineRecipe != null) {
-                    processTime = cachedMachineRecipe.getProcessTime();
-                    energyPerTick = cachedMachineRecipe.getEnergyCost();
+                    processTime = overclockedTime(cachedMachineRecipe.getProcessTime());
+                    energyPerTick = overclockedEnergy(cachedMachineRecipe.getEnergyPerTick());
                 } else {
-                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(BASE_PROCESS_TIME, cachedOverclockerCount);
-                    energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(BASE_ENERGY_CONSUMPTION, cachedOverclockerCount);
+                    processTime = overclockedTime(cachedAbstractCookingRecipe.cookingTime());
+                    energyPerTick = overclockedEnergy(BASE_ENERGY_CONSUMPTION);
                 }
 
                 // 感应炉加速：缩短加工时间，增加能耗
@@ -186,11 +175,11 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
             } else {
                 progress = 0;
                 cachedOutput = ItemStack.EMPTY;
-                cachedInputResource = ItemResource.EMPTY;
+                // Cache misses too: do not scan every recipe again on every tick.
             }
         } else if (inputResource.isEmpty() || inputAmount <= 0) {
             progress = 0;
-            cachedSmeltingRecipe = null;
+            cachedAbstractCookingRecipe = null;
             cachedMachineRecipe = null;
             cachedOutput = ItemStack.EMPTY;
             cachedInputResource = ItemResource.EMPTY;
@@ -292,6 +281,15 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                 if (inserted > 0) {
                     itemHandler.extract(INPUT_SLOT, inputResource, 1, tx);
                     processed++;
+
+                    // 概率副产（尽力插入输出槽，放不下则舍弃，不阻塞主产物）
+                    if (cachedMachineRecipe != null && cachedMachineRecipe.hasExtraResults() && level != null) {
+                        for (MachineRecipe.ExtraResult extra : cachedMachineRecipe.getExtraResults()) {
+                            if (level.getRandom().nextFloat() >= extra.chance()) continue;
+                            ItemStack extraStack = extra.create();
+                            itemHandler.insert(OUTPUT_SLOT, ItemResource.of(extraStack), extraStack.getCount(), tx);
+                        }
+                    }
                 } else {
                     break;
                 }
@@ -309,8 +307,8 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
      * 查找原版熔炼配方
      */
     @Nullable
-    private SmeltingRecipe findSmeltingRecipe(ItemStack input) {
-        return RecipeHelper.findSmeltingRecipe(level, input);
+    private AbstractCookingRecipe findAbstractCookingRecipe(ItemStack input) {
+        return RecipeHelper.findCookingRecipe(level, input);
     }
 
     /**
@@ -327,23 +325,10 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         // 输出槽已有物品，检查是否相同且未满
         ItemStack existingStack = outputResource.toStack(1);
         if (ItemStack.isSameItemSameComponents(existingStack, output)) {
-            return outputAmount < existingStack.getMaxStackSize();
+            return outputAmount + output.getCount() <= existingStack.getMaxStackSize();
         }
 
         return false;
-    }
-
-    private void updateRunningState() {
-        if (level != null && !level.isClientSide()) {
-            BlockState state = getBlockState();
-            if (state.hasProperty(MachineBlock.RUNNING)) {
-                boolean currentRunning = state.getValue(MachineBlock.RUNNING);
-                boolean shouldRun = isWorking();
-                if (currentRunning != shouldRun) {
-                    level.setBlockAndUpdate(worldPosition, state.setValue(MachineBlock.RUNNING, shouldRun));
-                }
-            }
-        }
     }
 
     @Override
@@ -351,7 +336,7 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         return "电炉";
     }
 
-    private static final Component DISPLAY_NAME = Component.literal("电炉");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.electric_furnace");
 
     @Override
     public Component getDisplayName() {
@@ -365,99 +350,13 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
     }
 
     @Override
-    public ItemStacksResourceHandler getItemHandler() {
-        return itemHandler;
-    }
-
-    @Override
-    public int getUpgradeSlotCount() {
-        return 4;
-    }
-
-    @Override
-    public int getUpgradeSlotStart() {
-        return 2; // 1 input + 1 output
-    }
-
-    @Override
-    public EUEnergyStorage getEnergyStorage() {
-        return energyStorage;
-    }
-
-    public EUVoltage getVoltage() {
-        return voltage;
-    }
-
-    public boolean isWorking() {
-        return progress > 0;
-    }
-
-    public int getProgress() {
-        return progress;
-    }
-
-    public int getMaxProgress() {
-        return maxProgress;
-    }
-
-    public void setProgress(int value) {
-        this.progress = value;
-    }
-
-    public void setMaxProgress(int value) {
-        this.maxProgress = value;
-    }
-
-    @Override
     public MachinePriority getMachinePriority() {
         return MachinePriority.HIGH;
-    }
-
-    @Override protected boolean canReceiveEU() { return true; }
-    @Override protected boolean canExtractEU() { return false; }
-
-    @Override
-    public float getProcessingProgress() {
-        if (maxProgress <= 0 || !isWorking()) return 0f;
-        return (float) progress / maxProgress;
-    }
-
-    @Override
-    public boolean isProcessing() {
-        return isWorking();
     }
 
     @Override
     public String getProgressLabel() {
         return "";
-    }
-
-    @Override
-    protected void saveAdditional(ValueOutput output) {
-        super.saveAdditional(output);
-        output.putLong("energy", energyStorage.getEnergyStored());
-        output.putInt("progress", progress);
-        output.putInt("maxProgress", maxProgress);
-        itemHandler.serialize(output);
-    }
-
-    @Override
-    public void loadAdditional(ValueInput input) {
-        super.loadAdditional(input);
-        input.getLong("energy").ifPresent(energy -> energyStorage.setEnergy(energy));
-
-        // 兼容旧版 INT[] 格式和新版 number 格式
-        progress = loadIntField(input, "progress", 0);
-        maxProgress = loadIntField(input, "maxProgress", BASE_PROCESS_TIME);
-
-        itemHandler.deserialize(input);
-        // 重置缓存
-        cachedSmeltingRecipe = null;
-        cachedMachineRecipe = null;
-        cachedOutput = ItemStack.EMPTY;
-        cachedInputResource = ItemResource.EMPTY;
-        cachedOverclockerCount = -1;
-        cachedInductionCount = -1;
     }
 
     /**
@@ -476,5 +375,17 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         }
 
         return defaultValue;
+    }
+
+    @Override
+    protected void loadExtra(ValueInput input) {
+        // 兼容旧版把进度存成 INT[] 的存档
+        progress = loadIntField(input, "progress", 0);
+        maxProgress = loadIntField(input, "maxProgress", BASE_PROCESS_TIME);
+        cachedAbstractCookingRecipe = null;
+        cachedMachineRecipe = null;
+        cachedOutput = ItemStack.EMPTY;
+        cachedInputResource = ItemResource.EMPTY;
+        cachedInductionCount = -1;
     }
 }

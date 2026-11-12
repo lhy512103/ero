@@ -1,0 +1,14 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "alloy_furnace",
+  "input": "iuce:iron_stick",
+  "input_count": 2,
+  "input2": "minecraft:redstone",
+  "input2_count": 4,
+  "result": {
+    "id": "iuce:magnet",
+    "count": 1
+  },
+  "energy": 3200,
+  "time": 200
+}

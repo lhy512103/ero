@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "iuce:iron_gear",
+    "iuce:bronze_gear",
+    "iuce:bronze_rotor",
+    "iuce:copper_coil",
+    "iuce:heating_coil",
+    "iuce:electric_motor",
+    "iuce:advanced_motor",
+    "iuce:magnet",
+    "iuce:electrode"
+  ]
+}

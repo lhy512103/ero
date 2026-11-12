@@ -2,7 +2,6 @@ package machine.electrolyzer.menu;
 
 import init.ModMenus;
 import item.FluidSlot;
-import item.ModItems;
 import item.UpgradeItem;
 import item.UpgradeSlot;
 import machine.electrolyzer.ElectrolyzerBlockEntity;
@@ -47,7 +46,7 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
         // 流体输入槽 (79, 21) — 使用 Menu 同步的 fluid 数据判断
         addSlot(new FluidSlot(blockEntity.getItemHandler(),
             blockEntity.getItemHandler()::set, fluidInputSlot, 79, 21,
-            () -> fluid > 0 ? new ItemStack(ModItems.WATER.get()) : ItemStack.EMPTY));
+            () -> fluid > 0 ? new ItemStack(net.minecraft.world.item.Items.WATER_BUCKET) : ItemStack.EMPTY));
 
         // 流体输出槽 1 (47, 56)
         addSlot(new ResourceHandlerSlot(blockEntity.getItemHandler(),

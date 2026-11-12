@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "metal_former_extruding",
+  "input": "iuce:zinc_ingot",
+  "result": {
+    "id": "iuce:zinc_stick",
+    "count": 2
+  },
+  "energy": 400,
+  "time": 100
+}

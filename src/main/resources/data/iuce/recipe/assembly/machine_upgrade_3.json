@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:lapotron_crystal", "iuce:cobalt_plate", "iuce:lapotron_crystal"],
+    ["iuce:cobalt_plate", "iuce:machine_upgrade_2", "iuce:cobalt_plate"],
+    ["iuce:advanced_circuit", "iuce:perfect_plated_shell", "iuce:advanced_circuit"]
+  ],
+  "result": { "id": "iuce:machine_upgrade_3", "count": 1 }
+}

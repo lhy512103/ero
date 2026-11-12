@@ -1,0 +1,24 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    [
+      "iuce:lapotron_crystal",
+      "iuce:advanced_circuit",
+      "iuce:lapotron_crystal"
+    ],
+    [
+      "iuce:lapotron_crystal",
+      "iuce:mfe",
+      "iuce:lapotron_crystal"
+    ],
+    [
+      "iuce:refined_steel_ingot",
+      "iuce:machine_casing_2",
+      "iuce:refined_steel_ingot"
+    ]
+  ],
+  "result": {
+    "id": "iuce:mfsu",
+    "count": 1
+  }
+}

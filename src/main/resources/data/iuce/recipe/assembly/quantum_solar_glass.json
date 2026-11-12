@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:perfect_hybrid_solar_glass", "iuce:perfect_hybrid_solar_glass", "iuce:perfect_hybrid_solar_glass"],
+    ["iuce:purified_uranium_dust", "iuce:purified_uranium_dust", "iuce:purified_uranium_dust"],
+    ["iuce:perfect_hybrid_solar_glass", "iuce:perfect_hybrid_solar_glass", "iuce:perfect_hybrid_solar_glass"]
+  ],
+  "result": { "id": "iuce:quantum_solar_glass", "count": 3 }
+}

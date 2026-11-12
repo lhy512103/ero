@@ -1,5 +1,7 @@
 package recipe;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -16,7 +18,24 @@ import org.slf4j.LoggerFactory;
  */
 public class IngredientHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("ero/IngredientHelper");
+    private static final Logger LOGGER = LoggerFactory.getLogger("iuce/IngredientHelper");
+
+    /**
+     * Ingredient codec accepting both the current object form and the compact
+     * string form used throughout IUCE data ("namespace:item" / "#namespace:tag").
+     */
+    public static final Codec<Ingredient> FLEXIBLE_CODEC = Codec.withAlternative(
+        Ingredient.CODEC,
+        Codec.STRING.flatXmap(
+            value -> {
+                Ingredient ingredient = parse(value);
+                return ingredient == null
+                    ? DataResult.error(() -> "Unknown ingredient: " + value)
+                    : DataResult.success(ingredient);
+            },
+            ingredient -> DataResult.error(() -> "Ingredient string encoding is decode-only")
+        )
+    );
 
     /**
      * 解析字符串为 Ingredient

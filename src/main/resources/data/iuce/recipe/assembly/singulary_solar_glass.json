@@ -1,0 +1,9 @@
+{
+  "type": "iuce:crafting",
+  "input": [
+    ["iuce:quantum_solar_glass", "iuce:quantum_solar_glass", "iuce:quantum_solar_glass"],
+    ["iuce:lapotron_crystal", "minecraft:nether_star", "iuce:lapotron_crystal"],
+    ["iuce:quantum_solar_glass", "iuce:quantum_solar_glass", "iuce:quantum_solar_glass"]
+  ],
+  "result": { "id": "iuce:singulary_solar_glass", "count": 3 }
+}

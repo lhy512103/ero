@@ -155,11 +155,11 @@ public class PlanterMenu extends AbstractContainerMenu {
 
     /** 获取当前时间阶段名称 */
     public String getPhaseName() {
-        if (clockTime < 2000) return "凌晨";
-        if (clockTime < 6000) return "清晨";
-        if (clockTime < 8000) return "正午";
-        if (clockTime < 12000) return "下午";
-        return "夜晚";
+        if (clockTime < 2000) return "tooltip.iuce.planter.phase.0";
+        if (clockTime < 6000) return "tooltip.iuce.planter.phase.1";
+        if (clockTime < 8000) return "tooltip.iuce.planter.phase.2";
+        if (clockTime < 12000) return "tooltip.iuce.planter.phase.3";
+        return "tooltip.iuce.planter.phase.4";
     }
 
     /** 获取当前速度倍率 */

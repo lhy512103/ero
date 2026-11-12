@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:insulated_gold_cable",
+      "iuce:copper_coil",
+      "iuce:insulated_gold_cable"
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:machine_casing",
+      "iuce:iron_plate"
+    ],
+    [
+      "iuce:insulated_copper_cable",
+      "iuce:copper_coil",
+      "iuce:insulated_copper_cable"
+    ]
+  ],
+  "result": {
+    "id": "iuce:transformer",
+    "count": 1
+  }
+}

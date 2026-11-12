@@ -184,7 +184,7 @@ public class CraftingRecipeSerializer {
             }
         ),
         // 回退到1D平铺格式（无序配方）
-        Ingredient.CODEC.listOf().flatXmap(
+        IngredientHelper.FLEXIBLE_CODEC.listOf().flatXmap(
             inputs -> DataResult.success(new InputData(inputs, false, null, 0, 0)),
             inputData -> {
                 if (inputData.shaped()) {

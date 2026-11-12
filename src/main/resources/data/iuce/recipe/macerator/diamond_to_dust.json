@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "minecraft:diamond",
+  "result": {
+    "id": "iuce:diamond_dust",
+    "count": 1
+  },
+  "energy": 2400,
+  "time": 300
+}

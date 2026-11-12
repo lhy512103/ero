@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot"
+    ],
+    [
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot"
+    ],
+    [
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot",
+      "iuce:cobalt_ingot"
+    ]
+  ],
+  "result": {
+    "id": "iuce:cobalt_block",
+    "count": 1
+  }
+}

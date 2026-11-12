@@ -35,6 +35,7 @@ public class ChargeSlot extends ResourceHandlerSlot {
      */
     public static boolean isChargeableItem(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        return stack.getItem() instanceof RechargeableBatteryItem;
+        return net.neoforged.neoforge.transfer.access.ItemAccess.forStack(stack)
+            .getCapability(net.neoforged.neoforge.capabilities.Capabilities.Energy.ITEM) != null;
     }
 }

@@ -1,0 +1,6 @@
+{
+  "values": [
+    "iuce:basic_solar_glass", "iuce:advanced_solar_glass", "iuce:hybrid_solar_glass",
+    "iuce:perfect_hybrid_solar_glass", "iuce:quantum_solar_glass", "iuce:singulary_solar_glass"
+  ]
+}

@@ -22,8 +22,12 @@ public class ModCreativeModeTabs {
         ModBlockItems.MACERATOR,
         ModBlockItems.ELECTRIC_FURNACE,
         ModBlockItems.COMPRESSOR,
+        ModBlockItems.METAL_FORMER,
         ModBlockItems.GEOTHERMAL_GENERATOR,
         ModBlockItems.INDUCTION_FURNACE,
+        ModBlockItems.TRANSFORMER,
+        ModBlockItems.CHUTE,
+        ModBlockItems.CONVEYOR,
         ModBlockItems.BATBOX,
         ModBlockItems.CESU,
         ModBlockItems.MFE,
@@ -58,6 +62,7 @@ public class ModCreativeModeTabs {
         ModBlockItems.RUBBER_LEAVES,
         ModBlockItems.RUBBER_SAPLING,
         // 工具
+        ModItems.GUIDE,
         ModItems.CUTTER,
         ModItems.FORGE_HAMMER,
         ModItems.TREETAP,
@@ -75,20 +80,20 @@ public class ModCreativeModeTabs {
     );
 
     private static final List<DeferredItem<? extends Item>> DUSTS = List.of(
-        ModItems.TIN_DUST, ModItems.ZINC_DUST, ModItems.ALUMINIUM_DUST,
-        ModItems.COBALT_DUST, ModItems.LEAD_DUST, ModItems.NICKEL_DUST,
-        ModItems.SILVER_DUST, ModItems.URANIUM_DUST, ModItems.BRONZE_DUST, ModItems.DIAMOND_DUST, ModItems.ENERGIUM_DUST
+        ModItems.PURIFIED_TIN_DUST, ModItems.PURIFIED_ZINC_DUST, ModItems.PURIFIED_ALUMINIUM_DUST,
+        ModItems.PURIFIED_COBALT_DUST, ModItems.PURIFIED_LEAD_DUST, ModItems.PURIFIED_NICKEL_DUST,
+        ModItems.PURIFIED_SILVER_DUST, ModItems.PURIFIED_URANIUM_DUST, ModItems.BRONZE_DUST, ModItems.DIAMOND_DUST, ModItems.ENERGIUM_DUST
     );
 
     private static final List<DeferredItem<? extends Item>> CRUSHED_ORES = List.of(
-        ModItems.COPPER_DUST, ModItems.PURIFIED_TIN_DUST, ModItems.PURIFIED_ZINC_DUST, ModItems.PURIFIED_ALUMINIUM_DUST, ModItems.PURIFIED_COBALT_DUST,
-        ModItems.PURIFIED_LEAD_DUST, ModItems.PURIFIED_NICKEL_DUST, ModItems.PURIFIED_SILVER_DUST, ModItems.PURIFIED_URANIUM_DUST
+        ModItems.COPPER_DUST, ModItems.CRUSHED_TIN_DUST, ModItems.CRUSHED_ZINC_DUST, ModItems.CRUSHED_ALUMINIUM_DUST, ModItems.CRUSHED_COBALT_DUST,
+        ModItems.CRUSHED_LEAD_DUST, ModItems.CRUSHED_NICKEL_DUST, ModItems.CRUSHED_SILVER_DUST, ModItems.CRUSHED_URANIUM_DUST
     );
 
     private static final List<DeferredItem<? extends Item>> PLATES = List.of(
         ModItems.TIN_PLATE, ModItems.IRON_PLATE, ModItems.ZINC_PLATE, ModItems.ALUMINIUM_PLATE,
         ModItems.COBALT_PLATE, ModItems.LEAD_PLATE, ModItems.NICKEL_PLATE, ModItems.SILVER_PLATE,
-        ModItems.GOLD_PLATE, ModItems.COPPER_PLATE
+        ModItems.GOLD_PLATE, ModItems.COPPER_PLATE, ModItems.BRONZE_PLATE, ModItems.STEEL_PLATE
     );
 
     private static final List<DeferredItem<? extends Item>> DENSE_PLATES = List.of(
@@ -150,11 +155,16 @@ public class ModCreativeModeTabs {
 
     private static final List<DeferredItem<? extends Item>> STICKS = List.of(
         ModItems.ALUMINIUM_STICK, ModItems.COBALT_STICK, ModItems.NICKEL_STICK,
-        ModItems.SILVER_STICK, ModItems.ZINC_STICK
+        ModItems.SILVER_STICK, ModItems.ZINC_STICK, ModItems.IRON_STICK
+    );
+
+    private static final List<DeferredItem<? extends Item>> COMPONENTS = List.of(
+        ModItems.COPPER_COIL, ModItems.HEATING_COIL, ModItems.ELECTRIC_MOTOR, ModItems.ADVANCED_MOTOR,
+        ModItems.IRON_GEAR, ModItems.BRONZE_GEAR, ModItems.BRONZE_ROTOR, ModItems.MAGNET, ModItems.ELECTRODE
     );
 
     private static final List<DeferredItem<? extends Item>> CELLS = List.of(
-        ModItems.EMPTY_CELL, ModItems.COOLANT_CELL, ModItems.COOLANT
+        ModItems.EMPTY_CELL, ModItems.COOLANT_CELL, ModItems.COOLANT_BUCKET
     );
 
     private static final List<DeferredItem<? extends Item>> SOLAR_GLASSES = List.of(
@@ -174,11 +184,11 @@ public class ModCreativeModeTabs {
     );
 
     private static final List<List<DeferredItem<? extends Item>>> ALL_GROUPS = List.of(
-        INGOTS, DUSTS, CRUSHED_ORES, PLATES, DENSE_PLATES, NUGGETS, CIRCUITS, PLATED_SHELLS, CASINGS, UPGRADES, STICKS, CELLS, SOLAR_GLASSES, BATTERIES,
+        INGOTS, DUSTS, CRUSHED_ORES, PLATES, DENSE_PLATES, NUGGETS, STICKS, COMPONENTS, CIRCUITS, PLATED_SHELLS, CASINGS, UPGRADES, CELLS, SOLAR_GLASSES, BATTERIES,
         ORES, DEEP_ORES, METAL_BLOCKS, COAL_PRODUCTS, RUBBER_PRODUCTS
     );
 
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ERO_TAB = TABS.register("ero_tab",
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ERO_TAB = TABS.register("iuce_tab",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup." + Ero.MOD_ID))
             .icon(() -> ModItems.CIRCUIT.get().getDefaultInstance())

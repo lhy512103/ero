@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "iuce:perfect_hybrid_solar_generator"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "iuce:blocks/perfect_hybrid_solar_generator"
+}

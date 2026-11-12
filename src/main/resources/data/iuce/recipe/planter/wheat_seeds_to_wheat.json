@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "planter",
+  "input": "minecraft:wheat_seeds",
+  "input_count": 1,
+  "input2": "minecraft:dirt",
+  "input2_count": 1,
+  "result": { "id": "minecraft:wheat", "count": 2 },
+  "energy": 800,
+  "time": 400
+}

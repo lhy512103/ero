@@ -15,10 +15,8 @@ import recipe.CraftingRecipe;
 import recipe.MachineRecipe;
 import recipe.ModRecipes;
 import recipe.OptionalCraftingRecipe;
-import item.ModItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.types.IRecipeHolderType;
 import mezz.jei.api.recipe.types.IRecipeType;
@@ -48,14 +46,17 @@ public class EroJeiPlugin implements IModPlugin {
     private static final Map<String, MachineTypeEntry> MACHINE_TYPES = new LinkedHashMap<>();
 
     static {
-        registerMachineType("macerator", "打粉机", ModBlocks.MACERATOR);
-        registerMachineType("compressor", "压缩机", ModBlocks.COMPRESSOR);
-        registerMachineType("extractor", "提取机", ModBlocks.EXTRACTOR);
-        registerMachineType("electric_furnace", "电炉", ModBlocks.ELECTRIC_FURNACE);
-        registerMachineType("electrolyzer", "电解机", ModBlocks.ELECTROLYZER);
-        registerMachineType("ore_washer", "洗矿机", ModBlocks.ORE_WASHER);
-        registerMachineType("alloy_furnace", "合金炉", ModBlocks.INDUCTION_FURNACE);
-        registerMachineType("planter", "种植机", ModBlocks.PLANTER);
+        registerMachineType("macerator", "guide.iuce.machine.macerator", ModBlocks.MACERATOR);
+        registerMachineType("compressor", "guide.iuce.machine.compressor", ModBlocks.COMPRESSOR);
+        registerMachineType("metal_former_rolling", "guide.iuce.machine.metal_former_rolling", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_cutting", "guide.iuce.machine.metal_former_cutting", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_extruding", "guide.iuce.machine.metal_former_extruding", ModBlocks.METAL_FORMER);
+        registerMachineType("extractor", "guide.iuce.machine.extractor", ModBlocks.EXTRACTOR);
+        registerMachineType("electric_furnace", "guide.iuce.machine.electric_furnace", ModBlocks.ELECTRIC_FURNACE);
+        registerMachineType("electrolyzer", "guide.iuce.machine.electrolyzer", ModBlocks.ELECTROLYZER);
+        registerMachineType("ore_washer", "guide.iuce.machine.ore_washer", ModBlocks.ORE_WASHER);
+        registerMachineType("alloy_furnace", "guide.iuce.machine.alloy_furnace", ModBlocks.INDUCTION_FURNACE);
+        registerMachineType("planter", "guide.iuce.machine.planter", ModBlocks.PLANTER);
     }
 
     // 工业合成配方类型
@@ -94,8 +95,8 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
         registration.addRecipeCategories(
-            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "合成", net.minecraft.world.item.Items.CRAFTING_TABLE),
-            new OptionalCraftingRecipeCategory(registration.getJeiHelpers(), OPTIONAL_CRAFTING_RECIPE_TYPE.get(), "可选合成", ModBlocks.INDUSTRIAL_WORKBENCH.get())
+            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "block.iuce.industrial_workbench", ModBlocks.INDUSTRIAL_WORKBENCH.get()),
+            new OptionalCraftingRecipeCategory(registration.getJeiHelpers(), OPTIONAL_CRAFTING_RECIPE_TYPE.get(), "jei.iuce.optional_crafting", ModBlocks.INDUSTRIAL_WORKBENCH.get())
         );
     }
 
@@ -104,16 +105,16 @@ public class EroJeiPlugin implements IModPlugin {
         // MC 26.1 客户端的 level.recipeAccess() 返回 ClientRecipeContainer（不是 RecipeManager），
         // 因此需要从集成服务器获取 RecipeManager
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+        // 单人游戏直接读集成服务器；连到服务器时用服务器同步下来的配方
         net.minecraft.server.MinecraftServer server = minecraft.getSingleplayerServer();
-        if (server == null) {
-            LOGGER.warn("[Ero JEI] 无法获取集成服务器，跳过配方注册");
+        net.minecraft.world.item.crafting.RecipeMap recipeMap = client.guide.Guide.recipes();
+        if (recipeMap == null) {
+            LOGGER.warn("[Ero JEI] 尚未收到服务器同步的配方，跳过配方注册");
             return;
         }
 
-        net.minecraft.world.item.crafting.RecipeManager recipeManager = server.getRecipeManager();
-
         // 获取所有机器配方
-        Collection<RecipeHolder<MachineRecipe>> allMachineRecipes = recipeManager.recipeMap().byType(ModRecipes.MACHINE_TYPE.get());
+        Collection<RecipeHolder<MachineRecipe>> allMachineRecipes = recipeMap.byType(ModRecipes.MACHINE_TYPE.get());
         LOGGER.info("[Ero JEI] 找到 {} 个机器配方", allMachineRecipes.size());
 
         // 注册机器配方到对应的JEI类型
@@ -125,19 +126,66 @@ public class EroJeiPlugin implements IModPlugin {
                 .filter(holder -> holder.value().matchesMachine(machineType))
                 .toList();
 
+            if (machineType.equals("planter") && server != null) recipes = withAutomaticCrops(server, recipes);
+
             LOGGER.info("[Ero JEI] 机器类型 '{}': {} 个配方", machineType, recipes.size());
             registration.addRecipes(mt.recipeType, recipes);
         }
 
         // 注册工业合成配方
-        List<RecipeHolder<CraftingRecipe>> craftingRecipes = List.copyOf(recipeManager.recipeMap().byType(ModRecipes.ERO_CRAFTING_TYPE.get()));
+        List<RecipeHolder<CraftingRecipe>> craftingRecipes = List.copyOf(recipeMap.byType(ModRecipes.ERO_CRAFTING_TYPE.get()));
         LOGGER.info("[Ero JEI] 工业合成配方: {} 个", craftingRecipes.size());
         registration.addRecipes(CRAFTING_RECIPE_TYPE.get(), craftingRecipes);
 
         // 注册可选合成配方
-        List<RecipeHolder<OptionalCraftingRecipe>> optionalRecipes = List.copyOf(recipeManager.recipeMap().byType(ModRecipes.OPTIONAL_CRAFTING_TYPE.get()));
+        List<RecipeHolder<OptionalCraftingRecipe>> optionalRecipes = List.copyOf(recipeMap.byType(ModRecipes.OPTIONAL_CRAFTING_TYPE.get()));
         LOGGER.info("[Ero JEI] 可选合成配方: {} 个", optionalRecipes.size());
         registration.addRecipes(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), optionalRecipes);
+    }
+
+    /**
+     * Adds every crop the planter recognises automatically (vanilla and modded) to its JEI page,
+     * skipping seeds that already have a data recipe. The crop list is computed on the server thread
+     * because it queries block loot tables.
+     */
+    private static List<RecipeHolder<MachineRecipe>> withAutomaticCrops(net.minecraft.server.MinecraftServer server,
+                                                                       List<RecipeHolder<MachineRecipe>> dataRecipes) {
+        List<RecipeHolder<MachineRecipe>> all = new java.util.ArrayList<>(dataRecipes);
+        try {
+            var level = server.overworld();
+            List<machine.planter.CropRegistry.Entry> crops = server.submit(
+                () -> machine.planter.CropRegistry.listAll(level, net.minecraft.core.BlockPos.ZERO)).join();
+            int added = 0;
+            for (machine.planter.CropRegistry.Entry crop : crops) {
+                net.minecraft.world.item.ItemStack seed = crop.seed();
+                if (dataRecipes.stream().anyMatch(holder -> holder.value().getInput().test(seed))) continue;
+                var profile = crop.profile();
+                Identifier itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(seed.getItem());
+                Identifier id = Identifier.fromNamespaceAndPath(Ero.MOD_ID, "planter_auto/" + itemId.getNamespace() + "/" + itemId.getPath());
+                MachineRecipe recipe = new MachineRecipe("planter", net.minecraft.world.item.crafting.Ingredient.of(seed.getItem()),
+                    profile.result(), profile.energyPerTick() * profile.ticks(), profile.ticks());
+                all.add(new RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, id), recipe));
+                added++;
+            }
+            LOGGER.info("[Ero JEI] 种植机自动识别作物: {} 种", added);
+        } catch (RuntimeException error) {
+            LOGGER.warn("[Ero JEI] 无法列出种植机自动识别的作物", error);
+        }
+        return all;
+    }
+
+    /** Opens the JEI recipe view for an item (used by the built-in guide). */
+    public static boolean showRecipes(net.minecraft.world.item.ItemStack stack, boolean uses) {
+        if (jeiRuntime == null || stack.isEmpty()) return false;
+        var focus = jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(
+            uses ? mezz.jei.api.recipe.RecipeIngredientRole.INPUT : mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT,
+            mezz.jei.api.constants.VanillaTypes.ITEM_STACK, stack);
+        jeiRuntime.getRecipesGui().show(focus);
+        return true;
+    }
+
+    public static boolean searchHasFocus() {
+        return jeiRuntime != null && jeiRuntime.getIngredientListOverlay().hasKeyboardFocus();
     }
 
     @Override
@@ -146,10 +194,6 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 强制 JEI 识别到 Minecraft 已显示模组名，避免 JEI 为物品额外添加重复的模组名行
         forceModNameOverride(rt);
-
-        // 隐藏模组水物品（仅用于 GUI 流体显示，不应出现在 JEI 中）
-        rt.getIngredientManager().removeIngredientsAtRuntime(
-            VanillaTypes.ITEM_STACK, List.of(new net.minecraft.world.item.ItemStack(ModItems.WATER.get())));
     }
 
     /**
@@ -193,6 +237,10 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 工业合成
         registration.addCraftingStation(CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.SMELTING, ModBlocks.ELECTRIC_FURNACE.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.BLASTING, ModBlocks.ELECTRIC_FURNACE.get());
+        registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.SMOKING, ModBlocks.ELECTRIC_FURNACE.get());
 
         // 可选合成
         registration.addCraftingStation(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
@@ -208,7 +256,10 @@ public class EroJeiPlugin implements IModPlugin {
         // 电炉 — 进度箭头 (79, 36, 16x22)
         registration.addRecipeClickArea(ElectricFurnaceScreen.class,
             79, 36, 16, 22,
-            MACHINE_TYPES.get("electric_furnace").recipeType);
+            MACHINE_TYPES.get("electric_furnace").recipeType,
+            mezz.jei.api.constants.RecipeTypes.SMELTING,
+            mezz.jei.api.constants.RecipeTypes.BLASTING,
+            mezz.jei.api.constants.RecipeTypes.SMOKING);
 
         // 合金炉 — 进度箭头 (80, 36, 16x22)
         registration.addRecipeClickArea(InductionFurnaceScreen.class,
@@ -224,6 +275,13 @@ public class EroJeiPlugin implements IModPlugin {
         registration.addRecipeClickArea(CompressorScreen.class,
             79, 36, 16, 22,
             MACHINE_TYPES.get("compressor").recipeType);
+
+        // 金属成型机 — 进度箭头 (79, 36, 16x22)，三种模式的配方一起显示
+        registration.addRecipeClickArea(machine.metal_former.screen.MetalFormerScreen.class,
+            79, 36, 16, 22,
+            MACHINE_TYPES.get("metal_former_rolling").recipeType,
+            MACHINE_TYPES.get("metal_former_cutting").recipeType,
+            MACHINE_TYPES.get("metal_former_extruding").recipeType);
 
         // 提取机 — 进度箭头 (79, 36, 16x22)
         registration.addRecipeClickArea(ExtractorScreen.class,
@@ -243,7 +301,7 @@ public class EroJeiPlugin implements IModPlugin {
         // 工业工作台 — 箭头 (90, 32, 22x15)
         registration.addRecipeClickArea(IndustrialWorkbenchScreen.class,
             90, 32, 22, 15,
-            CRAFTING_RECIPE_TYPE.get());
+            CRAFTING_RECIPE_TYPE.get(), mezz.jei.api.constants.RecipeTypes.CRAFTING);
     }
 
     /** 机器类型条目 */

@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:zinc_plate",
+    "minecraft:redstone",
+    "iuce:coal_dust"
+  ],
+  "result": {
+    "id": "iuce:single_use_battery",
+    "count": 1
+  }
+}
