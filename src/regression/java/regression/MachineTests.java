@@ -105,6 +105,8 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        for (String name : CASE_NAMES)
+            tests.put("machine_" + name + "_overclocker_added_later", helper -> lateOverclock(helper, byName(name)));
         tests.put("transfer_respects_slot_roles", MachineTests::slotRoles);
     }
 
@@ -358,6 +360,20 @@ final class MachineTests {
         check(helper, item.EjectorUpgradeItem.pushOutputToInput(electrolyzer, target) && amount(electrolyzer, 1) == 1,
             "An ejector must push the electrolyzer's first output slot");
         check(helper, amount(target, 1) == 0, "An ejector must never insert into the target's output slot");
+        helper.succeed();
+    }
+
+    /** Upgrades installed after the machine has already worked must apply to the next batch. */
+    private static void lateOverclock(GameTestHelper helper, Case c) {
+        MachineBlockEntity machine = prepare(helper, c, 1, 2);
+        if (machine.getUpgradeSlotCount() == 0) { helper.succeed(); return; }
+        check(helper, runUntil(machine, c, c.outputCount(), c.ticks() + 10) > 0, c.name() + " must finish the first batch");
+        int start = machine.getUpgradeSlotStart();
+        for (int i = 0; i < 2; i++) put(machine.getItemHandler(), start + i, new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get()));
+        int second = runUntil(machine, c, c.outputCount() * 2, c.ticks() + 10);
+        int expected = (int) Math.round(c.ticks() * 0.75 * 0.75);
+        check(helper, second > 0 && Math.abs(second - expected) <= 2,
+            c.name() + ": second batch with late overclockers took " + second + " ticks, expected about " + expected);
         helper.succeed();
     }
 }

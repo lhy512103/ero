@@ -77,6 +77,7 @@ public class ElectrolyzerBlockEntity extends MachineBlockEntity
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
                 setChanged();
+                if (index >= 4) cachedOverclockerCount = -1;
             }
         };
     }

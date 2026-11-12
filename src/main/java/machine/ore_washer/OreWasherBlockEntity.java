@@ -83,6 +83,7 @@ public class OreWasherBlockEntity extends MachineBlockEntity implements EnergyDi
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
                 setChanged();
+                if (index >= 4) cachedOverclockerCount = -1;
             }
         };
     }

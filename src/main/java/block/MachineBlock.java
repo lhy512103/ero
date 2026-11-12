@@ -3,10 +3,7 @@ package block;
 import blockentity.MachineBlockEntity;
 import blockentity.TickableBlockEntity;
 // import machine.planter.PlanterBlockEntity;
-import machine.MaceratorGuiProvider;
 import machine.GeneratorGuiProvider;
-import machine.CompressorGuiProvider;
-import machine.ExtractorGuiProvider;
 import machine.InductionFurnaceGuiProvider;
 import machine.OreWasherGuiProvider;
 import machine.ElectrolyzerGuiProvider;
@@ -141,19 +138,7 @@ public class MachineBlock extends BaseEntityBlock {
             // }
 
             if (blockEntity instanceof MachineBlockEntity machine) {
-                if (blockEntity instanceof MaceratorGuiProvider provider) {
-                    player.openMenu(provider, pos);
-                    return InteractionResult.SUCCESS;
-                }
                 if (blockEntity instanceof GeneratorGuiProvider provider) {
-                    player.openMenu(provider, pos);
-                    return InteractionResult.SUCCESS;
-                }
-                if (blockEntity instanceof CompressorGuiProvider provider) {
-                    player.openMenu(provider, pos);
-                    return InteractionResult.SUCCESS;
-                }
-                if (blockEntity instanceof ExtractorGuiProvider provider) {
                     player.openMenu(provider, pos);
                     return InteractionResult.SUCCESS;
                 }
