@@ -141,10 +141,10 @@ public class EjectorUpgradeItem extends UpgradeItem {
 
         BlockPos boundPos = getBoundPos(stack);
         if (boundPos != null) {
-            builder.accept(Component.literal("功能: 自动推送输出槽物品到目标机器").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("方向: 当前机器输出 → 目标机器输入").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("范围: " + MAX_RANGE + "格").withStyle(ChatFormatting.GRAY));
-            builder.accept(Component.literal("间隔: 1秒").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.ejector_upgrade.1").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.ejector_upgrade.2").withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.upgrade.range", MAX_RANGE).withStyle(ChatFormatting.GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.upgrade.interval").withStyle(ChatFormatting.GRAY));
         }
     }
 }

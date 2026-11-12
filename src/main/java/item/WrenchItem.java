@@ -19,7 +19,7 @@ public class WrenchItem extends Item {
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
             Consumer<Component> builder, TooltipFlag flag) {
         builder.accept(Component.translatable("item.iuce.wrench.durability", MAX_DAMAGE - stack.getDamageValue(), MAX_DAMAGE));
-        builder.accept(Component.literal("右键：调整机器朝向 / 切换线缆点击面的连接"));
-        builder.accept(Component.literal("潜行右键：拆卸机器或线缆（掉落内部物品）"));
+        builder.accept(Component.translatable("tooltip.iuce.wrench.1"));
+        builder.accept(Component.translatable("tooltip.iuce.wrench.2"));
     }
 }

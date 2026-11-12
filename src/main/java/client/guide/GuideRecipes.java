@@ -98,7 +98,7 @@ final class GuideRecipes {
     }
 
     @Nullable
-    private static RecipeMap current() {
+    static RecipeMap current() {
         var server = Minecraft.getInstance().getSingleplayerServer();
         if (server != null) return server.getRecipeManager().recipeMap();
         return synced;

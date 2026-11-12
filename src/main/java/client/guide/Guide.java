@@ -31,6 +31,12 @@ import javax.annotation.Nullable;
 public final class Guide {
     private Guide() {}
 
+    /** The recipes this client knows: the integrated server's in single player, the synced ones on a server. */
+    @Nullable
+    public static net.minecraft.world.item.crafting.RecipeMap recipes() {
+        return GuideRecipes.current();
+    }
+
     public static final KeyMapping.Category KEY_CATEGORY =
         new KeyMapping.Category(Identifier.fromNamespaceAndPath("iuce", "main"));
     @Nullable private static KeyMapping openKey;
@@ -45,7 +51,7 @@ public final class Guide {
             Identifier.fromNamespaceAndPath("iuce", "guide"),
             (ResourceManagerReloadListener) manager -> GuideBook.invalidate()));
 
-        NeoForge.EVENT_BUS.addListener((RecipesReceivedEvent event) -> GuideRecipes.onRecipesReceived(event));
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, (RecipesReceivedEvent event) -> GuideRecipes.onRecipesReceived(event));
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut event) -> GuideRecipes.clear());
         NeoForge.EVENT_BUS.addListener(Guide::onClientTick);
         NeoForge.EVENT_BUS.addListener(Guide::onScreenKey);

@@ -26,7 +26,7 @@ public class ElectricWrenchItem extends Item {
             Consumer<Component> builder, TooltipFlag flag) {
         builder.accept(Component.literal(RechargeableBatteryItem.formatEnergy(RechargeableBatteryItem.getEnergy(stack))
             + " / " + RechargeableBatteryItem.formatEnergy(MAX_ENERGY) + " EU").withStyle(ChatFormatting.GREEN));
-        builder.accept(Component.literal("右键：调整朝向 / 切换线缆点击面的连接（50 EU）"));
-        builder.accept(Component.literal("潜行右键：拆卸机器或线缆（500 EU，掉落内部物品）"));
+        builder.accept(Component.translatable("tooltip.iuce.electric_wrench.1"));
+        builder.accept(Component.translatable("tooltip.iuce.electric_wrench.2"));
     }
 }

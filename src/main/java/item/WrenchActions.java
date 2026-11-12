@@ -26,7 +26,7 @@ public final class WrenchActions {
         boolean dismantle = player.isShiftKeyDown();
         long cost = dismantle ? 500 : 50;
         if (electric && !player.hasInfiniteMaterials() && RechargeableBatteryItem.getEnergy(context.getItemInHand()) < cost) {
-            if (!level.isClientSide()) player.sendSystemMessage(net.minecraft.network.chat.Component.literal("电量不足，请先放入储电箱充电"));
+            if (!level.isClientSide()) player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.iuce.wrench.no_energy"));
             return InteractionResult.FAIL;
         }
         EnumProperty<Direction> facing = state.hasProperty(BlockStateProperties.FACING) ? BlockStateProperties.FACING

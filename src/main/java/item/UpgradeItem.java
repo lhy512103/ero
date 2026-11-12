@@ -49,11 +49,11 @@ public class UpgradeItem extends Item {
         if (needsBinding()) {
             BlockPos bound = getBoundPos(stack);
             if (bound == null) {
-                player.sendOverlayMessage(Component.literal("请先潜行右键目标机器进行绑定").withStyle(ChatFormatting.YELLOW));
+                player.sendOverlayMessage(Component.translatable("message.iuce.upgrade.bind_first").withStyle(ChatFormatting.YELLOW));
                 return InteractionResult.FAIL;
             }
             if (bound.equals(context.getClickedPos())) {
-                player.sendOverlayMessage(Component.literal("不能安装到它所绑定的目标机器上").withStyle(ChatFormatting.YELLOW));
+                player.sendOverlayMessage(Component.translatable("message.iuce.upgrade.self_target").withStyle(ChatFormatting.YELLOW));
                 return InteractionResult.FAIL;
             }
         }
@@ -68,10 +68,10 @@ public class UpgradeItem extends Item {
             Component name = stack.getHoverName();
             if (!player.hasInfiniteMaterials()) stack.shrink(1);
             machine.setChanged();
-            player.sendOverlayMessage(Component.literal("已安装：").withStyle(ChatFormatting.GREEN).append(name));
+            player.sendOverlayMessage(Component.translatable("message.iuce.upgrade.installed", name).withStyle(ChatFormatting.GREEN));
             return InteractionResult.SUCCESS;
         }
-        player.sendOverlayMessage(Component.literal("没有空的升级槽").withStyle(ChatFormatting.RED));
+        player.sendOverlayMessage(Component.translatable("message.iuce.upgrade.no_slot").withStyle(ChatFormatting.RED));
         return InteractionResult.FAIL;
     }
     @Override
@@ -93,14 +93,13 @@ public class UpgradeItem extends Item {
             tag.putInt("BoundX", pos.getX());
             tag.putInt("BoundY", pos.getY());
             tag.putInt("BoundZ", pos.getZ());
-            tag.putString("BoundType", machine.getMachineName());
+            tag.putString("BoundType", machine.getBlockState().getBlock().getDescriptionId());
             context.getItemInHand().set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 
             player.sendSystemMessage(
-                Component.literal("已绑定到 ").withStyle(ChatFormatting.GREEN)
-                    .append(Component.literal(machine.getMachineName()).withStyle(ChatFormatting.GOLD))
-                    .append(Component.literal(" @ ").withStyle(ChatFormatting.GREEN))
-                    .append(Component.literal(pos.toShortString()).withStyle(ChatFormatting.YELLOW))
+                Component.translatable("message.iuce.upgrade.bound",
+                    machine.getBlockState().getBlock().getName().withStyle(ChatFormatting.GOLD),
+                    Component.literal(pos.toShortString()).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GREEN)
             );
             return InteractionResult.SUCCESS;
         }
@@ -120,15 +119,15 @@ public class UpgradeItem extends Item {
                 int y = tag.getIntOr("BoundY", 0);
                 int z = tag.getIntOr("BoundZ", 0);
 
-                builder.accept(Component.literal("已绑定机器: ").withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal(type).withStyle(ChatFormatting.GOLD)));
-                builder.accept(Component.literal("位置: ").withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal(x + ", " + y + ", " + z).withStyle(ChatFormatting.YELLOW)));
+                builder.accept(Component.translatable("tooltip.iuce.upgrade.bound_machine",
+                    Component.translatable(type).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.GRAY));
+                builder.accept(Component.translatable("tooltip.iuce.upgrade.bound_pos",
+                    Component.literal(x + ", " + y + ", " + z).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY));
             }
         } else if (needsBinding()) {
-            builder.accept(Component.literal("Shift+右键机器以绑定").withStyle(ChatFormatting.DARK_GRAY));
+            builder.accept(Component.translatable("tooltip.iuce.upgrade.bind_hint").withStyle(ChatFormatting.DARK_GRAY));
         }
-        builder.accept(Component.literal("右键机器直接安装").withStyle(ChatFormatting.DARK_GRAY));
+        builder.accept(Component.translatable("tooltip.iuce.upgrade.install_hint").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     /**

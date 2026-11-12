@@ -47,7 +47,7 @@ public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
             int progress = menu.getProgress();
             int maxProgress = menu.getMaxProgress();
             graphics.setComponentTooltipForNextFrame(this.font,
-                List.of(Component.literal("培育进度: " + progress + " / " + maxProgress)),
+                List.of(Component.translatable("tooltip.iuce.planter.progress", progress, maxProgress)),
                 mouseX, mouseY);
         }
         // solar_on 悬停显示游戏日时刻和阶段信息
@@ -60,7 +60,7 @@ public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
             graphics.setComponentTooltipForNextFrame(this.font,
                 List.of(
                     Component.literal(String.format("%02d:%02d", hours, minutes)),
-                    Component.literal(phase + " · " + speed + "x速度")),
+                    Component.translatable("tooltip.iuce.planter.speed", Component.translatable(phase), speed)),
                 mouseX, mouseY);
         }
     }

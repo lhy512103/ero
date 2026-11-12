@@ -154,7 +154,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
 
     @Override
     public Component getDisplayName() {
-        return Component.literal(getMachineName());
+        return getBlockState().getBlock().getName();
     }
 
     public boolean isWorking() {

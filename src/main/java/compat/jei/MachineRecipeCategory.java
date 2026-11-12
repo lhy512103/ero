@@ -20,7 +20,7 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
     private final IDrawableAnimated arrow;
 
     public MachineRecipeCategory(IJeiHelpers helpers, IRecipeType<RecipeHolder<MachineRecipe>> recipeType, String machineName, ItemLike iconItem) {
-        super(recipeType, Component.literal(machineName), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
+        super(recipeType, Component.translatable(machineName), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
         this.slotBg = helpers.getGuiHelper().getSlotDrawable();
         this.arrow = helpers.getGuiHelper().createAnimatedRecipeArrow(200);
     }

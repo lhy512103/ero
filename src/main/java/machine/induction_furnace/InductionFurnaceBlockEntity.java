@@ -35,7 +35,7 @@ public class InductionFurnaceBlockEntity extends PoweredMachineBlockEntity imple
     private static final int INPUT_SLOT_1 = 0;
     private static final int INPUT_SLOT_2 = 1;
     private static final int OUTPUT_SLOT = 2;
-    private static final Component DISPLAY_NAME = Component.literal("合金炉");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.induction_furnace");
 
     @Nullable
     private MachineRecipe cachedRecipe;

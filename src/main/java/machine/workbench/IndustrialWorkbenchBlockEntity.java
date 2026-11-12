@@ -55,7 +55,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     private boolean recipeChecked;
     private Object cachedRecipeMap;
 
-    private static final Component DISPLAY_NAME = Component.literal("工业工作台");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.industrial_workbench");
 
     public IndustrialWorkbenchBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.INDUSTRIAL_WORKBENCH.get(), pos, state);
@@ -281,7 +281,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     }
 
     @Override
-    public String getProgressLabel() { return "合成进度"; }
+    public String getProgressLabel() { return "tooltip.iuce.progress.craft"; }
 
     @Override protected boolean canReceiveEU() { return true; }
     @Override protected boolean canExtractEU() { return false; }

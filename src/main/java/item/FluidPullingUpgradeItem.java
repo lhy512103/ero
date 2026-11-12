@@ -89,9 +89,9 @@ public class FluidPullingUpgradeItem extends UpgradeItem {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
         super.appendHoverText(stack, context, display, builder, flag);
 
-        builder.accept(Component.literal("功能: 自动输入流体").withStyle(ChatFormatting.GRAY));
-        builder.accept(Component.literal("效果: 从相邻机器输入流体").withStyle(ChatFormatting.GREEN));
-        builder.accept(Component.literal("传输速率: " + TRANSFER_AMOUNT + " mB/次").withStyle(ChatFormatting.YELLOW));
-        builder.accept(Component.literal("传输间隔: " + (TRANSFER_INTERVAL / 20.0) + " 秒").withStyle(ChatFormatting.YELLOW));
+        builder.accept(Component.translatable("tooltip.iuce.fluid_pulling_upgrade.1").withStyle(ChatFormatting.GRAY));
+        builder.accept(Component.translatable("tooltip.iuce.fluid_pulling_upgrade.2").withStyle(ChatFormatting.GREEN));
+        builder.accept(Component.translatable("tooltip.iuce.upgrade.fluid_rate", TRANSFER_AMOUNT).withStyle(ChatFormatting.YELLOW));
+        builder.accept(Component.translatable("tooltip.iuce.upgrade.fluid_interval", TRANSFER_INTERVAL / 20.0).withStyle(ChatFormatting.YELLOW));
     }
 }

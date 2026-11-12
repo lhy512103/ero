@@ -314,7 +314,7 @@ public class GeneratorBlockEntity extends MachineBlockEntity implements EnergyDi
         return "发电机";
     }
 
-    private static final Component DISPLAY_NAME = Component.literal("发电机");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.generator");
 
     @Override
     public Component getDisplayName() {

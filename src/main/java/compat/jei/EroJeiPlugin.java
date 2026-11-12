@@ -46,17 +46,17 @@ public class EroJeiPlugin implements IModPlugin {
     private static final Map<String, MachineTypeEntry> MACHINE_TYPES = new LinkedHashMap<>();
 
     static {
-        registerMachineType("macerator", "打粉机", ModBlocks.MACERATOR);
-        registerMachineType("compressor", "压缩机", ModBlocks.COMPRESSOR);
-        registerMachineType("metal_former_rolling", "金属成型机 · 辊压", ModBlocks.METAL_FORMER);
-        registerMachineType("metal_former_cutting", "金属成型机 · 切割", ModBlocks.METAL_FORMER);
-        registerMachineType("metal_former_extruding", "金属成型机 · 挤压", ModBlocks.METAL_FORMER);
-        registerMachineType("extractor", "提取机", ModBlocks.EXTRACTOR);
-        registerMachineType("electric_furnace", "电炉", ModBlocks.ELECTRIC_FURNACE);
-        registerMachineType("electrolyzer", "电解机", ModBlocks.ELECTROLYZER);
-        registerMachineType("ore_washer", "洗矿机", ModBlocks.ORE_WASHER);
-        registerMachineType("alloy_furnace", "合金炉", ModBlocks.INDUCTION_FURNACE);
-        registerMachineType("planter", "种植机", ModBlocks.PLANTER);
+        registerMachineType("macerator", "guide.iuce.machine.macerator", ModBlocks.MACERATOR);
+        registerMachineType("compressor", "guide.iuce.machine.compressor", ModBlocks.COMPRESSOR);
+        registerMachineType("metal_former_rolling", "guide.iuce.machine.metal_former_rolling", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_cutting", "guide.iuce.machine.metal_former_cutting", ModBlocks.METAL_FORMER);
+        registerMachineType("metal_former_extruding", "guide.iuce.machine.metal_former_extruding", ModBlocks.METAL_FORMER);
+        registerMachineType("extractor", "guide.iuce.machine.extractor", ModBlocks.EXTRACTOR);
+        registerMachineType("electric_furnace", "guide.iuce.machine.electric_furnace", ModBlocks.ELECTRIC_FURNACE);
+        registerMachineType("electrolyzer", "guide.iuce.machine.electrolyzer", ModBlocks.ELECTROLYZER);
+        registerMachineType("ore_washer", "guide.iuce.machine.ore_washer", ModBlocks.ORE_WASHER);
+        registerMachineType("alloy_furnace", "guide.iuce.machine.alloy_furnace", ModBlocks.INDUCTION_FURNACE);
+        registerMachineType("planter", "guide.iuce.machine.planter", ModBlocks.PLANTER);
     }
 
     // 工业合成配方类型
@@ -95,8 +95,8 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
         registration.addRecipeCategories(
-            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "工业工作台", ModBlocks.INDUSTRIAL_WORKBENCH.get()),
-            new OptionalCraftingRecipeCategory(registration.getJeiHelpers(), OPTIONAL_CRAFTING_RECIPE_TYPE.get(), "可选合成", ModBlocks.INDUSTRIAL_WORKBENCH.get())
+            new EroCraftingRecipeCategory(registration.getJeiHelpers(), CRAFTING_RECIPE_TYPE.get(), "block.iuce.industrial_workbench", ModBlocks.INDUSTRIAL_WORKBENCH.get()),
+            new OptionalCraftingRecipeCategory(registration.getJeiHelpers(), OPTIONAL_CRAFTING_RECIPE_TYPE.get(), "jei.iuce.optional_crafting", ModBlocks.INDUSTRIAL_WORKBENCH.get())
         );
     }
 
@@ -105,16 +105,16 @@ public class EroJeiPlugin implements IModPlugin {
         // MC 26.1 客户端的 level.recipeAccess() 返回 ClientRecipeContainer（不是 RecipeManager），
         // 因此需要从集成服务器获取 RecipeManager
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+        // 单人游戏直接读集成服务器；连到服务器时用服务器同步下来的配方
         net.minecraft.server.MinecraftServer server = minecraft.getSingleplayerServer();
-        if (server == null) {
-            LOGGER.warn("[Ero JEI] 无法获取集成服务器，跳过配方注册");
+        net.minecraft.world.item.crafting.RecipeMap recipeMap = client.guide.Guide.recipes();
+        if (recipeMap == null) {
+            LOGGER.warn("[Ero JEI] 尚未收到服务器同步的配方，跳过配方注册");
             return;
         }
 
-        net.minecraft.world.item.crafting.RecipeManager recipeManager = server.getRecipeManager();
-
         // 获取所有机器配方
-        Collection<RecipeHolder<MachineRecipe>> allMachineRecipes = recipeManager.recipeMap().byType(ModRecipes.MACHINE_TYPE.get());
+        Collection<RecipeHolder<MachineRecipe>> allMachineRecipes = recipeMap.byType(ModRecipes.MACHINE_TYPE.get());
         LOGGER.info("[Ero JEI] 找到 {} 个机器配方", allMachineRecipes.size());
 
         // 注册机器配方到对应的JEI类型
@@ -126,19 +126,19 @@ public class EroJeiPlugin implements IModPlugin {
                 .filter(holder -> holder.value().matchesMachine(machineType))
                 .toList();
 
-            if (machineType.equals("planter")) recipes = withAutomaticCrops(server, recipes);
+            if (machineType.equals("planter") && server != null) recipes = withAutomaticCrops(server, recipes);
 
             LOGGER.info("[Ero JEI] 机器类型 '{}': {} 个配方", machineType, recipes.size());
             registration.addRecipes(mt.recipeType, recipes);
         }
 
         // 注册工业合成配方
-        List<RecipeHolder<CraftingRecipe>> craftingRecipes = List.copyOf(recipeManager.recipeMap().byType(ModRecipes.ERO_CRAFTING_TYPE.get()));
+        List<RecipeHolder<CraftingRecipe>> craftingRecipes = List.copyOf(recipeMap.byType(ModRecipes.ERO_CRAFTING_TYPE.get()));
         LOGGER.info("[Ero JEI] 工业合成配方: {} 个", craftingRecipes.size());
         registration.addRecipes(CRAFTING_RECIPE_TYPE.get(), craftingRecipes);
 
         // 注册可选合成配方
-        List<RecipeHolder<OptionalCraftingRecipe>> optionalRecipes = List.copyOf(recipeManager.recipeMap().byType(ModRecipes.OPTIONAL_CRAFTING_TYPE.get()));
+        List<RecipeHolder<OptionalCraftingRecipe>> optionalRecipes = List.copyOf(recipeMap.byType(ModRecipes.OPTIONAL_CRAFTING_TYPE.get()));
         LOGGER.info("[Ero JEI] 可选合成配方: {} 个", optionalRecipes.size());
         registration.addRecipes(OPTIONAL_CRAFTING_RECIPE_TYPE.get(), optionalRecipes);
     }

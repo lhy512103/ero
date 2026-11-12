@@ -224,7 +224,7 @@ public class PlanterBlockEntity extends PoweredMachineBlockEntity implements Men
     @Override
     public String getMachineName() { return "种植机"; }
 
-    private static final Component DISPLAY_NAME = Component.literal("种植机");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.planter");
 
     @Override
     public Component getDisplayName() {
@@ -246,11 +246,11 @@ public class PlanterBlockEntity extends PoweredMachineBlockEntity implements Men
     /** 获取当前时间阶段名称 */
     public String getPhaseName() {
         int time = getClockTime();
-        if (time < 2000) return "凌晨";
-        if (time < 6000) return "清晨";
-        if (time < 8000) return "正午";
-        if (time < 12000) return "下午";
-        return "夜晚";
+        if (time < 2000) return "tooltip.iuce.planter.phase.0";
+        if (time < 6000) return "tooltip.iuce.planter.phase.1";
+        if (time < 8000) return "tooltip.iuce.planter.phase.2";
+        if (time < 12000) return "tooltip.iuce.planter.phase.3";
+        return "tooltip.iuce.planter.phase.4";
     }
 
     // /** 切换时间模式：正常 → 永昼 → 永夜 → 正常（测试模式，需要消耗能量） */
@@ -303,7 +303,7 @@ public class PlanterBlockEntity extends PoweredMachineBlockEntity implements Men
 
     @Override
     public String getProgressLabel() {
-        return "培育进度";
+        return "tooltip.iuce.progress.grow";
     }
 
     /**

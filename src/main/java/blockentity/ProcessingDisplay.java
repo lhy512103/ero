@@ -26,9 +26,9 @@ public interface ProcessingDisplay {
     /**
      * 获取进度显示标签
      *
-     * @return 进度条前缀文字，默认"处理进度"
+     * @return 进度条前缀文字的翻译键
      */
     default String getProgressLabel() {
-        return "处理进度";
+        return "tooltip.iuce.progress.process";
     }
 }

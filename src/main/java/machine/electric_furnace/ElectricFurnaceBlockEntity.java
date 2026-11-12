@@ -336,7 +336,7 @@ public class ElectricFurnaceBlockEntity extends PoweredMachineBlockEntity implem
         return "电炉";
     }
 
-    private static final Component DISPLAY_NAME = Component.literal("电炉");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.electric_furnace");
 
     @Override
     public Component getDisplayName() {

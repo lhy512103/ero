@@ -75,7 +75,7 @@ public class FluidInfoProvider implements StreamServerDataProvider<BlockAccessor
             float ratio = (float) data.fluid() / data.maxFluid();
             int buckets = data.fluid() / 1000;
             int maxBuckets = data.maxFluid() / 1000;
-            Component text = Component.literal(buckets + " / " + maxBuckets + " 桶 (" + data.fluid() + " mB)");
+            Component text = Component.translatable("tooltip.iuce.jade_fluid", buckets, maxBuckets, data.fluid());
 
             ProgressView progressView = new ProgressView(
                     ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), WATER_BLUE),

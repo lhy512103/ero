@@ -48,7 +48,7 @@ public abstract class StorageBlockEntity extends MachineBlockEntity implements E
     }
 
     @Override public String getMachineName() { return machineName; }
-    @Override public Component getDisplayName() { return displayName; }
+    @Override public Component getDisplayName() { return getBlockState().getBlock().getName(); }
     @Override public EUEnergyStorage getEnergyStorage() { return energyStorage; }
     @Override public ItemStacksResourceHandler getItemHandler() { return itemHandler; }
     @Override public MachinePriority getMachinePriority() { return MachinePriority.CRITICAL; }

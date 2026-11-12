@@ -259,6 +259,11 @@ for item in sorted(all_items):
 for block in sorted(block_items):
     if not os.path.exists(RES + "data/iuce/loot_table/blocks/" + block + ".json"):
         errors.append("missing loot table (the block would drop nothing): data/iuce/loot_table/blocks/%s.json" % block)
+for path in glob.glob(ROOT + "/src/main/java/**/*.java", recursive=True):
+    for key in set(re.findall(r'translatable\("([a-z0-9_.]*\biuce\.[a-z0-9_.]+)"[,)]', read(path))):
+        for code, table in languages.items():
+            if key not in table:
+                errors.append("%s uses %s, which lang/%s.json does not define" % (os.path.basename(path), key, code))
 for key in sorted(set(languages["zh_cn"]) - set(languages["en_us"])):
     warnings.append("en_us is missing key present in zh_cn: " + key)
 

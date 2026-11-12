@@ -27,7 +27,7 @@ public class OptionalCraftingRecipeCategory extends AbstractRecipeCategory<Recip
 
     public OptionalCraftingRecipeCategory(IJeiHelpers helpers, IRecipeHolderType<OptionalCraftingRecipe> recipeType,
                                           String title, ItemLike iconItem) {
-        super(recipeType, Component.literal(title), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
+        super(recipeType, Component.translatable(title), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
         this.slotBg = helpers.getGuiHelper().getSlotDrawable();
         this.arrow = helpers.getGuiHelper().createAnimatedRecipeArrow(200);
     }

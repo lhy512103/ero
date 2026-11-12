@@ -88,7 +88,7 @@ public class MetalFormerScreen extends AbstractContainerScreen<MetalFormerMenu> 
 
         if (hover) {
             graphics.setTooltipForNextFrame(
-                Component.literal("模式：" + MetalFormerBlockEntity.MODE_NAMES[mode] + "（点击切换）"),
+                Component.translatable("tooltip.iuce.metal_former.mode", Component.translatable("tooltip.iuce.metal_former.mode." + mode)),
                 mouseX, mouseY);
         }
     }

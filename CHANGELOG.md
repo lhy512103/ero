@@ -46,6 +46,8 @@
 40. Added: Hoppers and other mods' pipes can feed machines, collect their products, and fill or drain their tanks.
 41. Fixed: Machines, cables, ores and all other blocks of the mod dropped nothing when mined.
 42. Added: Breaking a machine drops the items and upgrades stored inside it.
+43. Optimized: Machine titles, tooltips, messages and JEI category names now follow the game language instead of always being Chinese.
+44. Fixed: JEI showed no IUCE recipes when playing on a multiplayer server.
 
 ### 中文
 
@@ -91,3 +93,5 @@
 40. 新增：漏斗和其他模组的管道可以给机器送料、取走产物，并为储罐注入或抽出流体。
 41. 修复：机器、线缆、矿石等本模组方块被挖掉后不掉落任何东西的问题。
 42. 新增：机器被破坏时会掉出内部存放的物品和升级。
+43. 优化：机器标题、提示、消息和 JEI 分类名称会跟随游戏语言显示，不再固定为中文。
+44. 修复：在多人服务器中 JEI 不显示本模组配方的问题。

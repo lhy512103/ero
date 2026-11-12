@@ -37,7 +37,7 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     private static final int OUTPUT2_SLOT = 2;
     private static final int OUTPUT3_SLOT = 3;
     private static final int MAX_STORED_FLUID = 16000;
-    private static final Component DISPLAY_NAME = Component.literal("电解机");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.electrolyzer");
 
     /** 内部水箱 */
     private final MachineTank tank = MachineTank.of(Fluids.WATER, MAX_STORED_FLUID, this::setChanged);

@@ -35,7 +35,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
     private static final int OUTPUT_SLOT = 2;
     private static final int EXTRA_OUTPUT_SLOT = 3;
     private static final int MAX_STORED_WATER = 16000;
-    private static final Component DISPLAY_NAME = Component.literal("洗矿机");
+    private static final Component DISPLAY_NAME = Component.translatable("block.iuce.ore_washer");
 
     /** 内部水箱 */
     private final MachineTank tank = MachineTank.of(Fluids.WATER, MAX_STORED_WATER, this::setChanged);

@@ -106,7 +106,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
 
             // 如果正在处理且有进度标签，显示文本进度
             if (data.processing() && !data.progressLabel().isEmpty()) {
-                Component progressText = Component.literal(data.progressLabel() + ": " + (int)(data.progress() * 100) + "%");
+                Component progressText = Component.translatable(data.progressLabel()).append(": " + (int)(data.progress() * 100) + "%");
                 tooltip.add(progressText);
             }
         }

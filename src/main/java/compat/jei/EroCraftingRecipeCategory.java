@@ -23,7 +23,7 @@ public class EroCraftingRecipeCategory extends AbstractRecipeCategory<RecipeHold
     private final IDrawableAnimated arrow;
 
     public EroCraftingRecipeCategory(IJeiHelpers helpers, IRecipeHolderType<CraftingRecipe> recipeType, String title, ItemLike iconItem) {
-        super(recipeType, Component.literal(title), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
+        super(recipeType, Component.translatable(title), helpers.getGuiHelper().createDrawableItemLike(iconItem), 116, 54);
         this.slotBg = helpers.getGuiHelper().getSlotDrawable();
         this.arrow = helpers.getGuiHelper().createAnimatedRecipeArrow(200);
     }
