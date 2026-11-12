@@ -106,6 +106,8 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("builder_completes_structure", MachineTests::builder);
+        tests.put("pipe_network_fluids_channels_rest", MachineTests::networkExtras);
         tests.put("rolling_mill_molds_and_hatch_tiers", MachineTests::rollingMill);
         tests.put("repair_bench_lamp_converter", MachineTests::utilities);
         tests.put("interface_exposes_network_storage", MachineTests::networkStorage);
@@ -1229,6 +1231,88 @@ final class MachineTests {
         helper.setBlock(new BlockPos(2, 1, 1), Blocks.AIR);
         check(helper, level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
             helper.absolutePos(new BlockPos(3, 1, 1)), net.minecraft.core.Direction.UP).size() == 0, "An interface cut off from the network sees no stock");
+        helper.succeed();
+    }
+
+    /** The builder fills in the shell from its own stock, asks the network only for what is missing, then stops. */
+    private static void builder(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos controllerPos = new BlockPos(0, 1, 2);
+        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.ITEM_INPUT_HATCH.get());
+        helper.setBlock(new BlockPos(0, 1, 3), ModBlocks.ITEM_OUTPUT_HATCH.get());
+        helper.setBlock(new BlockPos(8, 1, 2), ModBlocks.ENERGY_HATCH.get());
+        var millState = ModBlocks.MILL_CONTROLLER.get().defaultBlockState()
+            .setValue(block.PlantControllerBlock.FACING, helper.getTestRotation().rotate(net.minecraft.core.Direction.WEST));
+        level.setBlockAndUpdate(helper.absolutePos(controllerPos), millState);
+        var controller = helper.getBlockEntity(controllerPos, blockentity.PlantControllerBlockEntity.class);
+        check(helper, blockentity.PlantControllerBlockEntity.targetLength(millState.setValue(block.PlantControllerBlock.LENGTH, 11)) == 11
+            && blockentity.PlantControllerBlockEntity.shell(BlockPos.ZERO, net.minecraft.core.Direction.NORTH, 11).size() == 193,
+            "The blueprint's chosen length must decide the shape of the shell");
+        check(helper, controller.summary() != null && controller.missing().size() == 158, "A 9-long mill with three hatches lacks 158 casing blocks");
+
+        helper.setBlock(new BlockPos(1, 1, 2), ModBlocks.BUILDER.get());
+        var machine = helper.getBlockEntity(new BlockPos(1, 1, 2), blockentity.BuilderBlockEntity.class);
+        var casing = ItemResource.of(new ItemStack(ModBlocks.PLANT_CASING.get()));
+        check(helper, machine.controller() == controller, "The builder must find the controller next to it");
+        check(helper, machine.requestSlot(casing) < 0, "Before looking at the structure the builder asks for nothing");
+        energy(machine).setEnergy(4000);
+        for (int i = 0; i < 5; i++) machine.tick();
+        check(helper, machine.requestSlot(casing) >= 0 && machine.requestSlot(ItemResource.of(new ItemStack(Items.DIRT))) < 0,
+            "With casing missing the builder must ask the network for casing and nothing else");
+        check(helper, controller.missing().size() == 158, "Without casing nothing is placed");
+        check(helper, !machine.acceptsAutomationInput(0, ItemResource.of(new ItemStack(Items.DIRT))), "Hoppers may only bring casing");
+
+        for (int slot = 0; slot < 3; slot++) put(machine.getItemHandler(), slot, new ItemStack(ModBlocks.PLANT_CASING.get(), 64));
+        for (int i = 0; i < 5; i++) machine.tick();
+        check(helper, controller.missing().size() == 154, "One round places four blocks, missing " + controller.missing().size());
+        for (int i = 0; i < 400; i++) {
+            energy(machine).setEnergy(4000);
+            machine.tick();
+        }
+        check(helper, controller.missing().isEmpty() && machine.held() == 192 - 158, "The builder must place exactly the 158 missing blocks, holds " + machine.held());
+        check(helper, helper.getBlockState(new BlockPos(4, 2, 2)).isAir(), "The inside must stay empty");
+        controller.tick();
+        check(helper, controller.isFormed(), "The machine must form once the builder is done");
+        check(helper, machine.requestSlot(casing) < 0, "A finished machine needs no more casing");
+        helper.succeed();
+    }
+
+    /** Fluids go from the pump to the machine's tank, channels keep interfaces apart, an idle network rests. */
+    private static void networkExtras(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var water = net.minecraft.world.level.material.Fluids.WATER;
+        MachineBlockEntity pump = place(helper, 0, ModBlocks.PUMP.get());
+        var pumpTank = ((FluidProvider) pump).getTank();
+        var pumpPort = port(helper, 1, net.minecraft.core.Direction.WEST);
+        helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.PNEUMATIC_PIPE.get());
+        var washerPort = port(helper, 3, net.minecraft.core.Direction.EAST);
+        MachineBlockEntity washer = place(helper, 4, ModBlocks.ORE_WASHER.get());
+        var washerTank = ((FluidProvider) washer).getTank();
+        check(helper, pumpPort.fluidRole() == blockentity.LogisticsPortBlockEntity.FLUID_PUMP
+            && washerPort.fluidRole() == blockentity.LogisticsPortBlockEntity.FLUID_CONSUMER, "Pump and washer must be recognised");
+
+        pumpTank.setAmount(water, 3000);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, washerTank.getAmount() == 3000 && pumpTank.getAmount() == 0, "The pump's water must reach the washer, has " + washerTank.getAmount());
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, washerTank.getAmount() == 3000, "Water must never be pulled back out of a machine");
+
+        washerPort.setChannel(3);
+        pumpTank.setAmount(water, 2000);
+        put(pump.getItemHandler() == null ? washer.getItemHandler() : washer.getItemHandler(), 2, new ItemStack(ModItems.PURIFIED_TIN_DUST.get(), 1));
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, washerTank.getAmount() == 3000 && pumpTank.getAmount() == 2000, "Interfaces on different channels must not deal with each other");
+        pumpPort.setChannel(3);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, washerTank.getAmount() == 5000, "Interfaces on the same channel must deal with each other");
+
+        // nothing left to move: the network rests, and a change wakes it
+        for (int i = 0; i < 3; i++) logistics.LogisticsManager.runDueCycle(level);
+        check(helper, logistics.LogisticsManager.restingCount(level) >= 1, "A network with nothing to move must rest");
+        pumpTank.setAmount(water, 1000);
+        logistics.LogisticsManager.wake(level);
+        logistics.LogisticsManager.runDueCycle(level);
+        check(helper, washerTank.getAmount() == 6000, "A woken network must work again at once");
         helper.succeed();
     }
 }

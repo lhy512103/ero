@@ -146,6 +146,8 @@ public class ModBlocks {
         () -> machineProperties().get().destroyTime(0.5f).lightLevel(state -> state.getValue(MachineBlock.RUNNING) ? 15 : 0));
     public static final DeferredBlock<MachineBlock> CONVERTER = BLOCKS.registerBlock("converter",
         p -> new MachineBlock(p, blockentity.ConverterBlockEntity::new, ModBlockEntities.CONVERTER), machineProperties());
+    public static final DeferredBlock<BuilderBlock> BUILDER = BLOCKS.registerBlock("builder",
+        BuilderBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

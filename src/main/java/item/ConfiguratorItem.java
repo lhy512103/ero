@@ -33,6 +33,7 @@ public class ConfiguratorItem extends Item {
         if (player.isShiftKeyDown()) {
             CompoundTag tag = new CompoundTag();
             tag.putInt("Mode", port.getMode());
+            tag.putInt("Channel", port.getChannel());
             if (port.getFilter() != null) tag.putString("Filter", BuiltInRegistries.ITEM.getKey(port.getFilter()).toString());
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
             player.sendOverlayMessage(Component.translatable("message.iuce.configurator.copied", LogisticsPortBlock.describe(port)));
@@ -47,6 +48,7 @@ public class ConfiguratorItem extends Item {
         Identifier id = Identifier.tryParse(tag.getStringOr("Filter", ""));
         Item filter = tag.contains("Filter") && id != null ? BuiltInRegistries.ITEM.getValue(id) : null;
         port.configure(tag.getIntOr("Mode", 0), filter);
+        port.setChannel(tag.getIntOr("Channel", 0));
         player.sendOverlayMessage(Component.translatable("message.iuce.configurator.pasted", LogisticsPortBlock.describe(port)));
         return InteractionResult.SUCCESS;
     }

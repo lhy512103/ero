@@ -33,6 +33,7 @@ public final class NetworkInventory implements ResourceHandler<ItemResource> {
         parts.clear();
         for (BlockPos pos : LogisticsManager.networkOf(level, port.getBlockPos())) {
             if (!level.isLoaded(pos) || !(level.getBlockEntity(pos) instanceof LogisticsPortBlockEntity member) || !member.isStorage()) continue;
+            if (member.getChannel() != port.getChannel()) continue;
             // an interface facing another interface would make the view contain itself
             if (level.getBlockEntity(member.targetPos()) instanceof LogisticsPortBlockEntity) continue;
             ResourceHandler<ItemResource> handler = member.handler();

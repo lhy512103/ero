@@ -36,7 +36,8 @@ import java.util.Map;
 /**
  * Logistics interface I. FACING points at the machine or container it serves; the pipe goes on
  * the opposite side. Right-click with an item to only let that item through, with an empty hand to
- * switch between both ways / receive only / supply only, sneaking with an empty hand to clear the filter.
+ * switch between both ways / receive only / supply only, with a dye to put it on that colour's channel,
+ * sneaking with an empty hand to clear filter and channel.
  */
 public class LogisticsPortBlock extends BaseEntityBlock {
     public static final MapCodec<LogisticsPortBlock> CODEC = BlockBehaviour.simpleCodec(LogisticsPortBlock::new);
@@ -101,8 +102,10 @@ public class LogisticsPortBlock extends BaseEntityBlock {
     public static Component describe(LogisticsPortBlockEntity port) {
         Component filter = port.getFilter() == null ? Component.translatable("message.iuce.port.any")
             : new ItemStack(port.getFilter()).getHoverName();
+        Component channel = port.getChannel() == 0 ? Component.translatable("message.iuce.port.no_channel")
+            : Component.translatable("color.minecraft." + net.minecraft.world.item.DyeColor.byId(port.getChannel() - 1).getName());
         return Component.translatable("message.iuce.port.status",
-            Component.translatable("message.iuce.port.mode." + port.getMode()).withStyle(ChatFormatting.YELLOW), filter);
+            Component.translatable("message.iuce.port.mode." + port.getMode()).withStyle(ChatFormatting.YELLOW), filter, channel);
     }
 
     @Override
@@ -110,7 +113,10 @@ public class LogisticsPortBlock extends BaseEntityBlock {
                                           InteractionHand hand, BlockHitResult hitResult) {
         if (stack.isEmpty() || stack.getItem() instanceof item.ConfiguratorItem) return InteractionResult.TRY_WITH_EMPTY_HAND;
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof LogisticsPortBlockEntity port) {
-            port.configure(port.getMode(), stack.getItem());
+            // a dye puts the interface on that colour's channel; anything else becomes the filter
+            net.minecraft.world.item.DyeColor dye = stack.get(net.minecraft.core.component.DataComponents.DYE);
+            if (dye != null) port.setChannel(dye.getId() + 1);
+            else port.configure(port.getMode(), stack.getItem());
             player.sendOverlayMessage(describe(port));
         }
         return InteractionResult.SUCCESS;
@@ -119,7 +125,10 @@ public class LogisticsPortBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof LogisticsPortBlockEntity port) {
-            if (player.isShiftKeyDown()) port.configure(port.getMode(), null);
+            if (player.isShiftKeyDown()) {
+                port.configure(port.getMode(), null);
+                port.setChannel(0);
+            }
             else port.configure((port.getMode() + 1) % 3, port.getFilter());
             player.sendOverlayMessage(describe(port));
         }

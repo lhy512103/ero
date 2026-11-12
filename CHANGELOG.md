@@ -86,6 +86,11 @@
 80. Added: Electric Lamp.
 81. Added: Energy Converter, which turns EU into Forge Energy for other mods' machines.
 82. Added: A logistics interface works as a container holding its whole network's stored items, so hoppers, other pipes or an Applied Energistics storage bus can use it.
+83. Added: Builder I, which places a large machine's casing by itself and asks the pipe network for exactly the blocks still missing.
+84. Added: Blueprint Terminal, which lists what a large machine still needs and sets the length of the Rolling Mill.
+85. Added: The pipe network carries fluids from pumps and tanks to machines.
+86. Added: Dyeing a logistics interface puts it on a colour channel, so one pipe run can serve several separate lines.
+87. Optimized: A pipe network with nothing to move checks less often and resumes at full speed when items arrive.
 
 ### 中文
 
@@ -171,3 +176,8 @@
 80. 新增：电灯。
 81. 新增：能量转换器，把 EU 转换成其他模组通用的能量。
 82. 新增：物流接口可当作容器使用，里面是整个管网的库存，漏斗、其他管道或应用能源的存储总线都能接入。
+83. 新增：施工机 I，自动摆放大机器的外壳，并只向管网索要还缺的数量。
+84. 新增：图纸终端，列出大机器还缺的材料，并可设定轧制联合机的长度。
+85. 新增：管网可以把泵和储罐里的流体送给机器。
+86. 新增：给物流接口染色可划分频道，一组管道能同时服务互不相干的几条线。
+87. 优化：没有东西可运的管网会降低检查频率，有物品时立即恢复全速。

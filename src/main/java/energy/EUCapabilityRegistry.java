@@ -61,6 +61,7 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.REPAIR_BENCH.get());
         register(event, ModBlockEntities.LAMP.get());
         register(event, ModBlockEntities.CONVERTER.get());
+        register(event, ModBlockEntities.BUILDER.get());
         // 物流接口本身就是整个管网仓库的入口：漏斗、其他模组的管道、应用能源的存储总线都可以接在它上面
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.LOGISTICS_PORT.get(), (port, direction) -> port.networkInventory());
 

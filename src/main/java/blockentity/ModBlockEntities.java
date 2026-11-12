@@ -133,6 +133,11 @@ public class ModBlockEntities {
             new BlockEntityType<>(ConverterBlockEntity::new, false, ModBlocks.CONVERTER.get())
         );
 
+    public static final Supplier<BlockEntityType<BuilderBlockEntity>> BUILDER =
+        BLOCK_ENTITIES.register("builder", () ->
+            new BlockEntityType<>(BuilderBlockEntity::new, false, ModBlocks.BUILDER.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

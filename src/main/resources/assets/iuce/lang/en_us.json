@@ -412,7 +412,7 @@
   "block.iuce.silo": "Silo",
   "block.iuce.fluid_tank": "Fluid Tank",
   "item.iuce.configurator": "Configurator",
-  "message.iuce.port.status": "Mode: %s   Filter: %s",
+  "message.iuce.port.status": "Mode: %s   Filter: %s   Channel: %s",
   "message.iuce.port.any": "any",
   "message.iuce.port.mode.0": "automatic",
   "message.iuce.port.mode.1": "receive only",
@@ -451,5 +451,18 @@
   "message.iuce.plant.filled": "Placed %s plant casing blocks",
   "message.iuce.repair.working": "Repairing: %s   %s / %s",
   "message.iuce.repair.done": "Repaired: take it with an empty hand",
-  "message.iuce.repair.empty": "Right-click with a damaged tool or armour piece"
+  "message.iuce.repair.empty": "Right-click with a damaged tool or armour piece",
+  "block.iuce.builder": "Builder I",
+  "item.iuce.blueprint_terminal": "Blueprint Terminal",
+  "message.iuce.builder.no_controller": "Must be placed next to the controller of a large machine",
+  "message.iuce.builder.done": "This machine is complete",
+  "message.iuce.builder.status": "%s casing blocks still missing, %s loaded",
+  "message.iuce.blueprint.title": "%s: %s long, %s shell positions",
+  "message.iuce.blueprint.blocks": "Casing %s, hatches %s; missing %s; wrong %s",
+  "message.iuce.blueprint.parallel": "Parallel once formed: %s with an MV hatch, %s with an HV hatch",
+  "message.iuce.blueprint.resize": "Sneak-right-click to change the length (%s-%s)",
+  "message.iuce.plant.scanning": "Checking the structure...",
+  "tooltip.iuce.blueprint.1": "Right-click a large machine's controller: bill of materials",
+  "tooltip.iuce.blueprint.2": "Sneak-right-click: change the length of an adjustable machine",
+  "message.iuce.port.no_channel": "none"
 }

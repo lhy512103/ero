@@ -22,7 +22,7 @@ items: iuce:plant_controller, iuce:plant_casing, iuce:item_input_hatch, iuce:ite
 - **仓口可以替换任意一块外壳**，至少各要一个：{item:iuce:energy_hatch}、{item:iuce:item_input_hatch}、{item:iuce:item_output_hatch}。想要更大的缓冲就多放几个。
 - 搭好后右键控制器：成型了屏幕会变绿；没成型会告诉你哪里不对。
 - **搭建投影**：先放控制器，准星对着它，还缺方块的位置会用黄色线框标出来，放错方块的位置是红色。
-- **一键补外壳**：手持 {item:iuce:plant_casing} 右键控制器，会把手里的外壳自动放到所有空着的位置。仓口先摆好，剩下的交给它。
+- **一键补外壳**：手持 {item:iuce:plant_casing} 右键控制器，会把手里的外壳自动放到所有空着的位置。仓口先摆好，剩下的交给它。更省事的办法见 [搭建大机器的工具](machines/building)。
 
 {recipe: iuce:plant_casing, iuce:plant_controller}
 

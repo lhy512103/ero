@@ -62,6 +62,7 @@ public final class RegressionTests {
         TESTS.put("transformer_wet_shock", RegressionTests::transformerShock);
         TESTS.put("upgrade_install_and_stacking", RegressionTests::upgrades);
         MachineTests.register(TESTS);
+        StressTests.register(TESTS);
     }
     public static void register(IEventBus bus) {
         var functions = DeferredRegister.<Consumer<GameTestHelper>>create(Registries.TEST_FUNCTION, "iuce");

@@ -64,6 +64,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> REPAIR_BENCH = registerBlockItem(ModBlocks.REPAIR_BENCH);
     public static final DeferredItem<BlockItem> LAMP = registerBlockItem(ModBlocks.LAMP);
     public static final DeferredItem<BlockItem> CONVERTER = registerBlockItem(ModBlocks.CONVERTER);
+    public static final DeferredItem<BlockItem> BUILDER = registerBlockItem(ModBlocks.BUILDER);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);
     public static final DeferredItem<BlockItem> CESU = registerBlockItem("cesu", ModBlocks.CESU, p -> p.rarity(Rarity.UNCOMMON));
     public static final DeferredItem<BlockItem> MFE = registerBlockItem("mfe", ModBlocks.MFE, p -> p.rarity(Rarity.UNCOMMON));

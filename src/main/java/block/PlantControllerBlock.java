@@ -39,10 +39,13 @@ public class PlantControllerBlock extends BaseEntityBlock {
     public static final MapCodec<PlantControllerBlock> CODEC = BlockBehaviour.simpleCodec(PlantControllerBlock::new);
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
+    /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set with the blueprint terminal. */
+    public static final net.minecraft.world.level.block.state.properties.IntegerProperty LENGTH =
+        net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 17);
 
     public PlantControllerBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FORMED, false));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FORMED, false).setValue(LENGTH, 9));
     }
 
     @Override
@@ -52,7 +55,7 @@ public class PlantControllerBlock extends BaseEntityBlock {
     public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, FORMED); }
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, FORMED, LENGTH); }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {

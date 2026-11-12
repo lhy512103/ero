@@ -412,7 +412,7 @@
   "block.iuce.silo": "料仓",
   "block.iuce.fluid_tank": "储罐",
   "item.iuce.configurator": "配置器",
-  "message.iuce.port.status": "模式：%s　过滤：%s",
+  "message.iuce.port.status": "模式：%s　过滤：%s　频道：%s",
   "message.iuce.port.any": "不限",
   "message.iuce.port.mode.0": "自动",
   "message.iuce.port.mode.1": "只进",
@@ -451,5 +451,18 @@
   "message.iuce.plant.filled": "已补上 %s 块厂房外壳",
   "message.iuce.repair.working": "修理中：%s　%s / %s",
   "message.iuce.repair.done": "修好了，空手右键取回",
-  "message.iuce.repair.empty": "手持损坏的工具或护甲右键放入"
+  "message.iuce.repair.empty": "手持损坏的工具或护甲右键放入",
+  "block.iuce.builder": "施工机 I",
+  "item.iuce.blueprint_terminal": "图纸终端",
+  "message.iuce.builder.no_controller": "要紧贴大机器的控制器放置",
+  "message.iuce.builder.done": "这台机器已经成型",
+  "message.iuce.builder.status": "还缺 %s 块外壳，机内有 %s 块",
+  "message.iuce.blueprint.title": "%s：长 %s 格，外壳位置共 %s 个",
+  "message.iuce.blueprint.blocks": "已有外壳 %s、仓口 %s；还缺 %s；放错 %s",
+  "message.iuce.blueprint.parallel": "成型后并行：MV 能源仓 %s，HV 能源仓 %s",
+  "message.iuce.blueprint.resize": "潜行右键切换长度（%s–%s 格）",
+  "message.iuce.plant.scanning": "正在检查结构……",
+  "tooltip.iuce.blueprint.1": "右键大机器控制器：查看材料清单",
+  "tooltip.iuce.blueprint.2": "潜行右键：切换可伸缩机器的长度",
+  "message.iuce.port.no_channel": "无"
 }

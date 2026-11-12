@@ -19,7 +19,7 @@ items: iuce:mill_controller, iuce:energy_hatch_hv
 
 {structure: rolling_mill | 宽 5、高 5、长 9 的空心外壳；可以加长到 17}
 
-和 [选矿联合厂](machines/ore_plant) 用同样的外壳和仓口，只是更长。**长度可以自己定**：从 9 格到 17 格，越长并行越多，17 格时翻倍。先搭 9 格用着，以后把后墙往后挪、补上外壳就行，不用拆。
+和 [选矿联合厂](machines/ore_plant) 用同样的外壳和仓口，只是更长。**长度可以自己定**：从 9 格到 17 格，越长并行越多，17 格时翻倍。长度用 [图纸终端](machines/building) 选：潜行右键控制器，每次加长一格。先搭 9 格用着，以后选个更长的规格，把后墙拆了往后补就行。
 
 {recipe: iuce:mill_controller}
 

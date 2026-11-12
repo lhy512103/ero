@@ -32,8 +32,7 @@ public final class StructureProjection {
         var level = event.getLevel();
         BlockPos pos = event.getBlockPos();
         Direction facing = state.getValue(PlantControllerBlock.FACING);
-        boolean mill = state.is(block.ModBlocks.MILL_CONTROLLER.get());
-        int length = PlantControllerBlockEntity.detectLength(level, pos, facing, mill);
+        int length = PlantControllerBlockEntity.targetLength(state);
 
         List<BlockPos> free = new ArrayList<>(), wrong = new ArrayList<>();
         for (BlockPos shell : PlantControllerBlockEntity.shell(pos, facing, length)) {

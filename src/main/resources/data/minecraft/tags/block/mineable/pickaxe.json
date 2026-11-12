@@ -82,6 +82,7 @@
     "iuce:mill_controller",
     "iuce:repair_bench",
     "iuce:lamp",
-    "iuce:converter"
+    "iuce:converter",
+    "iuce:builder"
   ]
 }

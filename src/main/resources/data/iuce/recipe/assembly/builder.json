@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:circuit",
+      "minecraft:piston",
+      "iuce:circuit"
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:machine_casing",
+      "iuce:iron_plate"
+    ],
+    [
+      "",
+      "iuce:electric_motor",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:builder",
+    "count": 1
+  }
+}
