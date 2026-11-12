@@ -66,7 +66,7 @@ MAX_EU_PER_TICK = 128
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
-    "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer",
+    "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor",
     "batbox", "cesu", "mfe", "mfsu", "singulary_solar_generator",
     "copper_cable", "tin_cable", "gold_cable", "iron_cable", "glass_cable", "singular_cable",
     "insulated_copper_cable", "insulated_tin_cable", "insulated_gold_cable", "insulated_hv_cable",

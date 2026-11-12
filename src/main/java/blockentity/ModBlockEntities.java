@@ -78,6 +78,11 @@ public class ModBlockEntities {
             new BlockEntityType<>(machine.transformer.TransformerBlockEntity::new, false, ModBlocks.TRANSFORMER.get())
         );
 
+    public static final Supplier<BlockEntityType<ChuteBlockEntity>> CHUTE =
+        BLOCK_ENTITIES.register("chute", () ->
+            new BlockEntityType<>(ChuteBlockEntity::new, false, ModBlocks.CHUTE.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

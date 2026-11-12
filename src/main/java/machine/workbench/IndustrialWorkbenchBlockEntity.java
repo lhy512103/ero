@@ -41,7 +41,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     private static final int BATTERY_SLOT = 14;
     private static final int EXTRA_INVENTORY_START = 15;
     private static final int EXTRA_INVENTORY_SIZE = 18;
-    private static final int PROCESS_TIME = 200;
+    private static final int PROCESS_TIME = 40;
 
     private final EUEnergyStorageImpl energyStorage;
     private final EUVoltage voltage;
@@ -53,6 +53,11 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     private CraftingRecipe cachedRecipe = null;
     private ItemStack cachedOutput = ItemStack.EMPTY;
     private boolean recipeChecked;
+    /** Grid layout of the last successful craft; empty grid slots are refilled from the stock to match it. */
+    @Nullable
+    private ItemResource[] pattern;
+    /** True while the machine itself is changing the grid (crafting, refilling). */
+    private boolean internalChange;
     private Object cachedRecipeMap;
 
     private static final Component DISPLAY_NAME = Component.translatable("block.iuce.industrial_workbench");
@@ -69,6 +74,8 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
                 setChanged();
                 // 输入变化时重置配方缓存
                 if (index >= CRAFTING_START && index < CRAFTING_START + CRAFTING_SIZE) {
+                    // a player taking items out of the grid, or laying out something else, forgets the remembered recipe
+                    if (pattern != null && !internalChange && !getResource(index).equals(pattern[index - CRAFTING_START])) pattern = null;
                     cachedRecipe = null;
                     recipeChecked = false;
                     cachedOutput = ItemStack.EMPTY;
@@ -86,6 +93,15 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
 
         // 供电槽：红石粉转化为能量
         processPowerSlot();
+
+        if (pattern != null) {
+            if (tickCount % 5 == 0) refillFromStock();
+            if (!patternComplete()) {
+                // never craft a half-filled layout: it could match a different recipe
+                progress = 0;
+                return;
+            }
+        }
 
         // 查找配方
         Object recipeMap = RecipeHelper.getRecipeManager(level).recipeMap();
@@ -154,7 +170,42 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
         recipeChecked = true;
     }
 
+    private boolean patternComplete() {
+        for (int i = 0; i < CRAFTING_SIZE; i++) {
+            if (!pattern[i].isEmpty() && itemHandler.getAmountAsInt(CRAFTING_START + i) <= 0) return false;
+        }
+        return true;
+    }
+
+    /** Fills empty grid slots of the remembered layout from the stock, whenever the stock has the item. */
+    private void refillFromStock() {
+        internalChange = true;
+        try {
+            for (int i = 0; i < CRAFTING_SIZE; i++) {
+                if (pattern[i].isEmpty() || itemHandler.getAmountAsInt(CRAFTING_START + i) > 0) continue;
+                for (int j = EXTRA_INVENTORY_START; j < EXTRA_INVENTORY_START + EXTRA_INVENTORY_SIZE; j++) {
+                    if (!itemHandler.getResource(j).equals(pattern[i]) || itemHandler.getAmountAsInt(j) <= 0) continue;
+                    try (Transaction tx = Transaction.openRoot()) {
+                        if (itemHandler.extract(j, pattern[i], 1, tx) == 1 && itemHandler.insert(CRAFTING_START + i, pattern[i], 1, tx) == 1) tx.commit();
+                    }
+                    break;
+                }
+            }
+        } finally {
+            internalChange = false;
+        }
+    }
+
     private boolean tryCraft() {
+        internalChange = true;
+        try {
+            return craftOnce();
+        } finally {
+            internalChange = false;
+        }
+    }
+
+    private boolean craftOnce() {
         if (cachedRecipe == null || cachedOutput.isEmpty()) return false;
 
         ItemResource outputResource = ItemResource.of(cachedOutput);
@@ -206,6 +257,8 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
             }
             tx.commit();
         }
+
+        pattern = slotResources;
 
         // 自动补充：从额外物品栏提取相同物品填充空的合成槽
         for (int i = 0; i < CRAFTING_SIZE; i++) {
@@ -291,6 +344,7 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
         super.saveAdditional(output);
         output.putLong("energy", energyStorage.getEnergyStored());
         output.putInt("progress", progress);
+        if (pattern != null) output.store("pattern", ItemResource.OPTIONAL_CODEC.listOf(), List.of(pattern));
         itemHandler.serialize(output);
     }
 
@@ -300,6 +354,8 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
         input.getLong("energy").ifPresent(energy -> energyStorage.setEnergy(energy));
         progress = input.getInt("progress").orElse(0);
         itemHandler.deserialize(input);
+        pattern = input.read("pattern", ItemResource.OPTIONAL_CODEC.listOf())
+            .filter(list -> list.size() == CRAFTING_SIZE).map(list -> list.toArray(new ItemResource[0])).orElse(null);
         cachedRecipe = null;
         cachedOutput = ItemStack.EMPTY;
     }

@@ -105,6 +105,9 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("chute_moves_items_down", MachineTests::chute);
+        tests.put("conveyor_carries_items_into_container", MachineTests::conveyor);
+        tests.put("workbench_remembers_recipe", MachineTests::workbenchMemory);
         tests.put("products_return_to_feeding_side", MachineTests::returnProducts);
         tests.put("overclocker_tiers_differ", MachineTests::overclockerTiers);
         tests.put("blocks_drop_themselves_and_contents", MachineTests::drops);
@@ -677,5 +680,81 @@ final class MachineTests {
             check(helper, rubber == 6, "All 6 rubber must return to the feeding barrel, it has " + rubber);
             check(helper, other.isEmpty(), "Nothing may go to the other side");
         });
+    }
+
+    private static int count(net.minecraft.world.Container container, net.minecraft.world.item.Item item) {
+        int total = 0;
+        for (int slot = 0; slot < container.getContainerSize(); slot++) {
+            if (container.getItem(slot).is(item)) total += container.getItem(slot).getCount();
+        }
+        return total;
+    }
+
+    /** A chute empties the container above it into the one it points at, and picks up loose items. */
+    private static void chute(GameTestHelper helper) {
+        BlockPos chutePos = new BlockPos(1, 2, 1);
+        helper.setBlock(chutePos.above(), Blocks.BARREL);
+        helper.setBlock(chutePos, ModBlocks.CHUTE.get());
+        helper.setBlock(chutePos.below(), Blocks.BARREL);
+        var source = helper.getBlockEntity(chutePos.above(), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        var target = helper.getBlockEntity(chutePos.below(), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        source.setItem(0, new ItemStack(Items.STICK, 64));
+        source.setItem(5, new ItemStack(Items.COAL, 7));
+
+        // a second chute with nothing above it collects dropped items
+        BlockPos loosePos = new BlockPos(3, 2, 1);
+        helper.setBlock(loosePos, ModBlocks.CHUTE.get());
+        helper.setBlock(loosePos.below(), Blocks.BARREL);
+        var looseTarget = helper.getBlockEntity(loosePos.below(), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        helper.spawnItem(Items.FLINT, 3.5f, 3.2f, 1.5f);
+
+        helper.succeedWhen(() -> {
+            check(helper, source.isEmpty(), "The chute must empty the container above it");
+            check(helper, count(target, Items.STICK) == 64 && count(target, Items.COAL) == 7, "Everything must arrive below the chute");
+            check(helper, count(looseTarget, Items.FLINT) == 1, "A chute must pick up items lying on it");
+        });
+    }
+
+    /** Items dropped on a conveyor travel along it and enter the container at its end. */
+    private static void conveyor(GameTestHelper helper) {
+        var east = net.minecraft.core.Direction.EAST;
+        var facing = helper.getTestRotation().rotate(east);
+        for (int x = 0; x < 3; x++) {
+            helper.setBlock(new BlockPos(x, 1, 1), ModBlocks.CONVEYOR.get());
+            BlockPos absolute = helper.absolutePos(new BlockPos(x, 1, 1));
+            helper.getLevel().setBlockAndUpdate(absolute, ModBlocks.CONVEYOR.get().defaultBlockState().setValue(block.ConveyorBlock.FACING, facing));
+        }
+        helper.setBlock(new BlockPos(3, 1, 1), Blocks.BARREL);
+        var target = helper.getBlockEntity(new BlockPos(3, 1, 1), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        helper.spawnItem(Items.IRON_INGOT, 0.5f, 1.4f, 1.5f);
+        helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must reach the container at the end of the belt"));
+    }
+
+    /** The workbench keeps its layout and continues as soon as the stock has materials again. */
+    private static void workbenchMemory(GameTestHelper helper) {
+        MachineBlockEntity bench = place(helper, 1, ModBlocks.INDUSTRIAL_WORKBENCH.get());
+        var inventory = bench.getItemHandler();
+        put(inventory, 4, new ItemStack(Items.OAK_LOG));
+        put(inventory, 15, new ItemStack(Items.OAK_LOG, 2));
+        for (int i = 0; i < 200; i++) bench.tick();
+        check(helper, amount(bench, 9) == 12, "Three logs must become 12 planks, got " + amount(bench, 9));
+        check(helper, amount(bench, 4) == 0 && amount(bench, 15) == 0, "All logs must be used up");
+
+        // materials arriving later (as from a hopper) are laid out again without anyone touching the grid
+        put(inventory, 20, new ItemStack(Items.OAK_LOG));
+        for (int i = 0; i < 60; i++) bench.tick();
+        check(helper, amount(bench, 9) == 16, "The remembered recipe must continue when materials return, got " + amount(bench, 9));
+
+        // the memory survives a reload
+        put(inventory, 21, new ItemStack(Items.OAK_LOG));
+        MachineBlockEntity loaded = reload(helper, bench, 3);
+        for (int i = 0; i < 60; i++) loaded.tick();
+        check(helper, amount(loaded, 9) == 20, "The remembered recipe must survive saving, got " + amount(loaded, 9));
+
+        // other items in the stock are never pulled into the grid, and a new layout replaces the memory
+        put(loaded.getItemHandler(), 22, new ItemStack(Items.STICK, 4));
+        for (int i = 0; i < 20; i++) loaded.tick();
+        for (int slot = 0; slot < 9; slot++) check(helper, amount(loaded, slot) == 0, "Unrelated stock must stay out of the grid");
+        helper.succeed();
     }
 }

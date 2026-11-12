@@ -47,6 +47,8 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> GEOTHERMAL_GENERATOR = registerBlockItem(ModBlocks.GEOTHERMAL_GENERATOR);
     public static final DeferredItem<BlockItem> INDUCTION_FURNACE = registerBlockItem(ModBlocks.INDUCTION_FURNACE);
     public static final DeferredItem<BlockItem> TRANSFORMER = registerBlockItem(ModBlocks.TRANSFORMER);
+    public static final DeferredItem<BlockItem> CHUTE = registerBlockItem(ModBlocks.CHUTE);
+    public static final DeferredItem<BlockItem> CONVEYOR = registerBlockItem(ModBlocks.CONVEYOR);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);
     public static final DeferredItem<BlockItem> CESU = registerBlockItem("cesu", ModBlocks.CESU, p -> p.rarity(Rarity.UNCOMMON));
     public static final DeferredItem<BlockItem> MFE = registerBlockItem("mfe", ModBlocks.MFE, p -> p.rarity(Rarity.UNCOMMON));

@@ -65,6 +65,8 @@
     "iuce:reactor_casing",
     "iuce:fission_controller_front",
     "iuce:reactor_casing_back",
-    "iuce:reactor_casing_side"
+    "iuce:reactor_casing_side",
+    "iuce:chute",
+    "iuce:conveyor"
   ]
 }

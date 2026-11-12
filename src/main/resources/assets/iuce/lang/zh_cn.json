@@ -388,5 +388,7 @@
   "message.iuce.return_products.on": "产物退回进料面：开（产物会送回送料的容器）",
   "message.iuce.return_products.off": "产物退回进料面：关",
   "jei.iuce.chance": "%s%% 概率产出",
-  "jei.iuce.catalyst": "不消耗"
+  "jei.iuce.catalyst": "不消耗",
+  "block.iuce.chute": "滑槽",
+  "block.iuce.conveyor": "传送带 I"
 }

@@ -51,6 +51,11 @@
 45. Optimized: The three overclocker upgrades now differ (time ×0.75 / ×0.60 / ×0.45, energy ×1.5 / ×1.8 / ×2.2) and can be mixed in one machine.
 46. Added: Sneak-right-click a machine with an empty hand to make it return products to the container that fed it, so one AE2 pattern provider can both supply and collect.
 47. Optimized: JEI machine pages now show input amounts, fluids, by-products with their chance, and the energy and time per operation.
+48. Added: Chute, an unpowered block that takes items from above and passes whole stacks down or sideways.
+49. Added: Conveyor I, which carries dropped items along and feeds them into the machine or container at its end.
+50. Added: The Industrial Workbench remembers its last recipe and resumes whenever its stock receives materials again.
+51. Optimized: The Industrial Workbench crafts in 2 seconds instead of 10.
+52. Optimized: The Generator, Metal Former and Industrial Workbench are much cheaper to build, so automation starts earlier.
 
 ### 中文
 
@@ -101,3 +106,8 @@
 45. 优化：三种超频升级效果不再相同（时间 ×0.75 / ×0.60 / ×0.45，耗电 ×1.5 / ×1.8 / ×2.2），可在同一台机器里混装。
 46. 新增：空手潜行右键机器可开启“产物退回进料面”，一个应用能源样板供应器即可同时发料和回收。
 47. 优化：JEI 机器配方页会显示原料数量、流体、副产物及概率，以及每次加工的耗电和时间。
+48. 新增：滑槽，不用电，从上方取物品并整组送往下方或侧面。
+49. 新增：传送带 I，运送掉落物并送入末端的机器或容器。
+50. 新增：工业工作台会记住上一次的配方，原料仓再有原料时自动继续合成。
+51. 优化：工业工作台每次合成由 10 秒缩短为 2 秒。
+52. 优化：火力发电机、金属成型机和工业工作台的造价大幅降低，更早用上自动化。

@@ -388,5 +388,7 @@
   "message.iuce.return_products.on": "Return products to feeder: ON (products go back to the container that supplied the materials)",
   "message.iuce.return_products.off": "Return products to feeder: OFF",
   "jei.iuce.chance": "%s%% chance",
-  "jei.iuce.catalyst": "Not consumed"
+  "jei.iuce.catalyst": "Not consumed",
+  "block.iuce.chute": "Chute",
+  "block.iuce.conveyor": "Conveyor I"
 }

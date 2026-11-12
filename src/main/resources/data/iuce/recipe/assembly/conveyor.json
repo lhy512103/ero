@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:rubber",
+      "iuce:rubber",
+      "iuce:rubber"
+    ],
+    [
+      "minecraft:iron_ingot",
+      "minecraft:redstone",
+      "minecraft:iron_ingot"
+    ],
+    [
+      "",
+      "",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:conveyor",
+    "count": 8
+  }
+}

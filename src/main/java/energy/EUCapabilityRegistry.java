@@ -47,6 +47,9 @@ public final class EUCapabilityRegistry {
         // 工业工作台
         register(event, ModBlockEntities.INDUSTRIAL_WORKBENCH.get());
 
+        // 滑槽：任意面都可以放入和取出
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
+
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());
         registerCable(event, ModBlockEntities.TIN_CABLE.get());

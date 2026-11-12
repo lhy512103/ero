@@ -26,6 +26,8 @@ public class ModCreativeModeTabs {
         ModBlockItems.GEOTHERMAL_GENERATOR,
         ModBlockItems.INDUCTION_FURNACE,
         ModBlockItems.TRANSFORMER,
+        ModBlockItems.CHUTE,
+        ModBlockItems.CONVEYOR,
         ModBlockItems.BATBOX,
         ModBlockItems.CESU,
         ModBlockItems.MFE,

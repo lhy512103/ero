@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "iuce:block/chute"
+    },
+    "facing=north": {
+      "model": "iuce:block/chute_side",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "iuce:block/chute_side",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "iuce:block/chute_side",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "iuce:block/chute_side",
+      "y": 270
+    }
+  }
+}
