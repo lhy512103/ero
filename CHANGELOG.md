@@ -37,6 +37,7 @@
 31. Added: Right-click a machine with any upgrade to install it without opening the interface.
 32. Improved: Upgrades now stack up to 16 in the inventory.
 33. Improved: The Planter's JEI page now lists every crop it can grow automatically, including modded ones.
+34. Improved: The guide book's inventory icon is redrawn as a tilted book in the style of vanilla books.
 
 ### 中文
 
@@ -73,3 +74,4 @@
 31. 新增：手持任意升级右键机器即可直接安装，无需打开界面。
 32. 优化：升级在物品栏中可堆叠至 16 个。
 33. 优化：种植机的 JEI 页面会自动列出全部可种植的作物，包括其他模组的作物。
+34. 优化：指南的物品栏图标重绘为原版书本风格的斜放立体书。

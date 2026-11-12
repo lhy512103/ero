@@ -88,6 +88,9 @@ public final class GuideShots {
                 if (player == null) return;
                 var book = new net.minecraft.world.item.ItemStack(item.ModItems.GUIDE.get());
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, book);
+                player.getInventory().setItem(9, book.copy());
+                player.getInventory().setItem(10, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ENCHANTED_BOOK));
+                player.getInventory().setItem(11, new net.minecraft.world.item.ItemStack(item.ModItems.OVERCLOCKER_UPGRADE.get(), 16));
                 player.drop(book.copy(), false);
             });
             minecraft.setScreen(null);
@@ -100,7 +103,10 @@ public final class GuideShots {
             Screenshot.grab(minecraft.gameDirectory, "guide_hand_third.png", minecraft.getMainRenderTarget(), 1, message -> { });
         } else if (settle == 54) {
             minecraft.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
-        } else if (settle > 70) {
+            minecraft.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(minecraft.player));
+        } else if (settle == 70) {
+            Screenshot.grab(minecraft.gameDirectory, "guide_inventory.png", minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (settle > 76) {
             minecraft.stop();
         }
     }
