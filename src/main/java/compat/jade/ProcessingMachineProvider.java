@@ -97,7 +97,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
             Component text = Component.literal(data.energy() + " / " + data.capacity() + " EU (" + data.voltageName() + ")");
 
             ProgressView energyView = new ProgressView(
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());

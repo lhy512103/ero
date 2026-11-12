@@ -82,7 +82,7 @@ public class CableEnergyProvider implements StreamServerDataProvider<BlockAccess
                 data.energy() + " / " + data.capacity() + " EU (" + data.voltageName() + cableInfo + ", " + data.transferRate() + " EU/t)");
 
             ProgressView view = new ProgressView(
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());

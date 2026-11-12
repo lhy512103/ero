@@ -238,7 +238,7 @@ public class GeneratorEnergyProvider implements StreamServerDataProvider<BlockAc
             ProgressView progressView = new ProgressView(
 
 
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
 
 
                     text,
@@ -271,7 +271,7 @@ public class GeneratorEnergyProvider implements StreamServerDataProvider<BlockAc
                 ProgressView fuelProgress = new ProgressView(
 
 
-                        ProgressView.Part.of(data.burnProgress(), DARK_RED),
+                        ProgressView.Part.of(Math.clamp(data.burnProgress(), 0f, 1f), DARK_RED),
 
 
                         fuelText,

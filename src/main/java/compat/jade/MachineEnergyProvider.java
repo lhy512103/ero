@@ -244,7 +244,7 @@ public class MachineEnergyProvider implements StreamServerDataProvider<BlockAcce
             ProgressView progressView = new ProgressView(
 
 
-                    ProgressView.Part.of(ratio, DARK_RED),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), DARK_RED),
 
 
                     text,

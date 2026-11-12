@@ -78,7 +78,7 @@ public class FluidInfoProvider implements StreamServerDataProvider<BlockAccessor
             Component text = Component.literal(buckets + " / " + maxBuckets + " 桶 (" + data.fluid() + " mB)");
 
             ProgressView progressView = new ProgressView(
-                    ProgressView.Part.of(ratio, WATER_BLUE),
+                    ProgressView.Part.of(Math.clamp(ratio, 0f, 1f), WATER_BLUE),
                     text,
                     JadeUI.progressStyle(),
                     BoxStyle.nestedBox());

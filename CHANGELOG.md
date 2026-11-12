@@ -28,6 +28,7 @@
 22. Added: Planters grow saplings into logs and propagate flowers, mushrooms, vines, and other plants.
 23. Improved: Machines and storage units only accept power at or below their own voltage tier, so higher-tier sources need a Transformer.
 24. Added: Live Transformers shock and stun creatures standing in water or rain within 10 blocks, scaling with voltage.
+25. Fixed: Looking at a machine holding more energy than its capacity could crash the game with Jade installed.
 
 ### 中文
 
@@ -55,3 +56,4 @@
 22. 新增：种植机可将树苗培育为原木，并可繁殖花、蘑菇、藤蔓等植物。
 23. 优化：机器和储电箱只接受不高于自身电压等级的电力，高等级电源需经变压器降压。
 24. 新增：带电变压器会电击并定身周围 10 格内处于水中或淋雨的生物，强度随电压等级提高。
+25. 修复：安装 Jade 时查看电量超过容量的机器可能导致游戏崩溃的问题。
