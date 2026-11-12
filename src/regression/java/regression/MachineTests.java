@@ -106,6 +106,8 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("pipe_network_feeds_and_collects", MachineTests::pipeNetwork);
+        tests.put("silo_and_fluid_tank", MachineTests::siloAndTank);
         tests.put("metal_former_molds", MachineTests::molds);
         tests.put("factory_hub_rates_sustained_supply", MachineTests::factoryHub);
         tests.put("underpowered_machine_slows_down", MachineTests::underpowered);
@@ -959,6 +961,88 @@ final class MachineTests {
         put(loaded.getItemHandler(), 0, new ItemStack(ModItems.COPPER_PLATE.get()));
         power(loaded, 120);
         check(helper, amount(loaded, 1) == 4, "The migrated machine must keep cutting wires, made " + amount(loaded, 1));
+        helper.succeed();
+    }
+
+    private static blockentity.LogisticsPortBlockEntity port(GameTestHelper helper, int x, net.minecraft.core.Direction facing) {
+        BlockPos pos = new BlockPos(x, 1, 1);
+        helper.getLevel().setBlockAndUpdate(helper.absolutePos(pos), ModBlocks.LOGISTICS_PORT.get().defaultBlockState()
+            .setValue(block.LogisticsPortBlock.FACING, helper.getTestRotation().rotate(facing)));
+        return helper.getBlockEntity(pos, blockentity.LogisticsPortBlockEntity.class);
+    }
+
+    /** Storage feeds a machine what it can use, and the machine's products come back to storage. */
+    private static void pipeNetwork(GameTestHelper helper) {
+        var level = helper.getLevel();
+        helper.setBlock(new BlockPos(0, 1, 1), Blocks.BARREL);
+        var barrel = helper.getBlockEntity(new BlockPos(0, 1, 1), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+        port(helper, 1, net.minecraft.core.Direction.WEST);
+        helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.PNEUMATIC_PIPE.get());
+        helper.setBlock(new BlockPos(3, 1, 1), ModBlocks.PNEUMATIC_PIPE.get());
+        var machinePort = port(helper, 4, net.minecraft.core.Direction.EAST);
+        MachineBlockEntity macerator = place(helper, 5, ModBlocks.MACERATOR.get());
+        check(helper, logistics.LogisticsManager.networkCount(level) >= 1, "Two interfaces joined by pipes must form a network");
+
+        barrel.setItem(0, new ItemStack(ModBlocks.TIN_ORE.get(), 4));
+        barrel.setItem(1, new ItemStack(Items.DIRT, 4));
+        machinePort.configure(blockentity.LogisticsPortBlockEntity.AUTO, Items.DIRT);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, amount(macerator, 0) == 0, "A filter must keep other items out, and dirt is of no use to a macerator");
+        machinePort.configure(blockentity.LogisticsPortBlockEntity.SUPPLY, null);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, amount(macerator, 0) == 0, "A supply-only interface must not take anything in");
+        machinePort.configure(blockentity.LogisticsPortBlockEntity.AUTO, null);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, amount(macerator, 0) == 4 && count(barrel, ModBlocks.TIN_ORE.get().asItem()) == 0, "The ore must be delivered to the macerator");
+        check(helper, count(barrel, Items.DIRT) == 4, "What no machine can use must stay in storage");
+
+        put(macerator.getItemHandler(), 1, new ItemStack(ModItems.CRUSHED_TIN_DUST.get(), 2));
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, amount(macerator, 1) == 0 && count(barrel, ModItems.CRUSHED_TIN_DUST.get()) == 2, "Products nobody needs must go into storage");
+        check(helper, amount(macerator, 0) == 4, "Raw materials must not be taken back out of a machine");
+
+        // cutting the pipe splits the network
+        helper.setBlock(new BlockPos(2, 1, 1), Blocks.AIR);
+        barrel.setItem(2, new ItemStack(ModBlocks.TIN_ORE.get(), 1));
+        macerator.getItemHandler().set(0, ItemResource.EMPTY, 0);
+        logistics.LogisticsManager.runCycle(level);
+        check(helper, amount(macerator, 0) == 0, "A cut pipe must stop deliveries");
+        helper.succeed();
+    }
+
+    /** A silo holds far more than a stack of one item; a tank holds one fluid. */
+    private static void siloAndTank(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var up = net.minecraft.core.Direction.UP;
+        helper.setBlock(new BlockPos(1, 1, 1), ModBlocks.SILO.get());
+        var silo = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK, helper.absolutePos(new BlockPos(1, 1, 1)), up);
+        check(helper, silo != null, "The silo must expose its inventory");
+        var iron = ItemResource.of(new ItemStack(Items.IRON_INGOT));
+        try (var tx = Transaction.openRoot()) {
+            check(helper, silo.insert(iron, 5000, tx) == 4096, "A silo holds 64 stacks");
+            check(helper, silo.insert(ItemResource.of(new ItemStack(Items.GOLD_INGOT)), 1, tx) == 0, "A silo holds one kind of item");
+            tx.commit();
+        }
+        try (var tx = Transaction.openRoot()) {
+            silo.extract(iron, 1000, tx);
+        }
+        check(helper, silo.getAmountAsLong(0) == 4096, "An aborted transfer must leave the silo unchanged");
+        check(helper, extract(silo, new ItemStack(Items.IRON_INGOT, 64)) == 64 && silo.getAmountAsLong(0) == 4032, "Items must come back out");
+        var saved = helper.getBlockEntity(new BlockPos(1, 1, 1), blockentity.SiloBlockEntity.class).saveWithoutMetadata(level.registryAccess());
+        check(helper, saved.getLongOr("Amount", 0) == 4032 && saved.contains("Item"), "The silo must save its contents");
+
+        helper.setBlock(new BlockPos(3, 1, 1), ModBlocks.FLUID_TANK.get());
+        var tank = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, helper.absolutePos(new BlockPos(3, 1, 1)), up);
+        check(helper, tank != null, "The tank must expose its fluid");
+        var water = net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER);
+        var lava = net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.LAVA);
+        try (var tx = Transaction.openRoot()) {
+            check(helper, tank.insert(water, 20000, tx) == 16000, "A tank holds 16 buckets");
+            check(helper, tank.insert(lava, 1000, tx) == 0, "A tank holds one fluid at a time");
+            check(helper, tank.extract(water, 16000, tx) == 16000 && tank.insert(lava, 1000, tx) == 1000, "An emptied tank takes any fluid");
+            tx.commit();
+        }
+        helper.setBlock(new BlockPos(1, 1, 1), Blocks.AIR);
         helper.succeed();
     }
 }

@@ -198,6 +198,11 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
     }
 
     @Override
+    public int requestSlot(ItemResource resource) {
+        return logistics.RecipeInputs.isInput(level, recipeType(), resource) ? slotFor(resource, range(0, processSlots)) : -1;
+    }
+
+    @Override
     public String getStatusKey() {
         return tickCount - starvedAt < 40 ? "tooltip.iuce.status.undervoltage" : "";
     }

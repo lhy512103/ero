@@ -320,6 +320,16 @@ public class IndustrialWorkbenchBlockEntity extends MachineBlockEntity implement
     public int[] getOutputSlots() { return new int[]{OUTPUT_SLOT}; }
 
     public int getExtraInventoryStart() { return EXTRA_INVENTORY_START; }
+
+    /** Asks for the ingredients of the remembered recipe, into the stock. */
+    @Override
+    public int requestSlot(ItemResource resource) {
+        if (pattern == null) return -1;
+        for (ItemResource wanted : pattern) {
+            if (wanted.equals(resource)) return slotFor(resource, range(EXTRA_INVENTORY_START, EXTRA_INVENTORY_START + EXTRA_INVENTORY_SIZE));
+        }
+        return -1;
+    }
     public int getExtraInventorySize() { return EXTRA_INVENTORY_SIZE; }
     public int getProgress() { return progress; }
     public int getMaxProgress() { return maxProgress; }

@@ -159,6 +159,11 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     }
 
     @Override public String getMachineName() { return "电解机"; }
+
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        return logistics.RecipeInputs.isInput(level, "electrolyzer", resource) ? slotFor(resource, INPUT_SLOT) : -1;
+    }
     @Override public Component getDisplayName() { return DISPLAY_NAME; }
 
     @Nullable

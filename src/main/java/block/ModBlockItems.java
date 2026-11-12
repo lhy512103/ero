@@ -50,6 +50,10 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> CHUTE = registerBlockItem(ModBlocks.CHUTE);
     public static final DeferredItem<BlockItem> CONVEYOR = registerBlockItem(ModBlocks.CONVEYOR);
     public static final DeferredItem<BlockItem> FACTORY_HUB = registerBlockItem(ModBlocks.FACTORY_HUB);
+    public static final DeferredItem<BlockItem> PNEUMATIC_PIPE = registerBlockItem(ModBlocks.PNEUMATIC_PIPE);
+    public static final DeferredItem<BlockItem> LOGISTICS_PORT = registerBlockItem(ModBlocks.LOGISTICS_PORT);
+    public static final DeferredItem<BlockItem> SILO = registerBlockItem(ModBlocks.SILO);
+    public static final DeferredItem<BlockItem> FLUID_TANK = registerBlockItem(ModBlocks.FLUID_TANK);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);
     public static final DeferredItem<BlockItem> CESU = registerBlockItem("cesu", ModBlocks.CESU, p -> p.rarity(Rarity.UNCOMMON));
     public static final DeferredItem<BlockItem> MFE = registerBlockItem("mfe", ModBlocks.MFE, p -> p.rarity(Rarity.UNCOMMON));

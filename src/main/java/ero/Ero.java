@@ -59,6 +59,7 @@ public class Ero {
         }
 
         network.EnergyTransferManager.tick(event.getLevel());
+        logistics.LogisticsManager.tick(event.getLevel());
     }
 
     private static void onPlayerLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {

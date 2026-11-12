@@ -196,6 +196,25 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         return automationItems[index];
     }
 
+    /**
+     * The slot a logistics interface should put this item into, or -1 when the machine has no use
+     * for it. Unlike hoppers, which may put anything into an input slot, the pipe network only
+     * delivers what the machine can actually work with.
+     */
+    public int requestSlot(ItemResource resource) { return -1; }
+
+    /** The first of the slots that already holds the item and has room, else the first empty one, else -1. */
+    protected int slotFor(ItemResource resource, int... slots) {
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null) return -1;
+        for (int slot : slots) {
+            int amount = inventory.getAmountAsInt(slot);
+            if (amount > 0 && amount < resource.getMaxStackSize() && inventory.getResource(slot).equals(resource)) return slot;
+        }
+        for (int slot : slots) if (inventory.getAmountAsInt(slot) <= 0) return slot;
+        return -1;
+    }
+
     protected static int[] range(int from, int to) {
         int[] slots = new int[Math.max(0, to - from)];
         for (int i = 0; i < slots.length; i++) slots[i] = from + i;

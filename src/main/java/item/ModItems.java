@@ -131,6 +131,7 @@ public class ModItems {
     public static final DeferredItem<MoldItem> PLATE_MOLD = registerItem("plate_mold", p -> new MoldItem(p.stacksTo(1), 0));
     public static final DeferredItem<MoldItem> WIRE_MOLD = registerItem("wire_mold", p -> new MoldItem(p.stacksTo(1), 1));
     public static final DeferredItem<MoldItem> ROD_MOLD = registerItem("rod_mold", p -> new MoldItem(p.stacksTo(1), 2));
+    public static final DeferredItem<ConfiguratorItem> CONFIGURATOR = registerItem("configurator", ConfiguratorItem::new);
 
     // 特殊锭 (Special Ingots)
     public static final DeferredItem<Item> IRRADIANT_URANIUM_INGOT = registerSimpleItem("irradiant_uranium_ingot");

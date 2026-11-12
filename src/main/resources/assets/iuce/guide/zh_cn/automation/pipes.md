@@ -1,0 +1,48 @@
+---
+title: 气动管网
+category: automation
+order: 17
+icon: iuce:logistics_port
+items: iuce:pneumatic_pipe, iuce:logistics_port, iuce:silo, iuce:fluid_tank, iuce:configurator
+---
+
+滑槽和传送带一次只连两台机器。气动管网把一片机器和仓库连成一个整体：机器缺什么，网络自己送；做出什么，网络自己拿走。
+
+{recipe: iuce:pneumatic_pipe, iuce:logistics_port}
+
+## 怎么接
+
+1. 对着机器或箱子的某一面放 {item:iuce:logistics_port}，它的面板会贴住那个方块。
+2. 从接口背后的管口接出 {item:iuce:pneumatic_pipe}，把各个接口连起来。管道随便拐弯、分叉，长度不影响速度。
+3. 至少给网络接一个仓库：箱子、木桶、{item:iuce:silo} 都行。
+
+接好就能用，不需要任何设置：
+
+- **机器的产物**先送给网络里用得上它的机器，没人要就存进仓库。
+- **仓库里的东西**会送给用得上它的机器。打粉机只会收到能打粉的东西，感应炉只会收到能配成合金的原料。
+- 每个接口每秒最多送出 1280 件。管道本身没有上限，也不会有东西掉在地上。
+
+{flow: iuce:silo -> iuce:macerator -> iuce:ore_washer -> iuce:electric_furnace -> iuce:silo}
+
+## 模式与过滤
+
+- **空手右键**接口切换模式：自动、只进、只出。
+- **手持物品右键**接口：只让这一种物品通过。**潜行空手右键**清除过滤。
+- {item:iuce:configurator}：潜行右键一个接口复制设置，再右键别的接口粘贴。
+
+> [!WARN]
+> 自动模式下，机器会要走仓库里**所有**它能加工的东西。比如打粉机会把铜锭磨成粉，电炉又把铜粉炼回铜锭，来回空转。遇到这种情况，给其中一台的接口设过滤，或者改成「只出」。
+
+## 料仓与储罐
+
+{recipe: iuce:silo, iuce:fluid_tank}
+
+- {item:iuce:silo}：只存一种物品，最多 64 组。手持物品右键存入，空手右键取出一组，空手看提示可知存量。
+- {item:iuce:fluid_tank}：存 16 桶任意一种流体，用桶右键装入或取出，也接受流体升级和其他模组的流体管道。
+
+> [!NOTE]
+> 气动管目前只运物品。流体仍然靠泵贴着机器、流体升级或其他模组的管道。
+
+## 交付评级
+
+把接口贴在 [工厂中枢](start/factory_hub) 上，网络会把中枢认可的产品自动送进去。

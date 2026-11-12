@@ -51,6 +51,9 @@ public final class EUCapabilityRegistry {
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
         // 工厂中枢：只进不出
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.FACTORY_HUB.get(), (hub, direction) -> hub.getIntake());
+        // 料仓与储罐
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.SILO.get(), (silo, direction) -> silo.getInventory());
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.FLUID_TANK.get(), (tank, direction) -> tank.getTank());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());

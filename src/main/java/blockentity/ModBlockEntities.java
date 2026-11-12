@@ -88,6 +88,21 @@ public class ModBlockEntities {
             new BlockEntityType<>(FactoryHubBlockEntity::new, false, ModBlocks.FACTORY_HUB.get())
         );
 
+    public static final Supplier<BlockEntityType<LogisticsPortBlockEntity>> LOGISTICS_PORT =
+        BLOCK_ENTITIES.register("logistics_port", () ->
+            new BlockEntityType<>(LogisticsPortBlockEntity::new, false, ModBlocks.LOGISTICS_PORT.get())
+        );
+
+    public static final Supplier<BlockEntityType<SiloBlockEntity>> SILO =
+        BLOCK_ENTITIES.register("silo", () ->
+            new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get())
+        );
+
+    public static final Supplier<BlockEntityType<FluidTankBlockEntity>> FLUID_TANK =
+        BLOCK_ENTITIES.register("fluid_tank", () ->
+            new BlockEntityType<>(FluidTankBlockEntity::new, false, ModBlocks.FLUID_TANK.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

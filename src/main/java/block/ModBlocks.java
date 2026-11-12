@@ -118,6 +118,14 @@ public class ModBlocks {
         ConveyorBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
     public static final DeferredBlock<FactoryHubBlock> FACTORY_HUB = BLOCKS.registerBlock("factory_hub",
         FactoryHubBlock::new, machineProperties());
+    public static final DeferredBlock<PneumaticPipeBlock> PNEUMATIC_PIPE = BLOCKS.registerBlock("pneumatic_pipe",
+        PneumaticPipeBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
+    public static final DeferredBlock<LogisticsPortBlock> LOGISTICS_PORT = BLOCKS.registerBlock("logistics_port",
+        LogisticsPortBlock::new, () -> machineProperties().get().destroyTime(1.5f).noOcclusion());
+    public static final DeferredBlock<StorageBlock> SILO = BLOCKS.registerBlock("silo",
+        p -> new StorageBlock(p, false), machineProperties());
+    public static final DeferredBlock<StorageBlock> FLUID_TANK = BLOCKS.registerBlock("fluid_tank",
+        p -> new StorageBlock(p, true), machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

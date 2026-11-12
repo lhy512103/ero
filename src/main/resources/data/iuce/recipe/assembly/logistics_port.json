@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:pneumatic_pipe",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:circuit",
+      "iuce:iron_plate"
+    ],
+    [
+      "",
+      "minecraft:hopper",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:logistics_port",
+    "count": 2
+  }
+}

@@ -174,6 +174,12 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
     }
 
     @Override public String getMachineName() { return "洗矿机"; }
+
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        if (logistics.RecipeInputs.isInput(level, "ore_washer", resource)) return slotFor(resource, INPUT1_SLOT);
+        return logistics.RecipeInputs.isSecondInput(level, "ore_washer", resource) ? slotFor(resource, INPUT2_SLOT) : -1;
+    }
     @Override public Component getDisplayName() { return DISPLAY_NAME; }
 
     @Nullable

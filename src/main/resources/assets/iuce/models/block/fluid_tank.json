@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "iuce:block/machine/logistic/silo_top",
+    "bottom": "iuce:block/casing/machine_1",
+    "side": "iuce:block/machine/logistic/tank_side"
+  }
+}

@@ -71,6 +71,11 @@
 65. Added: One-star and two-star ratings, with a rating screen showing the wanted products, stock and progress.
 66. Added: Plate, wire and rod molds; the mold placed in the Metal Former decides what it makes, replacing the mode button.
 67. Optimized: Existing Metal Formers receive the mold matching their previous mode when the world is loaded.
+68. Added: Pneumatic Pipes and Logistics Interface I, a network that brings each machine what its recipes can use and carries its products away.
+69. Added: Logistics interfaces can be set to receive only or supply only, and filtered to a single item.
+70. Added: Silo, which stores 64 stacks of one item.
+71. Added: Fluid Tank, which stores 16 buckets of any one fluid.
+72. Added: Configurator, which copies the settings of one logistics interface to others.
 
 ### 中文
 
@@ -141,3 +146,8 @@
 65. 新增：一星和二星评级，评级界面会显示认可的产品、库存和进度。
 66. 新增：板材、导线、棍材三种模具，金属成型机放入哪种模具就做哪种产品，取代原来的模式按钮。
 67. 优化：读取旧存档时，已有的金属成型机会自动获得与原模式对应的模具。
+68. 新增：气动管和物流接口 I，组成的管网会给每台机器送去它用得上的原料，并运走产物。
+69. 新增：物流接口可设为只进或只出，并可限定只通过一种物品。
+70. 新增：料仓，可存放 64 组同一种物品。
+71. 新增：储罐，可存放 16 桶任意一种流体。
+72. 新增：配置器，可把一个物流接口的设置复制到其他接口。
