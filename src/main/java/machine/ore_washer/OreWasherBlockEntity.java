@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 /**
  * 洗矿机：LV，缓冲 2000 EU。槽位：2 输入 + 1 输出 + 1 副产 + 4 升级。
- * 每次加工消耗 1000 mB 水，内部最多存 16000 mB。
+ * 用水量由配方决定（现有配方每次 1000 mB），内部最多存 16000 mB。
  */
 public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements OreWasherGuiProvider, FluidProvider {
 
@@ -35,7 +35,6 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
     private static final int OUTPUT_SLOT = 2;
     private static final int EXTRA_OUTPUT_SLOT = 3;
     private static final int MAX_STORED_WATER = 16000;
-    private static final int WATER_PER_OPERATION = 1000;
     private static final Component DISPLAY_NAME = Component.literal("洗矿机");
 
     /** 内部水箱 */
@@ -80,7 +79,9 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
                 long energyPerTick = overclockedEnergy(cachedRecipe.getEnergyPerTick());
 
                 // 水不够时不开始新的一轮；已经开始的继续做完
-                boolean stalled = (tank.getAmount() < WATER_PER_OPERATION && progress == 0)
+                // 用水量由配方的 fluid_input 决定；配方要的不是水时无法加工
+                int water = cachedRecipe.fluidInputAmount(Fluids.WATER);
+                boolean stalled = water < 0 || (tank.getAmount() < water && progress == 0)
                     || energyStorage.removeEnergy(energyPerTick) <= 0;
                 if (stalled) {
                     if (wasWorking) {
@@ -92,7 +93,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
 
                 progress++;
                 if (progress >= maxProgress && tryProcessOutput()) {
-                    tank.drain(WATER_PER_OPERATION);
+                    tank.drain(water);
                     progress = 0;
                 }
             } else {

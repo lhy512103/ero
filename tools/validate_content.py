@@ -57,6 +57,11 @@ STATION = {
 SUPPORTS_EXTRA_RESULTS = {"electric_furnace", "ore_washer", "electrolyzer"}
 SUPPORTS_SECOND_INPUT = {"alloy_furnace", "planter", "ore_washer"}
 ORDER_INSENSITIVE = {"alloy_furnace"}
+# Machines whose code reads the recipe's fluid_input (and the fluid their tank holds).
+USES_FLUID_INPUT = {"ore_washer": "minecraft:water", "electrolyzer": "minecraft:water"}
+# No machine consumes these fields yet; a recipe using them would silently ignore them.
+USES_FLUID_OUTPUT = set()
+USES_CATALYST = set()
 MAX_EU_PER_TICK = 128
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
@@ -151,6 +156,22 @@ for path in sorted(glob.glob(RECIPES + "*/*.json")):
             warnings.append("%s: %.0f EU/t exceeds %d" % (name, data["energy"] / data["time"], MAX_EU_PER_TICK))
         if data.get("extra_results") and machine not in SUPPORTS_EXTRA_RESULTS:
             errors.append("%s: %s ignores extra_results" % (name, machine))
+        fluid_in = data.get("fluid_input")
+        if fluid_in is not None:
+            if machine not in USES_FLUID_INPUT:
+                errors.append("%s: %s ignores fluid_input" % (name, machine))
+            elif fluid_in.get("id") != USES_FLUID_INPUT[machine]:
+                errors.append("%s: %s only holds %s" % (name, machine, USES_FLUID_INPUT[machine]))
+            if not isinstance(fluid_in.get("amount"), int) or fluid_in["amount"] <= 0:
+                errors.append("%s: fluid_input needs a positive amount" % name)
+        elif machine in USES_FLUID_INPUT:
+            warnings.append("%s: %s recipe without fluid_input runs dry" % (name, machine))
+        if "fluid_output" in data and machine not in USES_FLUID_OUTPUT:
+            errors.append("%s: %s ignores fluid_output" % (name, machine))
+        if "catalyst" in data:
+            if machine not in USES_CATALYST:
+                errors.append("%s: %s ignores catalyst" % (name, machine))
+            check_id(data["catalyst"], name)
         if "input2" in data and machine not in SUPPORTS_SECOND_INPUT:
             errors.append("%s: %s has no second input" % (name, machine))
         recipes.append((name, inputs, outputs, "iuce:" + STATION.get(machine, machine)))

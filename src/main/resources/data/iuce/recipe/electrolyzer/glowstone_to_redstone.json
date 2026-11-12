@@ -15,6 +15,10 @@
       "chance": 0.5
     }
   ],
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
   "energy": 6400,
   "time": 200
 }

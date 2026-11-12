@@ -11,6 +11,9 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,11 +35,26 @@ public class MachineRecipe implements Recipe<MachineRecipeInput> {
     private final List<ExtraResult> extraResults;
     private final long energyCost;
     private final int processTime;
+    /** Fluid consumed per operation; empty when the recipe needs none. */
+    private final Optional<FluidStackTemplate> fluidInput;
+    /** Fluid produced per operation; empty when the recipe makes none. */
+    private final Optional<FluidStackTemplate> fluidOutput;
+    /** Item that must be present but is not consumed (mould, culture, ...). */
+    private final Optional<Ingredient> catalyst;
 
     public MachineRecipe(String machineType, Ingredient input, Optional<Ingredient> input2,
                          int inputCount, int input2Count,
                          ItemStackTemplate outputTemplate, List<ExtraResult> extraResults,
                          long energyCost, int processTime) {
+        this(machineType, input, input2, inputCount, input2Count, outputTemplate, extraResults, energyCost, processTime,
+            Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    public MachineRecipe(String machineType, Ingredient input, Optional<Ingredient> input2,
+                         int inputCount, int input2Count,
+                         ItemStackTemplate outputTemplate, List<ExtraResult> extraResults,
+                         long energyCost, int processTime,
+                         Optional<FluidStackTemplate> fluidInput, Optional<FluidStackTemplate> fluidOutput, Optional<Ingredient> catalyst) {
         this.machineType = machineType;
         this.input = input;
         this.input2 = input2;
@@ -46,6 +64,34 @@ public class MachineRecipe implements Recipe<MachineRecipeInput> {
         this.extraResults = extraResults;
         this.energyCost = energyCost;
         this.processTime = processTime;
+        this.fluidInput = fluidInput;
+        this.fluidOutput = fluidOutput;
+        this.catalyst = catalyst;
+    }
+
+    /**
+     * Fluid consumed per operation; empty when none. Templates are used because recipes are
+     * loaded before fluids can be turned into stacks.
+     */
+    public Optional<FluidStackTemplate> getFluidInputTemplate() { return fluidInput; }
+
+    public Optional<FluidStackTemplate> getFluidOutputTemplate() { return fluidOutput; }
+
+    /** A fresh stack of the consumed fluid, or an empty stack. Only call while a world is loaded. */
+    public FluidStack getFluidInput() { return fluidInput.map(FluidStackTemplate::create).orElse(FluidStack.EMPTY); }
+
+    /** A fresh stack of the produced fluid, or an empty stack. Only call while a world is loaded. */
+    public FluidStack getFluidOutput() { return fluidOutput.map(FluidStackTemplate::create).orElse(FluidStack.EMPTY); }
+
+    public Optional<Ingredient> getCatalyst() { return catalyst; }
+
+    /**
+     * Millibuckets of {@code fluid} one operation consumes: 0 when the recipe needs no fluid,
+     * -1 when it needs a different fluid (so a machine with a {@code fluid} tank cannot run it).
+     */
+    public int fluidInputAmount(Fluid fluid) {
+        if (fluidInput.isEmpty()) return 0;
+        return fluidInput.get().fluid().value() == fluid ? fluidInput.get().amount() : -1;
     }
 
     public MachineRecipe(String machineType, Ingredient input, Optional<Ingredient> input2,

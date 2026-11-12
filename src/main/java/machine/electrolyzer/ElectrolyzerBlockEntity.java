@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 
 /**
  * 电解机：MV，缓冲 8000 EU。槽位：1 输入 + 3 输出 + 4 升级。
- * 每次加工消耗 1000 mB 水，内部最多存 16000 mB，会从相邻的供水设备（如泵）取水。
+ * 用水量由配方决定（现有配方每次 1000 mB），内部最多存 16000 mB，会从相邻的供水设备（如泵）取水。
  */
 public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implements ElectrolyzerGuiProvider, FluidProvider {
 
@@ -37,7 +37,6 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
     private static final int OUTPUT2_SLOT = 2;
     private static final int OUTPUT3_SLOT = 3;
     private static final int MAX_STORED_FLUID = 16000;
-    private static final int WATER_PER_OPERATION = 1000;
     private static final Component DISPLAY_NAME = Component.literal("电解机");
 
     /** 内部水箱 */
@@ -83,12 +82,14 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
         long energyPerTick = overclockedEnergy(cachedRecipe.getEnergyPerTick());
 
         // 水不够时不开始新的一轮；已经开始的继续做完
-        if (tank.getAmount() < WATER_PER_OPERATION && progress == 0) return;
+        // 用水量由配方的 fluid_input 决定；配方要的不是水时无法加工
+        int water = cachedRecipe.fluidInputAmount(Fluids.WATER);
+        if (water < 0 || (tank.getAmount() < water && progress == 0)) return;
         if (energyStorage.removeEnergy(energyPerTick) <= 0) return;
 
         progress++;
         if (progress >= maxProgress && tryProcessOutput()) {
-            tank.drain(WATER_PER_OPERATION);
+            tank.drain(water);
             progress = 0;
             setChanged();
         }

@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("recipe_fluids_and_catalyst", MachineTests::recipeFluids);
         tests.put("fluid_tanks_and_legacy_saves", MachineTests::tanks);
         for (String name : CASE_NAMES)
             tests.put("machine_" + name + "_overclocker_added_later", helper -> lateOverclock(helper, byName(name)));
@@ -431,6 +432,57 @@ final class MachineTests {
             energy(loadedGeo).setEnergy(0);
         }
         check(helper, produced == (400 + 2000) * 20L, "The migrated lava must burn for its remaining 2400 ticks, got " + produced / 20);
+        helper.succeed();
+    }
+
+    /** Recipes carry fluid input/output and a catalyst through JSON and the network; machines use the recipe's water amount. */
+    private static void recipeFluids(GameTestHelper helper) {
+        var registries = helper.getLevel().registryAccess();
+        var water = net.minecraft.world.level.material.Fluids.WATER;
+        var lava = net.minecraft.world.level.material.Fluids.LAVA;
+
+        String json = "{\"machine_type\":\"ore_washer\",\"input\":\"minecraft:gravel\",\"result\":{\"id\":\"minecraft:flint\",\"count\":1},"
+            + "\"energy\":100,\"time\":20,\"fluid_input\":{\"id\":\"minecraft:water\",\"amount\":250},"
+            + "\"fluid_output\":{\"id\":\"minecraft:lava\",\"amount\":40},\"catalyst\":\"minecraft:stick\"}";
+        var ops = registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
+        recipe.MachineRecipe parsed = recipe.MachineRecipeSerializer.CODEC.codec()
+            .parse(ops, com.google.gson.JsonParser.parseString(json)).getOrThrow();
+        check(helper, parsed.fluidInputAmount(water) == 250 && parsed.fluidInputAmount(lava) == -1, "fluid_input must parse");
+        check(helper, parsed.getFluidOutput().getFluid() == lava && parsed.getFluidOutput().getAmount() == 40, "fluid_output must parse");
+        check(helper, parsed.getCatalyst().isPresent() && parsed.getCatalyst().get().test(new ItemStack(Items.STICK)), "catalyst must parse");
+
+        var buffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), registries);
+        recipe.MachineRecipeSerializer.STREAM_CODEC.encode(buffer, parsed);
+        recipe.MachineRecipe synced = recipe.MachineRecipeSerializer.STREAM_CODEC.decode(buffer);
+        check(helper, synced.fluidInputAmount(water) == 250 && synced.getFluidOutput().getAmount() == 40
+            && synced.getCatalyst().isPresent() && synced.getProcessTime() == 20, "Fluids and catalyst must survive network sync");
+        check(helper, buffer.readableBytes() == 0, "Network encoding and decoding must read the same number of bytes");
+
+        // a plain recipe still round-trips with nothing extra
+        recipe.MachineRecipe plain = new recipe.MachineRecipe("macerator",
+            net.minecraft.world.item.crafting.Ingredient.of(Items.GRAVEL), new ItemStack(Items.FLINT), 100, 20);
+        buffer.clear();
+        recipe.MachineRecipeSerializer.STREAM_CODEC.encode(buffer, plain);
+        recipe.MachineRecipe plainSynced = recipe.MachineRecipeSerializer.STREAM_CODEC.decode(buffer);
+        check(helper, plainSynced.getFluidInput().isEmpty() && plainSynced.getFluidOutput().isEmpty() && plainSynced.getCatalyst().isEmpty()
+            && plainSynced.fluidInputAmount(water) == 0, "A recipe without fluids must stay without fluids");
+
+        // the shipped washer recipes ask for one bucket, and the machine uses exactly that
+        recipe.MachineRecipe shipped = recipe.RecipeHelper.findMachineRecipe(helper.getLevel(), "ore_washer",
+            new ItemStack(ModItems.CRUSHED_TIN_DUST.get()));
+        check(helper, shipped != null && shipped.fluidInputAmount(water) == 1000, "Shipped ore washer recipes must declare 1000 mB of water");
+        Case washer = byName("ore_washer");
+        MachineBlockEntity machine = prepare(helper, washer, 1, 2);
+        var tank = ((FluidProvider) machine).getTank();
+        check(helper, runUntil(machine, washer, washer.outputCount(), washer.ticks() + 10) > 0 && tank.getAmount() == 3000,
+            "One wash must consume exactly the recipe's 1000 mB");
+        tank.drain(2500);
+        for (int i = 0; i < washer.ticks() + 40; i++) {
+            energy(machine).setEnergy(energy(machine).getMaxEnergyStored());
+            machine.tick();
+        }
+        check(helper, amount(machine, washer.outputSlot()) == washer.outputCount() && tank.getAmount() == 500,
+            "The washer must not start a wash with less water than the recipe needs");
         helper.succeed();
     }
 }

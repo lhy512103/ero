@@ -7,6 +7,10 @@
     "id": "iuce:purified_aluminium_dust",
     "count": 1
   },
+  "fluid_input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
   "energy": 9600,
   "time": 300
 }

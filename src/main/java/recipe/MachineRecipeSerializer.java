@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
+import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +82,10 @@ public class MachineRecipeSerializer {
             FLEXIBLE_RESULT_CODEC.fieldOf("result").forGetter(MachineRecipe::getOutputTemplate),
             EXTRA_RESULT_CODEC.listOf().optionalFieldOf("extra_results", List.of()).forGetter(MachineRecipe::getExtraResults),
             Codec.LONG.fieldOf("energy").forGetter(MachineRecipe::getEnergyCost),
-            Codec.INT.fieldOf("time").forGetter(MachineRecipe::getProcessTime)
+            Codec.INT.fieldOf("time").forGetter(MachineRecipe::getProcessTime),
+            FluidStackTemplate.MAP_CODEC.codec().optionalFieldOf("fluid_input").forGetter(MachineRecipe::getFluidInputTemplate),
+            FluidStackTemplate.MAP_CODEC.codec().optionalFieldOf("fluid_output").forGetter(MachineRecipe::getFluidOutputTemplate),
+            FLEXIBLE_INGREDIENT_CODEC.optionalFieldOf("catalyst").forGetter(MachineRecipe::getCatalyst)
         ).apply(instance, MachineRecipe::new)
     );
 
@@ -102,6 +106,10 @@ public class MachineRecipeSerializer {
                 }
                 buf.writeLong(recipe.getEnergyCost());
                 buf.writeVarInt(recipe.getProcessTime());
+                writeFluid(buf, recipe.getFluidInputTemplate());
+                writeFluid(buf, recipe.getFluidOutputTemplate());
+                buf.writeBoolean(recipe.getCatalyst().isPresent());
+                recipe.getCatalyst().ifPresent(ing -> Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ing));
             },
             buf -> {
                 String machineType = buf.readUtf();
@@ -121,10 +129,24 @@ public class MachineRecipeSerializer {
                 }
                 long energyCost = buf.readLong();
                 int processTime = buf.readVarInt();
+                Optional<FluidStackTemplate> fluidInput = readFluid(buf);
+                Optional<FluidStackTemplate> fluidOutput = readFluid(buf);
+                Optional<Ingredient> catalyst = buf.readBoolean()
+                    ? Optional.of(Ingredient.CONTENTS_STREAM_CODEC.decode(buf)) : Optional.empty();
                 return new MachineRecipe(machineType, input, input2, inputCount, input2Count,
-                    new ItemStackTemplate(output.getItem(), output.getCount()), List.copyOf(extras), energyCost, processTime);
+                    new ItemStackTemplate(output.getItem(), output.getCount()), List.copyOf(extras), energyCost, processTime,
+                    fluidInput, fluidOutput, catalyst);
             }
         );
+
+    private static void writeFluid(RegistryFriendlyByteBuf buf, Optional<FluidStackTemplate> fluid) {
+        buf.writeBoolean(fluid.isPresent());
+        fluid.ifPresent(template -> FluidStackTemplate.STREAM_CODEC.encode(buf, template));
+    }
+
+    private static Optional<FluidStackTemplate> readFluid(RegistryFriendlyByteBuf buf) {
+        return buf.readBoolean() ? Optional.of(FluidStackTemplate.STREAM_CODEC.decode(buf)) : Optional.empty();
+    }
 
     public static RecipeSerializer<MachineRecipe> create() {
         return new RecipeSerializer<>(CODEC, STREAM_CODEC);

@@ -138,3 +138,18 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - 洗矿机、电解机、泵用水罐（16 000 mB），地热发电机用熔岩罐（64 桶）。
 - 旧存档兼容：以前这些机器只存一个数字（`storedWater`、`storedFluid`、`storedLava`），读档时找不到储罐数据就按旧字段换算。地热发电机旧存档里「正在烧的那一桶」仍计在桶数里，换算时会扣掉。
 - 储罐目前还没有对外开放给其他模组的管道，这是阶段 0.6 的内容。
+
+## 机器配方的可选字段
+
+`iuce:machine` 配方除了原有字段，还可以写：
+
+```json
+"fluid_input":  { "id": "minecraft:water", "amount": 1000 },
+"fluid_output": { "id": "minecraft:lava",  "amount": 250 },
+"catalyst": "minecraft:stick"
+```
+
+- `fluid_input`：每次加工消耗的流体。洗矿机和电解机已经按它扣水（不再写死 1000 mB），现有配方都声明了 1000 mB 水。
+- `fluid_output`、`catalyst`（在场但不消耗的物品，如模具、菌种）：格式和网络同步已支持，但**目前还没有机器使用**。校验脚本会对写了这两个字段的配方报错，避免它们被悄悄忽略；等有机器支持时，把机器类型加进 `tools/validate_content.py` 的 `USES_FLUID_OUTPUT` / `USES_CATALYST`。
+- 流体用 `FluidStackTemplate` 保存：数据包加载时流体还不能构造成 `FluidStack`。
+- 物品输入仍然最多两种、主产物一种加若干概率副产物；更多输入和多个主产物留到第一台需要它的机器再加。
