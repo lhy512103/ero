@@ -74,6 +74,37 @@ public abstract class PoweredMachineBlockEntity extends MachineBlockEntity imple
         return overclock().energy(energyPerTick);
     }
 
+    private long paid;
+    private long starvedAt = -1000;
+    /** Set by machines whose by-product slot cannot take the next by-product. */
+    protected boolean byproductBlocked;
+
+    /**
+     * Pays for one tick of work. Energy that is not enough for a whole tick is kept and counted
+     * towards the next attempt, so a machine that gets half the power it needs works at half speed.
+     *
+     * @return true when this tick's work is paid for and progress may advance
+     */
+    protected boolean payForTick(long energyPerTick) {
+        if (energyPerTick <= 0) return true;
+        paid += energyStorage.removeEnergy(energyPerTick - paid);
+        if (paid < energyPerTick) {
+            starvedAt = tickCount;
+            return false;
+        }
+        paid = 0;
+        return true;
+    }
+
+    /** For machines that collect their energy themselves: records that this tick could not be paid. */
+    protected void noteStarved() { starvedAt = tickCount; }
+
+    @Override
+    public String getStatusKey() {
+        if (byproductBlocked && progress > 0) return "tooltip.iuce.status.byproduct_full";
+        return tickCount - starvedAt < 40 ? "tooltip.iuce.status.undervoltage" : "";
+    }
+
     /** Makes the block's RUNNING state follow {@link #isWorking()}. */
     protected void updateRunningState() {
         if (level == null || level.isClientSide()) return;

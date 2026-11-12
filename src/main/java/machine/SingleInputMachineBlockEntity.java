@@ -49,6 +49,9 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
     private final MachineRecipe[] cachedRecipes;
     private final ItemResource[] cachedInputResources;
     @javax.annotation.Nullable private OverclockerUpgradeItem.Effect overclock;
+    /** Energy already collected towards the current tick of work, per process slot. */
+    private long[] paid;
+    private long starvedAt = -1000;
 
     protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
                                             int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime) {
@@ -99,7 +102,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
             ItemResource inputResource = itemHandler.getResource(i);
             int inputAmount = itemHandler.getAmountAsInt(i);
 
-            if (!inputResource.isEmpty() && inputAmount > 0 && energyStorage.getEnergyStored() > 0) {
+            if (!inputResource.isEmpty() && inputAmount > 0) {
                 if (cachedRecipes[i] == null || !inputResource.equals(cachedInputResources[i])) {
                     cachedRecipes[i] = RecipeHelper.findMachineRecipe(level, recipeType(), inputResource.toStack(1));
                     cachedInputResources[i] = inputResource;
@@ -115,7 +118,14 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
                 maxProgress[i] = overclock.time(recipe.getProcessTime());
                 long energyPerTick = overclock.energy(recipe.getEnergyPerTick());
 
-                if (energyStorage.removeEnergy(energyPerTick) <= 0) continue;
+                // 电不够付一整 tick 时先攒着，攒够了才前进一步：供电一半，速度一半
+                if (paid == null) paid = new long[processSlots];
+                paid[i] += energyStorage.removeEnergy(energyPerTick - paid[i]);
+                if (paid[i] < energyPerTick) {
+                    starvedAt = tickCount;
+                    continue;
+                }
+                paid[i] = 0;
 
                 progress[i]++;
                 anyWorking = true;
@@ -155,6 +165,11 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
     @Override
     public Component getDisplayName() {
         return getBlockState().getBlock().getName();
+    }
+
+    @Override
+    public String getStatusKey() {
+        return tickCount - starvedAt < 40 ? "tooltip.iuce.status.undervoltage" : "";
     }
 
     public boolean isWorking() {

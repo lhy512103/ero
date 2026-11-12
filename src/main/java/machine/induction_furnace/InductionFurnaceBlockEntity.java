@@ -77,7 +77,7 @@ public class InductionFurnaceBlockEntity extends PoweredMachineBlockEntity imple
 
                 boolean stalled = input1Amount < cachedRecipe.getInputCount()
                     || input2Amount < cachedRecipe.getInput2Count()
-                    || energyStorage.removeEnergy(energyPerTick) <= 0;
+                    || !payForTick(energyPerTick);
                 if (stalled) {
                     if (wasWorking) {
                         updateRunningState();

@@ -85,9 +85,11 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
         // 用水量由配方的 fluid_input 决定；配方要的不是水时无法加工
         int water = cachedRecipe.fluidInputAmount(Fluids.WATER);
         if (water < 0 || (tank.getAmount() < water && progress == 0)) return;
-        if (energyStorage.removeEnergy(energyPerTick) <= 0) return;
-
-        progress++;
+        // 做完后等出料的时候不再前进，也不再耗电
+        if (progress < maxProgress) {
+            if (!payForTick(energyPerTick)) return;
+            progress++;
+        }
         if (progress >= maxProgress && tryProcessOutput()) {
             tank.drain(water);
             progress = 0;
@@ -97,6 +99,7 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
 
     private boolean tryProcessOutput() {
         if (cachedRecipe == null) return false;
+        byproductBlocked = false;
 
         ItemStack outputStack = cachedRecipe.getOutput();
         ItemResource outputResource = ItemResource.of(outputStack);
@@ -105,6 +108,23 @@ public class ElectrolyzerBlockEntity extends PoweredMachineBlockEntity implement
             ItemResource inputResource = itemHandler.getResource(INPUT_SLOT);
             if (itemHandler.extract(INPUT_SLOT, inputResource, cachedRecipe.getInputCount(), tx) < cachedRecipe.getInputCount()) return false;
             if (itemHandler.insert(OUTPUT1_SLOT, outputResource, outputStack.getCount(), tx) < outputStack.getCount()) return false;
+
+            // 副产槽放不下就停机。不看这一次是否真的产出，否则可以靠反复重试躲过去
+            if (cachedRecipe.hasExtraResults() && level != null) {
+                try (Transaction check = Transaction.open(tx)) {
+                    for (MachineRecipe.ExtraResult extra : cachedRecipe.getExtraResults()) {
+                        ItemStack extraStack = extra.create();
+                        ItemResource extraResource = ItemResource.of(extraStack);
+                        int remaining = extraStack.getCount();
+                        remaining -= itemHandler.insert(OUTPUT2_SLOT, extraResource, remaining, check);
+                        if (remaining > 0) remaining -= itemHandler.insert(OUTPUT3_SLOT, extraResource, remaining, check);
+                        if (remaining > 0) {
+                            byproductBlocked = true;
+                            return false;
+                        }
+                    }
+                }
+            }
 
             // 副产物依次尝试放入输出槽 2、3
             if (cachedRecipe.hasExtraResults()) {

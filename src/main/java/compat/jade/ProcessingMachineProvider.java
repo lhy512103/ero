@@ -32,7 +32,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
     /** 暗红色 (ARGB) */
     private static final int DARK_RED = 0xFFAA0000;
 
-    public record Data(long energy, long capacity, String voltageName, boolean processing, float progress, String progressLabel) {
+    public record Data(long energy, long capacity, String voltageName, boolean processing, float progress, String progressLabel, String status) {
         public static final StreamCodec<ByteBuf, Data> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_LONG, Data::energy,
                 ByteBufCodecs.VAR_LONG, Data::capacity,
@@ -40,6 +40,7 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
                 ByteBufCodecs.BOOL, Data::processing,
                 ByteBufCodecs.FLOAT, Data::progress,
                 ByteBufCodecs.STRING_UTF8, Data::progressLabel,
+                ByteBufCodecs.STRING_UTF8, Data::status,
                 Data::new);
     }
 
@@ -67,7 +68,8 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
                         voltageName,
                         display.isProcessing(),
                         display.getProcessingProgress(),
-                        display.getProgressLabel());
+                        display.getProgressLabel(),
+                        display.getStatusKey());
             }
         }
         return null;
@@ -108,6 +110,9 @@ public class ProcessingMachineProvider implements StreamServerDataProvider<Block
             if (data.processing() && !data.progressLabel().isEmpty()) {
                 Component progressText = Component.translatable(data.progressLabel()).append(": " + (int)(data.progress() * 100) + "%");
                 tooltip.add(progressText);
+            }
+            if (!data.status().isEmpty()) {
+                tooltip.add(Component.translatable(data.status()).withStyle(net.minecraft.ChatFormatting.RED));
             }
         }
 

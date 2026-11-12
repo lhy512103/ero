@@ -390,5 +390,7 @@
   "jei.iuce.chance": "%s%% 概率产出",
   "jei.iuce.catalyst": "不消耗",
   "block.iuce.chute": "滑槽",
-  "block.iuce.conveyor": "传送带 I"
+  "block.iuce.conveyor": "传送带 I",
+  "tooltip.iuce.status.undervoltage": "供电不足，降速运行",
+  "tooltip.iuce.status.byproduct_full": "副产物槽已满，停机"
 }

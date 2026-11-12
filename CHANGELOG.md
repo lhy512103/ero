@@ -64,6 +64,9 @@
 58. Optimized: The placement preview now shows the half-transparent block with a white frame and a yellow direction arrow.
 59. Added: Machine recipes can be encoded into Applied Energistics processing patterns with one click from JEI.
 60. Added: Conveyors descend: a belt fed from one block higher turns into a down ramp.
+61. Fixed: Machines that received less power than they needed still ran at full speed; they now slow down in proportion.
+62. Optimized: The Ore Washer and Electrolyzer stop when their by-product slot is full instead of discarding by-products, and no longer use power while waiting.
+63. Added: Jade shows when a machine is underpowered or stopped by a full by-product slot.
 
 ### 中文
 
@@ -127,3 +130,6 @@
 58. 优化：摆放预览改为半透明方块模型，带白色线框和黄色方向箭头。
 59. 新增：机器配方可在 JEI 中一键编码为应用能源的处理样板。
 60. 新增：传送带可以下坡，被高一格的传送带送料时会自动变成下行斜坡。
+61. 修复：机器供电不足时仍按全速运行的问题，现在会按实际供电比例降速。
+62. 优化：洗矿机和电解机的副产物槽满时停机而不再丢弃副产物，等待期间不再耗电。
+63. 新增：Jade 会提示机器供电不足或被副产物堵住。

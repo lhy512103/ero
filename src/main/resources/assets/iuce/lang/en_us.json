@@ -390,5 +390,7 @@
   "jei.iuce.chance": "%s%% chance",
   "jei.iuce.catalyst": "Not consumed",
   "block.iuce.chute": "Chute",
-  "block.iuce.conveyor": "Conveyor I"
+  "block.iuce.conveyor": "Conveyor I",
+  "tooltip.iuce.status.undervoltage": "Underpowered: running slowly",
+  "tooltip.iuce.status.byproduct_full": "By-product slot full: stopped"
 }

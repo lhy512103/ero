@@ -105,6 +105,8 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("underpowered_machine_slows_down", MachineTests::underpowered);
+        tests.put("full_byproduct_slot_stops_machine", MachineTests::byproductBlocks);
         tests.put("conveyor_descends", MachineTests::conveyorDown);
         tests.put("conveyor_turns_and_climbs", MachineTests::conveyorRoute);
         tests.put("chute_moves_items_down", MachineTests::chute);
@@ -800,5 +802,46 @@ final class MachineTests {
         var target = helper.getBlockEntity(new BlockPos(3, 1, 1), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
         helper.spawnItem(Items.IRON_INGOT, 0.5f, 2.4f, 1.5f);
         helper.succeedWhen(() -> check(helper, count(target, Items.IRON_INGOT) == 1, "The item must ride down the ramp and reach the container"));
+    }
+
+    /** Half the power means half the speed, not a free ride and not a stop. */
+    private static void underpowered(GameTestHelper helper) {
+        Case c = byName("macerator");
+        MachineBlockEntity machine = prepare(helper, c, 1, 1);
+        long perTick = recipe.RecipeHelper.findMachineRecipe(helper.getLevel(), "macerator", c.inputs().get(0)).getEnergyPerTick();
+        energy(machine).setEnergy(0);
+        int took = -1;
+        boolean reported = false;
+        for (int tick = 1; tick <= c.ticks() * 2 + 10; tick++) {
+            if (tick % 2 == 0) energy(machine).addEnergy(perTick);
+            machine.tick();
+            reported |= ((blockentity.ProcessingDisplay) machine).getStatusKey().equals("tooltip.iuce.status.undervoltage");
+            if (amount(machine, c.outputSlot()) >= c.outputCount()) { took = tick; break; }
+        }
+        check(helper, took > 0 && Math.abs(took - c.ticks() * 2) <= 2, "At half power the macerator must take about " + c.ticks() * 2 + " ticks, took " + took);
+        check(helper, reported, "An underpowered machine must report it");
+        helper.succeed();
+    }
+
+    /** A washer whose by-product slot is full waits instead of throwing the by-product away. */
+    private static void byproductBlocks(GameTestHelper helper) {
+        Case c = byName("ore_washer");
+        MachineBlockEntity machine = prepare(helper, c, 1, 1);
+        put(machine.getItemHandler(), 3, new ItemStack(Items.DIRT, 64));
+        for (int i = 0; i < c.ticks() + 40; i++) {
+            energy(machine).setEnergy(energy(machine).getMaxEnergyStored());
+            machine.tick();
+        }
+        check(helper, amount(machine, c.outputSlot()) == 0 && amount(machine, c.inputSlots()[0]) > 0,
+            "A full by-product slot must hold the whole operation back");
+        check(helper, ((blockentity.ProcessingDisplay) machine).getStatusKey().equals("tooltip.iuce.status.byproduct_full"),
+            "The machine must report the full by-product slot");
+        long full = energy(machine).getMaxEnergyStored();
+        energy(machine).setEnergy(full);
+        for (int i = 0; i < 20; i++) machine.tick();
+        check(helper, energy(machine).getEnergyStored() == full, "A machine waiting for room must not keep using power");
+        machine.getItemHandler().set(3, ItemResource.EMPTY, 0);
+        check(helper, runUntil(machine, c, c.outputCount(), 20) > 0, "The machine must continue once the by-product slot has room");
+        helper.succeed();
     }
 }
