@@ -7,9 +7,6 @@ import item.EjectorUpgradeItem;
 import item.FluidEjectorUpgradeItem;
 import item.FluidPullingUpgradeItem;
 import item.PullingUpgradeItem;
-import network.LogisticsLink;
-import network.LogisticsNetwork;
-import network.NetworkManager;
 import network.performance.MachinePriority;
 import network.performance.TickThrottler;
 import net.minecraft.core.BlockPos;
@@ -207,26 +204,21 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
     }
 
     /**
-     * 创建物流连接（此机器作为目标/接收方）
+     * Drops everything held in the item slots when the block is broken (by hand, explosion or piston).
+     * The wrench dismantles differently: it collects the contents itself before removing the block.
      */
-    public LogisticsLink createLogisticsLink(MachineBlockEntity transportMachine) {
-        return LogisticsNetwork.getInstance().createLink(
-            this.worldPosition, transportMachine.getBlockPos()
-        );
-    }
-
-    /**
-     * 移除所有物流连接
-     */
-    public void removeAllLogisticsLinks() {
-        LogisticsNetwork.getInstance().removeMachineLinks(worldPosition);
-    }
-
-    /**
-     * 获取此机器的所有物流连接
-     */
-    public List<LogisticsLink> getLogisticsLinks() {
-        return LogisticsNetwork.getInstance().getMachineLinks(worldPosition);
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        ItemStacksResourceHandler inventory = getItemHandler();
+        if (inventory == null || level == null) return;
+        for (int slot = 0; slot < inventory.size(); slot++) {
+            int amount = inventory.getAmountAsInt(slot);
+            if (amount <= 0) continue;
+            ItemResource resource = inventory.getResource(slot);
+            inventory.set(slot, ItemResource.EMPTY, 0);
+            net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), resource.toStack(amount));
+        }
     }
 
     @Override
@@ -258,8 +250,6 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
     public void onRemove() {
         if (level != null && !level.isClientSide()) {
             network.EnergyTransferManager.remove(this);
-            // 移除所有物流连接
-            removeAllLogisticsLinks();
         }
     }
 

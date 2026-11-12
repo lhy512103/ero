@@ -42,6 +42,11 @@ public final class WrenchActions {
                     contents.add(inventory.getResource(slot).toStack(inventory.getAmountAsInt(slot)));
                 }
             }
+            if (entity instanceof MachineBlockEntity machine && machine.getItemHandler() != null) {
+                var inventory = machine.getItemHandler();
+                for (int slot = 0; slot < inventory.size(); slot++)
+                    inventory.set(slot, net.neoforged.neoforge.transfer.item.ItemResource.EMPTY, 0);
+            }
             if (!level.removeBlock(pos, false)) return InteractionResult.FAIL;
             Block.popResource(level, pos, new ItemStack(state.getBlock()));
             for (ItemStack stack : contents) if (!stack.isEmpty()) Block.popResource(level, pos, stack);

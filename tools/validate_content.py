@@ -256,6 +256,9 @@ for item in sorted(all_items):
     for code, table in languages.items():
         if key not in table:
             errors.append("missing %s translation: %s" % (code, key))
+for block in sorted(block_items):
+    if not os.path.exists(RES + "data/iuce/loot_table/blocks/" + block + ".json"):
+        errors.append("missing loot table (the block would drop nothing): data/iuce/loot_table/blocks/%s.json" % block)
 for key in sorted(set(languages["zh_cn"]) - set(languages["en_us"])):
     warnings.append("en_us is missing key present in zh_cn: " + key)
 

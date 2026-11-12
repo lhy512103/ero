@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("blocks_drop_themselves_and_contents", MachineTests::drops);
         tests.put("automation_item_and_fluid_access", MachineTests::automation);
         tests.put("hoppers_feed_and_drain_machines", MachineTests::hoppers);
         tests.put("recipe_fluids_and_catalyst", MachineTests::recipeFluids);
@@ -579,6 +580,41 @@ final class MachineTests {
             }
             check(helper, top.isEmpty() && amount(machine, 0) == 2, "The hopper above must feed the machine's input slot");
             check(helper, rubber == 6 && amount(machine, 1) == 0, "The hopper below must collect all 6 rubber, has " + rubber);
+        });
+    }
+
+    /** Every block has a loot table, and a broken machine spills what it held. */
+    private static void drops(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var pickaxe = new ItemStack(Items.NETHERITE_PICKAXE);
+        for (var holder : ModBlocks.BLOCKS.getEntries()) {
+            Block block = holder.get();
+            if (block.asItem() == Items.AIR) continue;
+            var loot = block.defaultBlockState().getDrops(new net.minecraft.world.level.storage.loot.LootParams.Builder(level)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, net.minecraft.world.phys.Vec3.ZERO)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL, pickaxe));
+            if (block == ModBlocks.RUBBER_LEAVES.get()) continue;   // leaves drop saplings by chance
+            check(helper, loot.size() == 1 && loot.get(0).is(block.asItem()), holder.getId() + " must drop itself, dropped " + loot);
+        }
+
+        BlockPos pos = new BlockPos(1, 1, 1);
+        MachineBlockEntity machine = place(helper, 1, ModBlocks.MACERATOR.get());
+        put(machine.getItemHandler(), 0, new ItemStack(ModBlocks.TIN_ORE.get(), 5));
+        put(machine.getItemHandler(), machine.getUpgradeSlotStart(), new ItemStack(ModItems.OVERCLOCKER_UPGRADE.get()));
+        level.destroyBlock(helper.absolutePos(pos), true);
+        helper.runAfterDelay(2, () -> {
+            var found = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                new net.minecraft.world.phys.AABB(helper.absolutePos(pos)).inflate(2));
+            int ore = 0, upgrades = 0, machines = 0;
+            for (var entity : found) {
+                ItemStack stack = entity.getItem();
+                if (stack.is(ModBlocks.TIN_ORE.get().asItem())) ore += stack.getCount();
+                if (stack.is(ModItems.OVERCLOCKER_UPGRADE.get())) upgrades += stack.getCount();
+                if (stack.is(ModBlocks.MACERATOR.get().asItem())) machines += stack.getCount();
+            }
+            check(helper, ore == 5 && upgrades == 1, "A broken machine must drop its contents, got ore=" + ore + " upgrades=" + upgrades);
+            check(helper, machines == 1, "A broken machine must drop itself once, got " + machines);
+            helper.succeed();
         });
     }
 }

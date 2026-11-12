@@ -3,7 +3,6 @@ package ero;
 import energy.EUCapabilityRegistry;
 import init.ModFluids;
 import init.ModRegistries;
-import network.MachineNetwork;
 import network.performance.PerformanceGovernor;
 import network.performance.PerformanceMonitor;
 import recipe.ModRecipes;
@@ -19,7 +18,6 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 public class Ero {
     public static final String MOD_ID = "iuce";
 
-    private static MachineNetwork machineNetwork;
 
     public Ero(ModContainer container) {
         IEventBus modEventBus = container.getEventBus();
@@ -38,8 +36,6 @@ public class Ero {
         // 注册能量能力
         modEventBus.addListener(EUCapabilityRegistry::registerAll);
 
-        // 初始化机器网络
-        machineNetwork = new MachineNetwork();
 
         // 初始化性能监控系统
         PerformanceMonitor.getInstance().register();
@@ -55,10 +51,6 @@ public class Ero {
         NeoForge.EVENT_BUS.addListener(Ero::onPlayerLogin);
     }
 
-    public static MachineNetwork getMachineNetwork() {
-        return machineNetwork;
-    }
-
     private static void onLevelTick(LevelTickEvent.Post event) {
         // 服务器冻结时（无玩家/手动降速）跳过网络能量传输处理，
         // 避免在 tick 被故意放缓时做无意义的网络计算
@@ -66,9 +58,7 @@ public class Ero {
             return;
         }
 
-        if (machineNetwork != null) {
-            machineNetwork.tick(event.getLevel());
-        }
+        network.EnergyTransferManager.tick(event.getLevel());
     }
 
     private static void onPlayerLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
