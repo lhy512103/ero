@@ -112,3 +112,21 @@ CropRegistry.register(seedItem, new ItemStack(cropItem, 2), 200, 2);
 - 没装 Python 的机器：`gradlew build -PskipContentValidation`；Python 不叫 `python` 时：`-PpythonCommand=python3`。
 - `python tools/validate_content.py --verbose` 额外打印每个物品最早能在第几轮做出来。
 - `python tools/dump_recipes.py` 把全部配方按一行一条打印出来，调数值时用。
+
+## 机器基类
+
+新增机器时先看能不能套用下面的基类，只写它自己的配方逻辑：
+
+| 基类 | 适用 | 已使用 |
+| --- | --- | --- |
+| `machine.SingleInputMachineBlockEntity` + `SingleInputMachineMenu` | 一种原料进、一种产物出，跑 `iuce:machine` 配方 | 打粉机、压缩机、提取机、金属成型机 |
+| `machine.PoweredMachineBlockEntity` | 其他耗电的加工机：提供电量缓冲、物品槽、进度、超频计数、运行状态和存档 | 洗矿机、电解机、感应炉、电炉、种植机 |
+| `machine.SolarBlockEntity` | 太阳能发电机各等级 | 六级太阳能 |
+| `machine.storage.StorageBlockEntity` | 储电箱各等级 | 储电箱、CESU、MFE、MFSU |
+
+- 套用 `SingleInputMachineBlockEntity` 的机器只需要给出配方类型、名称和界面，约 30 行（参考 `CompressorBlockEntity`）。
+- 槽位布局不是「前一半输入、后一半输出」的机器，要重写 `getInputSlots()` / `getOutputSlots()`，物品传输升级靠它们区分原料和产物。
+- 存档字段（`energy`、`progress`、`maxProgress`、物品）与迁移前一致，旧存档可直接读取。
+- 发电机、地热发电机、泵、工业工作台还没有迁移：泵和地热会在流体系统里重写，工作台会在装配台改造里重写。
+
+每台加工机在 `MachineTests` 里有一组测试（加工、断电、超频、后装超频、存档往返）。新增机器时在 `cases()` 和 `CASE_NAMES` 里各加一项。
