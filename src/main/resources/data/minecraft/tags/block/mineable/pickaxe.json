@@ -67,6 +67,7 @@
     "iuce:reactor_casing_back",
     "iuce:reactor_casing_side",
     "iuce:chute",
-    "iuce:conveyor"
+    "iuce:conveyor",
+    "iuce:factory_hub"
   ]
 }

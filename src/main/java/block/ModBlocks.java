@@ -116,6 +116,8 @@ public class ModBlocks {
         ChuteBlock::new, () -> machineProperties().get().destroyTime(2.0f).noOcclusion());
     public static final DeferredBlock<ConveyorBlock> CONVEYOR = BLOCKS.registerBlock("conveyor",
         ConveyorBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
+    public static final DeferredBlock<FactoryHubBlock> FACTORY_HUB = BLOCKS.registerBlock("factory_hub",
+        FactoryHubBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

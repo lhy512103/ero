@@ -28,6 +28,7 @@ public class ModCreativeModeTabs {
         ModBlockItems.TRANSFORMER,
         ModBlockItems.CHUTE,
         ModBlockItems.CONVEYOR,
+        ModBlockItems.FACTORY_HUB,
         ModBlockItems.BATBOX,
         ModBlockItems.CESU,
         ModBlockItems.MFE,

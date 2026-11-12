@@ -67,6 +67,8 @@
 61. Fixed: Machines that received less power than they needed still ran at full speed; they now slow down in proportion.
 62. Optimized: The Ore Washer and Electrolyzer stop when their by-product slot is full instead of discarding by-products, and no longer use power while waiting.
 63. Added: Jade shows when a machine is underpowered or stopped by a full by-product slot.
+64. Added: Factory Hub, which rates your factory with stars for keeping it supplied with products minute after minute.
+65. Added: One-star and two-star ratings, with a rating screen showing the wanted products, stock and progress.
 
 ### 中文
 
@@ -133,3 +135,5 @@
 61. 修复：机器供电不足时仍按全速运行的问题，现在会按实际供电比例降速。
 62. 优化：洗矿机和电解机的副产物槽满时停机而不再丢弃副产物，等待期间不再耗电。
 63. 新增：Jade 会提示机器供电不足或被副产物堵住。
+64. 新增：工厂中枢，根据产线能否持续不断地供应产品给工厂评星。
+65. 新增：一星和二星评级，评级界面会显示认可的产品、库存和进度。

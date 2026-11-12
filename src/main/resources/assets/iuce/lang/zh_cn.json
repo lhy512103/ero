@@ -392,5 +392,14 @@
   "block.iuce.chute": "滑槽",
   "block.iuce.conveyor": "传送带 I",
   "tooltip.iuce.status.undervoltage": "供电不足，降速运行",
-  "tooltip.iuce.status.byproduct_full": "副产物槽已满，停机"
+  "tooltip.iuce.status.byproduct_full": "副产物槽已满，停机",
+  "block.iuce.factory_hub": "工厂中枢",
+  "gui.iuce.hub.goal": "下一星：任意 %s 种产品，每种每分钟 %s 件",
+  "gui.iuce.hub.goal_time": "不间断供应 %s 分钟",
+  "gui.iuce.hub.progress": "已连续 %s / %s 分钟",
+  "gui.iuce.hub.maxed": "已达到当前版本的最高评级",
+  "gui.iuce.hub.item": "库存 %s / %s，每分钟消耗 %s",
+  "gui.iuce.hub.grace": "供应中断！再断一分钟将重新计时",
+  "gui.iuce.hub.hint": "手持产品右键中枢，或用滑槽、传送带送入",
+  "message.iuce.hub.promoted": "%s 的工厂升到了 %s 星！"
 }

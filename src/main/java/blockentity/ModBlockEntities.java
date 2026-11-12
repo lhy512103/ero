@@ -83,6 +83,11 @@ public class ModBlockEntities {
             new BlockEntityType<>(ChuteBlockEntity::new, false, ModBlocks.CHUTE.get())
         );
 
+    public static final Supplier<BlockEntityType<FactoryHubBlockEntity>> FACTORY_HUB =
+        BLOCK_ENTITIES.register("factory_hub", () ->
+            new BlockEntityType<>(FactoryHubBlockEntity::new, false, ModBlocks.FACTORY_HUB.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

@@ -72,6 +72,7 @@ public class EroClient {
         event.register(ModMenus.EXTRACTOR.get(), ExtractorScreen::new);
         event.register(ModMenus.INDUCTION_FURNACE.get(), InductionFurnaceScreen::new);
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);
+        event.register(ModMenus.FACTORY_HUB.get(), client.gui.FactoryHubScreen::new);
         event.register(ModMenus.ORE_WASHER.get(), OreWasherScreen::new);
         event.register(ModMenus.ELECTROLYZER.get(), ElectrolyzerScreen::new);
         event.register(ModMenus.PLANTER.get(), PlanterScreen::new);

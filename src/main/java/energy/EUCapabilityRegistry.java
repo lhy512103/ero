@@ -49,6 +49,8 @@ public final class EUCapabilityRegistry {
 
         // 滑槽：任意面都可以放入和取出
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
+        // 工厂中枢：只进不出
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.FACTORY_HUB.get(), (hub, direction) -> hub.getIntake());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());

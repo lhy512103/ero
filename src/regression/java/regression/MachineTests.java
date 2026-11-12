@@ -105,6 +105,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("factory_hub_rates_sustained_supply", MachineTests::factoryHub);
         tests.put("underpowered_machine_slows_down", MachineTests::underpowered);
         tests.put("full_byproduct_slot_stops_machine", MachineTests::byproductBlocks);
         tests.put("conveyor_descends", MachineTests::conveyorDown);
@@ -842,6 +843,64 @@ final class MachineTests {
         check(helper, energy(machine).getEnergyStored() == full, "A machine waiting for room must not keep using power");
         machine.getItemHandler().set(3, ItemResource.EMPTY, 0);
         check(helper, runUntil(machine, c, c.outputCount(), 20) > 0, "The machine must continue once the by-product slot has room");
+        helper.succeed();
+    }
+
+    /** The hub counts minutes of sustained supply, forgives one missed minute, and awards the star. */
+    private static void factoryHub(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var data = factory.FactoryData.get(level);
+        var owner = blockentity.FactoryHubBlockEntity.NO_OWNER;
+        data.setStars(owner, 0);
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, ModBlocks.FACTORY_HUB.get());
+        var hub = helper.getBlockEntity(pos, blockentity.FactoryHubBlockEntity.class);
+        var tier = factory.FactoryRating.tier(0);
+        var items = factory.FactoryRating.candidates(0);
+        check(helper, tier != null && items.size() >= tier.kinds(), "The first star needs at least " + 3 + " candidate products, has " + items.size());
+        var handler = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK, helper.absolutePos(pos), net.minecraft.core.Direction.UP);
+        check(helper, handler != null, "The hub must accept items from pipes");
+
+        check(helper, insert(handler, new ItemStack(Items.DIRT, 8)) == 0, "The hub must refuse things it does not ask for");
+        check(helper, insert(handler, new ItemStack(items.get(0), 64)) == 64, "The hub must take a wanted product");
+        hub.tick();
+        check(helper, hub.getStock(items.get(0)) == tier.capacity(), "The hub keeps at most two minutes' worth, has " + hub.getStock(items.get(0)));
+        int waiting = 0;
+        for (int slot = 0; slot < hub.getIntake().size(); slot++) waiting += hub.getIntake().getAmountAsInt(slot);
+        check(helper, waiting == 64 - tier.capacity(), "What does not fit must wait in the intake, not vanish");
+        check(helper, extract(handler, new ItemStack(items.get(0), 1)) == 0, "Nothing can be pulled back out of the hub");
+
+        Runnable deliver = () -> {
+            for (int i = 0; i < tier.kinds(); i++) insert(handler, new ItemStack(items.get(i), tier.rate()));
+            hub.tick();
+        };
+        deliver.run();
+        hub.endMinute();
+        check(helper, hub.getProgressMinutes() == 1, "A supplied minute must count");
+        hub.endMinute();
+        check(helper, hub.getProgressMinutes() == 1 && hub.getMisses() == 1, "One missed minute must be forgiven");
+        deliver.run();
+        hub.endMinute();
+        check(helper, hub.getProgressMinutes() == 2 && hub.getMisses() == 0, "Supply resuming must clear the miss");
+        hub.endMinute();
+        hub.endMinute();
+        check(helper, hub.getProgressMinutes() == 0, "Two missed minutes in a row must start the count over");
+
+        for (int minute = 0; minute < tier.minutes(); minute++) {
+            check(helper, data.stars(owner) == 0, "The star must not come early");
+            deliver.run();
+            hub.endMinute();
+        }
+        check(helper, data.stars(owner) == 1 && hub.getStars() == 1, "Sustained supply must earn the first star");
+        check(helper, hub.getProgressMinutes() == 0 && hub.getStock(items.get(0)) == 0, "A promotion must start the next rating from scratch");
+        check(helper, factory.FactoryRating.tier(1) != null && factory.FactoryRating.candidates(1).size() >= factory.FactoryRating.tier(1).kinds(),
+            "The second star must have enough candidate products");
+
+        var loaded = level.getBlockEntity(helper.absolutePos(pos));
+        var tag = hub.saveWithoutMetadata(level.registryAccess());
+        check(helper, tag.contains("Stock") && tag.contains("Minutes"), "The hub must save its progress");
+        data.setStars(owner, 0);
+        helper.setBlock(pos, Blocks.AIR);
         helper.succeed();
     }
 }
