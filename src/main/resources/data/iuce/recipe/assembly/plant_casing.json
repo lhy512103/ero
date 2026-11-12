@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "minecraft:bricks",
+      "iuce:iron_plate"
+    ],
+    [
+      "minecraft:bricks",
+      "iuce:machine_casing",
+      "minecraft:bricks"
+    ],
+    [
+      "iuce:iron_plate",
+      "minecraft:bricks",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:plant_casing",
+    "count": 16
+  }
+}

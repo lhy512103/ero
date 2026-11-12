@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "minecraft:hopper",
+      ""
+    ],
+    [
+      "",
+      "iuce:plant_casing",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:item_input_hatch",
+    "count": 1
+  }
+}

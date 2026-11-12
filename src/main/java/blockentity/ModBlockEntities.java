@@ -103,6 +103,21 @@ public class ModBlockEntities {
             new BlockEntityType<>(FluidTankBlockEntity::new, false, ModBlocks.FLUID_TANK.get())
         );
 
+    public static final Supplier<BlockEntityType<PlantControllerBlockEntity>> PLANT_CONTROLLER =
+        BLOCK_ENTITIES.register("plant_controller", () ->
+            new BlockEntityType<>(PlantControllerBlockEntity::new, false, ModBlocks.PLANT_CONTROLLER.get())
+        );
+
+    public static final Supplier<BlockEntityType<HatchBlockEntity>> ITEM_HATCH =
+        BLOCK_ENTITIES.register("item_hatch", () ->
+            new BlockEntityType<>(HatchBlockEntity::new, false, ModBlocks.ITEM_INPUT_HATCH.get(), ModBlocks.ITEM_OUTPUT_HATCH.get())
+        );
+
+    public static final Supplier<BlockEntityType<EnergyHatchBlockEntity>> ENERGY_HATCH =
+        BLOCK_ENTITIES.register("energy_hatch", () ->
+            new BlockEntityType<>(EnergyHatchBlockEntity::new, false, ModBlocks.ENERGY_HATCH.get())
+        );
+
     public static final Supplier<BlockEntityType<BatboxBlockEntity>> BATBOX =
         BLOCK_ENTITIES.register("batbox", () ->
             new BlockEntityType<>(BatboxBlockEntity::new, false, ModBlocks.BATBOX.get())

@@ -126,6 +126,15 @@ public class ModBlocks {
         p -> new StorageBlock(p, false), machineProperties());
     public static final DeferredBlock<StorageBlock> FLUID_TANK = BLOCKS.registerBlock("fluid_tank",
         p -> new StorageBlock(p, true), machineProperties());
+    public static final DeferredBlock<Block> PLANT_CASING = BLOCKS.registerSimpleBlock("plant_casing", machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> PLANT_CONTROLLER = BLOCKS.registerBlock("plant_controller",
+        PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<HatchBlock> ITEM_INPUT_HATCH = BLOCKS.registerBlock("item_input_hatch",
+        HatchBlock::new, machineProperties());
+    public static final DeferredBlock<HatchBlock> ITEM_OUTPUT_HATCH = BLOCKS.registerBlock("item_output_hatch",
+        HatchBlock::new, machineProperties());
+    public static final DeferredBlock<MachineBlock> ENERGY_HATCH = BLOCKS.registerBlock("energy_hatch",
+        p -> new MachineBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

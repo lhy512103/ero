@@ -106,6 +106,7 @@ final class MachineTests {
         tests.put("storage_save_load", MachineTests::storageSaveLoad);
         tests.put("pump_fills_from_water", MachineTests::pump);
         tests.put("machine_output_blocked", MachineTests::outputBlocked);
+        tests.put("ore_plant_forms_and_processes", MachineTests::orePlant);
         tests.put("pipe_network_feeds_and_collects", MachineTests::pipeNetwork);
         tests.put("silo_and_fluid_tank", MachineTests::siloAndTank);
         tests.put("metal_former_molds", MachineTests::molds);
@@ -1043,6 +1044,65 @@ final class MachineTests {
             tx.commit();
         }
         helper.setBlock(new BlockPos(1, 1, 1), Blocks.AIR);
+        helper.succeed();
+    }
+
+    /** The 5x5x5 plant forms, turns 16 ores into 96 ingots in one batch, and notices a missing casing. */
+    private static void orePlant(GameTestHelper helper) {
+        var level = helper.getLevel();
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 5; y++) {
+                for (int z = 0; z < 5; z++) {
+                    boolean shell = x == 0 || x == 4 || y == 0 || y == 4 || z == 0 || z == 4;
+                    if (shell) helper.setBlock(new BlockPos(x, y, z), ModBlocks.PLANT_CASING.get());
+                }
+            }
+        }
+        helper.setBlock(new BlockPos(1, 1, 0), ModBlocks.ITEM_INPUT_HATCH.get());
+        helper.setBlock(new BlockPos(3, 1, 0), ModBlocks.ITEM_OUTPUT_HATCH.get());
+        BlockPos controllerPos = new BlockPos(2, 1, 0);
+        level.setBlockAndUpdate(helper.absolutePos(controllerPos), ModBlocks.PLANT_CONTROLLER.get().defaultBlockState()
+            .setValue(block.PlantControllerBlock.FACING, helper.getTestRotation().rotate(net.minecraft.core.Direction.NORTH)));
+        var controller = helper.getBlockEntity(controllerPos, blockentity.PlantControllerBlockEntity.class);
+        controller.tick();
+        check(helper, !controller.isFormed(), "A plant without an energy hatch must not form");
+        helper.setBlock(new BlockPos(2, 1, 4), ModBlocks.ENERGY_HATCH.get());
+        controller.tick();
+        check(helper, controller.isFormed(), "The complete plant must form once the missing hatch is placed");
+        check(helper, helper.getBlockState(controllerPos).getValue(block.PlantControllerBlock.FORMED), "A formed controller must show it");
+
+        var input = helper.getBlockEntity(new BlockPos(1, 1, 0), blockentity.HatchBlockEntity.class);
+        var output = helper.getBlockEntity(new BlockPos(3, 1, 0), blockentity.HatchBlockEntity.class);
+        var energyHatch = helper.getBlockEntity(new BlockPos(2, 1, 4), blockentity.EnergyHatchBlockEntity.class);
+        check(helper, input.wants(ItemResource.of(new ItemStack(ModBlocks.TIN_ORE.get()))), "The input hatch must ask for ore");
+        check(helper, !input.wants(ItemResource.of(new ItemStack(Items.DIRT))), "The input hatch must not ask for dirt");
+        check(helper, insert(input.external(), new ItemStack(ModBlocks.TIN_ORE.get(), 20)) == 20, "Pipes must be able to fill the input hatch");
+        check(helper, extract(input.external(), new ItemStack(ModBlocks.TIN_ORE.get(), 1)) == 0, "Nothing comes back out of an input hatch");
+        check(helper, insert(output.external(), new ItemStack(Items.DIRT)) == 0, "Nothing can be put into an output hatch from outside");
+
+        for (int tick = 0; tick < blockentity.PlantControllerBlockEntity.DURATION + 15; tick++) {
+            energyHatch.storage().setEnergy(energyHatch.storage().getMaxEnergyStored());
+            controller.tick();
+            if (tick == 12) {
+                check(helper, controller.isWorking(), "The plant must start on its own");
+                int left = 0;
+                for (int slot = 0; slot < 9; slot++) left += input.getInventory().getAmountAsInt(slot);
+                check(helper, left == 4, "One batch must take 16 ores at once, " + left + " left");
+            }
+        }
+        int ingots = 0;
+        for (int slot = 0; slot < 9; slot++) {
+            if (output.getInventory().getResource(slot).getItem() == ModItems.TIN_INGOT.get()) ingots += output.getInventory().getAmountAsInt(slot);
+        }
+        check(helper, ingots == 96, "16 ores must become 96 ingots, got " + ingots);
+        check(helper, extract(output.external(), new ItemStack(ModItems.TIN_INGOT.get(), 96)) == 96, "Pipes must be able to empty the output hatch");
+
+        helper.setBlock(new BlockPos(4, 3, 2), Blocks.AIR);
+        controller.tick();
+        check(helper, !controller.isFormed(), "Removing a casing block must be noticed without anyone touching the controller");
+        helper.setBlock(new BlockPos(4, 3, 2), ModBlocks.PLANT_CASING.get());
+        controller.tick();
+        check(helper, controller.isFormed(), "Putting the casing back must form the plant again");
         helper.succeed();
     }
 }

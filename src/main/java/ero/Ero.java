@@ -43,6 +43,8 @@ public class Ero {
 
         // 注册世界tick事件
         NeoForge.EVENT_BUS.addListener(Ero::onLevelTick);
+        // 大机器只在自己范围内有方块变化时才重新检查结构
+        NeoForge.EVENT_BUS.addListener(multiblock.MultiblockManager::onBlockChanged);
 
         // 注册数据包同步事件 - 请求将自定义配方类型同步到客户端
         NeoForge.EVENT_BUS.addListener(Ero::onDatapackSync);

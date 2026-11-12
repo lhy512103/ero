@@ -54,6 +54,11 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> LOGISTICS_PORT = registerBlockItem(ModBlocks.LOGISTICS_PORT);
     public static final DeferredItem<BlockItem> SILO = registerBlockItem(ModBlocks.SILO);
     public static final DeferredItem<BlockItem> FLUID_TANK = registerBlockItem(ModBlocks.FLUID_TANK);
+    public static final DeferredItem<BlockItem> PLANT_CASING = registerBlockItem(ModBlocks.PLANT_CASING);
+    public static final DeferredItem<BlockItem> PLANT_CONTROLLER = registerBlockItem(ModBlocks.PLANT_CONTROLLER);
+    public static final DeferredItem<BlockItem> ITEM_INPUT_HATCH = registerBlockItem(ModBlocks.ITEM_INPUT_HATCH);
+    public static final DeferredItem<BlockItem> ITEM_OUTPUT_HATCH = registerBlockItem(ModBlocks.ITEM_OUTPUT_HATCH);
+    public static final DeferredItem<BlockItem> ENERGY_HATCH = registerBlockItem(ModBlocks.ENERGY_HATCH);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);
     public static final DeferredItem<BlockItem> CESU = registerBlockItem("cesu", ModBlocks.CESU, p -> p.rarity(Rarity.UNCOMMON));
     public static final DeferredItem<BlockItem> MFE = registerBlockItem("mfe", ModBlocks.MFE, p -> p.rarity(Rarity.UNCOMMON));

@@ -22,7 +22,8 @@ public final class WrenchActions {
         var entity = level.getBlockEntity(pos);
         boolean logistics = state.getBlock() instanceof block.ConveyorBlock || state.getBlock() instanceof block.ChuteBlock
             || state.getBlock() instanceof block.PneumaticPipeBlock || state.getBlock() instanceof block.LogisticsPortBlock
-            || state.getBlock() instanceof block.StorageBlock;
+            || state.getBlock() instanceof block.StorageBlock || state.getBlock() instanceof block.PlantControllerBlock
+            || state.getBlock() instanceof block.HatchBlock || state.is(block.ModBlocks.PLANT_CASING.get());
         if (!(entity instanceof MachineBlockEntity) && !(entity instanceof CableBlockEntity) && !logistics) return InteractionResult.PASS;
         if (player == null || !level.mayInteract(player, pos)
                 || !player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand())) return InteractionResult.FAIL;

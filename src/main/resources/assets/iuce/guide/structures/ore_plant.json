@@ -1,0 +1,46 @@
+{
+  "palette": {
+    "C": "iuce:plant_casing",
+    "F": "iuce:plant_controller",
+    "I": "iuce:item_input_hatch",
+    "O": "iuce:item_output_hatch",
+    "E": "iuce:energy_hatch"
+  },
+  "layers": [
+    [
+      "CCCCC",
+      "CCCCC",
+      "CCCCC",
+      "CCCCC",
+      "CCCCC"
+    ],
+    [
+      "CCECC",
+      "C   C",
+      "C   C",
+      "C   C",
+      "CIFOC"
+    ],
+    [
+      "CCCCC",
+      "C   C",
+      "C   C",
+      "C   C",
+      "CCCCC"
+    ],
+    [
+      "CCCCC",
+      "C   C",
+      "C   C",
+      "C   C",
+      "CCCCC"
+    ],
+    [
+      "CCCCC",
+      "CCCCC",
+      "CCCCC",
+      "CCCCC",
+      "CCCCC"
+    ]
+  ]
+}

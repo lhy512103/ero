@@ -76,6 +76,9 @@
 70. Added: Silo, which stores 64 stacks of one item.
 71. Added: Fluid Tank, which stores 16 buckets of any one fluid.
 72. Added: Configurator, which copies the settings of one logistics interface to others.
+73. Added: Ore Processing Plant, a 5×5×5 multiblock that crushes, washes and smelts in one step, 16 at a time and at half the energy per item.
+74. Added: Plant Casing, Item Input Hatch, Item Output Hatch and Energy Hatch for building large machines.
+75. Added: Logistics interfaces on hatches feed a large machine what it can process and carry its products away.
 
 ### 中文
 
@@ -151,3 +154,6 @@
 70. 新增：料仓，可存放 64 组同一种物品。
 71. 新增：储罐，可存放 16 桶任意一种流体。
 72. 新增：配置器，可把一个物流接口的设置复制到其他接口。
+73. 新增：选矿联合厂，5×5×5 的多方块大机器，打粉、洗矿、熔炼一步完成，一次 16 份，单件耗电减半。
+74. 新增：厂房外壳、物品输入仓、物品输出仓和能源仓，用于搭建大机器。
+75. 新增：物流接口贴在仓口上，会给大机器送去它能加工的原料并运走产物。

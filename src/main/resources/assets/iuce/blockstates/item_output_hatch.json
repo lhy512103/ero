@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "iuce:block/item_output_hatch"
+    }
+  }
+}

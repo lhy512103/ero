@@ -54,6 +54,9 @@ public final class EUCapabilityRegistry {
         // 料仓与储罐
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.SILO.get(), (silo, direction) -> silo.getInventory());
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.FLUID_TANK.get(), (tank, direction) -> tank.getTank());
+        // 大机器的仓口
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
+        register(event, ModBlockEntities.ENERGY_HATCH.get());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());

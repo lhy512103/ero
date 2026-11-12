@@ -63,7 +63,7 @@ public class LogisticsPortBlockEntity extends BlockEntity {
     /** True when the block behind is plain storage rather than something that asks for specific items. */
     public boolean isStorage() {
         BlockEntity target = level == null ? null : level.getBlockEntity(targetPos());
-        return !(target instanceof MachineBlockEntity) && !(target instanceof FactoryHubBlockEntity);
+        return !(target instanceof MachineBlockEntity) && !(target instanceof FactoryHubBlockEntity) && !(target instanceof HatchBlockEntity);
     }
 
     /**
@@ -82,6 +82,10 @@ public class LogisticsPortBlockEntity extends BlockEntity {
         }
         ResourceHandler<ItemResource> handler = handler();
         if (handler == null) return 0;
+        // an input hatch asks for what its machine can process; an output hatch takes nothing
+        if (target instanceof HatchBlockEntity hatch) {
+            return leftovers || !hatch.wants(resource) ? 0 : handler.insert(resource, amount, transaction);
+        }
         if (target instanceof FactoryHubBlockEntity hub) {
             return leftovers || !hub.accepts(resource.getItem()) ? 0 : handler.insert(resource, amount, transaction);
         }

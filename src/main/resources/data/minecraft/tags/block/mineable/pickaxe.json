@@ -72,6 +72,11 @@
     "iuce:pneumatic_pipe",
     "iuce:logistics_port",
     "iuce:silo",
-    "iuce:fluid_tank"
+    "iuce:fluid_tank",
+    "iuce:plant_casing",
+    "iuce:plant_controller",
+    "iuce:item_input_hatch",
+    "iuce:item_output_hatch",
+    "iuce:energy_hatch"
   ]
 }
