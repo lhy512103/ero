@@ -79,25 +79,13 @@ public class EjectorUpgradeItem extends UpgradeItem {
 
         if (sourceHandler == null || targetHandler == null) return false;
 
-        int sourceUpgradeStart = source.getUpgradeSlotStart();
-        int targetUpgradeStart = target.getUpgradeSlotStart();
-
-        // 源机器输出槽范围
-        int sourceTotalSlots = sourceUpgradeStart;
-        int sourceOutputStart = sourceTotalSlots / 2;
-        int sourceOutputEnd = sourceTotalSlots - 1;
-
-        // 目标机器输入槽范围
-        int targetTotalSlots = targetUpgradeStart;
-        int targetInputEnd = targetTotalSlots / 2 - 1;
-
-        for (int srcSlot = sourceOutputStart; srcSlot <= sourceOutputEnd; srcSlot++) {
+        for (int srcSlot : source.getOutputSlots()) {
             ItemResource srcResource = sourceHandler.getResource(srcSlot);
             int srcAmount = sourceHandler.getAmountAsInt(srcSlot);
 
             if (srcResource.isEmpty() || srcAmount <= 0) continue;
 
-            for (int tgtSlot = 0; tgtSlot <= targetInputEnd; tgtSlot++) {
+            for (int tgtSlot : target.getInputSlots()) {
                 try (Transaction tx = Transaction.openRoot()) {
                     int extracted = sourceHandler.extract(srcSlot, srcResource, MAX_TRANSFER_COUNT, tx);
                     if (extracted > 0) {

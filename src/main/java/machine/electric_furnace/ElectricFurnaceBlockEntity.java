@@ -159,8 +159,8 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                 int processTime;
                 long energyPerTick;
                 if (cachedMachineRecipe != null) {
-                    processTime = cachedMachineRecipe.getProcessTime();
-                    energyPerTick = cachedMachineRecipe.getEnergyPerTick();
+                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(cachedMachineRecipe.getProcessTime(), cachedOverclockerCount);
+                    energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(cachedMachineRecipe.getEnergyPerTick(), cachedOverclockerCount);
                 } else {
                     processTime = OverclockerUpgradeItem.getOverclockedProcessTime(cachedAbstractCookingRecipe.cookingTime(), cachedOverclockerCount);
                     energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(BASE_ENERGY_CONSUMPTION, cachedOverclockerCount);

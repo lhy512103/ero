@@ -107,6 +107,26 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
     }
 
     /**
+     * Slots that accept raw materials. Item-transfer upgrades insert only into these.
+     * The default assumes the slots before the upgrade slots are split evenly into inputs then outputs;
+     * machines with a different layout must override both methods.
+     */
+    public int[] getInputSlots() {
+        return range(0, getUpgradeSlotStart() / 2);
+    }
+
+    /** Slots that hold products. Item-transfer upgrades extract only from these. */
+    public int[] getOutputSlots() {
+        return range(getUpgradeSlotStart() / 2, getUpgradeSlotStart());
+    }
+
+    protected static int[] range(int from, int to) {
+        int[] slots = new int[Math.max(0, to - from)];
+        for (int i = 0; i < slots.length; i++) slots[i] = from + i;
+        return slots;
+    }
+
+    /**
      * 处理升级效果
      * 在每个tick中调用，处理所有安装的升级
      * <p>

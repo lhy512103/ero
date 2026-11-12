@@ -280,6 +280,12 @@ public class PlanterBlockEntity extends MachineBlockEntity implements EnergyDisp
     @Override
     public int getUpgradeSlotStart() { return 3; }
 
+    @Override
+    public int[] getInputSlots() { return new int[]{CULTIVATION_SLOT, SOIL_SLOT}; }
+
+    @Override
+    public int[] getOutputSlots() { return new int[]{OUTPUT_SLOT}; }
+
     public EUEnergyStorage getEnergyStorage() { return energyStorage; }
 
     public EUVoltage getVoltage() { return voltage; }

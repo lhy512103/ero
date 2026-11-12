@@ -67,6 +67,7 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
     /** 缓存的输入组合，用于检测输入变化 */
     private ItemResource cachedInput1 = ItemResource.EMPTY;
     private ItemResource cachedInput2 = ItemResource.EMPTY;
+    private int cachedOverclockerCount = -1;
 
     public InductionFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.INDUCTION_FURNACE.get(), pos, state);
@@ -78,6 +79,7 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
             @Override
             protected void onContentsChanged(int index, ItemStack previousContents) {
                 setChanged();
+                if (index > OUTPUT_SLOT) cachedOverclockerCount = -1;
             }
         };
     }
@@ -122,8 +124,9 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
             }
 
             if (cachedRecipe != null && !cachedOutput.isEmpty()) {
-                int processTime = cachedRecipe.getProcessTime();
-                long energyPerTick = cachedRecipe.getEnergyPerTick();
+                if (cachedOverclockerCount < 0) cachedOverclockerCount = item.OverclockerUpgradeItem.countOverclockers(this);
+                int processTime = item.OverclockerUpgradeItem.getOverclockedProcessTime(cachedRecipe.getProcessTime(), cachedOverclockerCount);
+                long energyPerTick = item.OverclockerUpgradeItem.getOverclockedEnergyConsumption(cachedRecipe.getEnergyPerTick(), cachedOverclockerCount);
                 maxProgress = processTime;
 
                 // 检查输入数量是否足够
@@ -266,6 +269,18 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
         return itemHandler;
     }
 
+    @Override
+    public int getUpgradeSlotCount() { return 4; }
+
+    @Override
+    public int getUpgradeSlotStart() { return OUTPUT_SLOT + 1; }
+
+    @Override
+    public int[] getInputSlots() { return new int[]{INPUT_SLOT_1, INPUT_SLOT_2}; }
+
+    @Override
+    public int[] getOutputSlots() { return new int[]{OUTPUT_SLOT}; }
+
     public EUVoltage getVoltage() {
         return voltage;
     }
@@ -319,6 +334,7 @@ public class InductionFurnaceBlockEntity extends MachineBlockEntity
         cachedOutput = ItemStack.EMPTY;
         cachedInput1 = ItemResource.EMPTY;
         cachedInput2 = ItemResource.EMPTY;
+        cachedOverclockerCount = -1;
     }
 
     @Override protected boolean canReceiveEU() { return true; }

@@ -244,6 +244,12 @@ public class ElectrolyzerBlockEntity extends MachineBlockEntity
     @Override
     public int getUpgradeSlotStart() { return 4; } // 1 input + 3 output
 
+    @Override
+    public int[] getInputSlots() { return new int[]{FLUID_INPUT_SLOT}; }
+
+    @Override
+    public int[] getOutputSlots() { return new int[]{FLUID_OUTPUT1_SLOT, FLUID_OUTPUT2_SLOT, FLUID_OUTPUT3_SLOT}; }
+
     // FluidProvider 接口实现
     @Override
     public int extractFluid(int maxAmount) {

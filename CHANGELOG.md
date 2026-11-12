@@ -38,6 +38,9 @@
 32. Improved: Upgrades now stack up to 16 in the inventory.
 33. Improved: The Planter's JEI page now lists every crop it can grow automatically, including modded ones.
 34. Improved: The guide book's inventory icon is redrawn as a tilted book in the style of vanilla books.
+35. Fixed: Overclocker upgrades had no effect on dust and other mod recipes in the Electric Furnace.
+36. Fixed: Upgrades placed in the Induction Furnace's upgrade slots did nothing.
+37. Fixed: Ejector upgrades could push a machine's raw materials, such as Planter soil, instead of its products.
 
 ### 中文
 
@@ -75,3 +78,6 @@
 32. 优化：升级在物品栏中可堆叠至 16 个。
 33. 优化：种植机的 JEI 页面会自动列出全部可种植的作物，包括其他模组的作物。
 34. 优化：指南的物品栏图标重绘为原版书本风格的斜放立体书。
+35. 修复：电炉加工矿粉等模组配方时超频升级不生效的问题。
+36. 修复：感应炉升级槽里的升级不起作用的问题。
+37. 修复：弹出升级会把机器的原料（如种植机的土壤）当成产物送走的问题。
