@@ -3,6 +3,7 @@ package machine.electric_furnace;
 import block.MachineBlock;
 import blockentity.EnergyDisplay;
 import blockentity.MachineBlockEntity;
+import machine.PoweredMachineBlockEntity;
 import blockentity.ProcessingDisplay;
 import blockentity.ModBlockEntities;
 import energy.EUEnergyStorageImpl;
@@ -51,18 +52,13 @@ import javax.annotation.Nullable;
  * - 可从感应炉抽取能量使用
  * </p>
  */
-public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements EnergyDisplay, ProcessingDisplay, MenuProvider {
+public class ElectricFurnaceBlockEntity extends PoweredMachineBlockEntity implements MenuProvider {
 
     private static final int INPUT_SLOT = 0;
     private static final int OUTPUT_SLOT = 1;
     private static final long BASE_ENERGY_CONSUMPTION = 2;
     private static final int BASE_PROCESS_TIME = 200;
 
-    private final EUEnergyStorageImpl energyStorage;
-    private final EUVoltage voltage;
-    private final ItemStacksResourceHandler itemHandler;
-    private int progress = 0;
-    private int maxProgress = BASE_PROCESS_TIME;
 
     /** 缓存的原版熔炼配方 */
     @Nullable
@@ -76,25 +72,13 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
     private ItemResource cachedInputResource = ItemResource.EMPTY;
     private Object cachedRecipeMap;
 
-    /** 缓存的超频器数量 */
-    private int cachedOverclockerCount = -1;
 
     /** 缓存的相邻感应炉数量 */
     private int cachedInductionCount = -1;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ELECTRIC_FURNACE.get(), pos, state);
-        this.voltage = EUVoltage.LV;
-        this.energyStorage = new EUEnergyStorageImpl(1000, voltage);
-
         // 1 输入槽 + 1 输出槽 + 4 升级槽
-        this.itemHandler = new ItemStacksResourceHandler(6) {
-            @Override
-            protected void onContentsChanged(int index, ItemStack previousContents) {
-                setChanged();
-                if (index >= 2) cachedOverclockerCount = -1;
-            }
-        };
+        super(ModBlockEntities.ELECTRIC_FURNACE.get(), pos, state, EUVoltage.LV, 1000, 6, 2, BASE_PROCESS_TIME);
     }
 
     @Override
@@ -150,20 +134,16 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
                 double speedMultiplier = 1.0 + inductionCount * InductionFurnaceBlockEntity.SPEED_BOOST_PER_FURNACE;
                 int parallelCount = 1 + inductionCount * InductionFurnaceBlockEntity.PARALLEL_PER_FURNACE;
 
-                // 使用缓存的超频器数量
-                if (cachedOverclockerCount < 0) {
-                    cachedOverclockerCount = OverclockerUpgradeItem.countOverclockers(this);
-                }
 
                 // 自定义配方使用配方的时间和能量，原版配方使用默认值
                 int processTime;
                 long energyPerTick;
                 if (cachedMachineRecipe != null) {
-                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(cachedMachineRecipe.getProcessTime(), cachedOverclockerCount);
-                    energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(cachedMachineRecipe.getEnergyPerTick(), cachedOverclockerCount);
+                    processTime = overclockedTime(cachedMachineRecipe.getProcessTime());
+                    energyPerTick = overclockedEnergy(cachedMachineRecipe.getEnergyPerTick());
                 } else {
-                    processTime = OverclockerUpgradeItem.getOverclockedProcessTime(cachedAbstractCookingRecipe.cookingTime(), cachedOverclockerCount);
-                    energyPerTick = OverclockerUpgradeItem.getOverclockedEnergyConsumption(BASE_ENERGY_CONSUMPTION, cachedOverclockerCount);
+                    processTime = overclockedTime(cachedAbstractCookingRecipe.cookingTime());
+                    energyPerTick = overclockedEnergy(BASE_ENERGY_CONSUMPTION);
                 }
 
                 // 感应炉加速：缩短加工时间，增加能耗
@@ -351,19 +331,6 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         return false;
     }
 
-    private void updateRunningState() {
-        if (level != null && !level.isClientSide()) {
-            BlockState state = getBlockState();
-            if (state.hasProperty(MachineBlock.RUNNING)) {
-                boolean currentRunning = state.getValue(MachineBlock.RUNNING);
-                boolean shouldRun = isWorking();
-                if (currentRunning != shouldRun) {
-                    level.setBlockAndUpdate(worldPosition, state.setValue(MachineBlock.RUNNING, shouldRun));
-                }
-            }
-        }
-    }
-
     @Override
     public String getMachineName() {
         return "电炉";
@@ -383,99 +350,13 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
     }
 
     @Override
-    public ItemStacksResourceHandler getItemHandler() {
-        return itemHandler;
-    }
-
-    @Override
-    public int getUpgradeSlotCount() {
-        return 4;
-    }
-
-    @Override
-    public int getUpgradeSlotStart() {
-        return 2; // 1 input + 1 output
-    }
-
-    @Override
-    public EUEnergyStorage getEnergyStorage() {
-        return energyStorage;
-    }
-
-    public EUVoltage getVoltage() {
-        return voltage;
-    }
-
-    public boolean isWorking() {
-        return progress > 0;
-    }
-
-    public int getProgress() {
-        return progress;
-    }
-
-    public int getMaxProgress() {
-        return maxProgress;
-    }
-
-    public void setProgress(int value) {
-        this.progress = value;
-    }
-
-    public void setMaxProgress(int value) {
-        this.maxProgress = value;
-    }
-
-    @Override
     public MachinePriority getMachinePriority() {
         return MachinePriority.HIGH;
-    }
-
-    @Override protected boolean canReceiveEU() { return true; }
-    @Override protected boolean canExtractEU() { return false; }
-
-    @Override
-    public float getProcessingProgress() {
-        if (maxProgress <= 0 || !isWorking()) return 0f;
-        return (float) progress / maxProgress;
-    }
-
-    @Override
-    public boolean isProcessing() {
-        return isWorking();
     }
 
     @Override
     public String getProgressLabel() {
         return "";
-    }
-
-    @Override
-    protected void saveAdditional(ValueOutput output) {
-        super.saveAdditional(output);
-        output.putLong("energy", energyStorage.getEnergyStored());
-        output.putInt("progress", progress);
-        output.putInt("maxProgress", maxProgress);
-        itemHandler.serialize(output);
-    }
-
-    @Override
-    public void loadAdditional(ValueInput input) {
-        super.loadAdditional(input);
-        input.getLong("energy").ifPresent(energy -> energyStorage.setEnergy(energy));
-
-        // 兼容旧版 INT[] 格式和新版 number 格式
-        progress = loadIntField(input, "progress", 0);
-        maxProgress = loadIntField(input, "maxProgress", BASE_PROCESS_TIME);
-
-        itemHandler.deserialize(input);
-        // 重置缓存
-        cachedAbstractCookingRecipe = null;
-        cachedMachineRecipe = null;
-        cachedOutput = ItemStack.EMPTY;
-        cachedInputResource = ItemResource.EMPTY;
-        cachedOverclockerCount = -1;
-        cachedInductionCount = -1;
     }
 
     /**
@@ -494,5 +375,17 @@ public class ElectricFurnaceBlockEntity extends MachineBlockEntity implements En
         }
 
         return defaultValue;
+    }
+
+    @Override
+    protected void loadExtra(ValueInput input) {
+        // 兼容旧版把进度存成 INT[] 的存档
+        progress = loadIntField(input, "progress", 0);
+        maxProgress = loadIntField(input, "maxProgress", BASE_PROCESS_TIME);
+        cachedAbstractCookingRecipe = null;
+        cachedMachineRecipe = null;
+        cachedOutput = ItemStack.EMPTY;
+        cachedInputResource = ItemResource.EMPTY;
+        cachedInductionCount = -1;
     }
 }
