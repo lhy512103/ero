@@ -15,16 +15,18 @@ items: iuce:plant_controller, iuce:plant_casing, iuce:item_input_hatch, iuce:ite
 
 ## 结构
 
-{structure: ore_plant | 5×5×5 的空心外壳，控制器在正面中间、离地一格}
+{structure: ore_plant | 宽 11、高 11、长 15；带高塔、露天洗选槽和末端炉段}
 
-- 外壳用 {item:iuce:plant_casing}，里面是空的，可以走进去。
+- 用 {item:iuce:plant_casing} 搭底座和工艺段，{item:iuce:plant_frame} 做门架和连梁，{item:iuce:plant_drum} 做轴筒。梁和滚筒沿轴放置：从端面接放下一段即可延长。
 - 控制器的屏幕朝外。
-- **仓口可以替换任意一块外壳**，至少各要一个：{item:iuce:energy_hatch}、{item:iuce:item_input_hatch}、{item:iuce:item_output_hatch}。想要更大的缓冲就多放几个。
+- 面朝控制器时，输入在右、输出在左；能源仓在末端正中。门架外缘另有可选仓位。旧版矩形厂房继续采用原有规则。
 - 搭好后右键控制器：成型了屏幕会变绿；没成型会告诉你哪里不对。
-- **搭建投影**：先放控制器，准星对着它，还缺方块的位置会用黄色线框标出来，放错方块的位置是红色。
+- **搭建投影**：黄色是可自动填充的外壳；蓝色是专用部件或仓口；放错方块或朝向会标红。
 - **一键补外壳**：手持 {item:iuce:plant_casing} 右键控制器，会把手里的外壳自动放到所有空着的位置。仓口先摆好，剩下的交给它。更省事的办法见 [搭建大机器的工具](machines/building)。
 
 {recipe: iuce:plant_casing, iuce:plant_controller}
+
+{recipe: iuce:plant_frame, iuce:plant_drum}
 
 {recipe: iuce:item_input_hatch, iuce:item_output_hatch, iuce:energy_hatch}
 

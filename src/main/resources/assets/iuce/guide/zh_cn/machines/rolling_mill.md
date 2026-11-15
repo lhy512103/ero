@@ -17,9 +17,9 @@ items: iuce:mill_controller, iuce:energy_hatch_hv
 
 ## 结构
 
-{structure: rolling_mill | 宽 5、高 5、长 9 的空心外壳；可以加长到 17}
+{structure: rolling_mill | 宽 9、高 7、长 9 的开放式辊床；可以加长到 17}
 
-和 [选矿联合厂](machines/ore_plant) 用同样的外壳和仓口，只是更长。**长度可以自己定**：从 9 格到 17 格，越长并行越多，17 格时翻倍。长度用 [图纸终端](machines/building) 选：潜行右键控制器，每次加长一格。先搭 9 格用着，以后选个更长的规格，把后墙拆了往后补就行。
+底座上是横置滚筒、纵向侧梁和跨过辊床的门架。控制器两侧是进出料口，尾端正中是能源仓。**长度可以自己定**：从 9 格到 17 格，越长并行越多，17 格时翻倍。用 [图纸终端](machines/building) 潜行右键控制器选定长度；延长时按投影移动尾架和能源仓。旧版矩形轧机继续采用原有规则。
 
 {recipe: iuce:mill_controller}
 

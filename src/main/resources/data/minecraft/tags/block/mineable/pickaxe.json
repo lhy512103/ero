@@ -74,6 +74,8 @@
     "iuce:silo",
     "iuce:fluid_tank",
     "iuce:plant_casing",
+    "iuce:plant_frame",
+    "iuce:plant_drum",
     "iuce:plant_controller",
     "iuce:item_input_hatch",
     "iuce:item_output_hatch",

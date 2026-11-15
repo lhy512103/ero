@@ -55,6 +55,8 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> SILO = registerBlockItem(ModBlocks.SILO);
     public static final DeferredItem<BlockItem> FLUID_TANK = registerBlockItem(ModBlocks.FLUID_TANK);
     public static final DeferredItem<BlockItem> PLANT_CASING = registerBlockItem(ModBlocks.PLANT_CASING);
+    public static final DeferredItem<BlockItem> PLANT_FRAME = registerBlockItem(ModBlocks.PLANT_FRAME);
+    public static final DeferredItem<BlockItem> PLANT_DRUM = registerBlockItem(ModBlocks.PLANT_DRUM);
     public static final DeferredItem<BlockItem> PLANT_CONTROLLER = registerBlockItem(ModBlocks.PLANT_CONTROLLER);
     public static final DeferredItem<BlockItem> ITEM_INPUT_HATCH = registerBlockItem(ModBlocks.ITEM_INPUT_HATCH);
     public static final DeferredItem<BlockItem> ITEM_OUTPUT_HATCH = registerBlockItem(ModBlocks.ITEM_OUTPUT_HATCH);

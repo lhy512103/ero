@@ -112,6 +112,7 @@ final class MachineTests {
         tests.put("repair_bench_lamp_converter", MachineTests::utilities);
         tests.put("interface_exposes_network_storage", MachineTests::networkStorage);
         tests.put("ore_plant_forms_and_processes", MachineTests::orePlant);
+        tests.put("open_industrial_multiblocks", MachineTests::industrialStructures);
         tests.put("pipe_network_feeds_and_collects", MachineTests::pipeNetwork);
         tests.put("silo_and_fluid_tank", MachineTests::siloAndTank);
         tests.put("metal_former_molds", MachineTests::molds);
@@ -1246,7 +1247,8 @@ final class MachineTests {
         level.setBlockAndUpdate(helper.absolutePos(controllerPos), millState);
         var controller = helper.getBlockEntity(controllerPos, blockentity.PlantControllerBlockEntity.class);
         check(helper, blockentity.PlantControllerBlockEntity.targetLength(millState.setValue(block.PlantControllerBlock.LENGTH, 11)) == 11
-            && blockentity.PlantControllerBlockEntity.shell(BlockPos.ZERO, net.minecraft.core.Direction.NORTH, 11).size() == 193,
+            && multiblock.PlantStructure.cells(BlockPos.ZERO, net.minecraft.core.Direction.NORTH,
+                millState.setValue(block.PlantControllerBlock.LENGTH, 11)).size() == 193,
             "The blueprint's chosen length must decide the shape of the shell");
         check(helper, controller.summary() != null && controller.missing().size() == 158, "A 9-long mill with three hatches lacks 158 casing blocks");
 
@@ -1274,6 +1276,45 @@ final class MachineTests {
         controller.tick();
         check(helper, controller.isFormed(), "The machine must form once the builder is done");
         check(helper, machine.requestSlot(casing) < 0, "A finished machine needs no more casing");
+        helper.succeed();
+    }
+
+    private static void industrialStructures(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var direction = net.minecraft.core.Direction.NORTH;
+        for (boolean mill : List.of(false, true)) {
+            var controllerBlock = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
+            var state = controllerBlock.defaultBlockState().setValue(block.PlantControllerBlock.LEGACY, false);
+            BlockPos origin = helper.absolutePos(new BlockPos(8, mill ? 24 : 4, 2));
+            var cells = multiblock.PlantStructure.cells(origin, direction, state);
+            check(helper, cells.stream().map(multiblock.PlantStructure.Cell::pos).distinct().count() == cells.size(), "Every part must have a unique position");
+            check(helper, cells.stream().allMatch(cell -> multiblock.PlantStructure.bounds(origin, direction, state).isInside(cell.pos())),
+                "Every part must be monitored for changes");
+            var pillar = cells.stream().filter(cell -> cell.part() == multiblock.PlantStructure.Part.FRAME_UP).findFirst().orElseThrow();
+            check(helper, !pillar.part().accepts(pillar.part().sample(direction).setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS,
+                net.minecraft.core.Direction.Axis.X), direction), "A girder with the wrong axis must not pass");
+            level.setBlockAndUpdate(origin, state);
+            var controller = (blockentity.PlantControllerBlockEntity) level.getBlockEntity(origin);
+            check(helper, controller != null && !controller.missing().contains(pillar.pos()), "The builder must not fill girder positions with casing");
+            for (var cell : cells) level.setBlockAndUpdate(cell.pos(), cell.part().sample(direction));
+            controller.tick();
+            check(helper, controller.isFormed() && controller.getParallel() == 16, "The open structure must form with all of its parts");
+            level.setBlockAndUpdate(pillar.pos(), ModBlocks.PLANT_CASING.get().defaultBlockState());
+            controller.tick();
+            check(helper, !controller.isFormed(), "A casing cannot replace a structural girder");
+            level.removeBlock(origin, false);
+            for (var cell : cells) level.removeBlock(cell.pos(), false);
+        }
+        BlockPos casing = helper.absolutePos(new BlockPos(8, 4, 2));
+        var state = ModBlocks.PLANT_CASING.get().defaultBlockState();
+        var east = net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST;
+        level.setBlockAndUpdate(casing, state);
+        check(helper, !level.getBlockState(casing).getValue(east), "An exposed edge must keep its trim");
+        level.setBlockAndUpdate(casing.east(), ModBlocks.ITEM_INPUT_HATCH.get().defaultBlockState());
+        check(helper, level.getBlockState(casing).getValue(east), "A hatch must hide the adjacent casing trim");
+        level.removeBlock(casing.east(), false);
+        check(helper, !level.getBlockState(casing).getValue(east), "Removing the hatch must restore the trim");
+        level.removeBlock(casing, false);
         helper.succeed();
     }
 

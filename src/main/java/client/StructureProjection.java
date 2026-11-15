@@ -1,7 +1,7 @@
 package client;
 
 import block.PlantControllerBlock;
-import blockentity.PlantControllerBlockEntity;
+import multiblock.PlantStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -18,12 +18,14 @@ import java.util.List;
 /**
  * Building aid for large machines: while the crosshair is on a controller whose structure is not
  * complete, every position that still needs a casing block or hatch is outlined in the world,
- * free positions in yellow and positions holding a wrong block in red.
+ * casing positions in yellow, dedicated parts in blue and incorrect positions in red.
  */
 public final class StructureProjection {
     private StructureProjection() {}
 
-    private static final int FREE = 0xFFFFD21E, WRONG = 0xFFFF5050;
+    private static final int FREE = 0xFFFFD21E, PART = 0xFF64D3FF, WRONG = 0xFFFF5050;
+
+    private record Outline(BlockPos pos, int color) {}
 
     public static void onOutline(ExtractBlockOutlineRenderStateEvent event) {
         BlockState state = event.getBlockState();
@@ -32,26 +34,24 @@ public final class StructureProjection {
         var level = event.getLevel();
         BlockPos pos = event.getBlockPos();
         Direction facing = state.getValue(PlantControllerBlock.FACING);
-        int length = PlantControllerBlockEntity.targetLength(state);
-
-        List<BlockPos> free = new ArrayList<>(), wrong = new ArrayList<>();
-        for (BlockPos shell : PlantControllerBlockEntity.shell(pos, facing, length)) {
-            BlockState there = level.getBlockState(shell);
-            if (PlantControllerBlockEntity.isShellBlock(there)) continue;
-            (there.canBeReplaced() ? free : wrong).add(shell);
+        List<Outline> outlines = new ArrayList<>();
+        for (PlantStructure.Cell cell : PlantStructure.cells(pos, facing, state)) {
+            if (!level.isLoaded(cell.pos())) continue;
+            BlockState there = level.getBlockState(cell.pos());
+            if (cell.part().accepts(there, facing)) continue;
+            int color = !there.canBeReplaced() ? WRONG : cell.part().canFillWithCasing() ? FREE : PART;
+            outlines.add(new Outline(cell.pos(), color));
         }
-        if (free.isEmpty() && wrong.isEmpty()) return;
+        if (outlines.isEmpty()) return;
 
         event.addCustomRenderer((renderState, buffer, poseStack, translucentPass, levelState) -> {
             if (!translucentPass) return false;
             Vec3 camera = levelState.cameraRenderState.pos;
             float width = minecraft.gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth;
             var lines = buffer.getBuffer(RenderTypes.lines());
-            for (BlockPos p : free) {
-                ShapeRenderer.renderShape(poseStack, lines, Shapes.block(), p.getX() - camera.x, p.getY() - camera.y, p.getZ() - camera.z, FREE, width);
-            }
-            for (BlockPos p : wrong) {
-                ShapeRenderer.renderShape(poseStack, lines, Shapes.block(), p.getX() - camera.x, p.getY() - camera.y, p.getZ() - camera.z, WRONG, width);
+            for (Outline outline : outlines) {
+                BlockPos p = outline.pos();
+                ShapeRenderer.renderShape(poseStack, lines, Shapes.block(), p.getX() - camera.x, p.getY() - camera.y, p.getZ() - camera.z, outline.color(), width);
             }
             return false;
         });

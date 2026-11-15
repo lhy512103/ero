@@ -1,12 +1,17 @@
 package client.guide;
 
+import block.ModBlocks;
+import block.PlantControllerBlock;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import multiblock.PlantStructure;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -62,6 +67,7 @@ public final class GuideStructure {
     }
 
     private static Optional<GuideStructure> load(String name) {
+        if (name.equals("ore_plant") || name.equals("rolling_mill")) return Optional.of(plant(name.equals("rolling_mill")));
         Optional<Resource> resource = GuideBook.resource("guide/structures/" + name + ".json");
         if (resource.isEmpty()) return Optional.empty();
         try (BufferedReader reader = resource.get().openAsReader()) {
@@ -91,5 +97,21 @@ public final class GuideStructure {
         } catch (Exception error) {
             return Optional.empty();
         }
+    }
+
+    private static GuideStructure plant(boolean mill) {
+        var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
+        var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+        var bounds = PlantStructure.bounds(BlockPos.ZERO, Direction.NORTH, state);
+        var cellsInWorld = PlantStructure.cells(BlockPos.ZERO, Direction.NORTH, state);
+        int radius = -bounds.minX();
+        List<Cell> cells = new ArrayList<>();
+        cells.add(new Cell(new BlockPos(radius, 1, 0), new ItemStack(controller), BuiltInRegistries.BLOCK.getKey(controller).toString()));
+        for (PlantStructure.Cell cell : cellsInWorld) {
+            var block = cell.part().sample(Direction.NORTH).getBlock();
+            cells.add(new Cell(cell.pos().offset(radius, 1, 0), new ItemStack(block), BuiltInRegistries.BLOCK.getKey(block).toString()));
+        }
+        int depth = 1 + cellsInWorld.stream().mapToInt(cell -> cell.pos().getZ()).max().orElse(0);
+        return new GuideStructure(List.copyOf(cells), bounds.getXSpan(), bounds.getYSpan(), depth);
     }
 }

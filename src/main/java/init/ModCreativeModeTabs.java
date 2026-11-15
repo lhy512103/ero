@@ -34,6 +34,8 @@ public class ModCreativeModeTabs {
         ModBlockItems.SILO,
         ModBlockItems.FLUID_TANK,
         ModBlockItems.PLANT_CASING,
+        ModBlockItems.PLANT_FRAME,
+        ModBlockItems.PLANT_DRUM,
         ModBlockItems.PLANT_CONTROLLER,
         ModBlockItems.ITEM_INPUT_HATCH,
         ModBlockItems.ITEM_OUTPUT_HATCH,

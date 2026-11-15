@@ -1,15 +1,23 @@
 package regression;
 
+import block.ModBlocks;
+import block.PlantControllerBlock;
 import client.guide.GuideBook;
 import client.guide.GuideScreen;
+import multiblock.PlantStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Development tool: opens every guide page and saves screenshots to {@code screenshots/guide_*.png},
@@ -22,6 +30,7 @@ public final class GuideShots {
     private static final List<String> pages = new ArrayList<>();
     private static int ticks, settle = -1, index, part;
     private static boolean started;
+    private static BlockPos industrialOrigin;
 
     public static void register() {
         NeoForge.EVENT_BUS.addListener(GuideShots::tick);
@@ -52,6 +61,10 @@ public final class GuideShots {
             handShots(minecraft);
             return;
         }
+        if ("industrial".equals(System.getProperty("iuce.guideShots"))) {
+            industrialShots(minecraft);
+            return;
+        }
         if (index >= pages.size()) {
             if (++settle > 20) minecraft.stop();
             return;
@@ -73,6 +86,52 @@ public final class GuideShots {
         } else {
             index++;
             settle = 0;
+        }
+    }
+
+    private static void industrialShots(Minecraft minecraft) {
+        var server = minecraft.getSingleplayerServer();
+        if (server == null || minecraft.player == null) { minecraft.stop(); return; }
+        settle++;
+        if (settle == 1 || settle == 150) {
+            boolean mill = settle == 150;
+            var uuid = minecraft.player.getUUID();
+            if (!mill) industrialOrigin = minecraft.player.blockPosition();
+            var playerPos = industrialOrigin;
+            minecraft.setScreen(null);
+            minecraft.options.hideGui = true;
+            server.execute(() -> {
+                var player = server.getPlayerList().getPlayer(uuid);
+                if (player == null) return;
+                var level = server.overworld();
+                int height = Math.min(level.getMaxY() - 32, Math.max(playerPos.getY() + 28, 120));
+                var origin = new BlockPos(playerPos.getX() + (mill ? 52 : -52), height, playerPos.getZ() + 8);
+                for (int x = -10; x <= 10; x++) {
+                    for (int z = -5; z <= 20; z++) {
+                        BlockPos floor = origin.offset(x, -2, z);
+                        level.getChunkAt(floor);
+                        level.setBlockAndUpdate(floor, Blocks.SMOOTH_STONE.defaultBlockState());
+                    }
+                }
+                var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
+                var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+                if (mill) state = state.setValue(PlantControllerBlock.LENGTH, 17);
+                level.setBlockAndUpdate(origin, state);
+                for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
+                    var part = cell.part().sample(Direction.NORTH);
+                    if (part.is(ModBlocks.PLANT_CASING.get())) part = ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos());
+                    level.setBlockAndUpdate(cell.pos(), part);
+                }
+                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set day");
+                player.setGameMode(GameType.SPECTATOR);
+                player.teleportTo(level, origin.getX() + 15, height + (mill ? 9 : 10), origin.getZ() - 10, Set.of(), 44, 14, true);
+            });
+        } else if (settle == 125 || settle == 274) {
+            var name = settle == 125 ? "iuce_ore_plant.png" : "iuce_rolling_mill.png";
+            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (settle > 285) {
+            minecraft.options.hideGui = false;
+            minecraft.stop();
         }
     }
 

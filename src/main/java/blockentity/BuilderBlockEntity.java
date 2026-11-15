@@ -115,13 +115,13 @@ public class BuilderBlockEntity extends MachineBlockEntity implements EnergyDisp
         int placed = 0;
         while (placed < BLOCKS_PER_ROUND && !queue.isEmpty()) {
             BlockPos pos = queue.peek();
-            if (!level.isLoaded(pos) || !level.getBlockState(pos).canBeReplaced()) {
+            if (!controller.canFillCasing(pos) || !level.isLoaded(pos) || !level.getBlockState(pos).canBeReplaced()) {
                 queue.poll();
                 continue;
             }
             if (storage.getEnergyStored() < COST || !takeCasing()) break;
             storage.removeEnergy(COST);
-            level.setBlock(pos, ModBlocks.PLANT_CASING.get().defaultBlockState(), Block.UPDATE_ALL);
+            level.setBlock(pos, ModBlocks.PLANT_CASING.get().joinedState(level, pos), Block.UPDATE_ALL);
             queue.poll();
             placed++;
         }

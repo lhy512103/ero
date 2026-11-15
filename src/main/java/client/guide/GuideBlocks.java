@@ -640,7 +640,7 @@ final class GuideBlocks {
             minY = -(structure.sizeY - 1) * DY;
             float maxY = (structure.sizeX + structure.sizeZ - 2) * DZ + 16;
             float w = maxX - minX, h = maxY - minY;
-            scale = (w * 2 <= width - 16 && h * 2 <= 150) ? 2 : 1;
+            scale = Math.min(2, Math.min(Math.max(1, width - 16) / w, 150 / h));
             viewH = (int) Math.ceil(h * scale) + 16;
             int perRow = Math.max(1, (width - 8) / 20);
             int kinds = structure.materials(shownLayers).size();

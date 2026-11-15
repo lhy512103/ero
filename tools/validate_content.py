@@ -68,7 +68,7 @@ MAX_EU_PER_TICK = 128
 TERMINAL = set(STATION.values()) | {
     "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor", "factory_hub",
     "logistics_port", "silo", "fluid_tank", "configurator",
-    "plant_controller", "item_input_hatch", "item_output_hatch", "energy_hatch",
+    "plant_controller", "plant_frame", "plant_drum", "item_input_hatch", "item_output_hatch", "energy_hatch",
     "energy_hatch_hv", "mill_controller", "repair_bench", "lamp", "converter", "builder", "blueprint_terminal",
     "batbox", "cesu", "mfe", "mfsu", "singulary_solar_generator",
     "copper_cable", "tin_cable", "gold_cable", "iron_cable", "glass_cable", "singular_cable",

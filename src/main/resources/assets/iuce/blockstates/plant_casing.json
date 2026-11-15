@@ -1,7 +1,57 @@
 {
-  "variants": {
-    "": {
-      "model": "iuce:block/plant_casing"
+  "multipart": [
+    {
+      "apply": {
+        "model": "iuce:block/plant_casing_panel"
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_west"
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_east"
+      }
+    },
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_down"
+      }
+    },
+    {
+      "when": {
+        "up": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_up"
+      }
+    },
+    {
+      "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_north"
+      }
+    },
+    {
+      "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_casing_edge_south"
+      }
     }
-  }
+  ]
 }

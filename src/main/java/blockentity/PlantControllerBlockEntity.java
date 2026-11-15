@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import item.MoldItem;
 import multiblock.MultiblockManager;
+import multiblock.PlantStructure;
 import multiblock.ProcessChain;
 import multiblock.StructureScan;
 import net.minecraft.core.BlockPos;
@@ -28,18 +29,13 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Controller of a large machine: a hollow shell of plant casing, 5 wide and 5 high, with the
- * controller in the middle of the front face one block above the floor. Hatches may replace any
- * casing block.
- * <ul>
- * <li>Ore processing plant: 5 long; crushes, washes and smelts.</li>
- * <li>Rolling mill: 9 to 17 long (chosen with the blueprint terminal); the mold put into the
- * controller decides between plates, wires and rods, and every extra block of length adds to the
- * parallel count (up to double).</li>
- * </ul>
+ * Controller of a large machine. The ore plant crushes, washes and smelts; the mill's mold
+ * selects its process, and the chosen mill length determines its parallel count.
  * The controller is the only part that does any work. Running sixteen operations side by side is
  * one batch whose amounts are multiplied by sixteen, not sixteen batches. The structure is checked
  * when the controller is placed or loaded and again only after a block inside its box changed; the
@@ -62,6 +58,9 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     private boolean structureDirty = true;
     @Nullable private StructureScan scan;
+    private final Map<BlockPos, PlantStructure.Part> scanParts = new HashMap<>();
+    @Nullable private BlockState layoutState;
+    private List<PlantStructure.Cell> layout = List.of();
     @Nullable private Component scanFailure;
     private boolean formed;
     private int length, parallel;
@@ -103,43 +102,30 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     // ------------------------------------------------------------------ geometry, shared with the client's projection
 
-    public static BlockPos at(BlockPos controller, Direction facing, int depth, int across, int up) {
-        Direction back = facing.getOpposite();
-        return controller.relative(back, depth).relative(back.getClockWise(), across).above(up);
-    }
-
-    public static boolean isShellBlock(BlockState state) {
-        return state.is(ModBlocks.PLANT_CASING.get()) || state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get())
-            || state.is(ModBlocks.ITEM_INPUT_HATCH.get()) || state.is(ModBlocks.ITEM_OUTPUT_HATCH.get());
-    }
-
     /** The length the structure of this controller is meant to have: fixed for the ore plant, chosen for the mill. */
     public static int targetLength(BlockState controller) {
-        return controller.is(ModBlocks.MILL_CONTROLLER.get()) ? controller.getValue(PlantControllerBlock.LENGTH) : 5;
-    }
-
-    /** Every position of the shell, the controller's own excluded. */
-    public static List<BlockPos> shell(BlockPos pos, Direction facing, int length) {
-        List<BlockPos> positions = new ArrayList<>();
-        for (int depth = 0; depth < length; depth++) {
-            for (int across = -2; across <= 2; across++) {
-                for (int up = -1; up <= 3; up++) {
-                    boolean shell = depth == 0 || depth == length - 1 || Math.abs(across) == 2 || up == -1 || up == 3;
-                    if (shell && !(depth == 0 && across == 0 && up == 0)) positions.add(at(pos, facing, depth, across, up));
-                }
-            }
-        }
-        return positions;
+        return controller.is(ModBlocks.MILL_CONTROLLER.get()) ? controller.getValue(PlantControllerBlock.LENGTH)
+            : controller.getValue(PlantControllerBlock.LEGACY) ? 5 : PlantStructure.ORE_LENGTH;
     }
 
     private Direction facing() { return getBlockState().getValue(PlantControllerBlock.FACING); }
 
-    private List<BlockPos> shell() { return shell(worldPosition, facing(), targetLength(getBlockState())); }
+    private List<PlantStructure.Cell> layout() {
+        BlockState state = getBlockState();
+        if (state != layoutState) {
+            layoutState = state;
+            layout = PlantStructure.cells(worldPosition, facing(), state);
+        }
+        return layout;
+    }
+
+    public boolean canFillCasing(BlockPos pos) {
+        return layout().stream().anyMatch(cell -> cell.pos().equals(pos) && cell.part().canFillWithCasing());
+    }
 
     /** The largest box the structure can occupy, so that lengthening a mill is noticed too. */
     public BoundingBox box() {
-        int longest = isMill() ? MILL_MAX : 5;
-        return BoundingBox.fromCorners(at(worldPosition, facing(), 0, -2, -1), at(worldPosition, facing(), longest - 1, 2, 3));
+        return PlantStructure.bounds(worldPosition, facing(), getBlockState());
     }
 
     @Override
@@ -174,21 +160,25 @@ public class PlantControllerBlockEntity extends BlockEntity {
         outputHatches.clear();
         length = targetLength(getBlockState());
         scanFailure = null;
-        scan = new StructureScan(shell());
+        scanParts.clear();
+        for (PlantStructure.Cell cell : layout()) scanParts.put(cell.pos(), cell.part());
+        scan = new StructureScan(layout().stream().map(PlantStructure.Cell::pos).toList());
     }
 
     private boolean visit(BlockPos pos, @Nullable BlockState state) {
         if (state == null) scanFailure = Component.translatable("message.iuce.plant.unloaded");
-        else if (state.is(ModBlocks.PLANT_CASING.get())) return true;
+        else if (!scanParts.get(pos).accepts(state, facing())) {
+            scanFailure = Component.translatable("message.iuce.plant.wrong_part", pos.toShortString(), scanParts.get(pos).sample(facing()).getBlock().getName());
+        }
         else if (state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get())) energyHatches.add(pos);
         else if (state.is(ModBlocks.ITEM_INPUT_HATCH.get())) inputHatches.add(pos);
         else if (state.is(ModBlocks.ITEM_OUTPUT_HATCH.get())) outputHatches.add(pos);
-        else scanFailure = Component.translatable("message.iuce.plant.wrong_block", pos.toShortString());
         return scanFailure == null;
     }
 
     private void finishScan() {
         scan = null;
+        scanParts.clear();
         if (scanFailure == null) {
             if (energyHatches.isEmpty()) scanFailure = Component.translatable("message.iuce.plant.no_energy_hatch");
             else if (inputHatches.isEmpty()) scanFailure = Component.translatable("message.iuce.plant.no_input_hatch");
@@ -217,8 +207,9 @@ public class PlantControllerBlockEntity extends BlockEntity {
     public List<BlockPos> missing() {
         List<BlockPos> free = new ArrayList<>();
         if (level == null) return free;
-        for (BlockPos pos : shell()) {
-            if (level.isLoaded(pos) && level.getBlockState(pos).canBeReplaced()) free.add(pos);
+        for (PlantStructure.Cell cell : layout()) {
+            BlockPos pos = cell.pos();
+            if (cell.part().canFillWithCasing() && level.isLoaded(pos) && level.getBlockState(pos).canBeReplaced()) free.add(pos);
         }
         return free;
     }
@@ -232,7 +223,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         int placed = 0;
         for (BlockPos pos : missing()) {
             if (placed >= casing.getCount()) break;
-            level.setBlock(pos, ModBlocks.PLANT_CASING.get().defaultBlockState(), Block.UPDATE_ALL);
+            level.setBlock(pos, ModBlocks.PLANT_CASING.get().joinedState(level, pos), Block.UPDATE_ALL);
             placed++;
         }
         structureDirty = true;
@@ -242,17 +233,20 @@ public class PlantControllerBlockEntity extends BlockEntity {
     /** Bill of materials for the blueprint terminal: size, what the shell needs and what is already there. */
     public Component summary() {
         int target = targetLength(getBlockState());
-        int total = 0, casing = 0, hatches = 0, free = 0, wrong = 0;
-        for (BlockPos pos : shell()) {
-            total++;
-            BlockState state = level.getBlockState(pos);
-            if (state.is(ModBlocks.PLANT_CASING.get())) casing++;
-            else if (isShellBlock(state)) hatches++;
-            else if (state.canBeReplaced()) free++;
-            else wrong++;
+        int fitted = 0, wrong = 0;
+        Map<Block, Integer> needed = new java.util.LinkedHashMap<>();
+        for (PlantStructure.Cell cell : layout()) {
+            if (!level.isLoaded(cell.pos())) continue;
+            BlockState state = level.getBlockState(cell.pos());
+            if (cell.part().accepts(state, facing())) fitted++;
+            else {
+                needed.merge(cell.part().sample(facing()).getBlock(), 1, Integer::sum);
+                if (!state.canBeReplaced()) wrong++;
+            }
         }
-        MutableComponent text = Component.translatable("message.iuce.blueprint.title", getBlockState().getBlock().getName(), target, total);
-        text.append("\n").append(Component.translatable("message.iuce.blueprint.blocks", casing, hatches, free, wrong));
+        MutableComponent text = Component.translatable("message.iuce.blueprint.title", getBlockState().getBlock().getName(), target, layout().size());
+        text.append("\n").append(Component.translatable("message.iuce.blueprint.parts", fitted, wrong));
+        needed.forEach((block, count) -> text.append("\n").append(Component.translatable("message.iuce.blueprint.needed", block.getName(), count)));
         double stretch = isMill() ? 1 + (target - MILL_MIN) / (double) (MILL_MAX - MILL_MIN) : 1;
         text.append("\n").append(Component.translatable("message.iuce.blueprint.parallel", (int) (16 * stretch), (int) (64 * stretch)));
         if (isMill()) text.append("\n").append(Component.translatable("message.iuce.blueprint.resize", MILL_MIN, MILL_MAX));

@@ -24,6 +24,7 @@ import machine.storage.CesuBlockEntity;
 import machine.storage.MfeBlockEntity;
 import machine.storage.MfsuBlockEntity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -126,7 +127,11 @@ public class ModBlocks {
         p -> new StorageBlock(p, false), machineProperties());
     public static final DeferredBlock<StorageBlock> FLUID_TANK = BLOCKS.registerBlock("fluid_tank",
         p -> new StorageBlock(p, true), machineProperties());
-    public static final DeferredBlock<Block> PLANT_CASING = BLOCKS.registerSimpleBlock("plant_casing", machineProperties());
+    public static final DeferredBlock<PlantCasingBlock> PLANT_CASING = BLOCKS.registerBlock("plant_casing", PlantCasingBlock::new, machineProperties());
+    public static final DeferredBlock<RotatedPillarBlock> PLANT_FRAME = BLOCKS.registerBlock("plant_frame",
+        PlantFrameBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<RotatedPillarBlock> PLANT_DRUM = BLOCKS.registerBlock("plant_drum",
+        PlantDrumBlock::new, () -> machineProperties().get().noOcclusion());
     public static final DeferredBlock<PlantControllerBlock> PLANT_CONTROLLER = BLOCKS.registerBlock("plant_controller",
         PlantControllerBlock::new, machineProperties());
     public static final DeferredBlock<HatchBlock> ITEM_INPUT_HATCH = BLOCKS.registerBlock("item_input_hatch",
