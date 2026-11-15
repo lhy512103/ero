@@ -91,6 +91,7 @@
 85. Added: The pipe network carries fluids from pumps and tanks to machines.
 86. Added: Dyeing a logistics interface puts it on a colour channel, so one pipe run can serve several separate lines.
 87. Optimized: A pipe network with nothing to move checks less often and resumes at full speed when items arrive.
+88. Added: An optional brushed-steel resource pack for the Ore Processing Plant and Rolling Mill.
 
 ### 中文
 
@@ -181,3 +182,4 @@
 85. 新增：管网可以把泵和储罐里的流体送给机器。
 86. 新增：给物流接口染色可划分频道，一组管道能同时服务互不相干的几条线。
 87. 优化：没有东西可运的管网会降低检查频率，有物品时立即恢复全速。
+88. 新增：选矿联合厂与轧制联合机的可选拉丝钢资源包。

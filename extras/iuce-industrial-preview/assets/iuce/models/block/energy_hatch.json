@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "iuce:block/industrial_preview/energy_hatch"
+  }
+}
