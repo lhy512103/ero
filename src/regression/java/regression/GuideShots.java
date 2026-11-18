@@ -82,8 +82,9 @@ public final class GuideShots {
         if (++settle < 8) return;
         String name = "guide_" + pages.get(index).replace('/', '-') + (part == 0 ? "" : "_" + part) + ".png";
         Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
-        int next = (part + 1) * 280;
-        if (part < 5 && screen.maxScroll() > 0 && next - 280 < screen.maxScroll()) {
+        int step = Integer.getInteger("iuce.guideShots.step", 280);
+        int next = (part + 1) * step;
+        if (part < 5 && screen.maxScroll() > 0 && next - step < screen.maxScroll()) {
             part++;
             screen.scrollTo(Math.min(next, screen.maxScroll()));
             settle = 4;

@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "iuce:block/machine/plant/input_hatch"
+    "particle": "iuce:block/machine/plant/input_hatch",
+    "down": "iuce:block/machine/plant/casing",
+    "up": "iuce:block/machine/plant/casing",
+    "north": "iuce:block/machine/plant/input_hatch",
+    "south": "iuce:block/machine/plant/input_hatch",
+    "west": "iuce:block/machine/plant/input_hatch",
+    "east": "iuce:block/machine/plant/input_hatch"
   }
 }

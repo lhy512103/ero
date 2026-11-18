@@ -1,12 +1,16 @@
 {
   "multipart": [
     {
+      "when": {
+        "formed": "false"
+      },
       "apply": {
         "model": "iuce:block/plant_casing_panel"
       }
     },
     {
       "when": {
+        "formed": "false",
         "west": "false"
       },
       "apply": {
@@ -15,6 +19,7 @@
     },
     {
       "when": {
+        "formed": "false",
         "east": "false"
       },
       "apply": {
@@ -23,6 +28,7 @@
     },
     {
       "when": {
+        "formed": "false",
         "down": "false"
       },
       "apply": {
@@ -31,6 +37,7 @@
     },
     {
       "when": {
+        "formed": "false",
         "up": "false"
       },
       "apply": {
@@ -39,6 +46,7 @@
     },
     {
       "when": {
+        "formed": "false",
         "north": "false"
       },
       "apply": {
@@ -47,6 +55,7 @@
     },
     {
       "when": {
+        "formed": "false",
         "south": "false"
       },
       "apply": {

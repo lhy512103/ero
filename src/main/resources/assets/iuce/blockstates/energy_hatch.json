@@ -1,28 +1,60 @@
 {
   "variants": {
-    "facing=north,running=false": {
-      "model": "iuce:block/energy_hatch"
+    "facing=north,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 0
     },
-    "facing=north,running=true": {
-      "model": "iuce:block/energy_hatch"
+    "facing=north,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
     },
-    "facing=east,running=false": {
-      "model": "iuce:block/energy_hatch"
+    "facing=north,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 0
     },
-    "facing=east,running=true": {
-      "model": "iuce:block/energy_hatch"
+    "facing=north,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
     },
-    "facing=south,running=false": {
-      "model": "iuce:block/energy_hatch"
+    "facing=east,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 90
     },
-    "facing=south,running=true": {
-      "model": "iuce:block/energy_hatch"
+    "facing=east,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
     },
-    "facing=west,running=false": {
-      "model": "iuce:block/energy_hatch"
+    "facing=east,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 90
     },
-    "facing=west,running=true": {
-      "model": "iuce:block/energy_hatch"
+    "facing=east,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 180
+    },
+    "facing=south,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 180
+    },
+    "facing=south,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 270
+    },
+    "facing=west,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch",
+      "y": 270
+    },
+    "facing=west,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
     }
   }
 }

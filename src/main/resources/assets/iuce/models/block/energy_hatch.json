@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/orientable",
   "textures": {
-    "all": "iuce:block/machine/plant/energy_hatch"
+    "particle": "iuce:block/machine/plant/energy_hatch",
+    "top": "iuce:block/machine/plant/casing",
+    "front": "iuce:block/machine/plant/energy_hatch",
+    "side": "iuce:block/machine/plant/vent"
   }
 }

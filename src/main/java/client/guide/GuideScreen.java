@@ -32,6 +32,8 @@ public final class GuideScreen extends Screen {
     @Nullable private final Screen parent;
     @Nullable private final String requested;
     private final List<Ctx.Zone> zones = new ArrayList<>();
+    /** The drag zone the left button went down on, followed until it is released. */
+    @Nullable private Ctx.Drag dragging;
     private final Deque<String> back = new ArrayDeque<>();
     private final Deque<String> forward = new ArrayDeque<>();
     private GuideBook book;
@@ -380,12 +382,29 @@ public final class GuideScreen extends Screen {
                 zone.action().run();
             } else if (button == 0 && zone.link() != null) {
                 follow(zone.link());
+            } else if (button == 0 && zone.drag() != null) {
+                dragging = zone.drag();
             } else {
                 continue;
             }
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (dragging != null && event.button() == 0) {
+            dragging.moved(dx, dy);
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        dragging = null;
+        return super.mouseReleased(event);
     }
 
     @Override

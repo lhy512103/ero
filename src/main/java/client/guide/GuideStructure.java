@@ -1,7 +1,13 @@
 package client.guide;
 
 import block.ModBlocks;
+import block.PlantCasingBlock;
+import client.PlantModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import org.joml.Vector3f;
 import block.PlantControllerBlock;
+import blockentity.PlantControllerBlockEntity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,6 +17,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import multiblock.PlantStructure;
 
 import javax.annotation.Nullable;
@@ -33,19 +42,64 @@ import java.util.Optional;
  * in-world projection needs, so {@link #cells} is deliberately plain.
  */
 public final class GuideStructure {
-    public record Cell(BlockPos pos, ItemStack stack, String blockId) {}
+    /** A placed block; {@code state} carries its facing or axis so the view matches the world. */
+    public record Cell(BlockPos pos, ItemStack stack, String blockId, BlockState state) {}
 
     public final List<Cell> cells;
     public final int sizeX, sizeY, sizeZ;
+    /** The controller's machine when this layout is a large machine with an assembled model, else null. */
+    @Nullable public final String machine;
+    /** Where the controller sits in this layout; the assembled model is drawn from there. */
+    public final BlockPos controller;
+    /** Depth of the machine in blocks, for models that stretch with it. */
+    public final int machineLength;
+    private final Map<BlockPos, BlockState> byPos = new HashMap<>();
 
     private static final Map<String, Optional<GuideStructure>> CACHE = new HashMap<>();
 
-    private GuideStructure(List<Cell> cells, int sizeX, int sizeY, int sizeZ) {
+    private GuideStructure(List<Cell> cells, int sizeX, int sizeY, int sizeZ, @Nullable String machine, BlockPos controller, int machineLength) {
         this.cells = cells;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
+        this.machine = machine;
+        this.controller = controller;
+        this.machineLength = machineLength;
+        for (Cell cell : cells) byPos.put(cell.pos, cell.state);
     }
+
+    /** The assembled model of the machine this layout builds, if it has one. */
+    @Nullable
+    public PlantModel model() {
+        if (machine == null) return null;
+        return PlantModel.get(machine.equals("mill_controller") ? PlantModel.ROLLING_MILL : PlantModel.ORE_PLANT);
+    }
+
+    /**
+     * Moves from layout space into model space. Guide machines face south, while models run towards
+     * +z from a north-facing controller, so the model turns half round about the controller.
+     */
+    public void toModel(PoseStack poseStack) {
+        poseStack.translate(controller.getX() + 0.5F, controller.getY(), controller.getZ() + 0.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        poseStack.translate(-0.5F, 0, -0.5F);
+    }
+
+    /** Corners of what is drawn, in layout blocks: the assembled model when formed, else the layout. */
+    public Vector3f[] extent(boolean formed) {
+        PlantModel model = formed ? model() : null;
+        if (model == null) return new Vector3f[]{new Vector3f(), new Vector3f(sizeX, sizeY, sizeZ)};
+        // After the half turn, model x and z run back from the controller's far corner.
+        float cx = controller.getX() + 1, cz = controller.getZ() + 1;
+        int extra = model.stretch.baseLength() > 0 ? Math.max(0, machineLength - model.stretch.baseLength()) : 0;
+        return new Vector3f[]{
+            new Vector3f(cx - model.max.x, controller.getY() + model.min.y, cz - model.max.z - extra),
+            new Vector3f(cx - model.min.x, controller.getY() + model.max.y, cz - model.min.z)};
+    }
+
+    /** The block at a layout position, or null for air; used to hide faces between neighbours. */
+    @Nullable
+    public BlockState stateAt(BlockPos pos) { return byPos.get(pos); }
 
     static void clearCache() { CACHE.clear(); }
 
@@ -89,11 +143,12 @@ public final class GuideStructure {
                         String blockId = palette.get(row.charAt(x));
                         if (blockId == null) continue;
                         ItemStack stack = GuideBook.stack(blockId);
-                        if (!stack.isEmpty()) cells.add(new Cell(new BlockPos(x, y, z), stack, blockId));
+                        Block block = BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse(blockId));
+                        if (!stack.isEmpty()) cells.add(new Cell(new BlockPos(x, y, z), stack, blockId, block.defaultBlockState()));
                     }
                 }
             }
-            return Optional.of(new GuideStructure(List.copyOf(cells), sizeX, layers.size(), sizeZ));
+            return Optional.of(new GuideStructure(List.copyOf(cells), sizeX, layers.size(), sizeZ, null, BlockPos.ZERO, 0));
         } catch (Exception error) {
             return Optional.empty();
         }
@@ -101,17 +156,36 @@ public final class GuideStructure {
 
     private static GuideStructure plant(boolean mill) {
         var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
-        var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
-        var bounds = PlantStructure.bounds(BlockPos.ZERO, Direction.NORTH, state);
-        var cellsInWorld = PlantStructure.cells(BlockPos.ZERO, Direction.NORTH, state);
-        int radius = -bounds.minX();
-        List<Cell> cells = new ArrayList<>();
-        cells.add(new Cell(new BlockPos(radius, 1, 0), new ItemStack(controller), BuiltInRegistries.BLOCK.getKey(controller).toString()));
-        for (PlantStructure.Cell cell : cellsInWorld) {
-            var block = cell.part().sample(Direction.NORTH).getBlock();
-            cells.add(new Cell(cell.pos().offset(radius, 1, 0), new ItemStack(block), BuiltInRegistries.BLOCK.getKey(block).toString()));
+        // The book shows the machine facing the reader: controller front towards south-west.
+        Direction facing = Direction.SOUTH;
+        var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false).setValue(PlantControllerBlock.FACING, facing);
+        var layout = PlantStructure.cells(BlockPos.ZERO, facing, state);
+        // The bounds of the parts actually placed: a mill's bounds cover its longest setting.
+        var bounds = net.minecraft.world.level.levelgen.structure.BoundingBox.encapsulatingPositions(
+            layout.stream().map(PlantStructure.Cell::pos).toList()).orElseThrow().encapsulate(BlockPos.ZERO);
+        var offset = new BlockPos(-bounds.minX(), -bounds.minY(), -bounds.minZ());
+        Map<BlockPos, BlockState> placed = new LinkedHashMap<>();
+        placed.put(offset, state);
+        for (PlantStructure.Cell cell : layout) {
+            placed.put(cell.pos().offset(offset), cell.part().sample(facing));
         }
-        int depth = 1 + cellsInWorld.stream().mapToInt(cell -> cell.pos().getZ()).max().orElse(0);
-        return new GuideStructure(List.copyOf(cells), bounds.getXSpan(), bounds.getYSpan(), depth);
+        List<Cell> cells = new ArrayList<>();
+        for (var entry : placed.entrySet()) {
+            BlockState part = entry.getValue();
+            if (part.getBlock() instanceof PlantCasingBlock) part = joined(part, entry.getKey(), placed);
+            Block block = part.getBlock();
+            cells.add(new Cell(entry.getKey(), new ItemStack(block), BuiltInRegistries.BLOCK.getKey(block).toString(), part));
+        }
+        return new GuideStructure(List.copyOf(cells), bounds.getXSpan(), bounds.getYSpan(), bounds.getZSpan(),
+            BuiltInRegistries.BLOCK.getKey(controller).getPath(), offset, PlantControllerBlockEntity.targetLength(state));
+    }
+
+    /** Casing trims hide where they touch other machine blocks, as {@code PlantCasingBlock#joinedState} does in the world. */
+    private static BlockState joined(BlockState casing, BlockPos pos, Map<BlockPos, BlockState> placed) {
+        for (Direction direction : Direction.values()) {
+            BlockState neighbour = placed.get(pos.relative(direction));
+            casing = casing.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction), neighbour != null && PlantCasingBlock.joins(neighbour));
+        }
+        return casing;
     }
 }

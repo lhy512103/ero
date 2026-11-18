@@ -22,9 +22,12 @@ final class Ctx {
     /** Visible area; zones outside it are discarded so scrolled-away content cannot be clicked. */
     int clipX0 = Integer.MIN_VALUE, clipY0 = Integer.MIN_VALUE, clipX1 = Integer.MAX_VALUE, clipY1 = Integer.MAX_VALUE;
 
-    /** An interactive rectangle. Exactly one of stack / link / action is normally set. */
+    /** Follows a mouse drag that started inside a zone, with the movement since the last call. */
+    interface Drag { void moved(double dx, double dy); }
+
+    /** An interactive rectangle. Exactly one of stack / link / action / drag is normally set. */
     record Zone(int x, int y, int w, int h, ItemStack stack, @Nullable String link,
-                @Nullable Runnable action, @Nullable Component tip) {
+                @Nullable Runnable action, @Nullable Component tip, @Nullable Drag drag) {
         boolean contains(double mx, double my) {
             return mx >= x && mx < x + w && my >= y && my < y + h;
         }
@@ -47,23 +50,27 @@ final class Ctx {
     }
 
     private void add(int x, int y, int w, int h, ItemStack stack, @Nullable String link,
-                     @Nullable Runnable action, @Nullable Component tip) {
+                     @Nullable Runnable action, @Nullable Component tip, @Nullable Drag drag) {
         int x0 = Math.max(x, clipX0), y0 = Math.max(y, clipY0);
         int x1 = Math.min(x + w, clipX1), y1 = Math.min(y + h, clipY1);
-        if (x1 > x0 && y1 > y0) zones.add(new Zone(x0, y0, x1 - x0, y1 - y0, stack, link, action, tip));
+        if (x1 > x0 && y1 > y0) zones.add(new Zone(x0, y0, x1 - x0, y1 - y0, stack, link, action, tip, drag));
     }
 
-    void linkZone(int x, int y, int w, int h, String target) { add(x, y, w, h, ItemStack.EMPTY, target, null, null); }
+    void dragZone(int x, int y, int w, int h, Drag drag, @Nullable Component tip) {
+        add(x, y, w, h, ItemStack.EMPTY, null, null, tip, drag);
+    }
+
+    void linkZone(int x, int y, int w, int h, String target) { add(x, y, w, h, ItemStack.EMPTY, target, null, null, null); }
 
     void actionZone(int x, int y, int w, int h, Runnable action, @Nullable Component tip) {
-        add(x, y, w, h, ItemStack.EMPTY, null, action, tip);
+        add(x, y, w, h, ItemStack.EMPTY, null, action, tip, null);
     }
 
     void itemZone(int x, int y, int w, int h, ItemStack stack) {
-        if (!stack.isEmpty()) add(x, y, w, h, stack, null, null, null);
+        if (!stack.isEmpty()) add(x, y, w, h, stack, null, null, null, null);
     }
 
-    void tipZone(int x, int y, int w, int h, Component tip) { add(x, y, w, h, ItemStack.EMPTY, null, null, tip); }
+    void tipZone(int x, int y, int w, int h, Component tip) { add(x, y, w, h, ItemStack.EMPTY, null, null, tip, null); }
 
     boolean hover(int x, int y, int w, int h) {
         return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h

@@ -80,6 +80,8 @@ neoForge {
             // Development only: screenshot every guide page (see docs/GUIDE.md).
             if (providers.gradleProperty('guideShots').isPresent()) {
                 systemProperty 'iuce.guideShots', providers.gradleProperty('guideShots').get() ?: 'true'
+                if (providers.gradleProperty('guideFormed').isPresent()) systemProperty 'iuce.guideShots.formed', 'true'
+                if (providers.gradleProperty('guideStep').isPresent()) systemProperty 'iuce.guideShots.step', providers.gradleProperty('guideStep').get()
                 programArguments.addAll '--width', '1280', '--height', '720'
                 if (providers.gradleProperty('guideWorld').isPresent()) {
                     systemProperty 'iuce.guideShots.world', 'true'

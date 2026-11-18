@@ -21,6 +21,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -34,6 +36,10 @@ public class EroClient {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         container.getEventBus().addListener(EroClient::registerScreens);
         container.getEventBus().addListener(EroClient::registerFluidModels);
+        container.getEventBus().addListener(EroClient::registerRenderers);
+        container.getEventBus().addListener((AddClientReloadListenersEvent event) -> event.addListener(
+            Identifier.fromNamespaceAndPath("iuce", "plant_models"),
+            (net.minecraft.server.packs.resources.ResourceManagerReloadListener) manager -> client.PlantModel.invalidate()));
         client.guide.Guide.init(container.getEventBus());
         if (System.getProperty("iuce.guideShots") != null) {
             try {
@@ -57,6 +63,10 @@ public class EroClient {
         NeoForge.EVENT_BUS.addListener(client.StructureProjection::onOutline);
     }
 
+    private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(blockentity.ModBlockEntities.PLANT_CONTROLLER.get(), client.PlantControllerBlockEntityRenderer::new);
+    }
+
     private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
         event.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
             new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/coolant_still")),
@@ -75,6 +85,7 @@ public class EroClient {
         event.register(ModMenus.INDUCTION_FURNACE.get(), InductionFurnaceScreen::new);
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);
         event.register(ModMenus.FACTORY_HUB.get(), client.gui.FactoryHubScreen::new);
+        event.register(ModMenus.MULTIBLOCK.get(), client.gui.MultiblockScreen::new);
         event.register(ModMenus.ORE_WASHER.get(), OreWasherScreen::new);
         event.register(ModMenus.ELECTROLYZER.get(), ElectrolyzerScreen::new);
         event.register(ModMenus.PLANTER.get(), PlanterScreen::new);
@@ -85,7 +96,6 @@ public class EroClient {
      * 在 tooltip 渲染前移除模组物品底部的模组名标签。
      * 模组名由 Minecraft/NeoForge 在渲染阶段追加（不在 getTooltipLines 中），
      * 因此使用 RenderTooltipEvent.GatherComponents 在渲染阶段拦截。
-        event.register(ModMenus.MULTIBLOCK.get(), client.gui.MultiblockScreen::new);
      * JEI 使用自己的 JeiTooltip.draw 不触发此事件，由 EroJeiPlugin.forceModNameOverride 处理。
      */
     private static void onGatherTooltipComponents(RenderTooltipEvent.GatherComponents event) {

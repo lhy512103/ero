@@ -1,7 +1,12 @@
 package blockentity;
 
+import block.EnergyHatchBlock;
+import block.HatchBlock;
 import block.ModBlocks;
+import block.PlantCasingBlock;
 import block.PlantControllerBlock;
+import block.PlantDrumBlock;
+import block.PlantFrameBlock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import item.MoldItem;
@@ -11,8 +16,11 @@ import multiblock.ProcessChain;
 import multiblock.StructureScan;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
@@ -74,14 +82,14 @@ public class PlantControllerBlockEntity extends BlockEntity {
     private final List<Pending> pending = new ArrayList<>();
     private int progress, idleTicks;
     private long energyPerTick, paid;
-    private boolean blocked, starved;
+    private boolean blocked, starved, clientWorking, lastSyncedWorking;
 
     public PlantControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PLANT_CONTROLLER.get(), pos, state);
     }
 
-    public boolean isFormed() { return formed; }
-    public boolean isWorking() { return !pending.isEmpty(); }
+    public boolean isFormed() { return formed || (level != null && level.isClientSide() && getBlockState().getValue(PlantControllerBlock.FORMED)); }
+    public boolean isWorking() { return (level != null && level.isClientSide()) ? clientWorking : !pending.isEmpty(); }
     public int getProgress() { return progress; }
     public int getParallel() { return parallel; }
     public int getLength() { return length; }
@@ -149,6 +157,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
+        setFormedParts(state, false);
         if (level != null && !getMold().isEmpty())
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), swapMold(ItemStack.EMPTY));
     }
@@ -204,7 +213,69 @@ public class PlantControllerBlockEntity extends BlockEntity {
         BlockState state = getBlockState();
         if (state.getValue(PlantControllerBlock.FORMED) != formed) {
             level.setBlock(worldPosition, state.setValue(PlantControllerBlock.FORMED, formed), Block.UPDATE_ALL);
+            state = getBlockState();
         }
+        setFormedParts(state, formed);
+        structureDirty = false;
+    }
+
+    private void setFormedParts(BlockState controllerState, boolean value) {
+        if (level == null || level.isClientSide()) return;
+        boolean hide = value && !controllerState.getValue(PlantControllerBlock.LEGACY);
+        Direction facing = controllerState.getValue(PlantControllerBlock.FACING);
+        for (PlantStructure.Cell cell : PlantStructure.cells(worldPosition, facing, controllerState)) {
+            BlockPos pos = cell.pos();
+            if (!level.isLoaded(pos)) continue;
+            BlockState s = level.getBlockState(pos);
+            Boolean prop = null;
+            if (s.getBlock() instanceof PlantCasingBlock) prop = s.getValue(PlantCasingBlock.FORMED);
+            else if (s.getBlock() instanceof PlantFrameBlock) prop = s.getValue(PlantFrameBlock.FORMED);
+            else if (s.getBlock() instanceof PlantDrumBlock) prop = s.getValue(PlantDrumBlock.FORMED);
+            else if (s.getBlock() instanceof HatchBlock) prop = s.getValue(HatchBlock.FORMED);
+            else if (s.getBlock() instanceof EnergyHatchBlock) prop = s.getValue(EnergyHatchBlock.FORMED);
+            if (prop != null && prop != hide) {
+                BlockState next = s;
+                if (s.getBlock() instanceof PlantCasingBlock) next = s.setValue(PlantCasingBlock.FORMED, hide);
+                else if (s.getBlock() instanceof PlantFrameBlock) next = s.setValue(PlantFrameBlock.FORMED, hide);
+                else if (s.getBlock() instanceof PlantDrumBlock) next = s.setValue(PlantDrumBlock.FORMED, hide);
+                else if (s.getBlock() instanceof HatchBlock) next = s.setValue(HatchBlock.FORMED, hide);
+                else if (s.getBlock() instanceof EnergyHatchBlock) next = s.setValue(EnergyHatchBlock.FORMED, hide);
+                level.setBlock(pos, next, Block.UPDATE_ALL);
+            }
+        }
+    }
+
+    /** Creative-mode one-click placement: places every missing part (casings, girders, drums, hatches) and forms immediately. */
+    public int assembleCreative() {
+        if (level == null || level.isClientSide()) return 0;
+        Direction facing = facing();
+        List<PlantStructure.Cell> cells = layout();
+        int placed = 0;
+        for (PlantStructure.Cell cell : cells) {
+            BlockPos pos = cell.pos();
+            if (!level.isLoaded(pos)) continue;
+            BlockState existing = level.getBlockState(pos);
+            if (cell.part().accepts(existing, facing) || !existing.canBeReplaced()) continue;
+            level.setBlock(pos, cell.part().sample(facing), Block.UPDATE_ALL);
+            placed++;
+        }
+        // Update casing edge trims after all parts and hatches are in place
+        for (PlantStructure.Cell cell : cells) {
+            if (!cell.part().canFillWithCasing()) continue;
+            BlockPos pos = cell.pos();
+            if (level.isLoaded(pos) && level.getBlockState(pos).is(ModBlocks.PLANT_CASING.get())) {
+                BlockState joined = ModBlocks.PLANT_CASING.get().joinedState(level, pos);
+                if (!joined.equals(level.getBlockState(pos))) level.setBlock(pos, joined, Block.UPDATE_ALL);
+            }
+        }
+        structureDirty = true;
+        if (level instanceof ServerLevel) {
+            beginScan();
+            if (scan != null && scan.step(level, Integer.MAX_VALUE, this::visit)) {
+                finishScan();
+            }
+        }
+        return placed;
     }
 
     /** Positions of the shell that are still free, in building order. */
@@ -283,6 +354,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         if (!formed) return;
         if (pending.isEmpty()) {
             if (idleTicks++ % 10 == 0) tryStart(server);
+            syncWorking();
             return;
         }
         if (progress < DURATION) {
@@ -301,6 +373,15 @@ public class PlantControllerBlockEntity extends BlockEntity {
         idleTicks = 1;
         setChanged();
         tryStart(server);
+        syncWorking();
+    }
+
+    private void syncWorking() {
+        boolean working = !pending.isEmpty();
+        if (working != lastSyncedWorking && level != null && !level.isClientSide()) {
+            lastSyncedWorking = working;
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
     }
 
     /** EU stored and capacity summed over the bound energy hatches, for the control panel. */
@@ -402,6 +483,19 @@ public class PlantControllerBlockEntity extends BlockEntity {
     }
 
     @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Working", !pending.isEmpty());
+        return tag;
+    }
+
+    @Nullable
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putInt("Progress", progress);
@@ -421,6 +515,8 @@ public class PlantControllerBlockEntity extends BlockEntity {
         input.read("Pending", Pending.CODEC.listOf()).ifPresent(pending::addAll);
         ItemResource mold = input.read("Mold", ItemResource.OPTIONAL_CODEC).orElse(ItemResource.EMPTY);
         moldSlot.set(0, mold, mold.isEmpty() ? 0 : 1);
+        clientWorking = input.getBooleanOr("Working", !pending.isEmpty());
+        lastSyncedWorking = !pending.isEmpty();
         structureDirty = true;
     }
 }

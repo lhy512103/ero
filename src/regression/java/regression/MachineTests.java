@@ -1279,13 +1279,19 @@ final class MachineTests {
         helper.succeed();
     }
 
+    /** Whether a multiblock part is hidden; every part block names its flag {@code formed}. */
+    private static boolean formed(net.minecraft.world.level.block.state.BlockState state) {
+        return state.getProperties().stream().anyMatch(property -> property.getName().equals("formed")
+            && Boolean.TRUE.equals(state.getValue(property)));
+    }
+
     private static void industrialStructures(GameTestHelper helper) {
         var level = helper.getLevel();
         var direction = net.minecraft.core.Direction.NORTH;
         for (boolean mill : List.of(false, true)) {
             var controllerBlock = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
             var state = controllerBlock.defaultBlockState().setValue(block.PlantControllerBlock.LEGACY, false);
-            BlockPos origin = helper.absolutePos(new BlockPos(8, mill ? 24 : 4, 2));
+            BlockPos origin = helper.absolutePos(new BlockPos(mill ? 16 : 5, 2, 2));
             var cells = multiblock.PlantStructure.cells(origin, direction, state);
             check(helper, cells.stream().map(multiblock.PlantStructure.Cell::pos).distinct().count() == cells.size(), "Every part must have a unique position");
             check(helper, cells.stream().allMatch(cell -> multiblock.PlantStructure.bounds(origin, direction, state).isInside(cell.pos())),
@@ -1296,13 +1302,28 @@ final class MachineTests {
             level.setBlockAndUpdate(origin, state);
             var controller = (blockentity.PlantControllerBlockEntity) level.getBlockEntity(origin);
             check(helper, controller != null && !controller.missing().contains(pillar.pos()), "The builder must not fill girder positions with casing");
-            for (var cell : cells) level.setBlockAndUpdate(cell.pos(), cell.part().sample(direction));
-            controller.tick();
-            check(helper, controller.isFormed() && controller.getParallel() == 16, "The open structure must form with all of its parts");
+            int assembled = controller.assembleCreative();
+            check(helper, assembled > 0 && controller.isFormed() && controller.getParallel() == 16,
+                "Creative assembly must build and form the structure (mill=" + mill + ", placed=" + assembled
+                    + ", formed=" + controller.isFormed() + ", parallel=" + controller.getParallel()
+                    + ", desc=" + controller.describe().getString() + ")");
+            check(helper, Boolean.TRUE.equals(level.getBlockState(origin).getValue(block.PlantControllerBlock.FORMED)),
+                "A formed controller must hide behind its assembled model (mill=" + mill + ")");
+            check(helper, cells.stream().allMatch(cell -> formed(level.getBlockState(cell.pos()))),
+                "All formed parts must be marked formed (mill=" + mill + ")");
+            var inputHatch = cells.stream().filter(cell -> cell.part() == multiblock.PlantStructure.Part.INPUT).findFirst().orElseThrow();
             level.setBlockAndUpdate(pillar.pos(), ModBlocks.PLANT_CASING.get().defaultBlockState());
             controller.tick();
             check(helper, !controller.isFormed(), "A casing cannot replace a structural girder");
+            check(helper, !formed(level.getBlockState(inputHatch.pos())),
+                "Unforming the machine must make remaining parts visible again");
+            level.setBlockAndUpdate(pillar.pos(), pillar.part().sample(direction));
+            controller.tick();
+            check(helper, controller.isFormed() && formed(level.getBlockState(inputHatch.pos())),
+                "Restoring the girder must reform and re-hide the parts");
             level.removeBlock(origin, false);
+            check(helper, !formed(level.getBlockState(inputHatch.pos())),
+                "Removing the formed controller must restore part visibility");
             for (var cell : cells) level.removeBlock(cell.pos(), false);
         }
         BlockPos casing = helper.absolutePos(new BlockPos(8, 4, 2));

@@ -100,7 +100,7 @@ items = set(re.findall(r'register(?:Simple)?Item\(\s*"([a-z0-9_]+)"', java("item
 blocks = set(re.findall(r'register(?:Simple)?Block\(\s*"([a-z0-9_]+)"', java("block/ModBlocks.java")))
 block_item_source = java("block/ModBlockItems.java")
 block_items = {name.lower() for name in re.findall(r"registerBlockItem\(ModBlocks\.([A-Z0-9_]+)\)", block_item_source)}
-block_items |= set(re.findall(r'registerBlockItem\("([a-z0-9_]+)"', block_item_source))
+block_items |= set(re.findall(r'register(?:Block|Controller)Item\("([a-z0-9_]+)"', block_item_source))
 block_items &= blocks
 all_items = items | block_items
 

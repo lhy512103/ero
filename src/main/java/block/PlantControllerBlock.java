@@ -53,7 +53,9 @@ public class PlantControllerBlock extends BaseEntityBlock {
     protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+    public RenderShape getRenderShape(BlockState state) {
+        return !state.getValue(LEGACY) && state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, FORMED, LENGTH, LEGACY); }
@@ -82,6 +84,13 @@ public class PlantControllerBlock extends BaseEntityBlock {
         if (!casing && !mold) return InteractionResult.TRY_WITH_EMPTY_HAND;
         if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller)) return InteractionResult.SUCCESS;
         if (casing) {
+            if (player.isShiftKeyDown() && player.hasInfiniteMaterials() && !controller.isFormed()) {
+                int placed = controller.assembleCreative();
+                player.sendOverlayMessage(placed > 0
+                    ? Component.translatable("message.iuce.plant.creative_assembled", placed)
+                    : controller.describe());
+                return InteractionResult.SUCCESS;
+            }
             int placed = controller.fill(stack);
             if (!player.hasInfiniteMaterials()) stack.shrink(placed);
             controller.tick();
@@ -98,9 +107,17 @@ public class PlantControllerBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller) {
-            if (player.isShiftKeyDown() && !controller.getMold().isEmpty()) {
-                ItemStack old = controller.swapMold(ItemStack.EMPTY);
-                if (!player.getInventory().add(old)) player.drop(old, false);
+            if (player.isShiftKeyDown()) {
+                if (!controller.getMold().isEmpty()) {
+                    ItemStack old = controller.swapMold(ItemStack.EMPTY);
+                    if (!player.getInventory().add(old)) player.drop(old, false);
+                } else if (player.hasInfiniteMaterials() && !controller.isFormed()) {
+                    int placed = controller.assembleCreative();
+                    player.sendOverlayMessage(placed > 0
+                        ? Component.translatable("message.iuce.plant.creative_assembled", placed)
+                        : controller.describe());
+                    return InteractionResult.SUCCESS;
+                }
             }
             if (player.isShiftKeyDown()) player.sendOverlayMessage(controller.describe());
             else multiblock.MultiblockMenu.open(player, controller);

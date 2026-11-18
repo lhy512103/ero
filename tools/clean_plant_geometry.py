@@ -4,7 +4,9 @@ import re
 from copy import deepcopy
 from uuid import UUID, uuid5
 
-from export_ore_plant_model import BBMODEL, collect_groups
+import sys
+
+from export_plant_model import ROOT, SETTINGS, collect_groups
 
 
 FACES = {
@@ -89,7 +91,8 @@ def trim(model):
             elem['from'][0] = elem['origin'][0] - 0.95
             elem['to'][0] = elem['origin'][0] + 0.95
     groups, _ = collect_groups(model['outliner'], {group['uuid']: group for group in model['groups']})
-    moving = {'roller_front', 'roller_back', 'washing_drum'}
+    # Spinning groups and repeated sections move against the rest, so their faces are never trimmed against it.
+    moving = (set(SETTINGS[model['name']]['spinners']) | {'tail', 'bay', 'stand'}) if model.get('name') in SETTINGS else set()
     frames = [tuple(group for group in groups.get(elem['uuid'], []) if group in moving) for elem in elements]
     glass = {int(tex['id']) for tex in model['textures'] if tex['name'].removesuffix('.png') == 'gt_glass_frame'}
     opaque = [not any(face.get('texture') in glass for face in elem['faces'].values()) for elem in elements]
@@ -159,6 +162,7 @@ def trim(model):
 
 
 if __name__ == '__main__':
+    BBMODEL = ROOT / f"tools/models/{sys.argv[1] if len(sys.argv) > 1 else 'ore_processing_plant'}.bbmodel"
     model = json.loads(BBMODEL.read_text(encoding='utf-8'))
     trim(model)
     join_patches(model)

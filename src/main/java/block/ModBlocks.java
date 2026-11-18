@@ -139,9 +139,9 @@ public class ModBlocks {
     public static final DeferredBlock<HatchBlock> ITEM_OUTPUT_HATCH = BLOCKS.registerBlock("item_output_hatch",
         HatchBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> ENERGY_HATCH = BLOCKS.registerBlock("energy_hatch",
-        p -> new MachineBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+        p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
     public static final DeferredBlock<MachineBlock> ENERGY_HATCH_HV = BLOCKS.registerBlock("energy_hatch_hv",
-        p -> new MachineBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+        p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
     public static final DeferredBlock<PlantControllerBlock> MILL_CONTROLLER = BLOCKS.registerBlock("mill_controller",
         PlantControllerBlock::new, machineProperties());
     public static final DeferredBlock<RepairBenchBlock> REPAIR_BENCH = BLOCKS.registerBlock("repair_bench",

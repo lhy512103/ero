@@ -1,1 +1,25 @@
-{"variants":{"axis=y":{"model":"iuce:block/plant_drum"},"axis=z":{"model":"iuce:block/plant_drum","x":90},"axis=x":{"model":"iuce:block/plant_drum","x":90,"y":90}}}
+{
+  "variants": {
+    "axis=y,formed=false": {
+      "model": "iuce:block/plant_drum"
+    },
+    "axis=z,formed=false": {
+      "model": "iuce:block/plant_drum",
+      "x": 90
+    },
+    "axis=x,formed=false": {
+      "model": "iuce:block/plant_drum",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "axis=z,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "axis=x,formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

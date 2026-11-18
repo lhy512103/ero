@@ -285,6 +285,8 @@
   "guide.iuce.recipe.cost": "%s EU · %s s · %s EU/t",
   "guide.iuce.recipe.time": "%s s",
   "guide.iuce.structure.layers": "Layer %s / %s",
+  "guide.iuce.structure.formed": "Formed",
+  "guide.iuce.structure.parts": "Parts",
   "guide.iuce.machine.macerator": "Macerator",
   "guide.iuce.machine.compressor": "Compressor",
   "guide.iuce.machine.extractor": "Extractor",
@@ -485,6 +487,9 @@
   "message.iuce.blueprint.resize": "Sneak-right-click to change the length (%s-%s)",
   "message.iuce.plant.scanning": "Checking the structure...",
   "tooltip.iuce.blueprint.1": "Right-click a large machine's controller: bill of materials",
-  "tooltip.iuce.blueprint.2": "Sneak-right-click: change the length of an adjustable machine",
+  "tooltip.iuce.blueprint.2": "Sneak-right-click: change size on adjustable machines",
+  "tooltip.iuce.plant_controller.1": "Right-click controller with Plant Casing: fill casing slots",
+  "tooltip.iuce.plant_controller.2": "Creative Sneak-right-click (empty hand or casing): assemble whole plant",
+  "message.iuce.plant.creative_assembled": "Creative: placed %s structure blocks",
   "message.iuce.port.no_channel": "none"
 }

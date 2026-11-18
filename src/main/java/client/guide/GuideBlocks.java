@@ -6,6 +6,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -612,18 +613,19 @@ final class GuideBlocks {
     // ------------------------------------------------------------------ structures
 
     /**
-     * {@code {structure: name | caption}} - a block layout drawn as a stacked isometric view with a
-     * layer selector and a materials list. The layout comes from {@link GuideStructure}.
+     * {@code {structure: name | caption}} - a block layout drawn in 3D with a layer selector and a
+     * materials list; drag the view to turn it. Large machines also offer their assembled look.
+     * The layout comes from {@link GuideStructure}.
      */
     static final class Structure implements Block {
-        private static final float DX = 7.07f, DZ = 3.54f, DY = 8.66f;
+        private static final int VIEW_H = 200;
         private final String name;
         private final RichText caption;
         private final boolean hasCaption;
         private int shownLayers = -1;
-        private float scale = 1;
         private int viewH, materialsH, captionH;
-        private float minX, minY;
+        private float yaw = 225, pitch = 30;
+        private boolean formed = Boolean.getBoolean("iuce.guideShots.formed");
 
         Structure(String name, String caption) {
             this.name = name.trim();
@@ -635,18 +637,19 @@ final class GuideBlocks {
             GuideStructure structure = GuideStructure.get(name);
             if (structure == null) return RichText.LINE;
             if (shownLayers < 0) shownLayers = structure.sizeY;
-            minX = -(structure.sizeZ - 1) * DX;
-            float maxX = (structure.sizeX - 1) * DX + 16;
-            minY = -(structure.sizeY - 1) * DY;
-            float maxY = (structure.sizeX + structure.sizeZ - 2) * DZ + 16;
-            float w = maxX - minX, h = maxY - minY;
-            scale = Math.min(2, Math.min(Math.max(1, width - 16) / w, 150 / h));
-            viewH = (int) Math.ceil(h * scale) + 16;
+            viewH = VIEW_H;
             int perRow = Math.max(1, (width - 8) / 20);
             int kinds = structure.materials(shownLayers).size();
             materialsH = ((kinds + perRow - 1) / perRow) * 20;
             captionH = hasCaption ? caption.layout(font, width - 8) + 2 : 0;
             return viewH + 18 + materialsH + captionH + 6;
+        }
+
+        /** Pixels per block that fit a box of this size in the view whichever way it is turned. */
+        private static float fit(Vector3f size, int width, int height) {
+            float diagonal = (float) Math.sqrt(size.x * size.x + size.z * size.z);
+            float tall = size.y + diagonal * 0.5f;
+            return Math.min((width - 12) / diagonal, (height - 12) / tall);
         }
 
         @Override public void draw(Ctx c, int x, int y, int width) {
@@ -660,26 +663,27 @@ final class GuideBlocks {
             c.g.fill(x + 1, y + 1, x + width - 1, y + total - 1, GuideStyle.PANEL);
             c.g.fillGradient(x + 1, y + 1, x + width - 1, y + viewH, 0xFFF4FAFA, 0xFFC9D8D8);
 
-            float boundsW = ((structure.sizeX - 1) * DX + 16 - minX) * scale;
-            float originX = x + (width - boundsW) / 2f - minX * scale;
-            float originY = y + 8 - minY * scale;
-            List<GuideStructure.Cell> cells = new ArrayList<>(structure.cells);
-            cells.sort((a, b) -> {
-                int depth = Integer.compare(a.pos().getX() + a.pos().getZ(), b.pos().getX() + b.pos().getZ());
-                return depth != 0 ? depth : Integer.compare(a.pos().getY(), b.pos().getY());
-            });
-            for (GuideStructure.Cell cell : cells) {
-                if (cell.pos().getY() >= shownLayers) continue;
-                float px = (cell.pos().getX() - cell.pos().getZ()) * DX;
-                float py = (cell.pos().getX() + cell.pos().getZ()) * DZ - cell.pos().getY() * DY;
-                c.g.pose().pushMatrix();
-                c.g.pose().translate(originX + px * scale, originY + py * scale);
-                c.g.pose().scale(scale);
-                c.g.item(cell.stack(), 0, 0);
-                c.g.pose().popMatrix();
+            boolean showFormed = formed && structure.model() != null;
+            float spin = showFormed ? (System.currentTimeMillis() % 36000L) * 0.06f : 0;
+            Vector3f[] extent = structure.extent(showFormed);
+            Vector3f size = new Vector3f(extent[1]).sub(extent[0]);
+            Vector3f centre = new Vector3f(extent[0]).add(extent[1]).mul(0.5f);
+            c.g.submitPictureInPictureRenderState(new GuideStructureRenderState(structure,
+                showFormed ? structure.sizeY : shownLayers, showFormed, centre, yaw, pitch, spin,
+                x + 1, y + 1, x + width - 1, y + viewH, fit(size, width - 2, viewH - 1), c.g.peekScissorStack()));
+            c.dragZone(x + 1, y + 1, width - 2, viewH - 1, (dx, dy) -> {
+                yaw = (float) ((yaw + dx * 1.5) % 360);
+                pitch = (float) Math.clamp(pitch + dy * 1.5, -10, 90);
+            }, null);
+            if (structure.model() != null) {
+                Component label = Component.translatable(formed ? "guide.iuce.structure.parts" : "guide.iuce.structure.formed");
+                int bw = c.font.width(label) + 10;
+                boolean hover = GuideStyle.button(c.g, x + width - 5 - bw, y + 5, bw, 14, c.mouseX, c.mouseY, true);
+                GuideStyle.text(c.g, c.font, label.getString(), x + width - bw, y + 8, hover ? GuideStyle.ACCENT : GuideStyle.TEXT);
+                c.actionZone(x + width - 5 - bw, y + 5, bw, 14, () -> formed = !formed, null);
             }
 
-            // layer selector
+        // layer selector
             int ly = y + viewH + 3;
             c.g.fill(x + 1, y + viewH, x + width - 1, y + viewH + 1, GuideStyle.SLOT_DARK);
             boolean down = GuideStyle.button(c.g, x + 5, ly, 12, 12, c.mouseX, c.mouseY, shownLayers > 1);
@@ -691,8 +695,8 @@ final class GuideBlocks {
             boolean up = GuideStyle.button(c.g, x + 19 + labelW, ly, 12, 12, c.mouseX, c.mouseY, shownLayers < structure.sizeY);
             GuideStyle.triangle(c.g, x + 23 + labelW, ly + 3, 0, up ? GuideStyle.ACCENT : shownLayers < structure.sizeY ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
             c.actionZone(x + 19 + labelW, ly, 12, 12, () -> shownLayers = Math.min(structure.sizeY, shownLayers + 1), null);
-            String size = structure.sizeX + " × " + structure.sizeY + " × " + structure.sizeZ;
-            GuideStyle.text(c.g, c.font, size, x + width - 6 - c.font.width(size), ly + 2, GuideStyle.MUTED);
+            String dimensions = structure.sizeX + " × " + structure.sizeY + " × " + structure.sizeZ;
+            GuideStyle.text(c.g, c.font, dimensions, x + width - 6 - c.font.width(dimensions), ly + 2, GuideStyle.MUTED);
 
             // materials
             int my = y + viewH + 18;

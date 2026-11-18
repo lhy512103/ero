@@ -96,6 +96,9 @@
 90. Added industrial panels for plant controllers, item hatches and energy hatches.
 91. Fixed overlapping metal and glass surfaces that flickered on the Ore Processing Plant.
 92. Improved: Large machine controllers and hatches now use steel control panels with status lamps, energy gauges, and progress bars.
+93. Added: A formed Rolling Mill now shows an assembled mill with a reheating furnace, roll stands and a coiler that grows with its length.
+94. Improved: Guide structure views are drawn in 3D with correct block orientation and can be rotated by dragging.
+95. Added: Guide structure views for large machines can switch to show the formed machine.
 
 ### 中文
 
@@ -191,3 +194,6 @@
 90. 新增：联合厂控制器、物品仓和能源仓可右键打开工业面板。
 91. 修复：选矿联合厂钢架、滚筒和观察窗的重叠表面不再争抢显示。
 92. 优化：大型机器控制器和各类仓口改用钢板仪表面板，带状态灯、储能表和进度条。
+93. 新增：轧制联合机成型后显示整机模型，有加热炉、轧机机架和卷取机，并随长度伸展。
+94. 优化：指南里的多方块结构改为 3D 显示，方块朝向正确，可以拖动旋转。
+95. 新增：指南里的大型机器结构可以切换查看成型后的样子。

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class PlantStructure {
-    public static final int ORE_LENGTH = 15;
+    public static final int ORE_LENGTH = 7;
 
     public enum Part {
         CASING, SOCKET, INPUT, OUTPUT, POWER, FRAME_UP, FRAME_ALONG, FRAME_ACROSS, DRUM_UP, DRUM_ALONG, DRUM_ACROSS;
@@ -24,7 +24,8 @@ public final class PlantStructure {
                 case CASING, SOCKET -> ModBlocks.PLANT_CASING.get().defaultBlockState();
                 case INPUT -> ModBlocks.ITEM_INPUT_HATCH.get().defaultBlockState();
                 case OUTPUT -> ModBlocks.ITEM_OUTPUT_HATCH.get().defaultBlockState();
-                case POWER -> ModBlocks.ENERGY_HATCH.get().defaultBlockState();
+                case POWER -> ModBlocks.ENERGY_HATCH.get().defaultBlockState()
+                    .setValue(block.MachineBlock.FACING, facing.getOpposite());
                 case FRAME_UP, FRAME_ALONG, FRAME_ACROSS -> ModBlocks.PLANT_FRAME.get().defaultBlockState()
                     .setValue(RotatedPillarBlock.AXIS, axis(facing));
                 case DRUM_UP, DRUM_ALONG, DRUM_ACROSS -> ModBlocks.PLANT_DRUM.get().defaultBlockState()
@@ -66,9 +67,10 @@ public final class PlantStructure {
         boolean legacy = controller.getValue(PlantControllerBlock.LEGACY);
         int length = mill ? controller.getValue(PlantControllerBlock.LENGTH) : legacy ? 5 : ORE_LENGTH;
         List<Cell> cells = new ArrayList<>();
-        int radius = legacy ? 2 : mill ? 4 : 5;
-        int roof = legacy ? 3 : mill ? 5 : 9;
-        for (int up = -1; up <= roof; up++) {
+        int radius = legacy ? 2 : mill ? 4 : 2;
+        int minY = legacy || mill ? -1 : 0;
+        int roof = legacy ? 3 : 5;
+        for (int up = minY; up <= roof; up++) {
             for (int depth = 0; depth < length; depth++) {
                 for (int across = -radius; across <= radius; across++) {
                     if (depth == 0 && across == 0 && up == 0) continue;
@@ -84,10 +86,11 @@ public final class PlantStructure {
     public static BoundingBox bounds(BlockPos origin, Direction facing, BlockState controller) {
         boolean mill = controller.is(ModBlocks.MILL_CONTROLLER.get());
         boolean legacy = controller.getValue(PlantControllerBlock.LEGACY);
-        int radius = legacy ? 2 : mill ? 4 : 5;
-        int roof = legacy ? 3 : mill ? 5 : 9;
+        int radius = legacy ? 2 : mill ? 4 : 2;
+        int minY = legacy || mill ? -1 : 0;
+        int roof = legacy ? 3 : 5;
         int length = mill ? 17 : legacy ? 5 : ORE_LENGTH;
-        return BoundingBox.fromCorners(at(origin, facing, 0, -radius, -1), at(origin, facing, length - 1, radius, roof));
+        return BoundingBox.fromCorners(at(origin, facing, 0, -radius, minY), at(origin, facing, length - 1, radius, roof));
     }
 
     private static Part legacy(int depth, int side, int up, int length) {
@@ -96,40 +99,44 @@ public final class PlantStructure {
 
     private static Part ore(int depth, int across, int up) {
         int side = Math.abs(across);
-        if (up == -1) {
-            if (side <= 2 || (depth >= 2 && depth <= 11 && side <= 4) || (depth >= 4 && depth <= 10 && side == 5)) return Part.CASING;
-            return null;
-        }
         if (up == 0) {
-            if (depth == 0) return across == -1 ? Part.INPUT : across == 1 ? Part.OUTPUT : side == 2 ? Part.SOCKET : null;
-            if (depth == 14 && side == 0) return Part.POWER;
-            if ((depth == 4 || depth == 10) && side == 5) return Part.SOCKET;
-            if (side <= 2 || (depth >= 3 && depth <= 11 && side == 4)) return Part.CASING;
-        }
-        if ((depth == 3 || depth == 7) && side == 4 && up >= 1 && up <= 6) return Part.FRAME_UP;
-        if ((depth == 3 || depth == 7) && up == 7 && side <= 4) return Part.FRAME_ACROSS;
-        if (depth >= 3 && depth <= 7 && (side == 4 && up == 5 || side == 2 && up == 8)) return Part.FRAME_ALONG;
-        if (depth >= 3 && depth <= 7 && up >= 1) {
-            int longitudinal = Math.abs(depth - 5);
-            if (up <= 4 && side + longitudinal <= 3) return side == 0 && longitudinal == 0 ? Part.DRUM_UP : Part.CASING;
-            if (up >= 5 && up <= 6 && side + longitudinal <= 2) return Part.CASING;
-            if (up >= 7 && up <= 9 && side == 0 && longitudinal == 0) return Part.DRUM_UP;
-            if (up == 7 && longitudinal == 0 && side <= 2) return Part.CASING;
-        }
-        if (depth >= 8 && depth <= 11 && up >= 1 && up <= 2 && side <= 3) {
-            if (up == 2 && side <= 1) return side == 0 ? Part.DRUM_ALONG : null;
+            if (depth == 0) {
+                if (across == -1) return Part.INPUT;
+                if (across == 1) return Part.OUTPUT;
+                return side == 2 ? Part.SOCKET : Part.CASING;
+            }
+            if (depth == 6) {
+                if (across == 0) return Part.POWER;
+                return side == 2 ? Part.SOCKET : Part.CASING;
+            }
+            if ((depth == 2 || depth == 4) && side == 2) return Part.SOCKET;
             return Part.CASING;
         }
-        if (depth >= 8 && depth <= 13 && (up == 3 || up == 4) && side == 3) {
-            if (depth == 8 || depth == 13) return Part.FRAME_UP;
-            if (up == 4) return Part.DRUM_ALONG;
+        if (up == 1 || up == 2) {
+            if ((depth == 0 || depth == 2 || depth == 4) && side == 2) return Part.FRAME_UP;
+            if (across == -2 && depth == 3) return Part.CASING;
+            if (depth <= 2 && side <= 1) {
+                if (depth == 1) return Part.DRUM_ACROSS;
+                return up == 1 ? Part.CASING : null;
+            }
+            if ((depth == 3 || depth == 4) && across == 0) return up == 1 ? Part.CASING : Part.DRUM_ALONG;
+            if (depth >= 5 && side <= 1) return side == 1 ? Part.FRAME_UP : Part.CASING;
+            return null;
         }
-        if (depth >= 12 && depth <= 14 && up >= 1 && up <= 3 && side <= 2) {
-            if (up == 3 && side == 0) return Part.DRUM_ALONG;
-            if (up <= 2) return side == 0 && up == 2 ? Part.DRUM_ALONG : Part.CASING;
+        if (up == 3) {
+            if (side == 2 && depth <= 4) return Part.FRAME_ALONG;
+            if ((depth == 0 || depth == 2 || depth == 4) && side <= 1) return Part.FRAME_ACROSS;
+            if (depth == 1 && side <= 1) return Part.CASING;
+            if (depth >= 5 && side <= 1) return Part.CASING;
+            return null;
         }
-        if (depth >= 12 && depth <= 13 && up >= 3 && up <= 5 && side == 1) return Part.CASING;
-        if (depth == 13 && up >= 6 && up <= 7 && side == 1) return Part.DRUM_UP;
+        if (up == 4) {
+            if (depth <= 2 && side <= 1 && (depth == 0 || depth == 2 || side == 1)) return Part.CASING;
+            if (depth == 5 && across == -1) return Part.CASING;
+            if (depth == 5 && across == 1) return Part.DRUM_UP;
+            return null;
+        }
+        if (up == 5 && depth == 5 && across == 1) return Part.DRUM_UP;
         return null;
     }
 

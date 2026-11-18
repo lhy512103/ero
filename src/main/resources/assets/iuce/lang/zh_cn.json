@@ -285,6 +285,8 @@
   "guide.iuce.recipe.cost": "%s EU · %s 秒 · %s EU/t",
   "guide.iuce.recipe.time": "%s 秒",
   "guide.iuce.structure.layers": "第 %s / %s 层",
+  "guide.iuce.structure.formed": "成型后",
+  "guide.iuce.structure.parts": "零件",
   "guide.iuce.machine.macerator": "打粉机",
   "guide.iuce.machine.compressor": "压缩机",
   "guide.iuce.machine.extractor": "提取机",
@@ -486,5 +488,8 @@
   "message.iuce.plant.scanning": "正在检查结构……",
   "tooltip.iuce.blueprint.1": "右键大机器控制器：查看材料清单",
   "tooltip.iuce.blueprint.2": "潜行右键：切换可伸缩机器的长度",
+  "tooltip.iuce.plant_controller.1": "持厂房外壳右键：自动补齐外壳空位",
+  "tooltip.iuce.plant_controller.2": "创造模式潜行右键（空手或持外壳）：一键完整搭建",
+  "message.iuce.plant.creative_assembled": "创造模式：已一键放置 %s 个结构部件并尝试成型",
   "message.iuce.port.no_channel": "无"
 }
