@@ -85,6 +85,7 @@ public class EroClient {
      * 在 tooltip 渲染前移除模组物品底部的模组名标签。
      * 模组名由 Minecraft/NeoForge 在渲染阶段追加（不在 getTooltipLines 中），
      * 因此使用 RenderTooltipEvent.GatherComponents 在渲染阶段拦截。
+        event.register(ModMenus.MULTIBLOCK.get(), client.gui.MultiblockScreen::new);
      * JEI 使用自己的 JeiTooltip.draw 不触发此事件，由 EroJeiPlugin.forceModNameOverride 处理。
      */
     private static void onGatherTooltipComponents(RenderTooltipEvent.GatherComponents event) {

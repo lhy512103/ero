@@ -72,6 +72,9 @@ public class ModMenus {
             (IContainerFactory<factory.FactoryHubMenu>) (id, inv, data) -> new factory.FactoryHubMenu(id, inv, data)
         ));
 
+    public static final Supplier<MenuType<multiblock.MultiblockMenu>> MULTIBLOCK =
+        MENUS.register("multiblock", () -> IMenuTypeExtension.create(multiblock.MultiblockMenu::new));
+
     public static final Supplier<MenuType<StorageMenu>> STORAGE =
         MENUS.register("storage", () -> IMenuTypeExtension.create(
             (IContainerFactory<StorageMenu>) (id, inv, data) -> new StorageMenu(id, inv,

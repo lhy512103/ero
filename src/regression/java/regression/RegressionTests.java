@@ -61,6 +61,7 @@ public final class RegressionTests {
         TESTS.put("transformer_storage_rules", RegressionTests::transformerStorage);
         TESTS.put("transformer_wet_shock", RegressionTests::transformerShock);
         TESTS.put("upgrade_install_and_stacking", RegressionTests::upgrades);
+        TESTS.put("multiblock_panels", RegressionTests::multiblockPanels);
         MachineTests.register(TESTS);
         StressTests.register(TESTS);
     }
@@ -102,6 +103,35 @@ public final class RegressionTests {
             transaction.commit();
         }
     }
+    private static void multiblockPanels(GameTestHelper helper) {
+        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        var pos = new BlockPos(1, 2, 1);
+        helper.setBlock(pos, ModBlocks.ITEM_INPUT_HATCH.get());
+        var hatch = helper.getBlockEntity(pos, blockentity.HatchBlockEntity.class);
+        var input = new multiblock.MultiblockMenu(1, player.getInventory(), hatch);
+        player.getInventory().setItem(9, new ItemStack(Items.IRON_INGOT, 12));
+        input.quickMoveStack(player, 9);
+        check(helper, hatch.getInventory().getAmountAsInt(0) == 12, "Shift-click must fill the real input hatch");
+        helper.setBlock(pos, ModBlocks.ITEM_OUTPUT_HATCH.get());
+        hatch = helper.getBlockEntity(pos, blockentity.HatchBlockEntity.class);
+        var output = new multiblock.MultiblockMenu(2, player.getInventory(), hatch);
+        check(helper, !output.getSlot(0).mayPlace(new ItemStack(Items.IRON_INGOT)), "Output slots must reject insertion");
+        hatch.getInventory().set(0, ItemResource.of(Items.IRON_INGOT), 7);
+        check(helper, output.quickMoveStack(player, 0).getCount() == 7 && hatch.getInventory().getAmountAsInt(0) == 0,
+            "Shift-click must drain the real output hatch");
+        helper.setBlock(pos, ModBlocks.ENERGY_HATCH_HV.get());
+        var energy = helper.getBlockEntity(pos, blockentity.EnergyHatchBlockEntity.class);
+        var meter = new multiblock.MultiblockMenu(3, player.getInventory(), energy);
+        energy.storage().setEnergy(71000);
+        meter.broadcastChanges();
+        check(helper, meter.energy() == 71000 && meter.capacity() == 80000, "HV readings must retain high bits");
+        helper.setBlock(pos, ModBlocks.MILL_CONTROLLER.get());
+        var mill = new multiblock.MultiblockMenu(4, player.getInventory(), helper.getBlockEntity(pos, blockentity.PlantControllerBlockEntity.class));
+        check(helper, !mill.getSlot(0).mayPlace(new ItemStack(Items.IRON_INGOT)) && mill.getSlot(0).getMaxStackSize() == 1,
+            "Mill slot must accept one mold only");
+        helper.succeed();
+    }
+
     private static void adjacent(GameTestHelper helper) {
         var source = machine(helper, 1, ModBlocks.GENERATOR.get());
         var target = machine(helper, 2, ModBlocks.MACERATOR.get());

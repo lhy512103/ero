@@ -67,7 +67,10 @@ public class PlantControllerBlockEntity extends BlockEntity {
     private Component problem = Component.translatable("message.iuce.plant.unchecked");
     private final List<BlockPos> energyHatches = new ArrayList<>(), inputHatches = new ArrayList<>(), outputHatches = new ArrayList<>();
 
-    private ItemResource mold = ItemResource.EMPTY;
+    private final ItemStacksResourceHandler moldSlot = new ItemStacksResourceHandler(1) {
+        @Override
+        protected void onContentsChanged(int index, ItemStack previousContents) { setChanged(); }
+    };
     private final List<Pending> pending = new ArrayList<>();
     private int progress, idleTicks;
     private long energyPerTick, paid;
@@ -82,22 +85,25 @@ public class PlantControllerBlockEntity extends BlockEntity {
     public int getProgress() { return progress; }
     public int getParallel() { return parallel; }
     public int getLength() { return length; }
-    public ItemResource getMold() { return mold; }
+    public ItemResource getMold() { return moldSlot.getResource(0); }
+    public ItemStacksResourceHandler moldSlot() { return moldSlot; }
+    public boolean isScanning() { return scan != null; }
+    public boolean isBlocked() { return blocked; }
+    public boolean isStarved() { return starved; }
     public void markStructureDirty() { structureDirty = true; }
 
     public boolean isMill() { return getBlockState().is(ModBlocks.MILL_CONTROLLER.get()); }
 
     /** Swaps the mold of a rolling mill and returns the previous one (possibly empty). */
     public ItemStack swapMold(ItemStack newMold) {
-        ItemStack old = mold.isEmpty() ? ItemStack.EMPTY : mold.toStack(1);
-        mold = newMold.isEmpty() ? ItemResource.EMPTY : ItemResource.of(newMold.copyWithCount(1));
-        setChanged();
+        ItemStack old = getMold().toStack(1);
+        moldSlot.set(0, ItemResource.of(newMold), newMold.isEmpty() ? 0 : 1);
         return old;
     }
 
     private String[] steps() {
         if (!isMill()) return ORE_STEPS;
-        return mold.getItem() instanceof MoldItem item && item.mode() < MILL_STEPS.length ? MILL_STEPS[item.mode()] : NO_STEPS;
+        return getMold().getItem() instanceof MoldItem item && item.mode() < MILL_STEPS.length ? MILL_STEPS[item.mode()] : NO_STEPS;
     }
 
     // ------------------------------------------------------------------ geometry, shared with the client's projection
@@ -143,10 +149,8 @@ public class PlantControllerBlockEntity extends BlockEntity {
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
-        if (level != null && !mold.isEmpty()) {
-            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), mold.toStack(1));
-            mold = ItemResource.EMPTY;
-        }
+        if (level != null && !getMold().isEmpty())
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), swapMold(ItemStack.EMPTY));
     }
 
     // ------------------------------------------------------------------ structure
@@ -263,7 +267,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     public Component describe() {
         if (scan != null) return Component.translatable("message.iuce.plant.scanning");
         if (!formed) return Component.translatable("message.iuce.plant.unformed", problem);
-        if (isMill() && mold.isEmpty()) return Component.translatable("message.iuce.plant.no_mold");
+        if (isMill() && getMold().isEmpty()) return Component.translatable("message.iuce.plant.no_mold");
         if (pending.isEmpty()) return Component.translatable("message.iuce.plant.idle", parallel);
         if (blocked) return Component.translatable("message.iuce.plant.blocked");
         return Component.translatable(starved ? "message.iuce.plant.starved" : "message.iuce.plant.working", progress * 100 / DURATION);
@@ -392,7 +396,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         output.putLong("EnergyPerTick", energyPerTick);
         output.putLong("Paid", paid);
         output.store("Pending", Pending.CODEC.listOf(), pending);
-        output.store("Mold", ItemResource.OPTIONAL_CODEC, mold);
+        output.store("Mold", ItemResource.OPTIONAL_CODEC, getMold());
     }
 
     @Override
@@ -403,7 +407,8 @@ public class PlantControllerBlockEntity extends BlockEntity {
         paid = input.getLong("Paid").orElse(0L);
         pending.clear();
         input.read("Pending", Pending.CODEC.listOf()).ifPresent(pending::addAll);
-        mold = input.read("Mold", ItemResource.OPTIONAL_CODEC).orElse(ItemResource.EMPTY);
+        ItemResource mold = input.read("Mold", ItemResource.OPTIONAL_CODEC).orElse(ItemResource.EMPTY);
+        moldSlot.set(0, mold, mold.isEmpty() ? 0 : 1);
         structureDirty = true;
     }
 }

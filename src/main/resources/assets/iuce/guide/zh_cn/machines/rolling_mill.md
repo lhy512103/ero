@@ -12,7 +12,7 @@ items: iuce:mill_controller, iuce:energy_hatch_hv
   - {item:iuce:plate_mold}：锭 → 板
   - {item:iuce:wire_mold}：锭 → 导线（辊压和切割一步完成，一个锭 4 根）
   - {item:iuce:rod_mold}：锭 → 棍
-- 手持模具右键控制器放入，换下来的模具会还给你；潜行空手右键取出。
+- 右键控制器，在模具槽里更换模具，也可以手持模具右键替换、潜行空手右键取出。
 - 每批 5 秒，单件耗电是金属成型机的一半。
 
 ## 结构

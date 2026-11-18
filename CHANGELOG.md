@@ -93,6 +93,7 @@
 87. Optimized: A pipe network with nothing to move checks less often and resumes at full speed when items arrive.
 88. Added: An optional brushed-steel resource pack for the Ore Processing Plant and Rolling Mill.
 89. Redesigned the Ore Processing Plant and Rolling Mill as a tall processing line and an open gantry mill with connected casing trim.
+90. Added industrial panels for plant controllers, item hatches and energy hatches.
 
 ### 中文
 
@@ -185,3 +186,4 @@
 87. 优化：没有东西可运的管网会降低检查频率，有物品时立即恢复全速。
 88. 新增：选矿联合厂与轧制联合机的可选拉丝钢资源包。
 89. 优化：选矿联合厂改为高塔式产线，轧制联合机改为开放式门架，两者均使用连接式外壳收边。
+90. 新增：联合厂控制器、物品仓和能源仓可右键打开工业面板。

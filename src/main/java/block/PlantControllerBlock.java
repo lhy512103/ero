@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 /**
  * Controller of a large machine. Its front faces outwards.
- * Right-click: what the machine is doing or what is missing. Right-click with plant casing: the
+ * Right-click: open the controller panel. Right-click with plant casing: the
  * casing is placed into every free position of the shell. Right-click a rolling mill with a mold:
  * the mold is put in (the previous one comes back).
  */
@@ -102,9 +102,8 @@ public class PlantControllerBlock extends BaseEntityBlock {
                 ItemStack old = controller.swapMold(ItemStack.EMPTY);
                 if (!player.getInventory().add(old)) player.drop(old, false);
             }
-            controller.markStructureDirty();
-            controller.tick();
-            player.sendOverlayMessage(controller.describe());
+            if (player.isShiftKeyDown()) player.sendOverlayMessage(controller.describe());
+            else multiblock.MultiblockMenu.open(player, controller);
         }
         return InteractionResult.SUCCESS;
     }
