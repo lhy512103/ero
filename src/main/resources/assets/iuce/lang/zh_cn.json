@@ -414,6 +414,7 @@
   "block.iuce.factory_hub": "工厂中枢",
   "gui.iuce.hub.goal": "下一星：任意 %s 种产品，每种每分钟 %s 件",
   "gui.iuce.hub.goal_time": "不间断供应 %s 分钟",
+  "gui.iuce.hub.stocked": "达标 %s / %s 种",
   "gui.iuce.hub.progress": "已连续 %s / %s 分钟",
   "gui.iuce.hub.maxed": "已达到当前版本的最高评级",
   "gui.iuce.hub.item": "库存 %s / %s，每分钟消耗 %s",

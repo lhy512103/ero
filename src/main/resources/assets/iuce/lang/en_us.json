@@ -414,6 +414,7 @@
   "block.iuce.factory_hub": "Factory Hub",
   "gui.iuce.hub.goal": "Next star: any %s products, %s of each per minute",
   "gui.iuce.hub.goal_time": "supplied for %s minutes without a break",
+  "gui.iuce.hub.stocked": "Stocked %s / %s",
   "gui.iuce.hub.progress": "%s / %s minutes in a row",
   "gui.iuce.hub.maxed": "Highest rating available in this version reached",
   "gui.iuce.hub.item": "Stock %s / %s, uses %s per minute",

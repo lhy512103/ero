@@ -5,21 +5,28 @@ import factory.FactoryRating;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-/** Rating screen of the factory hub: stars, what the next star needs, and how the supply is doing. */
+/**
+ * Rating screen of the factory hub, on the steel panel drawn by {@code tools/draw_hub_gui.py}: stars,
+ * what the next star needs, how full each product's store is, and how long the supply has held.
+ */
 public class FactoryHubScreen extends AbstractContainerScreen<FactoryHubMenu> {
-    private static final int BG = 0xF0141414, BORDER = 0xFF6A8CAF, GOLD = 0xFFFFD700, TEXT = 0xFFE0E0E0, DIM = 0xFF9AA4AE;
-    private static final int CELL_BG = 0xFF2A2F36, BAR_BG = 0xFF3A4048, GOOD = 0xFF55D06A, LOW = 0xFFE0A030, BAD = 0xFFFF6060;
-    private static final int COLUMNS = 8, CELL = 22, GRID_X = 11, GRID_Y = 46, ROW = 26;
+    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/factory_hub.png");
+    private static final int TITLE = 0xFF2B3036, TEXT = 0xFFD8F5E0, DIM = 0xFF9FD0B0, ENGRAVED = 0xFF3A4047;
+    private static final int GREEN = 0xFF7DFF9A, AMBER = 0xFFFFD080, RED = 0xFFFF9A8A;
+    private static final int COLUMNS = 8, GRID_X = 11, GRID_Y = 55, CELL = 22, ROW = 24;
+    private static final int BAR_X = 10, BAR_Y = 122, BAR_W = 176;
 
     public FactoryHubScreen(FactoryHubMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 198, 150);
+        super(menu, inventory, title, 196, 160);
     }
 
     @Override
@@ -28,50 +35,50 @@ public class FactoryHubScreen extends AbstractContainerScreen<FactoryHubMenu> {
 
     @Override
     public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
-        int x = leftPos, y = topPos, w = imageWidth, h = imageHeight;
-        g.fill(x, y, x + w, y + h, BG);
-        g.fill(x, y, x + w, y + 1, BORDER);
-        g.fill(x, y + h - 1, x + w, y + h, BORDER);
-        g.fill(x, y, x + 1, y + h, BORDER);
-        g.fill(x + w - 1, y, x + w, y + h, BORDER);
+        blit(g, 0, 0, 0, 0, imageWidth, imageHeight);
         super.extractContents(g, mouseX, mouseY, a);
 
         int stars = menu.getStars();
-        g.text(font, title, x + 8, y + 8, TEXT, false);
-        String rating = "\u2605".repeat(stars) + "\u2606".repeat(Math.max(0, FactoryRating.MAX_STARS - stars));
-        g.text(font, rating, x + w - 8 - font.width(rating), y + 8, GOLD, false);
+        text(g, title, 20, 7, TITLE);
+        for (int i = 0; i < FactoryRating.MAX_STARS; i++) {
+            blit(g, 127 + i * 10, 6, i < stars ? 200 : 210, 0, 9, 9);
+        }
 
         FactoryRating.Tier tier = FactoryRating.tier(stars);
         if (tier == null) {
-            g.text(font, Component.translatable("gui.iuce.hub.maxed"), x + 8, y + 30, DIM, false);
+            text(g, Component.translatable("gui.iuce.hub.maxed"), 12, 30, GREEN);
+            text(g, Component.translatable("gui.iuce.hub.hint"), 12, 140, ENGRAVED);
             return;
         }
-        g.text(font, Component.translatable("gui.iuce.hub.goal", tier.kinds(), tier.rate()), x + 8, y + 22, TEXT, false);
-        g.text(font, Component.translatable("gui.iuce.hub.goal_time", tier.minutes()), x + 8, y + 33, DIM, false);
+        text(g, Component.translatable("gui.iuce.hub.goal", tier.kinds(), tier.rate()), 12, 25, TEXT);
+        text(g, Component.translatable("gui.iuce.hub.goal_time", tier.minutes()), 12, 36, DIM);
 
         List<Item> items = FactoryRating.candidates(stars);
+        int stocked = 0;
         for (int i = 0; i < items.size(); i++) {
-            int cx = x + GRID_X + (i % COLUMNS) * CELL, cy = y + GRID_Y + (i / COLUMNS) * ROW;
+            int cx = GRID_X + (i % COLUMNS) * CELL, cy = GRID_Y + (i / COLUMNS) * ROW;
             int stock = menu.getStock(i);
-            g.fill(cx - 1, cy - 1, cx + 17, cy + 17, CELL_BG);
-            g.item(new ItemStack(items.get(i)), cx, cy);
-            g.fill(cx - 1, cy + 18, cx + 17, cy + 21, BAR_BG);
+            g.item(new ItemStack(items.get(i)), leftPos + cx, topPos + cy);
             int filled = Math.min(18, stock * 18 / tier.capacity());
-            if (filled > 0) g.fill(cx - 1, cy + 18, cx - 1 + filled, cy + 21, stock >= tier.rate() ? GOOD : LOW);
+            if (filled > 0) blit(g, cx - 1, cy + 18, 200, stock >= tier.rate() ? 12 : 16, filled, 3);
+            if (stock >= tier.rate()) stocked++;
         }
+        // Lamp in the corner of the goal display: are enough products stocked for this minute?
+        boolean enough = stocked >= tier.kinds();
+        blit(g, 180, 24, enough ? 220 : 226, 0, 5, 5);
+        Component count = Component.translatable("gui.iuce.hub.stocked", stocked, tier.kinds());
+        text(g, count, 177 - font.width(count), 36, enough ? GREEN : AMBER);
 
-        int py = y + 104;
-        g.text(font, Component.translatable("gui.iuce.hub.progress", menu.getMinutes(), tier.minutes()), x + 8, py, TEXT, false);
+        boolean missed = menu.getMisses() > 0;
+        text(g, Component.translatable("gui.iuce.hub.progress", menu.getMinutes(), tier.minutes()), 12, 110, missed ? RED : TEXT);
         String clock = String.format("0:%02d", Math.max(0, 59 - menu.getSeconds()));
-        g.text(font, clock, x + w - 8 - font.width(clock), py, DIM, false);
-        int barW = w - 16;
-        g.fill(x + 8, py + 12, x + 8 + barW, py + 18, BAR_BG);
-        int done = Math.min(barW, (menu.getMinutes() * 60 + menu.getSeconds()) * barW / (tier.minutes() * 60));
-        if (done > 0) g.fill(x + 8, py + 12, x + 8 + done, py + 18, menu.getMisses() > 0 ? BAD : GOOD);
-        Component hint = menu.getMisses() > 0
-            ? Component.translatable("gui.iuce.hub.grace").withStyle(ChatFormatting.RED)
-            : Component.translatable("gui.iuce.hub.hint");
-        g.text(font, hint, x + 8, py + 26, DIM, false);
+        text(g, Component.literal(clock), 184 - font.width(clock), 110, DIM);
+        int done = Math.min(BAR_W, (menu.getMinutes() * 60 + menu.getSeconds()) * BAR_W / (tier.minutes() * 60));
+        if (done > 0) blit(g, BAR_X, BAR_Y, 0, missed ? 208 : 200, done, 6);
+
+        Component hint = missed ? Component.translatable("gui.iuce.hub.grace") : Component.translatable("gui.iuce.hub.hint");
+        text(g, hint, 12, 140, missed ? 0xFFB02818 : ENGRAVED);
+        blit(g, 178, 141, missed ? 232 : enough ? 220 : 226, 0, 5, 5);
     }
 
     @Override
@@ -89,5 +96,13 @@ public class FactoryHubScreen extends AbstractContainerScreen<FactoryHubMenu> {
                 mouseX, mouseY);
             return;
         }
+    }
+
+    private void text(GuiGraphicsExtractor g, Component text, int x, int y, int color) {
+        g.text(font, text, leftPos + x, topPos + y, color, false);
+    }
+
+    private void blit(GuiGraphicsExtractor g, int x, int y, int u, int v, int width, int height) {
+        g.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos + x, topPos + y, u, v, width, height, 256, 256);
     }
 }

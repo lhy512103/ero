@@ -180,7 +180,7 @@ public final class GuideShots {
         var server = minecraft.getSingleplayerServer();
         if (server == null || minecraft.player == null) { minecraft.stop(); return; }
         var blocks = List.of(ModBlocks.PLANT_CONTROLLER, ModBlocks.MILL_CONTROLLER, ModBlocks.ITEM_INPUT_HATCH,
-            ModBlocks.ITEM_OUTPUT_HATCH, ModBlocks.ENERGY_HATCH_HV);
+            ModBlocks.ITEM_OUTPUT_HATCH, ModBlocks.ENERGY_HATCH_HV, ModBlocks.FACTORY_HUB);
         settle++;
         int step = (settle - 1) / 40, phase = (settle - 1) % 40;
         if (step >= blocks.size()) { minecraft.stop(); return; }
@@ -199,10 +199,22 @@ public final class GuideShots {
                     hatch.getInventory().set(4, net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.COPPER_INGOT), 12);
                 }
                 if (target instanceof blockentity.EnergyHatchBlockEntity hatch) hatch.storage().setEnergy(52_000);
-                if (target != null) multiblock.MultiblockMenu.open(player, target);
+                if (target instanceof blockentity.FactoryHubBlockEntity hub) {
+                    // Some products stocked, one short of a minute's worth, to show both gauge colours.
+                    var items = factory.FactoryRating.candidates(0);
+                    int[] amounts = {32, 32, 20, 9, 0, 32};
+                    for (int i = 0; i < items.size() && i < amounts.length; i++) {
+                        if (amounts[i] == 0) continue;
+                        try (var transaction = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                            hub.getIntake().insert(i, net.neoforged.neoforge.transfer.item.ItemResource.of(items.get(i)), amounts[i], transaction);
+                            transaction.commit();
+                        }
+                    }
+                    player.openMenu(hub, pos);
+                } else if (target != null) multiblock.MultiblockMenu.open(player, target);
             });
         } else if (phase == 30) {
-            String[] names = {"plant", "mill", "input", "output", "energy"};
+            String[] names = {"plant", "mill", "input", "output", "energy", "hub"};
             Screenshot.grab(minecraft.gameDirectory, "panel_" + names[step] + ".png", minecraft.getMainRenderTarget(), 1, message -> { });
         }
     }

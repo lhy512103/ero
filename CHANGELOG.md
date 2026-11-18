@@ -99,6 +99,7 @@
 93. Added: A formed Rolling Mill now shows an assembled mill with a reheating furnace, roll stands and a coiler that grows with its length.
 94. Improved: Guide structure views are drawn in 3D with correct block orientation and can be rotated by dragging.
 95. Added: Guide structure views for large machines can switch to show the formed machine.
+96. Improved: The Factory Hub screen uses the steel control-panel style, with star badges, stock gauges and a count of products already stocked.
 
 ### 中文
 
@@ -197,3 +198,4 @@
 93. 新增：轧制联合机成型后显示整机模型，有加热炉、轧机机架和卷取机，并随长度伸展。
 94. 优化：指南里的多方块结构改为 3D 显示，方块朝向正确，可以拖动旋转。
 95. 新增：指南里的大型机器结构可以切换查看成型后的样子。
+96. 优化：工厂中枢界面改用钢板仪表风格，带星级徽章、库存表和已达标产品计数。
