@@ -125,6 +125,10 @@ public final class RegressionTests {
         energy.storage().setEnergy(71000);
         meter.broadcastChanges();
         check(helper, meter.energy() == 71000 && meter.capacity() == 80000, "HV readings must retain high bits");
+        // The network sends each data slot as a short; a low half above 32767 arrives negative.
+        meter.setData(4, (short) (40000 & 0xFFFF));
+        meter.setData(5, (short) (40000 >>> 16));
+        check(helper, meter.energy() == 40000, "Synced EU halves must rebuild the full reading");
         helper.setBlock(pos, ModBlocks.MILL_CONTROLLER.get());
         var mill = new multiblock.MultiblockMenu(4, player.getInventory(), helper.getBlockEntity(pos, blockentity.PlantControllerBlockEntity.class));
         check(helper, !mill.getSlot(0).mayPlace(new ItemStack(Items.IRON_INGOT)) && mill.getSlot(0).getMaxStackSize() == 1,

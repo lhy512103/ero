@@ -303,6 +303,18 @@ public class PlantControllerBlockEntity extends BlockEntity {
         tryStart(server);
     }
 
+    /** EU stored and capacity summed over the bound energy hatches, for the control panel. */
+    public long[] hatchEnergy() {
+        long stored = 0, capacity = 0;
+        if (level != null) for (BlockPos pos : energyHatches) {
+            if (level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch) {
+                stored += hatch.storage().getEnergyStored();
+                capacity += hatch.storage().getMaxEnergyStored();
+            }
+        }
+        return new long[]{stored, capacity};
+    }
+
     private long drawEnergy(long wanted) {
         long drawn = 0;
         for (BlockPos pos : energyHatches) {

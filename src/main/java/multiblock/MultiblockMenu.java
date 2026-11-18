@@ -20,8 +20,8 @@ import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public final class MultiblockMenu extends AbstractContainerMenu {
-    public static final int WIDTH = 200, HEIGHT = 216, INVENTORY_X = 20, INVENTORY_Y = 134;
-    public static final int HATCH_X = 65, HATCH_Y = 49, MOLD_X = 166, MOLD_Y = 69;
+    public static final int WIDTH = 176, CONTROLLER_HEIGHT = 190, HATCH_HEIGHT = 172, INVENTORY_X = 8;
+    public static final int HATCH_X = 63, HATCH_Y = 21, MOLD_X = 152, MOLD_Y = 21;
     public enum Kind { PLANT, MILL, INPUT, OUTPUT, ENERGY }
     public enum Status { CHECKING, INCOMPLETE, NO_MOLD, IDLE, BLOCKED, LOW_POWER, RUNNING }
 
@@ -32,8 +32,9 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     private final DataSlot progress = DataSlot.standalone();
     private final DataSlot parallel = DataSlot.standalone();
     private final DataSlot length = DataSlot.standalone();
-    private final DataSlot energy = DataSlot.standalone();
-    private final DataSlot capacity = DataSlot.standalone();
+    // Data slots travel as 16-bit values, so EU readings are split into two halves.
+    private final DataSlot energyLow = DataSlot.standalone(), energyHigh = DataSlot.standalone();
+    private final DataSlot capacityLow = DataSlot.standalone(), capacityHigh = DataSlot.standalone();
 
     public static void open(Player player, BlockEntity target) {
         if (player instanceof ServerPlayer server) {
@@ -76,15 +77,21 @@ public final class MultiblockMenu extends AbstractContainerMenu {
             addSlot(new MoldSlot(mold, mold::set, 0, MOLD_X, MOLD_Y));
         }
         machineSlots = slots.size();
-        addStandardInventorySlots(playerInventory, INVENTORY_X, INVENTORY_Y);
+        addStandardInventorySlots(playerInventory, INVENTORY_X, inventoryY(kind));
         addDataSlot(status);
         addDataSlot(progress);
         addDataSlot(parallel);
         addDataSlot(length);
-        addDataSlot(energy);
-        addDataSlot(capacity);
+        addDataSlot(energyLow);
+        addDataSlot(energyHigh);
+        addDataSlot(capacityLow);
+        addDataSlot(capacityHigh);
         updateReadings();
     }
+
+    public static boolean isController(Kind kind) { return kind == Kind.PLANT || kind == Kind.MILL; }
+    public static int height(Kind kind) { return isController(kind) ? CONTROLLER_HEIGHT : HATCH_HEIGHT; }
+    public static int inventoryY(Kind kind) { return height(kind) - 82; }
 
     private void updateReadings() {
         if (target instanceof PlantControllerBlockEntity plant) {
@@ -97,11 +104,20 @@ public final class MultiblockMenu extends AbstractContainerMenu {
             progress.set(plant.getProgress());
             parallel.set(plant.isFormed() ? plant.getParallel() : 0);
             length.set(PlantControllerBlockEntity.targetLength(plant.getBlockState()));
+            long[] stored = plant.hatchEnergy();
+            setEnergy(stored[0], stored[1]);
         } else if (target instanceof EnergyHatchBlockEntity hatch) {
             parallel.set(hatch.parallel());
-            energy.set((int) hatch.getEnergyStorage().getEnergyStored());
-            capacity.set((int) hatch.getEnergyStorage().getMaxEnergyStored());
+            setEnergy(hatch.getEnergyStorage().getEnergyStored(), hatch.getEnergyStorage().getMaxEnergyStored());
         }
+    }
+
+    private void setEnergy(long stored, long max) {
+        int value = (int) Math.min(stored, Integer.MAX_VALUE), limit = (int) Math.min(max, Integer.MAX_VALUE);
+        energyLow.set(value & 0xFFFF);
+        energyHigh.set(value >>> 16);
+        capacityLow.set(limit & 0xFFFF);
+        capacityHigh.set(limit >>> 16);
     }
 
     @Override
@@ -115,8 +131,8 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     public int progress() { return progress.get(); }
     public int parallel() { return parallel.get(); }
     public int length() { return length.get(); }
-    public int energy() { return energy.get(); }
-    public int capacity() { return capacity.get(); }
+    public int energy() { return energyHigh.get() << 16 | energyLow.get() & 0xFFFF; }
+    public int capacity() { return capacityHigh.get() << 16 | capacityLow.get() & 0xFFFF; }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {

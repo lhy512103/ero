@@ -61,6 +61,10 @@ public final class GuideShots {
             handShots(minecraft);
             return;
         }
+        if ("panels".equals(System.getProperty("iuce.guideShots"))) {
+            panelShots(minecraft);
+            return;
+        }
         if ("industrial".equals(System.getProperty("iuce.guideShots"))) {
             industrialShots(minecraft);
             return;
@@ -167,6 +171,38 @@ public final class GuideShots {
             Screenshot.grab(minecraft.gameDirectory, "guide_inventory.png", minecraft.getMainRenderTarget(), 1, message -> { });
         } else if (settle > 76) {
             minecraft.stop();
+        }
+    }
+
+    /** {@code -PguideShots=panels}: places each multiblock terminal next to the player and captures its panel. */
+    private static void panelShots(Minecraft minecraft) {
+        var server = minecraft.getSingleplayerServer();
+        if (server == null || minecraft.player == null) { minecraft.stop(); return; }
+        var blocks = List.of(ModBlocks.PLANT_CONTROLLER, ModBlocks.MILL_CONTROLLER, ModBlocks.ITEM_INPUT_HATCH,
+            ModBlocks.ITEM_OUTPUT_HATCH, ModBlocks.ENERGY_HATCH_HV);
+        settle++;
+        int step = (settle - 1) / 40, phase = (settle - 1) % 40;
+        if (step >= blocks.size()) { minecraft.stop(); return; }
+        if (phase == 0) {
+            var uuid = minecraft.player.getUUID();
+            var block = blocks.get(step).get();
+            server.execute(() -> {
+                var player = server.getPlayerList().getPlayer(uuid);
+                if (player == null) return;
+                var level = player.level();
+                BlockPos pos = player.blockPosition().offset(2 + step, 0, 2);
+                level.setBlockAndUpdate(pos, block.defaultBlockState());
+                var target = level.getBlockEntity(pos);
+                if (target instanceof blockentity.HatchBlockEntity hatch) {
+                    hatch.getInventory().set(0, net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.RAW_IRON), 48);
+                    hatch.getInventory().set(4, net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.COPPER_INGOT), 12);
+                }
+                if (target instanceof blockentity.EnergyHatchBlockEntity hatch) hatch.storage().setEnergy(52_000);
+                if (target != null) multiblock.MultiblockMenu.open(player, target);
+            });
+        } else if (phase == 30) {
+            String[] names = {"plant", "mill", "input", "output", "energy"};
+            Screenshot.grab(minecraft.gameDirectory, "panel_" + names[step] + ".png", minecraft.getMainRenderTarget(), 1, message -> { });
         }
     }
 }

@@ -95,6 +95,7 @@
 89. Redesigned the Ore Processing Plant and Rolling Mill as a tall processing line and an open gantry mill with connected casing trim.
 90. Added industrial panels for plant controllers, item hatches and energy hatches.
 91. Fixed overlapping metal and glass surfaces that flickered on the Ore Processing Plant.
+92. Improved: Large machine controllers and hatches now use steel control panels with status lamps, energy gauges, and progress bars.
 
 ### 中文
 
@@ -189,3 +190,4 @@
 89. 优化：选矿联合厂改为高塔式产线，轧制联合机改为开放式门架，两者均使用连接式外壳收边。
 90. 新增：联合厂控制器、物品仓和能源仓可右键打开工业面板。
 91. 修复：选矿联合厂钢架、滚筒和观察窗的重叠表面不再争抢显示。
+92. 优化：大型机器控制器和各类仓口改用钢板仪表面板，带状态灯、储能表和进度条。
