@@ -94,6 +94,7 @@
 88. Added: An optional brushed-steel resource pack for the Ore Processing Plant and Rolling Mill.
 89. Redesigned the Ore Processing Plant and Rolling Mill as a tall processing line and an open gantry mill with connected casing trim.
 90. Added industrial panels for plant controllers, item hatches and energy hatches.
+91. Fixed overlapping metal and glass surfaces that flickered on the Ore Processing Plant.
 
 ### 中文
 
@@ -187,3 +188,4 @@
 88. 新增：选矿联合厂与轧制联合机的可选拉丝钢资源包。
 89. 优化：选矿联合厂改为高塔式产线，轧制联合机改为开放式门架，两者均使用连接式外壳收边。
 90. 新增：联合厂控制器、物品仓和能源仓可右键打开工业面板。
+91. 修复：选矿联合厂钢架、滚筒和观察窗的重叠表面不再争抢显示。
