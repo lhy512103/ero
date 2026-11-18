@@ -86,7 +86,7 @@ rect(1, 1, 2, H - 3, HI)
 rect(3, H - 3, W - 4, 2, SH)
 rect(W - 3, 3, 2, H - 4, SH)
 for yy in range(4, H - 4, 2):
-    draw.line((3, yy, W - 4, yy), fill=(255, 255, 255, 9))
+    draw.line((3, yy, W - 4, yy), fill="#bfc5cb")  # opaque: PIL writes alpha instead of blending it
 for cx, cy in ((5, 5), (W - 8, 5), (5, H - 8), (W - 8, H - 8)):
     rivet(cx, cy)
 
