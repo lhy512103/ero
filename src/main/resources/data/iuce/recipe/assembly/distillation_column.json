@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:copper_plate",
+      "minecraft:glass",
+      "iuce:copper_plate"
+    ],
+    [
+      "iuce:copper_plate",
+      "iuce:machine_casing",
+      "iuce:copper_plate"
+    ],
+    [
+      "iuce:copper_plate",
+      "iuce:circuit",
+      "iuce:copper_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:distillation_column",
+    "count": 1
+  }
+}

@@ -55,6 +55,13 @@ public class ModCreativeModeTabs {
         ModBlockItems.ELECTROLYZER,
         ModBlockItems.EXTRACTOR,
         ModBlockItems.PLANTER,
+        // 公用工程
+        ModBlockItems.BOILER,
+        ModBlockItems.COOLING_TOWER,
+        ModBlockItems.STEAM_PIPE,
+        ModBlockItems.COOLING_WATER_PIPE,
+        ModBlockItems.AIR_PIPE,
+        ModBlockItems.CREATIVE_UTILITY_SOURCE,
         ModBlockItems.INDUSTRIAL_WORKBENCH,
         // 太阳能发电机 - 保留到奇异
         ModBlockItems.SOLAR_GENERATOR,
@@ -139,6 +146,12 @@ public class ModCreativeModeTabs {
         ModItems.RUBBER, ModItems.RAW_LATEX
     );
 
+    private static final List<DeferredItem<? extends Item>> BIOLOGICAL = List.of(
+        ModItems.BAGASSE, ModItems.DISTILLERS_GRAINS, ModItems.ENZYME_PREPARATION,
+        ModItems.YEAST_CULTURE, ModItems.LACTIC_CULTURE, ModItems.ASPERGILLUS_CULTURE,
+        ModItems.ACTIVATED_ALUMINA, ModItems.SPENT_CATALYST
+    );
+
     private static final List<DeferredItem<? extends Item>> CASINGS = List.of(
         ModBlockItems.MACHINE_CASING, ModBlockItems.MACHINE_CASING_2,
         ModBlockItems.FISSION_CONTROLLER_FRONT, ModBlockItems.REACTOR_CASING_BACK, ModBlockItems.REACTOR_CASING_SIDE
@@ -204,7 +217,7 @@ public class ModCreativeModeTabs {
 
     private static final List<List<DeferredItem<? extends Item>>> ALL_GROUPS = List.of(
         INGOTS, DUSTS, CRUSHED_ORES, PLATES, DENSE_PLATES, NUGGETS, STICKS, COMPONENTS, CIRCUITS, PLATED_SHELLS, CASINGS, UPGRADES, CELLS, SOLAR_GLASSES, BATTERIES,
-        ORES, DEEP_ORES, METAL_BLOCKS, COAL_PRODUCTS, RUBBER_PRODUCTS
+        ORES, DEEP_ORES, METAL_BLOCKS, COAL_PRODUCTS, RUBBER_PRODUCTS, BIOLOGICAL
     );
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ERO_TAB = TABS.register("iuce_tab",

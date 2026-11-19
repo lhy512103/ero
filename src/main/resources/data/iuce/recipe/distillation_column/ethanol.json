@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "distillation_column",
+  "fluids": [
+    {
+      "fluid": "iuce:fermented_wash",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:ethanol",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:stillage",
+      "amount": 500
+    }
+  ],
+  "energy": 3840,
+  "time": 160
+}

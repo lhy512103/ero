@@ -1,6 +1,8 @@
 {
   "values": [
     "minecraft:water",
-    "minecraft:flowing_water"
+    "minecraft:flowing_water",
+    "iuce:process_water",
+    "iuce:flowing_process_water"
   ]
 }

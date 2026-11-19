@@ -4,9 +4,13 @@ import fluid.MachineTank;
 import fluid.MachineTanksHandler;
 import fluid.MultiTankProvider;
 import machine.PoweredMachineBlockEntity;
+import machine.utility.Utility;
+import machine.utility.UtilityConsumer;
+import machine.utility.UtilityNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +30,9 @@ import recipe.cache.ProcessRecipeCache;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The block entity of every data-driven process machine. The slots and tanks come from the
@@ -37,7 +43,7 @@ import java.util.List;
  * the timer. When nothing can run, {@link #getStatusKey()} names the first thing that is missing.
  * </p>
  */
-public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity implements MenuProvider, MultiTankProvider {
+public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity implements MenuProvider, MultiTankProvider, UtilityConsumer {
 
     /** Reasons a machine is not running, in the order they are checked. Index = sync id. */
     public static final List<String> REASONS = List.of("", "no_recipe", "no_card", "wrong_card", "no_catalyst",
@@ -50,6 +56,17 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     @Nullable private RecipeHolder<ProcessRecipe> current;
     private boolean searchNeeded = true;
     private String reason = "";
+    /** Shares of each utility the recipes currently worth running would occupy; empty while running. */
+    private final EnumMap<Utility, Integer> wanted = new EnumMap<>(Utility.class);
+    /** The last demand reported to the network, so an unchanged one is not reported again. */
+    private final EnumMap<Utility, Integer> reported = new EnumMap<>(Utility.class);
+    private boolean reprobed;
+    private long lastRound = Long.MIN_VALUE;
+    /** Network generation this machine last reported into, so a cleared network is told again. */
+    private int seenGeneration;
+    @Nullable private Utility shortUtility;
+    private int freeShares;
+    private int neededShares;
 
     public ProcessMachineBlockEntity(BlockPos pos, BlockState state) {
         this(pos, state, ((ProcessMachineBlock) state.getBlock()).def());
@@ -98,14 +115,28 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         return false;
     }
 
+    /** Pipes may also fill the catalyst slot, so a worn catalyst can be replaced without a player. */
+    @Override
+    protected int[] getAutomationInputSlots() {
+        int[] inputs = getInputSlots();
+        if (!def.catalystSlot()) return inputs;
+        int[] slots = java.util.Arrays.copyOf(inputs, inputs.length + 1);
+        slots[inputs.length] = def.catalystIndex();
+        return slots;
+    }
+
     @Override
     public boolean acceptsAutomationInput(int slot, ItemResource resource) {
+        if (slot == def.catalystIndex()) return itemHandler.getAmountAsInt(slot) == 0 && isCatalyst(resource.toStack(1));
         return usesItem(resource);
     }
 
     @Override
     public int requestSlot(ItemResource resource) {
-        return usesItem(resource) ? slotFor(resource, getInputSlots()) : -1;
+        if (usesItem(resource)) return slotFor(resource, getInputSlots());
+        int catalyst = def.catalystIndex();
+        if (catalyst >= 0 && itemHandler.getAmountAsInt(catalyst) == 0 && isCatalyst(resource.toStack(1))) return catalyst;
+        return -1;
     }
 
     private boolean usesItem(ItemResource resource) {
@@ -135,17 +166,34 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         processUpgrades();
         boolean wasWorking = isWorking();
 
-        if (current != null && !check(current.value()).isEmpty()) {
-            current = null;
-            progress = 0;
-            searchNeeded = true;
-        }
-        if (current == null && searchNeeded) {
-            searchNeeded = false;
-            search();
-        }
+        // The network is asked before the recipe is checked, so one rebuilt this tick still answers
+        // with the shares the machine already holds.
+        reportUtilityDemand();
 
+        // A shortage of utilities only stalls the run: the work already done is kept, so a steam
+        // network that is rebuilt or drains for a moment does not throw away the batch.
+        boolean stalled = false;
         if (current != null) {
+            String why = check(current.value());
+            if (why.equals("missing_utility")) {
+                stalled = true;
+                reason = why;
+            } else if (!why.isEmpty()) {
+                current = null;
+                progress = 0;
+                searchNeeded = true;
+            }
+        }
+        // A machine that asked for a utility is retried once per network round even while its inputs
+        // stay the same, so it starts as soon as a share frees up.
+        long round = Math.floorDiv(level.getGameTime(), UtilityNetwork.PERIOD);
+        if (round != lastRound) {
+            lastRound = round;
+            reprobed = false;
+        }
+        if (current == null && (searchNeeded || (reason.equals("missing_utility") && !reprobed))) search();
+
+        if (current != null && !stalled) {
             ProcessRecipe recipe = current.value();
             maxProgress = overclockedTime(recipe.time());
             if (progress < maxProgress && payForTick(overclockedEnergy(recipe.energyPerTick()))) progress++;
@@ -157,19 +205,40 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
             }
         }
 
+        reportUtilityDemand();
         if (wasWorking != isWorking()) updateRunningState();
     }
 
-    /** Picks the first recipe that can run; otherwise remembers why the closest one cannot. */
+    /**
+     * Picks the first recipe that can run; otherwise remembers why the closest one cannot. A recipe
+     * that only lacks utilities has those written down as this machine's demand, and the search runs
+     * a second time once the network has answered, so a machine with a supplier attached starts the
+     * same tick it is placed.
+     */
     private void search() {
+        searchNeeded = false;
+        wanted.clear();
+        if (scan()) return;
+        if (!wanted.isEmpty()) {
+            // report the demand, let the network answer, then look again with the answer in hand
+            reportUtilityDemand();
+            reprobed = true;
+            wanted.clear();
+            scan();
+        }
+    }
+
+    /** One pass over the recipes; true when one of them started. Leaves the demand of the closest one. */
+    private boolean scan() {
         reason = "";
         int best = 0;
         for (RecipeHolder<ProcessRecipe> holder : ProcessRecipeCache.recipes(level, def.id())) {
             String why = check(holder.value());
             if (why.isEmpty()) {
                 current = holder;
-                return;
+                return true;
             }
+            if (why.equals("missing_utility")) wantedOf(holder.value(), wanted);
             int rank = REASONS.indexOf(why);
             if (rank > best && rank > 1) {
                 best = rank;
@@ -177,7 +246,56 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
             }
         }
         if (reason.isEmpty() && !inputsEmpty()) reason = "no_recipe";
+        return false;
     }
+
+    /** Adds the utilities of {@code recipe} to {@code into}, one share each. */
+    private static void wantedOf(ProcessRecipe recipe, EnumMap<Utility, Integer> into) {
+        for (String id : recipe.utilities()) {
+            Utility utility = Utility.of(id);
+            if (utility != null) into.merge(utility, 1, Integer::sum);
+        }
+    }
+
+    /** Everything this machine would occupy right now: what it runs, or what it is waiting to run. */
+    private EnumMap<Utility, Integer> currentWanted() {
+        EnumMap<Utility, Integer> demand = new EnumMap<>(Utility.class);
+        if (current != null) wantedOf(current.value(), demand);
+        else demand.putAll(wanted);
+        return demand;
+    }
+
+    /** Tells the network what this machine would use right now; a running recipe keeps its share. */
+    private void reportUtilityDemand() {
+        shortUtility = null;
+        freeShares = 0;
+        neededShares = 0;
+        if (!(level instanceof ServerLevel server)) return;
+        EnumMap<Utility, Integer> demand = currentWanted();
+        UtilityNetwork network = UtilityNetwork.of(server);
+        if (!demand.equals(reported) || network.generation() != seenGeneration) {
+            network.setDemand(worldPosition, demand);
+            reported.clear();
+            reported.putAll(demand);
+            seenGeneration = network.generation();
+        }
+        if (demand.isEmpty()) return;
+        network.refreshIfStale();
+        // remember the first utility that came up short, so the menu can name it and show the numbers
+        for (Map.Entry<Utility, Integer> entry : demand.entrySet()) {
+            if (network.granted(worldPosition, entry.getKey()) >= entry.getValue()) continue;
+            shortUtility = entry.getKey();
+            neededShares = entry.getValue();
+            freeShares = network.free(worldPosition, entry.getKey());
+            break;
+        }
+    }
+
+    /** The utility this machine is short of, or null when it has everything it asked for. */
+    @Nullable public Utility shortUtility() { return shortUtility; }
+    /** Shares of {@link #shortUtility()} still free at the suppliers; the machine asked for {@link #neededShares()}. */
+    public int freeShares() { return freeShares; }
+    public int neededShares() { return neededShares; }
 
     private boolean inputsEmpty() {
         for (int slot : getInputSlots()) if (itemHandler.getAmountAsInt(slot) > 0) return false;
@@ -200,12 +318,23 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
             if (slot < 0 || !recipe.catalyst().get().ingredient().test(itemHandler.getResource(slot).toStack(1))) return "no_catalyst";
         }
         if (hits < needed || !itemsAvailable(recipe) || assignTanks(recipe) == null) return "missing_input";
-        if (!recipe.utilities().isEmpty()) return "missing_utility";   // utility suppliers arrive in M1
+        if (!recipe.utilities().isEmpty() && !utilitiesGranted(recipe)) return "missing_utility";
         try (Transaction simulation = Transaction.openRoot()) {
             String full = insertProducts(recipe, simulation, false);
             if (!full.isEmpty()) return full;
         }
         return "";
+    }
+
+    /** Whether the network gave this machine one share of each utility the recipe needs this round. */
+    private boolean utilitiesGranted(ProcessRecipe recipe) {
+        if (!(level instanceof ServerLevel server)) return false;
+        UtilityNetwork network = UtilityNetwork.of(server);
+        for (String id : recipe.utilities()) {
+            Utility utility = Utility.of(id);
+            if (utility == null || network.granted(worldPosition, utility) < 1) return false;
+        }
+        return true;
     }
 
     /** How many of the recipe's item and fluid entries have at least something matching in the machine. */
@@ -291,6 +420,16 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
             }
             if (remaining > 0) return "output_full";
         }
+        if (catalystWearsOut(recipe)) {
+            // the worn catalyst leaves as spent catalyst through an output slot, so pipes can take it away
+            ItemResource spent = ItemResource.of(new ItemStack(item.ModItems.SPENT_CATALYST.get()));
+            int remaining = 1;
+            for (int slot : getOutputSlots()) {
+                remaining -= itemHandler.insert(slot, spent, remaining, transaction);
+                if (remaining <= 0) break;
+            }
+            if (remaining > 0) return "output_full";
+        }
         for (ProcessRecipe.FluidOutput output : recipe.fluidResults()) {
             FluidResource resource = FluidResource.of(output.fluid());
             int remaining = output.amount();
@@ -328,6 +467,13 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
             recipe.catalyst().ifPresent(catalyst -> wearCatalyst(catalyst, transaction));
             transaction.commit();
         }
+    }
+
+    /** Whether this run takes the last durability from the catalyst in the slot. */
+    private boolean catalystWearsOut(ProcessRecipe recipe) {
+        if (recipe.catalyst().isEmpty() || recipe.catalyst().get().damage() <= 0 || def.catalystIndex() < 0) return false;
+        ItemStack stack = itemHandler.getResource(def.catalystIndex()).toStack(1);
+        return stack.isDamageableItem() && stack.getDamageValue() + recipe.catalyst().get().damage() >= stack.getMaxDamage();
     }
 
     private void wearCatalyst(ProcessRecipe.Catalyst catalyst, TransactionContext transaction) {
@@ -385,6 +531,18 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         }
         if (current == null) progress = 0;
         savedRecipe = null;
+    }
+
+    @Override
+    public BlockPos position() { return worldPosition; }
+
+    @Override
+    public void setRemoved() {
+        if (level instanceof ServerLevel server) {
+            UtilityNetwork.of(server).remove(worldPosition);
+            reported.clear();
+        }
+        super.setRemoved();
     }
 
     // ---- menu ----

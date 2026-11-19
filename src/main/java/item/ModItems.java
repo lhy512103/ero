@@ -155,6 +155,18 @@ public class ModItems {
     public static final DeferredItem<Item> MACHINE_UPGRADE_2 = registerSimpleItem("machine_upgrade_2");
     public static final DeferredItem<Item> MACHINE_UPGRADE_3 = registerSimpleItem("machine_upgrade_3");
 
+    // 生物路线 (Biological Route) - 阶段 2 M1
+    public static final DeferredItem<Item> BAGASSE = registerSimpleItem("bagasse");
+    public static final DeferredItem<Item> DISTILLERS_GRAINS = registerSimpleItem("distillers_grains");
+    public static final DeferredItem<Item> ENZYME_PREPARATION = registerSimpleItem("enzyme_preparation");
+    public static final DeferredItem<Item> YEAST_CULTURE = registerSimpleItem("yeast_culture");
+    public static final DeferredItem<Item> LACTIC_CULTURE = registerSimpleItem("lactic_culture");
+    public static final DeferredItem<Item> ASPERGILLUS_CULTURE = registerSimpleItem("aspergillus_culture");
+    /** Dehydration catalyst: one point of wear per run, and it leaves the reactor as spent catalyst when worn out. */
+    public static final DeferredItem<Item> ACTIVATED_ALUMINA = ITEMS.registerSimpleItem("activated_alumina",
+        properties -> properties.durability(256));
+    public static final DeferredItem<Item> SPENT_CATALYST = registerSimpleItem("spent_catalyst");
+
     // 工具 (Tools)
     public static final DeferredItem<GuideItem> GUIDE = registerItem("guide", GuideItem::new);
     public static final DeferredItem<CutterItem> CUTTER = registerItem("cutter", CutterItem::new);

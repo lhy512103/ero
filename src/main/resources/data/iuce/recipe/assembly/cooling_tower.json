@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "iuce:electric_motor",
+      "iuce:iron_plate"
+    ],
+    [
+      "minecraft:iron_bars",
+      "iuce:machine_casing",
+      "minecraft:iron_bars"
+    ],
+    [
+      "iuce:iron_plate",
+      "minecraft:bucket",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:cooling_tower",
+    "count": 1
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "type": "iuce:process",
+  "machine": "dehydration_reactor",
+  "fluids": [
+    {
+      "fluid": "iuce:ethanol",
+      "amount": 500
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:activated_alumina",
+    "damage": 1
+  },
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:ethylene",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:process_water",
+      "amount": 250
+    }
+  ],
+  "energy": 7680,
+  "time": 120
+}

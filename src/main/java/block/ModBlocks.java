@@ -172,6 +172,35 @@ public class ModBlocks {
     public static final DeferredBlock<MachineBlock> PLANTER = BLOCKS.registerBlock("planter",
         p -> new MachineBlock(p, PlanterBlockEntity::new, ModBlockEntities.PLANTER), machineProperties());
 
+    // 公用工程 (Utility plants)
+    public static final DeferredBlock<UtilityPlantBlock> BOILER = BLOCKS.registerBlock("boiler",
+        p -> new UtilityPlantBlock(p, machine.utility.UtilityPlantBlockEntity.Kind.BOILER), machineProperties());
+    public static final DeferredBlock<UtilityPlantBlock> COOLING_TOWER = BLOCKS.registerBlock("cooling_tower",
+        p -> new UtilityPlantBlock(p, machine.utility.UtilityPlantBlockEntity.Kind.COOLING_TOWER), machineProperties());
+    public static final DeferredBlock<CreativeUtilitySourceBlock> CREATIVE_UTILITY_SOURCE = BLOCKS.registerBlock("creative_utility_source",
+        CreativeUtilitySourceBlock::new, machineProperties());
+    // 公用工程管道：只负责把机器连到供方，自身不存流体
+    public static final DeferredBlock<UtilityPipeBlock> STEAM_PIPE = BLOCKS.registerBlock("steam_pipe",
+        p -> new UtilityPipeBlock(machine.utility.Utility.STEAM, p), pipeProperties());
+    public static final DeferredBlock<UtilityPipeBlock> COOLING_WATER_PIPE = BLOCKS.registerBlock("cooling_water_pipe",
+        p -> new UtilityPipeBlock(machine.utility.Utility.COOLING_WATER, p), pipeProperties());
+    public static final DeferredBlock<UtilityPipeBlock> AIR_PIPE = BLOCKS.registerBlock("air_pipe",
+        p -> new UtilityPipeBlock(machine.utility.Utility.AIR, p), pipeProperties());
+
+    private static Supplier<BlockBehaviour.Properties> pipeProperties() {
+        return () -> BlockBehaviour.Properties.of()
+            .destroyTime(0.5f)
+            .explosionResistance(1.0f)
+            .sound(SoundType.METAL)
+            .requiresCorrectToolForDrops()
+            .noOcclusion();
+    }
+
+    /** Whether the state is one of the utility pipes; the utility network walks through them. */
+    public static boolean isUtilityPipe(net.minecraft.world.level.block.state.BlockState state) {
+        return state.getBlock() instanceof UtilityPipeBlock;
+    }
+
     // 冷却液流体方块
     public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> COOLANT_BLOCK =
         BLOCKS.registerBlock("coolant",

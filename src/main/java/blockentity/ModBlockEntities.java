@@ -183,6 +183,19 @@ public class ModBlockEntities {
             new BlockEntityType<>(PlanterBlockEntity::new, false, ModBlocks.PLANTER.get())
         );
 
+    // 公用工程：锅炉与冷却塔共用一个方块实体，创造供能源单独一个
+    public static final Supplier<BlockEntityType<machine.utility.UtilityPlantBlockEntity>> UTILITY_PLANT =
+        BLOCK_ENTITIES.register("utility_plant", () ->
+            new BlockEntityType<>((pos, state) -> new machine.utility.UtilityPlantBlockEntity(pos, state,
+                ((block.UtilityPlantBlock) state.getBlock()).kind()), false,
+                ModBlocks.BOILER.get(), ModBlocks.COOLING_TOWER.get())
+        );
+
+    public static final Supplier<BlockEntityType<machine.utility.CreativeUtilitySourceBlockEntity>> CREATIVE_UTILITY_SOURCE =
+        BLOCK_ENTITIES.register("creative_utility_source", () ->
+            new BlockEntityType<>(machine.utility.CreativeUtilitySourceBlockEntity::new, false, ModBlocks.CREATIVE_UTILITY_SOURCE.get())
+        );
+
     // 工业工作台 (Industrial Workbench)
     public static final Supplier<BlockEntityType<IndustrialWorkbenchBlockEntity>> INDUSTRIAL_WORKBENCH =
         BLOCK_ENTITIES.register("industrial_workbench", () ->

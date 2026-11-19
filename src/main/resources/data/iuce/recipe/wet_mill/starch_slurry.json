@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "wet_mill",
+  "items": [
+    {
+      "item": "#iuce:starch_crops",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "#iuce:any_water",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:starch_slurry",
+      "amount": 1000
+    }
+  ],
+  "energy": 1600,
+  "time": 100
+}

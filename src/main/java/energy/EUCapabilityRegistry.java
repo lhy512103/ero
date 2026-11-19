@@ -48,6 +48,9 @@ public final class EUCapabilityRegistry {
         // 工业工作台
         register(event, ModBlockEntities.INDUSTRIAL_WORKBENCH.get());
 
+        // 公用工程：冷却塔耗电，锅炉不要电但共用同一个方块实体
+        register(event, ModBlockEntities.UTILITY_PLANT.get());
+
         // 滑槽：任意面都可以放入和取出
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
         // 工厂中枢：只进不出

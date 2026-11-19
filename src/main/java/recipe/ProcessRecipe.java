@@ -68,8 +68,9 @@ public record ProcessRecipe(String machine, List<ItemInput> items, List<FluidInp
         public FluidStack create() { return new FluidStack(fluid, amount); }
     }
 
-    /** EU per tick, rounded up; at least 1. */
+    /** Spread over the run, rounded up; a recipe with no energy (the vent stack) needs no power at all. */
     public long energyPerTick() {
+        if (energy <= 0) return 0;
         int ticks = Math.max(1, time);
         return Math.max(1L, (energy + ticks - 1) / ticks);
     }

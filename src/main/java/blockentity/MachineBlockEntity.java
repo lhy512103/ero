@@ -167,7 +167,12 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         }
     }
 
-    /** Extra filter for items arriving from hoppers and pipes; {@code slot} is one of {@link #getInputSlots()}. */
+    /** Slots hoppers and pipes may fill: the input slots, plus any extra slot a machine wants fed (a catalyst slot). */
+    protected int[] getAutomationInputSlots() {
+        return getInputSlots();
+    }
+
+    /** Extra filter for items arriving from hoppers and pipes; {@code slot} is one of {@link #getAutomationInputSlots()}. */
     public boolean acceptsAutomationInput(int slot, net.neoforged.neoforge.transfer.item.ItemResource resource) {
         return true;
     }
@@ -188,7 +193,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements Tickable
         if (inventory == null) return null;
         int index = side == null ? 6 : side.get3DDataValue();
         if (automationItems[index] == null) {
-            int[] inputs = getInputSlots();
+            int[] inputs = getAutomationInputSlots();
             int[] outputs = getOutputSlots();
             if (inputs.length == 0 && outputs.length == 0) return null;
             automationItems[index] = new AutomationItemHandler(this, inventory, inputs, outputs, side);

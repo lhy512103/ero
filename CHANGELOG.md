@@ -101,6 +101,11 @@
 95. Added: Guide structure views for large machines can switch to show the formed machine.
 96. Improved: The Factory Hub screen uses the steel control-panel style, with star badges, stock gauges and a count of products already stocked.
 97. Fixed: The Factory Hub screen frame no longer shows the world through stripes in its steel casing.
+98. Added: A biological route from potatoes and sugar cane to ethylene: wet mill, liquefaction tank, saccharification tank, fermenter, distillation column, dehydration reactor, dryer and vent stack.
+99. Added: Seven enzymes, cultures and catalysts are bred in the fermenter and wear out into spent catalyst that a macerator recycles.
+100. Added: Boilers and cooling towers supply a fixed number of machines each, and pipes carry the supplies to every machine they touch.
+101. Added: A boiler or cooling tower that runs dry stops serving at once, and a machine stopped for lack of steam keeps the progress it already made.
+102. Added: Ethanol, ethylene, sugar solution, stillage and other biological fluids join the gas and water tags.
 
 ### 中文
 
@@ -201,3 +206,8 @@
 95. 新增：指南里的大型机器结构可以切换查看成型后的样子。
 96. 优化：工厂中枢界面改用钢板仪表风格，带星级徽章、库存表和已达标产品计数。
 97. 修复：工厂中枢界面的机壳不再有一条条透出背景的横线。
+98. 新增：土豆与甘蔗到乙烯的生物产线，包含湿磨机、液化罐、糖化罐、发酵罐、精馏塔、脱水反应器、干燥机与排气塔。
+99. 新增：发酵罐可培育七种酶、菌种与催化剂，耗尽的催化剂打粉后可回收。
+100. 新增：锅炉与冷却塔各自供应固定台数的机器，管道可把供应送到接触到的每一台机器。
+101. 新增：锅炉或冷却塔断供后立即停供，缺蒸汽的机器会保留已有进度。
+102. 新增：乙醇、乙烯、糖液、酒糟液等生物流体加入气体与水的标签。

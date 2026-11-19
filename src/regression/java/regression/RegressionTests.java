@@ -64,6 +64,7 @@ public final class RegressionTests {
         TESTS.put("multiblock_panels", RegressionTests::multiblockPanels);
         MachineTests.register(TESTS);
         ProcessMachineTests.register(TESTS);
+        M1LineTests.register(TESTS);
         StressTests.register(TESTS);
     }
     public static void register(IEventBus bus) {

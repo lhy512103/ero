@@ -86,6 +86,20 @@
     "iuce:lamp",
     "iuce:converter",
     "iuce:builder",
-    "iuce:test_press"
+    "iuce:test_press",
+    "iuce:boiler",
+    "iuce:cooling_tower",
+    "iuce:creative_utility_source",
+    "iuce:steam_pipe",
+    "iuce:cooling_water_pipe",
+    "iuce:air_pipe",
+    "iuce:dehydration_reactor",
+    "iuce:distillation_column",
+    "iuce:dryer",
+    "iuce:fermenter",
+    "iuce:liquefaction_tank",
+    "iuce:saccharification_tank",
+    "iuce:vent_stack",
+    "iuce:wet_mill"
   ]
 }

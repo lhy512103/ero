@@ -21,7 +21,9 @@ import java.util.List;
  * reason and every tank's contents are synced as container data.
  */
 public class ProcessMachineMenu extends AbstractContainerMenu {
-    private static final int FIXED_DATA = 7;   // energy low/high, capacity low/high, progress, max progress, reason
+    /** energy low/high, capacity low/high, progress, max progress, reason, short utility, have, need. */
+    private static final int FIXED_DATA = 10;
+    private static final int SHORT_UTILITY = 7, HAVE_SHARES = 8, NEED_SHARES = 9;
 
     private final ProcessMachineBlockEntity blockEntity;
     private final ProcessMachineDef def;
@@ -72,6 +74,12 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
                     case 4 -> blockEntity.getProgress();
                     case 5 -> blockEntity.getMaxProgress();
                     case 6 -> Math.max(0, ProcessMachineBlockEntity.REASONS.indexOf(blockEntity.isWorking() ? "" : blockEntity.reason()));
+                    case SHORT_UTILITY -> {
+                        machine.utility.Utility short_ = blockEntity.shortUtility();
+                        yield short_ == null ? 0 : short_.ordinal() + 1;
+                    }
+                    case HAVE_SHARES -> blockEntity.freeShares();
+                    case NEED_SHARES -> blockEntity.neededShares();
                     default -> {
                         MachineTank tank = blockEntity.getTanks().get((index - FIXED_DATA) / 2);
                         if ((index - FIXED_DATA) % 2 == 1) yield tank.getAmount();
@@ -108,8 +116,17 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
         return index >= 0 && index < reasons.size() ? reasons.get(index) : "";
     }
 
-    public Fluid tankFluid(int tank) {
-        int id = data[FIXED_DATA + tank * 2];
+    /** The utility the machine is short of (read from the synced data), or null. */
+    public machine.utility.Utility shortUtility() {
+        int index = data[SHORT_UTILITY] - 1;
+        return index >= 0 && index < machine.utility.Utility.values().length ? machine.utility.Utility.values()[index] : null;
+    }
+
+    /** Shares of {@link #shortUtility()} still free at the suppliers, and how many the machine needs. */
+    public int haveShares() { return data[HAVE_SHARES]; }
+    public int needShares() { return data[NEED_SHARES]; }
+
+    public Fluid tankFluid(int tank) {        int id = data[FIXED_DATA + tank * 2];
         return id < 0 ? Fluids.EMPTY : BuiltInRegistries.FLUID.byId(id);
     }
 

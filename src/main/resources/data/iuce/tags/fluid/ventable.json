@@ -1,3 +1,6 @@
 {
-  "values": []
+  "values": [
+    "iuce:carbon_dioxide",
+    "iuce:flowing_carbon_dioxide"
+  ]
 }

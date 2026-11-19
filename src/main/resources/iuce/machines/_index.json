@@ -1,1 +1,12 @@
-{"machines":[]}
+{
+  "machines": [
+    "dehydration_reactor",
+    "distillation_column",
+    "dryer",
+    "fermenter",
+    "liquefaction_tank",
+    "saccharification_tank",
+    "vent_stack",
+    "wet_mill"
+  ]
+}

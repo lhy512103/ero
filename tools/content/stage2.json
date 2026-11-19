@@ -1,3 +1,172 @@
 {
-  "machines": []
+  "machines": [
+    {
+      "id": "wet_mill",
+      "name_en": "Wet Mill",
+      "name_zh": "湿磨机",
+      "model": "box",
+      "accent": "#d8d2c0",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100
+    },
+    {
+      "id": "liquefaction_tank",
+      "name_en": "Liquefaction Tank",
+      "name_zh": "液化罐",
+      "model": "tank",
+      "accent": "#c9a86a",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 1,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 120
+    },
+    {
+      "id": "saccharification_tank",
+      "name_en": "Saccharification Tank",
+      "name_zh": "糖化罐",
+      "model": "tank",
+      "accent": "#e8d08a",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160
+    },
+    {
+      "id": "fermenter",
+      "name_en": "Fermenter",
+      "name_zh": "发酵罐",
+      "model": "tank",
+      "accent": "#9a7b4f",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 2,
+      "items_out": 1,
+      "fluids_in": [
+        8000,
+        4000
+      ],
+      "fluids_out": [
+        8000,
+        4000
+      ],
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 200
+    },
+    {
+      "id": "distillation_column",
+      "name_en": "Distillation Column",
+      "name_zh": "精馏塔",
+      "model": "column",
+      "accent": "#e9f0f2",
+      "voltage": "LV",
+      "buffer": 8000,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160
+    },
+    {
+      "id": "dehydration_reactor",
+      "name_en": "Dehydration Reactor",
+      "name_zh": "脱水反应器",
+      "model": "tank",
+      "accent": "#dce6b8",
+      "voltage": "MV",
+      "buffer": 16000,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        4000
+      ],
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 120
+    },
+    {
+      "id": "dryer",
+      "name_en": "Dryer",
+      "name_zh": "干燥器",
+      "model": "box",
+      "accent": "#5e4426",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100
+    },
+    {
+      "id": "vent_stack",
+      "name_en": "Vent Stack",
+      "name_zh": "放空火炬",
+      "model": "column",
+      "accent": "#b9bcc2",
+      "voltage": "LV",
+      "buffer": 1000,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        16000
+      ],
+      "fluids_out": [],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 0,
+      "base_time": 20
+    }
+  ]
 }

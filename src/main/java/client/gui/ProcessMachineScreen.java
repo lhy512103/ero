@@ -133,7 +133,10 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         int color;
         String reason = menu.reason();
         if (!reason.isEmpty()) {
-            text = Component.translatable("tooltip.iuce.status." + reason);
+            text = reason.equals("missing_utility") && menu.shortUtility() != null
+                ? Component.translatable("gui.iuce.utility.shortage",
+                    Component.translatable(menu.shortUtility().nameKey()), menu.needShares(), menu.haveShares())
+                : Component.translatable("tooltip.iuce.status." + reason);
             color = reason.equals("no_recipe") ? AMBER : RED;
         } else if (menu.maxProgress() > 0 && menu.progress() > 0) {
             text = Component.translatable("gui.iuce.process.running", menu.progress() * 100 / menu.maxProgress());
@@ -176,10 +179,12 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
-    /** Water and lava get their usual colours; any other fluid a stable colour derived from its id. */
+    /** Water and lava get their usual colours, our chemicals their registered colour, the rest a stable colour from its id. */
     static int fluidColor(Fluid fluid) {
         if (fluid.isSame(Fluids.WATER)) return 0xFF3F76E4;
         if (fluid.isSame(Fluids.LAVA)) return 0xFFE0661A;
+        int chemical = init.ModFluids.chemicalColor(fluid);
+        if (chemical != 0) return chemical;
         String id = BuiltInRegistries.FLUID.getKey(fluid).toString().toLowerCase(Locale.ROOT);
         float hue = (id.hashCode() & 0xFFFF) / 65535f;
         return 0xFF000000 | (net.minecraft.util.Mth.hsvToRgb(hue, 0.55f, 0.85f) & 0xFFFFFF);

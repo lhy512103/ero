@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "iuce:heating_coil",
+      "iuce:iron_plate"
+    ],
+    [
+      "iuce:heating_coil",
+      "iuce:machine_casing",
+      "iuce:heating_coil"
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:electric_motor",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:dryer",
+    "count": 1
+  }
+}

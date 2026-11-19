@@ -73,6 +73,15 @@ public class EroClient {
             new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/coolant_flow")),
             null, null),
             init.ModFluids.COOLANT, init.ModFluids.FLOWING_COOLANT);
+        // 化工流体共用一张灰度贴图，颜色由 FluidType 的颜色决定，省掉每种流体两套贴图。
+        for (init.ModFluids.Chemical chemical : init.ModFluids.CHEMICALS) {
+            event.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+                new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/chemical_still")),
+                new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/chemical_flow")),
+                null,
+                net.neoforged.neoforge.client.fluid.FluidTintSources.constant(chemical.color())),
+                init.ModFluids.chemical(chemical.id()), init.ModFluids.flowingChemical(chemical.id()));
+        }
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {

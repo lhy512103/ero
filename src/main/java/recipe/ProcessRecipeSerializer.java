@@ -90,7 +90,8 @@ public final class ProcessRecipeSerializer {
         Codec.LONG.fieldOf("energy").forGetter(ProcessRecipe::energy),
         Codec.intRange(1, Integer.MAX_VALUE).fieldOf("time").forGetter(ProcessRecipe::time)
     ).apply(i, ProcessRecipe::new)).validate(recipe -> recipe.results().isEmpty() && recipe.fluidResults().isEmpty()
-        ? DataResult.error(() -> "Process recipe for " + recipe.machine() + " produces nothing")
+        && (recipe.items().isEmpty() && recipe.fluids().isEmpty())
+        ? DataResult.error(() -> "Process recipe for " + recipe.machine() + " has neither inputs nor products")
         : DataResult.success(recipe));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, ProcessRecipe.ItemInput> ITEM_INPUT_STREAM = StreamCodec.composite(

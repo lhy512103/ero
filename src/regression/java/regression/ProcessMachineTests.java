@@ -8,6 +8,7 @@ import item.ModItems;
 import machine.process.ProcessMachineBlockEntity;
 import machine.process.ProcessMachineDef;
 import machine.process.ProcessMachines;
+import recipe.cache.ProcessRecipeCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -19,20 +20,43 @@ import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Behaviour tests for every data-driven process machine, written once for all of them. Each
- * registered machine gets five tests, so adding a machine needs no test code. Two inputs are used
- * throughout: {@code minecraft:iron_ingot} and {@code minecraft:diamond}, which the shipped test
- * recipes route to the plate and steam recipes.
+ * Behaviour tests for every data-driven process machine, written once for all of them. Only the
+ * machines with recipes in the regression pack are covered: the test press, which the shipped test
+ * recipes route from {@code minecraft:iron_ingot} and {@code minecraft:diamond}. The M1 machines
+ * run their own content, and {@link M1LineTests} covers them.
  */
 final class ProcessMachineTests {
     private ProcessMachineTests() {}
 
     /** The shipped test recipe: 2 iron ingots -> 1 iron plate in 40 ticks. */
     private static final int RECIPE_TICKS = 40;
+
+    /** Recipe folder the regression source set adds; only these machines follow the test recipe shape. */
+    private static final String TEST_PACK = "test_press/";
+
+    /**
+     * The machines these tests can drive. The regression server also loads the mod's own recipes, so
+     * a machine counts only when at least one of its recipes comes from the test pack.
+     */
+    private static List<ProcessMachines.Entry> pack(GameTestHelper helper) {
+        List<ProcessMachines.Entry> list = new ArrayList<>();
+        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+            for (var holder : ProcessRecipeCache.recipes(helper.getLevel(), entry.def().id())) {
+                if (holder.id().identifier().getPath().startsWith(TEST_PACK)) {
+                    list.add(entry);
+                    break;
+                }
+            }
+        }
+        if (list.isEmpty()) throw new IllegalStateException("the regression pack has no process recipes");
+        return list;
+    }
 
     static void register(Map<String, Consumer<GameTestHelper>> tests) {
         tests.put("process_machines_process", ProcessMachineTests::processAll);
@@ -114,7 +138,7 @@ final class ProcessMachineTests {
 
     private static void processAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             ProcessMachineBlockEntity machine = prepare(helper, def, x++, 2);
             int used = runUntilPlate(machine, RECIPE_TICKS + 10);
@@ -128,7 +152,7 @@ final class ProcessMachineTests {
 
     private static void powerLossAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             ProcessMachineBlockEntity machine = prepare(helper, def, x++, 2);
             energy(machine).setEnergy(0);
@@ -142,7 +166,7 @@ final class ProcessMachineTests {
 
     private static void overclockAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             if (def.upgrades() < 2) continue;
             ProcessMachineBlockEntity plain = prepare(helper, def, x++, 2);
@@ -160,7 +184,7 @@ final class ProcessMachineTests {
 
     private static void saveLoadAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             ProcessMachineBlockEntity machine = prepare(helper, def, x++, 4);
             for (int i = 0; i < RECIPE_TICKS / 3; i++) {
@@ -190,7 +214,7 @@ final class ProcessMachineTests {
 
     private static void missingUtilityAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             ProcessMachineBlockEntity machine = place(helper, def, x++);
             // A diamond only appears in recipes that need steam, and no utility supplier exists yet.
@@ -208,7 +232,7 @@ final class ProcessMachineTests {
     }
 
     private static void idleReasons(GameTestHelper helper) {
-        ProcessMachineDef def = ProcessMachines.all().iterator().next().def();
+        ProcessMachineDef def = pack(helper).getFirst().def();
         ProcessMachineBlockEntity machine = place(helper, def, 1);
         for (int i = 0; i < 3; i++) machine.tick();
         check(helper, machine.reason().isEmpty(), "an empty machine must not complain, got '" + machine.reason() + "'");
@@ -235,7 +259,7 @@ final class ProcessMachineTests {
 
     private static void fluidAll(GameTestHelper helper) {
         int x = 1;
-        for (ProcessMachines.Entry entry : ProcessMachines.all()) {
+        for (ProcessMachines.Entry entry : pack(helper)) {
             ProcessMachineDef def = entry.def();
             if (def.fluidsIn().isEmpty()) continue;
             ProcessMachineBlockEntity machine = place(helper, def, x++);

@@ -91,11 +91,16 @@ TERMINAL = set(STATION.values()) | {
     "overclocker_upgrade", "overclocker_upgrade1", "overclocker_upgrade2",
     "coal_fuel", "single_use_battery", "irradiant_uranium_ingot", "coolant_bucket",
     "rubber_sapling", "machine_casing_2", "logo", "coolant",
+    # stage 2 utilities: suppliers, their pipes, and by-products that end as boiler fuel or compost
+    "boiler", "cooling_tower", "creative_utility_source", "steam_pipe", "cooling_water_pipe", "air_pipe",
+    "bagasse", "distillers_grains",
 }
 # Obtained from the world rather than from a recipe.
 WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex"}
 # Registered but intentionally unobtainable / not shown.
-NOT_CRAFTABLE = {"logo", "coolant"}
+NOT_CRAFTABLE = {"logo", "coolant", "creative_utility_source"}
+# Process machines that only take fluids away (venting, flaring): no output slot or tank on purpose.
+SINKS = {"vent_stack"}
 # Test-only process machines (tools/content/regression.json): never crafted and never used.
 TEST_ONLY = {"test_press"}
 
@@ -169,10 +174,13 @@ for source in PROCESS_SOURCES:
             if definition.get("id") != machine_id:
                 errors.append("%s: id does not match the index" % os.path.relpath(path, ROOT))
             process_machines[machine_id] = definition
+# Their blocks and block items are registered from the definitions at startup.
+block_items |= set(process_machines)
+all_items |= set(process_machines)
 for machine_id, definition in process_machines.items():
     if definition.get("items_in", 1) > 9 or definition.get("items_out", 1) > 9:
         errors.append("%s: at most 9 input and 9 output slots" % machine_id)
-    if definition.get("items_out", 1) < 1 and not definition.get("fluids_out"):
+    if definition.get("items_out", 1) < 1 and not definition.get("fluids_out") and machine_id not in SINKS:
         errors.append("%s: produces nothing (no output slot or tank)" % machine_id)
     for key in ("fluids_in", "fluids_out"):
         for capacity in definition.get(key, []):
@@ -244,10 +252,16 @@ for path in sorted(process_paths):
             errors.append("%s: time must be positive" % name)
         elif data["energy"] / data["time"] > VOLTAGE[capacity]:
             errors.append("%s: %.0f EU/t exceeds %s's %d EU/t" % (name, data["energy"] / data["time"], capacity, VOLTAGE[capacity]))
-        key = (machine, tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
+        catalyst = data.get("catalyst", {}).get("item")
+        if catalyst and data["catalyst"].get("damage", 0) > 0 and definition.get("items_out", 1) < 1:
+            errors.append("%s: a wearing catalyst leaves as spent catalyst, but %s has no output slot" % (name, machine))
+        key = (machine, catalyst, tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
         by_process_input[key].append(name)
-        inputs = items_in
+        # the catalyst is not consumed, but the machine cannot run without one, so it counts as an input
+        inputs = items_in + ([catalyst] if catalyst else [])
         outputs = [entry["id"] for entry in data.get("results", [])]
+        if catalyst and data["catalyst"].get("damage", 0) > 0:
+            outputs.append("iuce:spent_catalyst")   # a worn-out catalyst leaves as spent catalyst
         recipes.append((name, inputs, outputs, "iuce:" + machine))
         for ref in inputs + outputs:
             check_id(ref, name)
@@ -346,13 +360,11 @@ for item in sorted({"iuce:" + name for name in all_items - NOT_CRAFTABLE - TEST_
     errors.append("unobtainable: " + item)
 
 used = {ref for _, inputs, _, _ in recipes for ref in inputs}
+# A process machine is an end in itself: it only has to be obtainable (checked above).
 for item in sorted(all_items - set(process_machines) - TEST_ONLY):
     if ("iuce:" + item) in used or item in TERMINAL or item.endswith("_block") or item.endswith("_ore"):
         continue
     errors.append("no use for iuce:%s (add a recipe that consumes it, or list it in TERMINAL)" % item)
-for machine_id in sorted(set(process_machines) - TEST_ONLY):
-    if "iuce:" + machine_id not in used and machine_id not in TERMINAL:
-        errors.append("no use for iuce:%s (process machines need a recipe or a TERMINAL entry)" % machine_id)
 
 # ------------------------------------------------------------------ 3. assets and names
 languages = {}

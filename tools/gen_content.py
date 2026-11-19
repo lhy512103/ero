@@ -31,12 +31,17 @@ CONTENT = sorted(glob.glob(ROOT + "/tools/content/*.json"))
 CHECK = "--check" in sys.argv
 
 # Keys a content entry carries for the generator only; the mod never reads them.
-EXTRAS = {"name_en", "name_zh", "model", "textures"}
-# Textures a "box" model needs, as (role, default path), where {id} is replaced by the machine id.
-BOX = (("side", "iuce:block/machine/{id}/side"),
-       ("top", "iuce:block/machine/{id}/top_1"),
-       ("front", "iuce:block/machine/{id}/{id}_front"),
-       ("front_active", "iuce:block/machine/{id}/{id}_front_active"))
+# "accent" is the colour tools/art/m1_machines.py paints into the machine's front.
+EXTRAS = {"name_en", "name_zh", "model", "textures", "accent"}
+# Looks a machine can take. The template decides the shared side, top and bottom textures; the front
+# is the machine's own. tools/art/m1_machines.py draws all of them.
+MODELS = ("box", "tank", "column")
+# Textures a model needs, as (role, default path); {id} is the machine id and {model} the template.
+TEXTURES = (("side", "iuce:block/machine/process/{model}_side"),
+            ("top", "iuce:block/machine/process/{model}_top"),
+            ("bottom", "iuce:block/machine/process/{model}_bottom"),
+            ("front", "iuce:block/machine/process/{id}_front"),
+            ("front_active", "iuce:block/machine/process/{id}_front_active"))
 FACING = (("north", 0), ("east", 90), ("south", 180), ("west", 270))
 
 errors = []
@@ -94,28 +99,28 @@ def blockstate(machine):
 
 def block_model(machine, active):
     given = machine.get("textures", {})
-    if machine.get("model", "box") != "box":
-        raise SystemExit("unknown model %r for %s" % (machine.get("model"), machine["id"]))
+    model = machine.get("model", "box")
+    if model not in MODELS:
+        raise SystemExit("unknown model %r for %s" % (model, machine["id"]))
     textures = {}
-    for role, default in BOX:
-        if role == "front_active" and role not in given:
-            continue
-        path = given.get(role, default).replace("{id}", machine["id"])
-        textures[role] = path
-    front = textures["front_active"] if active and "front_active" in textures else textures["front"]
-    textures["particle"] = front
+    for role, default in TEXTURES:
+        if given and role not in given:
+            continue                    # hand-picked textures: only the roles given (bottom falls back to top)
+        textures[role] = given.get(role, default).replace("{id}", machine["id"]).replace("{model}", model)
+    front = "#front_active" if active and "front_active" in textures else "#front"
+    textures["particle"] = textures["front"]
     return {
         "parent": "minecraft:block/block",
         "textures": textures,
         "elements": [{
             "from": [0, 0, 0], "to": [16, 16, 16],
             "faces": {
-                "north": {"texture": "#front", "cullface": "north"},
+                "north": {"texture": front, "cullface": "north"},
                 "south": {"texture": "#side", "cullface": "south"},
                 "east": {"texture": "#side", "cullface": "east"},
                 "west": {"texture": "#side", "cullface": "west"},
                 "up": {"texture": "#top", "cullface": "up"},
-                "down": {"texture": "#top", "cullface": "down"},
+                "down": {"texture": "#bottom" if "bottom" in textures else "#top", "cullface": "down"},
             },
         }],
     }

@@ -11,7 +11,8 @@ creates matter, or a fluid is produced with nowhere to go.
 Input: tools/content/loops.json
   * "loops"  closed loops. Each has a name and recipes (one operation each), a "declared" make-up
              percentage of the loop's main input, and "amount" - mB or items per round.
-  * "cycles" exemptions for the matter-creation check. Only the seed culture multiplies on purpose.
+  * "cycles" exemptions for the matter-creation check. Only grown cultures and enzymes multiply on purpose,
+             and each round still eats crops the gain check does not count.
 All recipes come from data/iuce/recipe/**, so the file never repeats what the game runs.
 """
 import glob
@@ -210,6 +211,10 @@ for name, recipe in recipes.items():
         if ref in known_fluids:
             produced[ref].append(name)
 consumed = {ref for recipe in recipes.values() for ref in recipe["in"]}
+# A recipe that takes a fluid tag consumes every fluid in it.
+for ref in list(consumed):
+    if ref.startswith("#"):
+        consumed |= tag_values.get(ref[1:], set())
 # Vented and flared fluids have a sink outside the recipes; gas flaring and venting are player moves.
 SINKS = {"iuce:ventable", "iuce:flammable_gases"}
 for ref, names in sorted(produced.items()):

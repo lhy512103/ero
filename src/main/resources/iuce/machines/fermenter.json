@@ -1,0 +1,19 @@
+{
+  "id": "fermenter",
+  "voltage": "LV",
+  "buffer": 4000,
+  "items_in": 2,
+  "items_out": 1,
+  "fluids_in": [
+    8000,
+    4000
+  ],
+  "fluids_out": [
+    8000,
+    4000
+  ],
+  "catalyst_slot": true,
+  "card_slot": false,
+  "upgrades": 4,
+  "base_time": 200
+}

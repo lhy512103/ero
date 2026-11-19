@@ -86,6 +86,13 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> EXTRACTOR = registerBlockItem(ModBlocks.EXTRACTOR);
     // 种植机 (Planters)
     public static final DeferredItem<BlockItem> PLANTER = registerBlockItem(ModBlocks.PLANTER);
+    // 公用工程 (Utility plants)
+    public static final DeferredItem<BlockItem> BOILER = registerBlockItem(ModBlocks.BOILER);
+    public static final DeferredItem<BlockItem> COOLING_TOWER = registerBlockItem(ModBlocks.COOLING_TOWER);
+    public static final DeferredItem<BlockItem> CREATIVE_UTILITY_SOURCE = registerBlockItem(ModBlocks.CREATIVE_UTILITY_SOURCE);
+    public static final DeferredItem<BlockItem> STEAM_PIPE = registerBlockItem(ModBlocks.STEAM_PIPE);
+    public static final DeferredItem<BlockItem> COOLING_WATER_PIPE = registerBlockItem(ModBlocks.COOLING_WATER_PIPE);
+    public static final DeferredItem<BlockItem> AIR_PIPE = registerBlockItem(ModBlocks.AIR_PIPE);
     // 工业工作台 (Industrial Workbench)
     public static final DeferredItem<BlockItem> INDUSTRIAL_WORKBENCH = registerBlockItem(ModBlocks.INDUSTRIAL_WORKBENCH);
     // 太阳能发电机 (Solar Generators) - 保留到奇异
