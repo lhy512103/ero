@@ -5,7 +5,7 @@
     "top": "iuce:block/machine/extractor/extractor_top_1",
     "front": "iuce:block/machine/extractor/extractor_front",
     "front_active": "iuce:block/machine/extractor/extractor_front_active",
-    "particle": "iuce:block/machine/extractor/extractor_front_active"
+    "particle": "iuce:block/machine/extractor/extractor_front"
   },
   "elements": [
     {
@@ -21,7 +21,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#front",
+          "texture": "#front_active",
           "cullface": "north"
         },
         "south": {
