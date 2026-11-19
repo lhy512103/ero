@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "iuce:forge_hammer",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:iron_stick",
+      ""
+    ],
+    [
+      "",
+      "",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:rod_mold",
+    "count": 1
+  }
+}

@@ -16,6 +16,9 @@ items: iuce:ore_washer
 
 {recipe: iuce:ore_washer}
 
+> [!WARN]
+> 副产物槽满了洗矿机会**停机**，不会把副产物扔掉。记得用滑槽、漏斗或弹出升级把金属粒运走——它们是别的矿链的原料。
+
 ## 全部配方
 
 {recipes: ore_washer}

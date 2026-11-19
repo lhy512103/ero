@@ -21,6 +21,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -34,6 +36,10 @@ public class EroClient {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         container.getEventBus().addListener(EroClient::registerScreens);
         container.getEventBus().addListener(EroClient::registerFluidModels);
+        container.getEventBus().addListener(EroClient::registerRenderers);
+        container.getEventBus().addListener((AddClientReloadListenersEvent event) -> event.addListener(
+            Identifier.fromNamespaceAndPath("iuce", "plant_models"),
+            (net.minecraft.server.packs.resources.ResourceManagerReloadListener) manager -> client.PlantModel.invalidate()));
         client.guide.Guide.init(container.getEventBus());
         if (System.getProperty("iuce.guideShots") != null) {
             try {
@@ -53,6 +59,12 @@ public class EroClient {
 
         // 手持传送带、滑槽时显示摆放预览和方向箭头
         NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
+        // 准星对着未成型的大机器控制器时，标出还缺的方块
+        NeoForge.EVENT_BUS.addListener(client.StructureProjection::onOutline);
+    }
+
+    private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(blockentity.ModBlockEntities.PLANT_CONTROLLER.get(), client.PlantControllerBlockEntityRenderer::new);
     }
 
     private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
@@ -72,6 +84,8 @@ public class EroClient {
         event.register(ModMenus.EXTRACTOR.get(), ExtractorScreen::new);
         event.register(ModMenus.INDUCTION_FURNACE.get(), InductionFurnaceScreen::new);
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);
+        event.register(ModMenus.FACTORY_HUB.get(), client.gui.FactoryHubScreen::new);
+        event.register(ModMenus.MULTIBLOCK.get(), client.gui.MultiblockScreen::new);
         event.register(ModMenus.ORE_WASHER.get(), OreWasherScreen::new);
         event.register(ModMenus.ELECTROLYZER.get(), ElectrolyzerScreen::new);
         event.register(ModMenus.PLANTER.get(), PlanterScreen::new);

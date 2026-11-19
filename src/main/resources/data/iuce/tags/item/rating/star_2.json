@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "iuce:steel_plate",
+    "iuce:bronze_plate",
+    "iuce:circuit",
+    "iuce:electric_motor",
+    "iuce:copper_coil",
+    "iuce:heating_coil",
+    "iuce:machine_casing",
+    "iuce:iron_gear",
+    "iuce:dense_iron_plate",
+    "iuce:dense_copper_plate",
+    "iuce:insulated_gold_cable",
+    "iuce:advanced_circuit",
+    "iuce:steel_ingot"
+  ]
+}

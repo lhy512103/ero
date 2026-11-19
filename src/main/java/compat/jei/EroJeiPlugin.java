@@ -235,6 +235,12 @@ public class EroJeiPlugin implements IModPlugin {
             registration.addCraftingStation(mt.recipeType, mt.iconBlock.get());
         }
 
+        // 金属成型机的每组配方还要对应的模具
+        String[] formerTypes = machine.metal_former.MetalFormerBlockEntity.MODE_RECIPE_TYPES;
+        for (int mode = 0; mode < formerTypes.length; mode++) {
+            registration.addCraftingStation(MACHINE_TYPES.get(formerTypes[mode]).recipeType, item.MoldItem.forMode(mode));
+        }
+
         // 工业合成
         registration.addCraftingStation(CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
         registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, ModBlocks.INDUSTRIAL_WORKBENCH.get());

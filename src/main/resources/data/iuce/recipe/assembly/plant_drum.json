@@ -1,0 +1,5 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [["", "iuce:iron_plate", ""], ["iuce:iron_plate", "iuce:plant_casing", "iuce:iron_plate"], ["", "iuce:iron_plate", ""]],
+  "result": {"id": "iuce:plant_drum", "count": 8}
+}

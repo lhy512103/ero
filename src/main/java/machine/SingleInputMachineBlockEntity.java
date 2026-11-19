@@ -43,27 +43,33 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
     protected final int processSlots;
     protected final int upgradeSlots;
     protected final ItemStacksResourceHandler itemHandler;
+    private final MachineInventory inventory;
     protected final int[] progress;
     protected final int[] maxProgress;
 
     private final MachineRecipe[] cachedRecipes;
     private final ItemResource[] cachedInputResources;
     @javax.annotation.Nullable private OverclockerUpgradeItem.Effect overclock;
+    /** Energy already collected towards the current tick of work, per process slot. */
+    private long[] paid;
+    private long starvedAt = -1000;
 
     protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
                                             int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime) {
+        this(type, pos, state, voltage, processSlots, upgradeSlots, bufferCapacity, baseProcessTime, 0);
+    }
+
+    /** @param extraSlots machine-specific slots placed after the upgrade slots (hidden from automation) */
+    protected SingleInputMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, EUVoltage voltage,
+                                            int processSlots, int upgradeSlots, long bufferCapacity, int baseProcessTime,
+                                            int extraSlots) {
         super(type, pos, state);
         this.voltage = voltage;
         this.processSlots = processSlots;
         this.upgradeSlots = upgradeSlots;
         this.energyStorage = new EUEnergyStorageImpl(bufferCapacity, voltage);
-        this.itemHandler = new ItemStacksResourceHandler(processSlots * 2 + upgradeSlots) {
-            @Override
-            protected void onContentsChanged(int index, ItemStack previousContents) {
-                if (index >= 2 * SingleInputMachineBlockEntity.this.processSlots) overclock = null;
-                setChanged();
-            }
-        };
+        this.inventory = new MachineInventory(processSlots * 2 + upgradeSlots + extraSlots);
+        this.itemHandler = inventory;
         this.progress = new int[processSlots];
         this.maxProgress = new int[processSlots];
         this.cachedRecipes = new MachineRecipe[processSlots];
@@ -73,6 +79,33 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
 
     /** The {@code machine_type} of the recipes this machine runs right now. */
     protected abstract String recipeType();
+
+    /** Called after the contents of an item slot changed. */
+    protected void slotChanged(int index) { }
+
+    private final class MachineInventory extends ItemStacksResourceHandler {
+        private final int slots;
+
+        MachineInventory(int slots) {
+            super(slots);
+            this.slots = slots;
+        }
+
+        @Override
+        protected void onContentsChanged(int index, ItemStack previousContents) {
+            if (index >= 2 * processSlots) overclock = null;
+            slotChanged(index);
+            setChanged();
+        }
+
+        /** Saves written before a machine gained slots hold a shorter list; pad it back to full size. */
+        void restoreSize() {
+            if (size() >= slots) return;
+            net.minecraft.core.NonNullList<ItemStack> stacks = net.minecraft.core.NonNullList.withSize(slots, ItemStack.EMPTY);
+            for (int slot = 0; slot < size(); slot++) stacks.set(slot, getResource(slot).toStack(getAmountAsInt(slot)));
+            setStacks(stacks);
+        }
+    }
 
     /** Drops all progress and cached recipes, e.g. after the recipe type changed. */
     protected void resetProcessing() {
@@ -99,7 +132,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
             ItemResource inputResource = itemHandler.getResource(i);
             int inputAmount = itemHandler.getAmountAsInt(i);
 
-            if (!inputResource.isEmpty() && inputAmount > 0 && energyStorage.getEnergyStored() > 0) {
+            if (!inputResource.isEmpty() && inputAmount > 0) {
                 if (cachedRecipes[i] == null || !inputResource.equals(cachedInputResources[i])) {
                     cachedRecipes[i] = RecipeHelper.findMachineRecipe(level, recipeType(), inputResource.toStack(1));
                     cachedInputResources[i] = inputResource;
@@ -115,7 +148,14 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
                 maxProgress[i] = overclock.time(recipe.getProcessTime());
                 long energyPerTick = overclock.energy(recipe.getEnergyPerTick());
 
-                if (energyStorage.removeEnergy(energyPerTick) <= 0) continue;
+                // 电不够付一整 tick 时先攒着，攒够了才前进一步：供电一半，速度一半
+                if (paid == null) paid = new long[processSlots];
+                paid[i] += energyStorage.removeEnergy(energyPerTick - paid[i]);
+                if (paid[i] < energyPerTick) {
+                    starvedAt = tickCount;
+                    continue;
+                }
+                paid[i] = 0;
 
                 progress[i]++;
                 anyWorking = true;
@@ -157,6 +197,16 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
         return getBlockState().getBlock().getName();
     }
 
+    @Override
+    public int requestSlot(ItemResource resource) {
+        return logistics.RecipeInputs.isInput(level, recipeType(), resource) ? slotFor(resource, range(0, processSlots)) : -1;
+    }
+
+    @Override
+    public String getStatusKey() {
+        return tickCount - starvedAt < 40 ? "tooltip.iuce.status.undervoltage" : "";
+    }
+
     public boolean isWorking() {
         for (int value : progress) if (value > 0) return true;
         return false;
@@ -191,6 +241,7 @@ public abstract class SingleInputMachineBlockEntity extends MachineBlockEntity
         System.arraycopy(savedProgress, 0, progress, 0, Math.min(processSlots, savedProgress.length));
         System.arraycopy(savedMaxProgress, 0, maxProgress, 0, Math.min(processSlots, savedMaxProgress.length));
         itemHandler.deserialize(input);
+        inventory.restoreSize();
         overclock = null;
     }
 

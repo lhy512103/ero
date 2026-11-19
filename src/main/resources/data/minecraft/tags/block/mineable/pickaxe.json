@@ -67,6 +67,24 @@
     "iuce:reactor_casing_back",
     "iuce:reactor_casing_side",
     "iuce:chute",
-    "iuce:conveyor"
+    "iuce:conveyor",
+    "iuce:factory_hub",
+    "iuce:pneumatic_pipe",
+    "iuce:logistics_port",
+    "iuce:silo",
+    "iuce:fluid_tank",
+    "iuce:plant_casing",
+    "iuce:plant_frame",
+    "iuce:plant_drum",
+    "iuce:plant_controller",
+    "iuce:item_input_hatch",
+    "iuce:item_output_hatch",
+    "iuce:energy_hatch",
+    "iuce:energy_hatch_hv",
+    "iuce:mill_controller",
+    "iuce:repair_bench",
+    "iuce:lamp",
+    "iuce:converter",
+    "iuce:builder"
   ]
 }

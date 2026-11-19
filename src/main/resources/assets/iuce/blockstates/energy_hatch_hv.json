@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 0
+    },
+    "facing=north,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 0
+    },
+    "facing=north,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 90
+    },
+    "facing=east,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 90
+    },
+    "facing=east,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 180
+    },
+    "facing=south,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 180
+    },
+    "facing=south,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,running=false,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 270
+    },
+    "facing=west,running=false,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,running=true,formed=false": {
+      "model": "iuce:block/energy_hatch_hv",
+      "y": 270
+    },
+    "facing=west,running=true,formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

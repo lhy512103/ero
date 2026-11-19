@@ -49,6 +49,21 @@ public final class EUCapabilityRegistry {
 
         // 滑槽：任意面都可以放入和取出
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
+        // 工厂中枢：只进不出
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.FACTORY_HUB.get(), (hub, direction) -> hub.getIntake());
+        // 料仓与储罐
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.SILO.get(), (silo, direction) -> silo.getInventory());
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.FLUID_TANK.get(), (tank, direction) -> tank.getTank());
+        // 大机器的仓口
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
+        register(event, ModBlockEntities.ENERGY_HATCH.get());
+        // 电动修理台、电灯、能量转换器
+        register(event, ModBlockEntities.REPAIR_BENCH.get());
+        register(event, ModBlockEntities.LAMP.get());
+        register(event, ModBlockEntities.CONVERTER.get());
+        register(event, ModBlockEntities.BUILDER.get());
+        // 物流接口本身就是整个管网仓库的入口：漏斗、其他模组的管道、应用能源的存储总线都可以接在它上面
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.LOGISTICS_PORT.get(), (port, direction) -> port.networkInventory());
 
         // 线缆
         registerCable(event, ModBlockEntities.COPPER_CABLE.get());

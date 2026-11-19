@@ -127,6 +127,12 @@ public class ModItems {
     public static final DeferredItem<Item> BRONZE_ROTOR = registerSimpleItem("bronze_rotor");
     public static final DeferredItem<Item> MAGNET = registerSimpleItem("magnet");
     public static final DeferredItem<Item> ELECTRODE = registerSimpleItem("electrode");
+    // 金属成型机的模具：不消耗，放进机器决定加工方式
+    public static final DeferredItem<MoldItem> PLATE_MOLD = registerItem("plate_mold", p -> new MoldItem(p.stacksTo(1), 0));
+    public static final DeferredItem<MoldItem> WIRE_MOLD = registerItem("wire_mold", p -> new MoldItem(p.stacksTo(1), 1));
+    public static final DeferredItem<MoldItem> ROD_MOLD = registerItem("rod_mold", p -> new MoldItem(p.stacksTo(1), 2));
+    public static final DeferredItem<ConfiguratorItem> CONFIGURATOR = registerItem("configurator", ConfiguratorItem::new);
+    public static final DeferredItem<BlueprintItem> BLUEPRINT_TERMINAL = registerItem("blueprint_terminal", BlueprintItem::new);
 
     // 特殊锭 (Special Ingots)
     public static final DeferredItem<Item> IRRADIANT_URANIUM_INGOT = registerSimpleItem("irradiant_uranium_ingot");

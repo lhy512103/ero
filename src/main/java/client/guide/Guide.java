@@ -42,6 +42,8 @@ public final class Guide {
     @Nullable private static KeyMapping openKey;
 
     public static void init(IEventBus modBus) {
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) ->
+            event.register(GuideStructureRenderState.class, GuideStructureRenderer::new));
         modBus.addListener((RegisterKeyMappingsEvent event) -> {
             event.registerCategory(KEY_CATEGORY);
             openKey = new KeyMapping("key.iuce.open_guide", InputConstants.Type.KEYSYM, InputConstants.KEY_G, KEY_CATEGORY);

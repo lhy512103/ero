@@ -224,6 +224,14 @@ public class PlanterBlockEntity extends PoweredMachineBlockEntity implements Men
     @Override
     public String getMachineName() { return "种植机"; }
 
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        if (logistics.RecipeInputs.isInput(level, "planter", resource) || logistics.RecipeInputs.isCrop(level, worldPosition, resource)) {
+            return slotFor(resource, CULTIVATION_SLOT);
+        }
+        return logistics.RecipeInputs.isSecondInput(level, "planter", resource) ? slotFor(resource, SOIL_SLOT) : -1;
+    }
+
     private static final Component DISPLAY_NAME = Component.translatable("block.iuce.planter");
 
     @Override

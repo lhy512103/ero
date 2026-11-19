@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 金属成型机界面：布局与压缩机一致，箭头右侧多一个模式切换按钮。
+ * 金属成型机界面：布局与压缩机一致，箭头右侧多一个模具槽。
  */
 public class MetalFormerScreen extends AbstractContainerScreen<MetalFormerMenu> {
 
@@ -23,10 +23,10 @@ public class MetalFormerScreen extends AbstractContainerScreen<MetalFormerMenu> 
     private static final Identifier ARROW_ON = Identifier.parse("iuce:textures/gui/com/arrow_on.png");
     private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
 
-    /** 模式按钮（相对 GUI 左上角），18×18 */
-    private static final int MODE_X = 106;
-    private static final int MODE_Y = 38;
-    private static final int MODE_SIZE = 18;
+    /** 模具槽的边框（相对 GUI 左上角），18×18 */
+    private static final int MOLD_X = MetalFormerMenu.MOLD_X - 1;
+    private static final int MOLD_Y = MetalFormerMenu.MOLD_Y - 1;
+    private static final int MOLD_SIZE = 18;
 
     private static final int BTN_BORDER = 0xFF5F6D78;
     private static final int BTN_FACE = 0xFFD3E1DF;
@@ -47,61 +47,28 @@ public class MetalFormerScreen extends AbstractContainerScreen<MetalFormerMenu> 
             TEXTURE, this.leftPos, this.topPos, 0, 0,
             this.imageWidth, this.imageHeight,
             256, 256);
+        drawMoldSlot(graphics);
 
         super.extractContents(graphics, mouseX, mouseY, a);
 
         drawProgressArrow(graphics);
         drawPowerOn(graphics);
-        drawModeButton(graphics, mouseX, mouseY);
+        drawMoldHint(graphics, mouseX, mouseY);
     }
 
-    private int currentMode() {
-        int mode = menu.getMode();
-        return (mode >= 0 && mode < MetalFormerBlockEntity.MODE_COUNT) ? mode : 0;
+    /** Frame for the mold slot; drawn before the slots so the mold itself stays on top. */
+    private void drawMoldSlot(GuiGraphicsExtractor graphics) {
+        int x = this.leftPos + MOLD_X;
+        int y = this.topPos + MOLD_Y;
+        graphics.fill(x, y, x + MOLD_SIZE, y + MOLD_SIZE, BTN_BORDER);
+        graphics.fill(x + 1, y + 1, x + MOLD_SIZE - 1, y + MOLD_SIZE - 1, menu.hasMold() ? BTN_FACE : BTN_SHADE);
     }
 
-    private boolean isOverModeButton(double mouseX, double mouseY) {
-        double rx = mouseX - this.leftPos;
-        double ry = mouseY - this.topPos;
-        return rx >= MODE_X && rx < MODE_X + MODE_SIZE && ry >= MODE_Y && ry < MODE_Y + MODE_SIZE;
-    }
-
-    private static ItemStack modeIcon(int mode) {
-        return switch (mode) {
-            case 1 -> new ItemStack(ModBlockItems.COPPER_CABLE.get());
-            case 2 -> new ItemStack(ModItems.IRON_STICK.get());
-            default -> new ItemStack(ModItems.IRON_PLATE.get());
-        };
-    }
-
-    private void drawModeButton(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        int x = this.leftPos + MODE_X;
-        int y = this.topPos + MODE_Y;
-        boolean hover = isOverModeButton(mouseX, mouseY);
-        int mode = currentMode();
-
-        graphics.fill(x, y, x + MODE_SIZE, y + MODE_SIZE, BTN_BORDER);
-        graphics.fill(x + 1, y + 1, x + MODE_SIZE - 1, y + MODE_SIZE - 1, hover ? BTN_FACE_HOVER : BTN_FACE);
-        graphics.fill(x + 1, y + MODE_SIZE - 2, x + MODE_SIZE - 1, y + MODE_SIZE - 1, BTN_SHADE);
-        graphics.fill(x + MODE_SIZE - 2, y + 1, x + MODE_SIZE - 1, y + MODE_SIZE - 1, BTN_SHADE);
-        graphics.item(modeIcon(mode), x + 1, y + 1);
-
-        if (hover) {
-            graphics.setTooltipForNextFrame(
-                Component.translatable("tooltip.iuce.metal_former.mode", Component.translatable("tooltip.iuce.metal_former.mode." + mode)),
-                mouseX, mouseY);
+    private void drawMoldHint(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        int rx = mouseX - this.leftPos, ry = mouseY - this.topPos;
+        if (!menu.hasMold() && rx >= MOLD_X && rx < MOLD_X + MOLD_SIZE && ry >= MOLD_Y && ry < MOLD_Y + MOLD_SIZE) {
+            graphics.setTooltipForNextFrame(Component.translatable("tooltip.iuce.metal_former.no_mold"), mouseX, mouseY);
         }
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0 && isOverModeButton(event.x(), event.y())
-                && this.minecraft.gameMode != null) {
-            this.minecraft.gameMode.handleInventoryButtonClick(menu.containerId, MetalFormerMenu.BUTTON_CYCLE_MODE);
-            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            return true;
-        }
-        return super.mouseClicked(event, doubleClick);
     }
 
     private void drawProgressArrow(GuiGraphicsExtractor graphics) {

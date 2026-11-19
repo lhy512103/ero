@@ -154,8 +154,10 @@ public class ElectricFurnaceBlockEntity extends PoweredMachineBlockEntity implem
                 maxProgress = processTime;
 
                 // 尝试消耗能量（先从自身缓冲，不足时从感应炉抽取）
-                long consumed = consumeEnergyWithInduction(energyPerTick, inductionCount);
-                if (consumed <= 0) {
+                furnacePaid += consumeEnergyWithInduction(energyPerTick - furnacePaid, inductionCount);
+                boolean starved = furnacePaid < energyPerTick;
+                if (starved) noteStarved(); else furnacePaid = 0;
+                if (starved) {
                     if (wasWorking) {
                         updateRunningState();
                         setChanged();
@@ -224,6 +226,15 @@ public class ElectricFurnaceBlockEntity extends PoweredMachineBlockEntity implem
      * @param inductionCount 相邻感应炉数量
      * @return 实际消耗的能量
      */
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        boolean used = logistics.RecipeInputs.isInput(level, "electric_furnace", resource) || logistics.RecipeInputs.isCookable(level, resource);
+        return used ? slotFor(resource, INPUT_SLOT) : -1;
+    }
+
+    /** Energy already collected towards the current tick of work. */
+    private long furnacePaid;
+
     private long consumeEnergyWithInduction(long required, int inductionCount) {
         // 先从自身缓冲消耗
         long consumed = energyStorage.removeEnergy(required);

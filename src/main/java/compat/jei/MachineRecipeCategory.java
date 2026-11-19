@@ -22,7 +22,9 @@ import java.util.List;
 /**
  * One machine's JEI page. Every input is shown with the amount one operation consumes, followed by
  * the fluid and the catalyst; the right side lists the product, the by-products (with their chance)
- * and the fluid produced, so a recipe can be read off completely, e.g. to encode an AE2 pattern.
+ * and the fluid produced. Inputs and guaranteed outputs are ordinary JEI input / output slots with
+ * their real amounts, which is what Applied Energistics reads when the "+" button encodes a
+ * processing pattern from this page; by-products that only appear by chance are left out of it.
  */
 public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<MachineRecipe>> {
 
@@ -71,7 +73,11 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
         for (MachineRecipe.ExtraResult extra : recipe.getExtraResults()) {
             if (out >= OUTPUTS.length) break;
             String percent = extra.chance() >= 1 ? "100" : String.valueOf(Math.round(extra.chance() * 100));
-            builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1]).setStandardSlotBackground().add(extra.template().create())
+            boolean certain = extra.chance() >= 1;
+            var slot = certain ? builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1])
+                : builder.addSlot(mezz.jei.api.recipe.RecipeIngredientRole.RENDER_ONLY, OUTPUTS[out][0], OUTPUTS[out][1]);
+            if (!certain) builder.addInvisibleIngredients(mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT).add(extra.template().create());
+            slot.setStandardSlotBackground().add(extra.template().create())
                 .setOverlay(new ChanceBadge(percent + "%"), 0, 0)
                 .addRichTooltipCallback((view, tooltip) ->
                     tooltip.add(Component.translatable("jei.iuce.chance", percent).withStyle(ChatFormatting.YELLOW)));

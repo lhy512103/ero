@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "minecraft:glass_pane",
+      ""
+    ],
+    [
+      "",
+      "iuce:circuit",
+      ""
+    ],
+    [
+      "",
+      "minecraft:paper",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:blueprint_terminal",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:insulated_gold_cable",
+      ""
+    ],
+    [
+      "iuce:circuit",
+      "iuce:machine_casing",
+      "iuce:circuit"
+    ],
+    [
+      "",
+      "minecraft:redstone_block",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:converter",
+    "count": 1
+  }
+}

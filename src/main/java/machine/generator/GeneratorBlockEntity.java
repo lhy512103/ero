@@ -451,6 +451,11 @@ public class GeneratorBlockEntity extends MachineBlockEntity implements EnergyDi
         return getFuelBurnTime(resource.toStack(1)) > 0;
     }
 
+    @Override
+    public int requestSlot(ItemResource resource) {
+        return getFuelBurnTime(resource.toStack(1)) > 0 ? slotFor(resource, 0, 1) : -1;
+    }
+
     private int getFuelBurnTime(ItemStack fuel) {
 
 

@@ -66,12 +66,16 @@ MAX_EU_PER_TICK = 128
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
-    "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor",
+    "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor", "factory_hub",
+    "logistics_port", "silo", "fluid_tank", "configurator",
+    "plant_controller", "plant_frame", "plant_drum", "item_input_hatch", "item_output_hatch", "energy_hatch",
+    "energy_hatch_hv", "mill_controller", "repair_bench", "lamp", "converter", "builder", "blueprint_terminal",
     "batbox", "cesu", "mfe", "mfsu", "singulary_solar_generator",
     "copper_cable", "tin_cable", "gold_cable", "iron_cable", "glass_cable", "singular_cable",
     "insulated_copper_cable", "insulated_tin_cable", "insulated_gold_cable", "insulated_hv_cable",
     "fission_controller", "fission_controller_front", "reactor_casing", "reactor_casing_back", "reactor_casing_side",
     "wrench", "cutter", "forge_hammer", "treetap", "electric_wrench", "electric_treetap", "electric_hoe", "guide",
+    "plate_mold", "wire_mold", "rod_mold",
     "ejector_upgrade", "pulling_upgrade", "fluid_ejector_upgrade", "fluid_pulling_upgrade", "energy_storage_upgrade",
     "overclocker_upgrade", "overclocker_upgrade1", "overclocker_upgrade2",
     "coal_fuel", "single_use_battery", "irradiant_uranium_ingot", "coolant_bucket",
@@ -96,7 +100,7 @@ items = set(re.findall(r'register(?:Simple)?Item\(\s*"([a-z0-9_]+)"', java("item
 blocks = set(re.findall(r'register(?:Simple)?Block\(\s*"([a-z0-9_]+)"', java("block/ModBlocks.java")))
 block_item_source = java("block/ModBlockItems.java")
 block_items = {name.lower() for name in re.findall(r"registerBlockItem\(ModBlocks\.([A-Z0-9_]+)\)", block_item_source)}
-block_items |= set(re.findall(r'registerBlockItem\("([a-z0-9_]+)"', block_item_source))
+block_items |= set(re.findall(r'register(?:Block|Controller)Item\("([a-z0-9_]+)"', block_item_source))
 block_items &= blocks
 all_items = items | block_items
 

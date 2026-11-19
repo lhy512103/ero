@@ -82,7 +82,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
                 // 用水量由配方的 fluid_input 决定；配方要的不是水时无法加工
                 int water = cachedRecipe.fluidInputAmount(Fluids.WATER);
                 boolean stalled = water < 0 || (tank.getAmount() < water && progress == 0)
-                    || energyStorage.removeEnergy(energyPerTick) <= 0;
+                    || (progress < maxProgress && !payForTick(energyPerTick));
                 if (stalled) {
                     if (wasWorking) {
                         updateRunningState();
@@ -91,7 +91,8 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
                     return;
                 }
 
-                progress++;
+                // 做完后等出料的时候不再前进，也不再耗电
+                if (progress < maxProgress) progress++;
                 if (progress >= maxProgress && tryProcessOutput()) {
                     tank.drain(water);
                     progress = 0;
@@ -114,6 +115,7 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
 
     private boolean tryProcessOutput() {
         if (cachedOutput.isEmpty() || cachedRecipe == null) return false;
+        byproductBlocked = false;
 
         ItemStack outputStack = cachedOutput;
         ItemResource outputResource = ItemResource.of(outputStack);
@@ -134,7 +136,23 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
 
             if (itemHandler.insert(OUTPUT_SLOT, outputResource, outputStack.getCount(), tx) <= 0) return false;
 
-            // 副产物（概率产出，副产槽满则丢弃）
+            // 副产槽放不下就停机。不看这一次是否真的产出，否则可以靠反复重试躲过去
+            if (cachedRecipe.hasExtraResults() && level != null) {
+                try (Transaction check = Transaction.open(tx)) {
+                    for (MachineRecipe.ExtraResult extra : cachedRecipe.getExtraResults()) {
+                        ItemStack extraStack = extra.create();
+                        ItemResource extraResource = ItemResource.of(extraStack);
+                        int remaining = extraStack.getCount();
+                        remaining -= itemHandler.insert(EXTRA_OUTPUT_SLOT, extraResource, remaining, check);
+                        if (remaining > 0) {
+                            byproductBlocked = true;
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // 副产物按概率产出
             if (cachedRecipe.hasExtraResults() && level != null) {
                 for (MachineRecipe.ExtraResult extra : cachedRecipe.getExtraResults()) {
                     if (level.getRandom().nextFloat() >= extra.chance()) continue;
@@ -156,6 +174,12 @@ public class OreWasherBlockEntity extends PoweredMachineBlockEntity implements O
     }
 
     @Override public String getMachineName() { return "洗矿机"; }
+
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        if (logistics.RecipeInputs.isInput(level, "ore_washer", resource)) return slotFor(resource, INPUT1_SLOT);
+        return logistics.RecipeInputs.isSecondInput(level, "ore_washer", resource) ? slotFor(resource, INPUT2_SLOT) : -1;
+    }
     @Override public Component getDisplayName() { return DISPLAY_NAME; }
 
     @Nullable

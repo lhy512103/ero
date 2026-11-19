@@ -2,11 +2,15 @@ package client;
 
 import block.ChuteBlock;
 import block.ConveyorBlock;
+import com.mojang.blaze3d.vertex.QuadInstance;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -18,14 +22,21 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * While a conveyor or chute is held, outlines where it would be placed and draws an arrow for the
- * direction it would carry items, so the direction is known before the block is put down.
+ * While a conveyor or chute is held, shows the block as it would be placed: its model drawn
+ * half-transparent, a white wireframe around it and a yellow wireframe arrow for the direction it
+ * will carry items.
  */
 public final class PlacementPreview {
     private PlacementPreview() {}
 
-    private static final int COLOR = 0xFF40E0FF;
+    private static final int MODEL_TINT = 0xA0FFFFFF;
+    private static final int FRAME_COLOR = 0xFFFFFFFF;
+    private static final int ARROW_COLOR = 0xFFFFD21E;
+    private static final Direction[] SIDES = Direction.values();
 
     public static void onOutline(ExtractBlockOutlineRenderStateEvent event) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -43,14 +54,35 @@ public final class PlacementPreview {
             BlockPos pos = context.getClickedPos();
             boolean conveyor = block instanceof ConveyorBlock;
             Direction facing = conveyor ? state.getValue(ConveyorBlock.FACING) : state.getValue(ChuteBlock.FACING);
-            VoxelShape shape = Shapes.or(conveyor ? state.getShape(event.getLevel(), pos) : Shapes.block(),
-                arrow(facing, conveyor ? 6.5 : 8));
+            VoxelShape frame = state.getShape(event.getLevel(), pos);
+            VoxelShape arrow = arrow(facing, conveyor ? (state.getValue(ConveyorBlock.ASCENDING) || state.getValue(ConveyorBlock.DESCENDING) ? 14 : 6.5) : 8);
+
+            List<BlockStateModelPart> parts = new ArrayList<>();
+            minecraft.getModelManager().getBlockStateModelSet().get(state)
+                .collectParts(event.getLevel(), pos, state, RandomSource.create(42L), parts);
+
             event.addCustomRenderer((renderState, buffer, poseStack, translucentPass, levelState) -> {
-                if (translucentPass) return false;
+                if (!translucentPass) return false;
                 Vec3 camera = levelState.cameraRenderState.pos;
-                ShapeRenderer.renderShape(poseStack, buffer.getBuffer(RenderTypes.lines()), shape,
-                    pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z, COLOR,
-                    minecraft.gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth);
+                double x = pos.getX() - camera.x, y = pos.getY() - camera.y, z = pos.getZ() - camera.z;
+
+                poseStack.pushPose();
+                poseStack.translate(x, y, z);
+                VertexConsumer model = buffer.getBuffer(RenderTypes.translucentMovingBlock());
+                QuadInstance instance = new QuadInstance();
+                instance.setColor(MODEL_TINT);
+                for (BlockStateModelPart part : parts) {
+                    for (var quad : part.getQuads(null)) model.putBakedQuad(poseStack.last(), quad, instance);
+                    for (Direction side : SIDES) {
+                        for (var quad : part.getQuads(side)) model.putBakedQuad(poseStack.last(), quad, instance);
+                    }
+                }
+                poseStack.popPose();
+                buffer.endBatch(RenderTypes.translucentMovingBlock());
+
+                float width = minecraft.gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth;
+                ShapeRenderer.renderShape(poseStack, buffer.getBuffer(RenderTypes.lines()), frame, x, y, z, FRAME_COLOR, width);
+                ShapeRenderer.renderShape(poseStack, buffer.getBuffer(RenderTypes.lines()), arrow, x, y, z, ARROW_COLOR, width);
                 return false;
             });
             return;
@@ -64,15 +96,15 @@ public final class PlacementPreview {
 
     private static VoxelShape part(Direction facing, double height, double from, double to, double halfWidth) {
         double[] min = new double[3], max = new double[3];
-        double[] centre = {8, facing.getAxis() == Direction.Axis.Y ? 8 : height, 8};
+        boolean vertical = facing.getAxis() == Direction.Axis.Y;
+        double[] centre = {8, vertical ? 8 : height, 8};
         int[] step = {facing.getStepX(), facing.getStepY(), facing.getStepZ()};
         for (int axis = 0; axis < 3; axis++) {
             if (step[axis] != 0) {
                 min[axis] = centre[axis] + Math.min(from * step[axis], to * step[axis]);
                 max[axis] = centre[axis] + Math.max(from * step[axis], to * step[axis]);
             } else {
-                double half = axis == 1 ? 0.5 : halfWidth;
-                if (facing.getAxis() == Direction.Axis.Y) half = halfWidth;
+                double half = axis == 1 && !vertical ? 0.5 : halfWidth;
                 min[axis] = centre[axis] - half;
                 max[axis] = centre[axis] + half;
             }

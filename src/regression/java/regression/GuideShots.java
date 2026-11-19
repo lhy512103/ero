@@ -1,15 +1,23 @@
 package regression;
 
+import block.ModBlocks;
+import block.PlantControllerBlock;
 import client.guide.GuideBook;
 import client.guide.GuideScreen;
+import multiblock.PlantStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Development tool: opens every guide page and saves screenshots to {@code screenshots/guide_*.png},
@@ -22,6 +30,7 @@ public final class GuideShots {
     private static final List<String> pages = new ArrayList<>();
     private static int ticks, settle = -1, index, part;
     private static boolean started;
+    private static BlockPos industrialOrigin;
 
     public static void register() {
         NeoForge.EVENT_BUS.addListener(GuideShots::tick);
@@ -52,6 +61,14 @@ public final class GuideShots {
             handShots(minecraft);
             return;
         }
+        if ("panels".equals(System.getProperty("iuce.guideShots"))) {
+            panelShots(minecraft);
+            return;
+        }
+        if ("industrial".equals(System.getProperty("iuce.guideShots"))) {
+            industrialShots(minecraft);
+            return;
+        }
         if (index >= pages.size()) {
             if (++settle > 20) minecraft.stop();
             return;
@@ -65,14 +82,61 @@ public final class GuideShots {
         if (++settle < 8) return;
         String name = "guide_" + pages.get(index).replace('/', '-') + (part == 0 ? "" : "_" + part) + ".png";
         Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
-        int next = (part + 1) * 280;
-        if (part < 5 && screen.maxScroll() > 0 && next - 280 < screen.maxScroll()) {
+        int step = Integer.getInteger("iuce.guideShots.step", 280);
+        int next = (part + 1) * step;
+        if (part < 5 && screen.maxScroll() > 0 && next - step < screen.maxScroll()) {
             part++;
             screen.scrollTo(Math.min(next, screen.maxScroll()));
             settle = 4;
         } else {
             index++;
             settle = 0;
+        }
+    }
+
+    private static void industrialShots(Minecraft minecraft) {
+        var server = minecraft.getSingleplayerServer();
+        if (server == null || minecraft.player == null) { minecraft.stop(); return; }
+        settle++;
+        if (settle == 1 || settle == 150) {
+            boolean mill = settle == 150;
+            var uuid = minecraft.player.getUUID();
+            if (!mill) industrialOrigin = minecraft.player.blockPosition();
+            var playerPos = industrialOrigin;
+            minecraft.setScreen(null);
+            minecraft.options.hideGui = true;
+            server.execute(() -> {
+                var player = server.getPlayerList().getPlayer(uuid);
+                if (player == null) return;
+                var level = server.overworld();
+                int height = Math.min(level.getMaxY() - 32, Math.max(playerPos.getY() + 28, 120));
+                var origin = new BlockPos(playerPos.getX() + (mill ? 52 : -52), height, playerPos.getZ() + 8);
+                for (int x = -10; x <= 10; x++) {
+                    for (int z = -5; z <= 20; z++) {
+                        BlockPos floor = origin.offset(x, -2, z);
+                        level.getChunkAt(floor);
+                        level.setBlockAndUpdate(floor, Blocks.SMOOTH_STONE.defaultBlockState());
+                    }
+                }
+                var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
+                var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+                if (mill) state = state.setValue(PlantControllerBlock.LENGTH, 17);
+                level.setBlockAndUpdate(origin, state);
+                for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
+                    var part = cell.part().sample(Direction.NORTH);
+                    if (part.is(ModBlocks.PLANT_CASING.get())) part = ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos());
+                    level.setBlockAndUpdate(cell.pos(), part);
+                }
+                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set day");
+                player.setGameMode(GameType.SPECTATOR);
+                player.teleportTo(level, origin.getX() + 15, height + (mill ? 9 : 10), origin.getZ() - 10, Set.of(), 44, 14, true);
+            });
+        } else if (settle == 125 || settle == 274) {
+            var name = settle == 125 ? "iuce_ore_plant.png" : "iuce_rolling_mill.png";
+            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (settle > 285) {
+            minecraft.options.hideGui = false;
+            minecraft.stop();
         }
     }
 
@@ -108,6 +172,50 @@ public final class GuideShots {
             Screenshot.grab(minecraft.gameDirectory, "guide_inventory.png", minecraft.getMainRenderTarget(), 1, message -> { });
         } else if (settle > 76) {
             minecraft.stop();
+        }
+    }
+
+    /** {@code -PguideShots=panels}: places each multiblock terminal next to the player and captures its panel. */
+    private static void panelShots(Minecraft minecraft) {
+        var server = minecraft.getSingleplayerServer();
+        if (server == null || minecraft.player == null) { minecraft.stop(); return; }
+        var blocks = List.of(ModBlocks.PLANT_CONTROLLER, ModBlocks.MILL_CONTROLLER, ModBlocks.ITEM_INPUT_HATCH,
+            ModBlocks.ITEM_OUTPUT_HATCH, ModBlocks.ENERGY_HATCH_HV, ModBlocks.FACTORY_HUB);
+        settle++;
+        int step = (settle - 1) / 40, phase = (settle - 1) % 40;
+        if (step >= blocks.size()) { minecraft.stop(); return; }
+        if (phase == 0) {
+            var uuid = minecraft.player.getUUID();
+            var block = blocks.get(step).get();
+            server.execute(() -> {
+                var player = server.getPlayerList().getPlayer(uuid);
+                if (player == null) return;
+                var level = player.level();
+                BlockPos pos = player.blockPosition().offset(2 + step, 0, 2);
+                level.setBlockAndUpdate(pos, block.defaultBlockState());
+                var target = level.getBlockEntity(pos);
+                if (target instanceof blockentity.HatchBlockEntity hatch) {
+                    hatch.getInventory().set(0, net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.RAW_IRON), 48);
+                    hatch.getInventory().set(4, net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.COPPER_INGOT), 12);
+                }
+                if (target instanceof blockentity.EnergyHatchBlockEntity hatch) hatch.storage().setEnergy(52_000);
+                if (target instanceof blockentity.FactoryHubBlockEntity hub) {
+                    // Some products stocked, one short of a minute's worth, to show both gauge colours.
+                    var items = factory.FactoryRating.candidates(0);
+                    int[] amounts = {32, 32, 20, 9, 0, 32};
+                    for (int i = 0; i < items.size() && i < amounts.length; i++) {
+                        if (amounts[i] == 0) continue;
+                        try (var transaction = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                            hub.getIntake().insert(i, net.neoforged.neoforge.transfer.item.ItemResource.of(items.get(i)), amounts[i], transaction);
+                            transaction.commit();
+                        }
+                    }
+                    player.openMenu(hub, pos);
+                } else if (target != null) multiblock.MultiblockMenu.open(player, target);
+            });
+        } else if (phase == 30) {
+            String[] names = {"plant", "mill", "input", "output", "energy", "hub"};
+            Screenshot.grab(minecraft.gameDirectory, "panel_" + names[step] + ".png", minecraft.getMainRenderTarget(), 1, message -> { });
         }
     }
 }

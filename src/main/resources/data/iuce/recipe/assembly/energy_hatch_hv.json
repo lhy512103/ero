@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:insulated_hv_cable",
+      ""
+    ],
+    [
+      "iuce:advanced_circuit",
+      "iuce:energy_hatch",
+      "iuce:advanced_circuit"
+    ],
+    [
+      "",
+      "iuce:copper_coil",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:energy_hatch_hv",
+    "count": 1
+  }
+}

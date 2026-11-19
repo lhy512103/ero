@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:insulated_gold_cable",
+      ""
+    ],
+    [
+      "iuce:circuit",
+      "iuce:plant_casing",
+      "iuce:circuit"
+    ],
+    [
+      "",
+      "iuce:copper_coil",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:energy_hatch",
+    "count": 1
+  }
+}

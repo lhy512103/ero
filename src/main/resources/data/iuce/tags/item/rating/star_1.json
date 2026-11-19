@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "iuce:iron_plate",
+    "iuce:copper_plate",
+    "iuce:tin_plate",
+    "iuce:bronze_plate",
+    "iuce:iron_stick",
+    "iuce:copper_cable",
+    "iuce:tin_cable",
+    "iuce:insulated_copper_cable",
+    "iuce:rubber",
+    "iuce:circuit",
+    "iuce:iron_gear",
+    "iuce:bronze_ingot"
+  ]
+}

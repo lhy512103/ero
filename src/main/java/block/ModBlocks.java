@@ -24,6 +24,7 @@ import machine.storage.CesuBlockEntity;
 import machine.storage.MfeBlockEntity;
 import machine.storage.MfsuBlockEntity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -116,6 +117,42 @@ public class ModBlocks {
         ChuteBlock::new, () -> machineProperties().get().destroyTime(2.0f).noOcclusion());
     public static final DeferredBlock<ConveyorBlock> CONVEYOR = BLOCKS.registerBlock("conveyor",
         ConveyorBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
+    public static final DeferredBlock<FactoryHubBlock> FACTORY_HUB = BLOCKS.registerBlock("factory_hub",
+        FactoryHubBlock::new, machineProperties());
+    public static final DeferredBlock<PneumaticPipeBlock> PNEUMATIC_PIPE = BLOCKS.registerBlock("pneumatic_pipe",
+        PneumaticPipeBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
+    public static final DeferredBlock<LogisticsPortBlock> LOGISTICS_PORT = BLOCKS.registerBlock("logistics_port",
+        LogisticsPortBlock::new, () -> machineProperties().get().destroyTime(1.5f).noOcclusion());
+    public static final DeferredBlock<StorageBlock> SILO = BLOCKS.registerBlock("silo",
+        p -> new StorageBlock(p, false), machineProperties());
+    public static final DeferredBlock<StorageBlock> FLUID_TANK = BLOCKS.registerBlock("fluid_tank",
+        p -> new StorageBlock(p, true), machineProperties());
+    public static final DeferredBlock<PlantCasingBlock> PLANT_CASING = BLOCKS.registerBlock("plant_casing", PlantCasingBlock::new, machineProperties());
+    public static final DeferredBlock<RotatedPillarBlock> PLANT_FRAME = BLOCKS.registerBlock("plant_frame",
+        PlantFrameBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<RotatedPillarBlock> PLANT_DRUM = BLOCKS.registerBlock("plant_drum",
+        PlantDrumBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<PlantControllerBlock> PLANT_CONTROLLER = BLOCKS.registerBlock("plant_controller",
+        PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<HatchBlock> ITEM_INPUT_HATCH = BLOCKS.registerBlock("item_input_hatch",
+        HatchBlock::new, machineProperties());
+    public static final DeferredBlock<HatchBlock> ITEM_OUTPUT_HATCH = BLOCKS.registerBlock("item_output_hatch",
+        HatchBlock::new, machineProperties());
+    public static final DeferredBlock<MachineBlock> ENERGY_HATCH = BLOCKS.registerBlock("energy_hatch",
+        p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+    public static final DeferredBlock<MachineBlock> ENERGY_HATCH_HV = BLOCKS.registerBlock("energy_hatch_hv",
+        p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> MILL_CONTROLLER = BLOCKS.registerBlock("mill_controller",
+        PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<RepairBenchBlock> REPAIR_BENCH = BLOCKS.registerBlock("repair_bench",
+        RepairBenchBlock::new, machineProperties());
+    public static final DeferredBlock<MachineBlock> LAMP = BLOCKS.registerBlock("lamp",
+        p -> new MachineBlock(p, blockentity.LampBlockEntity::new, ModBlockEntities.LAMP),
+        () -> machineProperties().get().destroyTime(0.5f).lightLevel(state -> state.getValue(MachineBlock.RUNNING) ? 15 : 0));
+    public static final DeferredBlock<MachineBlock> CONVERTER = BLOCKS.registerBlock("converter",
+        p -> new MachineBlock(p, blockentity.ConverterBlockEntity::new, ModBlockEntities.CONVERTER), machineProperties());
+    public static final DeferredBlock<BuilderBlock> BUILDER = BLOCKS.registerBlock("builder",
+        BuilderBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> BATBOX = BLOCKS.registerBlock("batbox",
         p -> new MachineBlock(p, BatboxBlockEntity::new, ModBlockEntities.BATBOX), machineProperties());
     public static final DeferredBlock<MachineBlock> CESU = BLOCKS.registerBlock("cesu",

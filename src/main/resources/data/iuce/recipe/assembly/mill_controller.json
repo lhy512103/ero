@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:advanced_circuit",
+      ""
+    ],
+    [
+      "iuce:metal_former",
+      "iuce:plant_casing",
+      "iuce:metal_former"
+    ],
+    [
+      "",
+      "iuce:electric_motor",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:mill_controller",
+    "count": 1
+  }
+}

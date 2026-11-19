@@ -28,6 +28,24 @@ public class ModCreativeModeTabs {
         ModBlockItems.TRANSFORMER,
         ModBlockItems.CHUTE,
         ModBlockItems.CONVEYOR,
+        ModBlockItems.FACTORY_HUB,
+        ModBlockItems.PNEUMATIC_PIPE,
+        ModBlockItems.LOGISTICS_PORT,
+        ModBlockItems.SILO,
+        ModBlockItems.FLUID_TANK,
+        ModBlockItems.PLANT_CASING,
+        ModBlockItems.PLANT_FRAME,
+        ModBlockItems.PLANT_DRUM,
+        ModBlockItems.PLANT_CONTROLLER,
+        ModBlockItems.ITEM_INPUT_HATCH,
+        ModBlockItems.ITEM_OUTPUT_HATCH,
+        ModBlockItems.ENERGY_HATCH,
+        ModBlockItems.ENERGY_HATCH_HV,
+        ModBlockItems.MILL_CONTROLLER,
+        ModBlockItems.REPAIR_BENCH,
+        ModBlockItems.LAMP,
+        ModBlockItems.CONVERTER,
+        ModBlockItems.BUILDER,
         ModBlockItems.BATBOX,
         ModBlockItems.CESU,
         ModBlockItems.MFE,
@@ -160,7 +178,8 @@ public class ModCreativeModeTabs {
 
     private static final List<DeferredItem<? extends Item>> COMPONENTS = List.of(
         ModItems.COPPER_COIL, ModItems.HEATING_COIL, ModItems.ELECTRIC_MOTOR, ModItems.ADVANCED_MOTOR,
-        ModItems.IRON_GEAR, ModItems.BRONZE_GEAR, ModItems.BRONZE_ROTOR, ModItems.MAGNET, ModItems.ELECTRODE
+        ModItems.IRON_GEAR, ModItems.BRONZE_GEAR, ModItems.BRONZE_ROTOR, ModItems.MAGNET, ModItems.ELECTRODE,
+        ModItems.PLATE_MOLD, ModItems.WIRE_MOLD, ModItems.ROD_MOLD, ModItems.CONFIGURATOR, ModItems.BLUEPRINT_TERMINAL
     );
 
     private static final List<DeferredItem<? extends Item>> CELLS = List.of(

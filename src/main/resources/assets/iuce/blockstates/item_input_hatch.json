@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "iuce:block/item_input_hatch"
+    },
+    "formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "minecraft:anvil",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:machine_casing",
+      "iuce:iron_plate"
+    ],
+    [
+      "",
+      "iuce:circuit",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:repair_bench",
+    "count": 1
+  }
+}

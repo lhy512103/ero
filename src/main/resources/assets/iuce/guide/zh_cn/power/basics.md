@@ -31,4 +31,11 @@ icon: iuce:re_battery
 
 反过来没有限制：低压发电机可以给中压机器供电，只是速度慢。
 
+## 供电不足
+
+机器每 tick 要的电给不够时不会停，而是**按比例降速**：只拿到一半的电，就只有一半的速度。超频之后尤其常见——低压机器每 tick 最多收 32 EU，装满终极超频要一百多。
+
+> [!TIP]
+> 装了 Jade 的话，看向机器会提示「供电不足，降速运行」。换更粗的导线、多接一路电，或者少装一个超频。
+
 {cards: power/generators, power/cables, power/storage, power/transformer, power/solar}

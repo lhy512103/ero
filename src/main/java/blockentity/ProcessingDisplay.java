@@ -28,6 +28,11 @@ public interface ProcessingDisplay {
      *
      * @return 进度条前缀文字的翻译键
      */
+    /** Translation key of what is holding the machine back right now, or an empty string. */
+    default String getStatusKey() {
+        return "";
+    }
+
     default String getProgressLabel() {
         return "tooltip.iuce.progress.process";
     }

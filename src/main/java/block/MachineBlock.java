@@ -120,6 +120,11 @@ public class MachineBlock extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
 
+            if (blockEntity instanceof blockentity.EnergyHatchBlockEntity hatch) {
+                multiblock.MultiblockMenu.open(player, hatch);
+                return InteractionResult.SUCCESS;
+            }
+
             // 空手潜行右键：切换“产物退回进料面”
             if (player.isShiftKeyDown() && blockEntity instanceof MachineBlockEntity returning
                     && returning.getItemHandler() != null && returning.getOutputSlots().length > 0) {

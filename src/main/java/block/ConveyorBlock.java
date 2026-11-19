@@ -34,9 +34,10 @@ import java.util.Map;
  * Conveyor I: carries loose items (and nudges mobs) along its facing and feeds them into the
  * machine or container at its end. It has no block entity and needs no power.
  * <ul>
- * <li>Turns: a belt simply hands its items to the next belt, whichever way that one faces.</li>
+ * <li>Turns: a belt simply hands its items to the next belt, whichever way that one faces; a belt fed
+ * only from one side shows a curved surface.</li>
  * <li>Climbing: a belt whose next belt sits one block higher turns into a ramp by itself.</li>
- * <li>Descending: items drop off the end onto the belt below.</li>
+ * <li>Descending: a belt fed by a belt one block higher behind it turns into a down ramp.</li>
  * </ul>
  */
 public class ConveyorBlock extends Block {
@@ -44,10 +45,15 @@ public class ConveyorBlock extends Block {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     /** True when the belt it feeds is one block higher: this belt is a ramp. */
     public static final BooleanProperty ASCENDING = BooleanProperty.create("ascending");
+    /** True when the belt feeding it sits one block higher behind it: this belt is a down ramp. */
+    public static final BooleanProperty DESCENDING = BooleanProperty.create("descending");
+    /** Straight, or curved because items only arrive from the left or right. */
+    public static final EnumProperty<ConveyorShape> SHAPE = EnumProperty.create("shape", ConveyorShape.class);
     /** Blocks per tick the belt asks for (ground friction makes the real speed about 1.5 blocks per second). */
     public static final double SPEED = 0.125;
     private static final VoxelShape FLAT = Block.box(0, 0, 0, 16, 4, 16);
     private static final Map<Direction, VoxelShape> RAMPS = new EnumMap<>(Direction.class);
+    private static final Map<Direction, VoxelShape> DOWN_RAMPS = new EnumMap<>(Direction.class);
 
     static {
         int[] tops = {2, 5, 8, 11};
@@ -65,11 +71,14 @@ public class ConveyorBlock extends Block {
             }
             RAMPS.put(direction, shape);
         }
+        // a down ramp is the up ramp of the opposite direction
+        for (Direction direction : Direction.Plane.HORIZONTAL) DOWN_RAMPS.put(direction, RAMPS.get(direction.getOpposite()));
     }
 
     public ConveyorBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(ASCENDING, false));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(ASCENDING, false)
+            .setValue(DESCENDING, false).setValue(SHAPE, ConveyorShape.STRAIGHT));
     }
 
     @Override
@@ -77,7 +86,7 @@ public class ConveyorBlock extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, ASCENDING);
+        builder.add(FACING, ASCENDING, DESCENDING, SHAPE);
     }
 
     /** Runs the way the player looks; sneaking reverses it. */
@@ -85,25 +94,54 @@ public class ConveyorBlock extends Block {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
         if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) facing = facing.getOpposite();
-        return defaultBlockState().setValue(FACING, facing)
-            .setValue(ASCENDING, feedsHigherBelt(context.getLevel(), context.getClickedPos(), facing));
+        return shaped(context.getLevel(), context.getClickedPos(), defaultBlockState().setValue(FACING, facing));
     }
 
     private static boolean feedsHigherBelt(BlockGetter level, BlockPos pos, Direction facing) {
         return level.getBlockState(pos.relative(facing).above()).getBlock() instanceof ConveyorBlock;
     }
 
-    /** Recomputes whether the belt at {@code pos} is a ramp. */
+    /** True when a belt next to {@code pos} on that side (level with it, or the ramp one below) runs towards it. */
+    private static boolean fedFrom(BlockGetter level, BlockPos pos, Direction side) {
+        BlockPos neighbour = pos.relative(side);
+        for (BlockPos candidate : new BlockPos[]{neighbour, neighbour.below(), neighbour.above()}) {
+            BlockState state = level.getBlockState(candidate);
+            if (state.getBlock() instanceof ConveyorBlock && state.getValue(FACING) == side.getOpposite()) return true;
+        }
+        return false;
+    }
+
+    /** The state a belt facing like {@code state} takes at {@code pos}, given the belts around it. */
+    public static BlockState shaped(BlockGetter level, BlockPos pos, BlockState state) {
+        Direction facing = state.getValue(FACING);
+        ConveyorShape shape = ConveyorShape.STRAIGHT;
+        if (!fedFrom(level, pos, facing.getOpposite())) {
+            boolean left = fedFrom(level, pos, facing.getCounterClockWise());
+            boolean right = fedFrom(level, pos, facing.getClockWise());
+            if (left != right) shape = left ? ConveyorShape.LEFT : ConveyorShape.RIGHT;
+        }
+        boolean ascending = feedsHigherBelt(level, pos, facing);
+        BlockState behindAbove = level.getBlockState(pos.relative(facing.getOpposite()).above());
+        boolean descending = !ascending && behindAbove.getBlock() instanceof ConveyorBlock && behindAbove.getValue(FACING) == facing;
+        return state.setValue(ASCENDING, ascending).setValue(DESCENDING, descending).setValue(SHAPE, shape);
+    }
+
+    /** Recomputes ramp and curve of the belt at {@code pos}. */
     private static void refresh(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof ConveyorBlock)) return;
-        boolean ascending = feedsHigherBelt(level, pos, state.getValue(FACING));
-        if (state.getValue(ASCENDING) != ascending) level.setBlock(pos, state.setValue(ASCENDING, ascending), Block.UPDATE_ALL);
+        BlockState updated = shaped(level, pos, state);
+        if (updated != state) level.setBlock(pos, updated, Block.UPDATE_ALL);
     }
 
-    /** A belt appearing or disappearing changes the belts one step below it. */
+    /** A belt appearing, turning or disappearing changes the belts beside it, one step below and one step above. */
     private static void refreshAround(Level level, BlockPos pos) {
-        for (Direction direction : Direction.Plane.HORIZONTAL) refresh(level, pos.relative(direction).below());
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos side = pos.relative(direction);
+            refresh(level, side);
+            refresh(level, side.below());
+            refresh(level, side.above());
+        }
     }
 
     @Override
@@ -122,14 +160,16 @@ public class ConveyorBlock extends Block {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return state.getValue(ASCENDING) ? RAMPS.get(state.getValue(FACING)) : FLAT;
+        if (state.getValue(ASCENDING)) return RAMPS.get(state.getValue(FACING));
+        return state.getValue(DESCENDING) ? DOWN_RAMPS.get(state.getValue(FACING)) : FLAT;
     }
 
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
         Direction facing = state.getValue(FACING);
         boolean ascending = state.getValue(ASCENDING);
-        if (!ascending && entity.getY() > pos.getY() + 0.5) return;
+        boolean descending = state.getValue(DESCENDING);
+        if (!ascending && !descending && entity.getY() > pos.getY() + 0.5) return;
         Vec3 motion = entity.getDeltaMovement();
         if (!(entity instanceof ItemEntity item)) {
             if (entity instanceof Player player && player.isShiftKeyDown()) return;
@@ -148,6 +188,15 @@ public class ConveyorBlock extends Block {
             double y = along >= 0.8 ? pos.getY() + 1.3 : pos.getY() + 0.3 + Math.max(0, along + SPEED) * 0.7;
             item.setPos(entity.getX() + facing.getStepX() * step + (alongX ? 0 : sideways * 0.2), y,
                 entity.getZ() + facing.getStepZ() * step + (alongX ? sideways * 0.2 : 0));
+            item.setDeltaMovement(facing.getStepX() * SPEED, 0, facing.getStepZ() * SPEED);
+            return;
+        }
+
+        if (descending && along < 0.85) {
+            // glide down the slope; the last stretch is handled like a flat belt
+            item.setPos(entity.getX() + facing.getStepX() * SPEED + (alongX ? 0 : sideways * 0.2),
+                pos.getY() + 0.3 + Math.max(0, 0.85 - along - SPEED) * 0.75,
+                entity.getZ() + facing.getStepZ() * SPEED + (alongX ? sideways * 0.2 : 0));
             item.setDeltaMovement(facing.getStepX() * SPEED, 0, facing.getStepZ() * SPEED);
             return;
         }

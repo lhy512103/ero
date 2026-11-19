@@ -77,7 +77,7 @@ public class InductionFurnaceBlockEntity extends PoweredMachineBlockEntity imple
 
                 boolean stalled = input1Amount < cachedRecipe.getInputCount()
                     || input2Amount < cachedRecipe.getInput2Count()
-                    || energyStorage.removeEnergy(energyPerTick) <= 0;
+                    || !payForTick(energyPerTick);
                 if (stalled) {
                     if (wasWorking) {
                         updateRunningState();
@@ -142,6 +142,23 @@ public class InductionFurnaceBlockEntity extends PoweredMachineBlockEntity imple
     }
 
     @Override public String getMachineName() { return "感应炉"; }
+
+    /** An empty furnace takes any alloy ingredient; once one is in, only its partners (or more of the same) are asked for. */
+    @Override
+    public int requestSlot(net.neoforged.neoforge.transfer.item.ItemResource resource) {
+        int amount1 = itemHandler.getAmountAsInt(INPUT_SLOT_1), amount2 = itemHandler.getAmountAsInt(INPUT_SLOT_2);
+        if (amount1 > 0 && itemHandler.getResource(INPUT_SLOT_1).equals(resource)) return slotFor(resource, INPUT_SLOT_1);
+        if (amount2 > 0 && itemHandler.getResource(INPUT_SLOT_2).equals(resource)) return slotFor(resource, INPUT_SLOT_2);
+        if (amount1 <= 0 && amount2 <= 0) {
+            boolean used = logistics.RecipeInputs.isInput(level, "alloy_furnace", resource)
+                || logistics.RecipeInputs.isSecondInput(level, "alloy_furnace", resource);
+            return used ? INPUT_SLOT_1 : -1;
+        }
+        if (amount1 > 0 && amount2 > 0) return -1;
+        int present = amount1 > 0 ? INPUT_SLOT_1 : INPUT_SLOT_2;
+        return logistics.RecipeInputs.isPair(level, "alloy_furnace", itemHandler.getResource(present), resource)
+            ? (present == INPUT_SLOT_1 ? INPUT_SLOT_2 : INPUT_SLOT_1) : -1;
+    }
     @Override public Component getDisplayName() { return DISPLAY_NAME; }
 
     @Nullable

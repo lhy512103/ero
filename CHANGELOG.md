@@ -59,6 +59,48 @@
 53. Added: Conveyors climb by turning into a ramp when the next belt is one block higher, and can be rotated with a wrench.
 54. Added: Holding a conveyor or chute shows a placement preview with a direction arrow.
 55. Optimized: JEI machine pages are more compact and show the by-product chance as a badge on its slot.
+56. Fixed: Conveyor ramps did not line up with the belts below and above them.
+57. Added: A conveyor fed only from one side is shown as a curve.
+58. Optimized: The placement preview now shows the half-transparent block with a white frame and a yellow direction arrow.
+59. Added: Machine recipes can be encoded into Applied Energistics processing patterns with one click from JEI.
+60. Added: Conveyors descend: a belt fed from one block higher turns into a down ramp.
+61. Fixed: Machines that received less power than they needed still ran at full speed; they now slow down in proportion.
+62. Optimized: The Ore Washer and Electrolyzer stop when their by-product slot is full instead of discarding by-products, and no longer use power while waiting.
+63. Added: Jade shows when a machine is underpowered or stopped by a full by-product slot.
+64. Added: Factory Hub, which rates your factory with stars for keeping it supplied with products minute after minute.
+65. Added: One-star and two-star ratings, with a rating screen showing the wanted products, stock and progress.
+66. Added: Plate, wire and rod molds; the mold placed in the Metal Former decides what it makes, replacing the mode button.
+67. Optimized: Existing Metal Formers receive the mold matching their previous mode when the world is loaded.
+68. Added: Pneumatic Pipes and Logistics Interface I, a network that brings each machine what its recipes can use and carries its products away.
+69. Added: Logistics interfaces can be set to receive only or supply only, and filtered to a single item.
+70. Added: Silo, which stores 64 stacks of one item.
+71. Added: Fluid Tank, which stores 16 buckets of any one fluid.
+72. Added: Configurator, which copies the settings of one logistics interface to others.
+73. Added: Ore Processing Plant, a 5×5×5 multiblock that crushes, washes and smelts in one step, 16 at a time and at half the energy per item.
+74. Added: Plant Casing, Item Input Hatch, Item Output Hatch and Energy Hatch for building large machines.
+75. Added: Logistics interfaces on hatches feed a large machine what it can process and carry its products away.
+76. Added: Rolling Mill, a multiblock 9 to 17 blocks long whose mold decides between plates, wires and rods; a longer mill runs more at once.
+77. Added: HV Energy Hatch, which raises a large machine from 16 to 64 parallel operations.
+78. Added: Aiming at an unfinished large machine's controller outlines the blocks still missing, and right-clicking it with Plant Casing places them.
+79. Added: Electric Repair Bench, which restores the durability of any tool or armour with electricity.
+80. Added: Electric Lamp.
+81. Added: Energy Converter, which turns EU into Forge Energy for other mods' machines.
+82. Added: A logistics interface works as a container holding its whole network's stored items, so hoppers, other pipes or an Applied Energistics storage bus can use it.
+83. Added: Builder I, which places a large machine's casing by itself and asks the pipe network for exactly the blocks still missing.
+84. Added: Blueprint Terminal, which lists what a large machine still needs and sets the length of the Rolling Mill.
+85. Added: The pipe network carries fluids from pumps and tanks to machines.
+86. Added: Dyeing a logistics interface puts it on a colour channel, so one pipe run can serve several separate lines.
+87. Optimized: A pipe network with nothing to move checks less often and resumes at full speed when items arrive.
+88. Added: An optional brushed-steel resource pack for the Ore Processing Plant and Rolling Mill.
+89. Redesigned the Ore Processing Plant and Rolling Mill as a tall processing line and an open gantry mill with connected casing trim.
+90. Added industrial panels for plant controllers, item hatches and energy hatches.
+91. Fixed overlapping metal and glass surfaces that flickered on the Ore Processing Plant.
+92. Improved: Large machine controllers and hatches now use steel control panels with status lamps, energy gauges, and progress bars.
+93. Added: A formed Rolling Mill now shows an assembled mill with a reheating furnace, roll stands and a coiler that grows with its length.
+94. Improved: Guide structure views are drawn in 3D with correct block orientation and can be rotated by dragging.
+95. Added: Guide structure views for large machines can switch to show the formed machine.
+96. Improved: The Factory Hub screen uses the steel control-panel style, with star badges, stock gauges and a count of products already stocked.
+97. Fixed: The Factory Hub screen frame no longer shows the world through stripes in its steel casing.
 
 ### 中文
 
@@ -117,3 +159,45 @@
 53. 新增：下一格传送带高一格时传送带会自动变成斜坡爬升，并可用扳手转向。
 54. 新增：手持传送带或滑槽时显示摆放预览和方向箭头。
 55. 优化：JEI 机器配方页排版更紧凑，副产物概率显示为槽位角标。
+56. 修复：传送带斜坡与上下两格传送带接不上的问题。
+57. 新增：只从侧面进料的传送带会显示为弯道。
+58. 优化：摆放预览改为半透明方块模型，带白色线框和黄色方向箭头。
+59. 新增：机器配方可在 JEI 中一键编码为应用能源的处理样板。
+60. 新增：传送带可以下坡，被高一格的传送带送料时会自动变成下行斜坡。
+61. 修复：机器供电不足时仍按全速运行的问题，现在会按实际供电比例降速。
+62. 优化：洗矿机和电解机的副产物槽满时停机而不再丢弃副产物，等待期间不再耗电。
+63. 新增：Jade 会提示机器供电不足或被副产物堵住。
+64. 新增：工厂中枢，根据产线能否持续不断地供应产品给工厂评星。
+65. 新增：一星和二星评级，评级界面会显示认可的产品、库存和进度。
+66. 新增：板材、导线、棍材三种模具，金属成型机放入哪种模具就做哪种产品，取代原来的模式按钮。
+67. 优化：读取旧存档时，已有的金属成型机会自动获得与原模式对应的模具。
+68. 新增：气动管和物流接口 I，组成的管网会给每台机器送去它用得上的原料，并运走产物。
+69. 新增：物流接口可设为只进或只出，并可限定只通过一种物品。
+70. 新增：料仓，可存放 64 组同一种物品。
+71. 新增：储罐，可存放 16 桶任意一种流体。
+72. 新增：配置器，可把一个物流接口的设置复制到其他接口。
+73. 新增：选矿联合厂，5×5×5 的多方块大机器，打粉、洗矿、熔炼一步完成，一次 16 份，单件耗电减半。
+74. 新增：厂房外壳、物品输入仓、物品输出仓和能源仓，用于搭建大机器。
+75. 新增：物流接口贴在仓口上，会给大机器送去它能加工的原料并运走产物。
+76. 新增：轧制联合机，长 9 到 17 格的多方块大机器，放入的模具决定出板、导线还是棍，越长并行越多。
+77. 新增：高压能源仓，可把大机器的并行数从 16 提高到 64。
+78. 新增：准星对着未完成的大机器控制器会标出还缺的方块，手持厂房外壳右键控制器可一键补齐。
+79. 新增：电动修理台，用电修复任何工具和护甲的耐久。
+80. 新增：电灯。
+81. 新增：能量转换器，把 EU 转换成其他模组通用的能量。
+82. 新增：物流接口可当作容器使用，里面是整个管网的库存，漏斗、其他管道或应用能源的存储总线都能接入。
+83. 新增：施工机 I，自动摆放大机器的外壳，并只向管网索要还缺的数量。
+84. 新增：图纸终端，列出大机器还缺的材料，并可设定轧制联合机的长度。
+85. 新增：管网可以把泵和储罐里的流体送给机器。
+86. 新增：给物流接口染色可划分频道，一组管道能同时服务互不相干的几条线。
+87. 优化：没有东西可运的管网会降低检查频率，有物品时立即恢复全速。
+88. 新增：选矿联合厂与轧制联合机的可选拉丝钢资源包。
+89. 优化：选矿联合厂改为高塔式产线，轧制联合机改为开放式门架，两者均使用连接式外壳收边。
+90. 新增：联合厂控制器、物品仓和能源仓可右键打开工业面板。
+91. 修复：选矿联合厂钢架、滚筒和观察窗的重叠表面不再争抢显示。
+92. 优化：大型机器控制器和各类仓口改用钢板仪表面板，带状态灯、储能表和进度条。
+93. 新增：轧制联合机成型后显示整机模型，有加热炉、轧机机架和卷取机，并随长度伸展。
+94. 优化：指南里的多方块结构改为 3D 显示，方块朝向正确，可以拖动旋转。
+95. 新增：指南里的大型机器结构可以切换查看成型后的样子。
+96. 优化：工厂中枢界面改用钢板仪表风格，带星级徽章、库存表和已达标产品计数。
+97. 修复：工厂中枢界面的机壳不再有一条条透出背景的横线。

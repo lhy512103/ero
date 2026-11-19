@@ -67,6 +67,14 @@ public class ModMenus {
                 (machine.induction_furnace.InductionFurnaceBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
         ));
 
+    public static final Supplier<MenuType<factory.FactoryHubMenu>> FACTORY_HUB =
+        MENUS.register("factory_hub", () -> IMenuTypeExtension.create(
+            (IContainerFactory<factory.FactoryHubMenu>) (id, inv, data) -> new factory.FactoryHubMenu(id, inv, data)
+        ));
+
+    public static final Supplier<MenuType<multiblock.MultiblockMenu>> MULTIBLOCK =
+        MENUS.register("multiblock", () -> IMenuTypeExtension.create(multiblock.MultiblockMenu::new));
+
     public static final Supplier<MenuType<StorageMenu>> STORAGE =
         MENUS.register("storage", () -> IMenuTypeExtension.create(
             (IContainerFactory<StorageMenu>) (id, inv, data) -> new StorageMenu(id, inv,

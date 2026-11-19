@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "",
+      "iuce:advanced_circuit",
+      ""
+    ],
+    [
+      "iuce:macerator",
+      "iuce:plant_casing",
+      "iuce:ore_washer"
+    ],
+    [
+      "",
+      "iuce:electric_furnace",
+      ""
+    ]
+  ],
+  "result": {
+    "id": "iuce:plant_controller",
+    "count": 1
+  }
+}

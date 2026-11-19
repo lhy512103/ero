@@ -1,12 +1,18 @@
 package block;
 import ero.Ero;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 public class ModBlockItems {
@@ -49,6 +55,24 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> TRANSFORMER = registerBlockItem(ModBlocks.TRANSFORMER);
     public static final DeferredItem<BlockItem> CHUTE = registerBlockItem(ModBlocks.CHUTE);
     public static final DeferredItem<BlockItem> CONVEYOR = registerBlockItem(ModBlocks.CONVEYOR);
+    public static final DeferredItem<BlockItem> FACTORY_HUB = registerBlockItem(ModBlocks.FACTORY_HUB);
+    public static final DeferredItem<BlockItem> PNEUMATIC_PIPE = registerBlockItem(ModBlocks.PNEUMATIC_PIPE);
+    public static final DeferredItem<BlockItem> LOGISTICS_PORT = registerBlockItem(ModBlocks.LOGISTICS_PORT);
+    public static final DeferredItem<BlockItem> SILO = registerBlockItem(ModBlocks.SILO);
+    public static final DeferredItem<BlockItem> FLUID_TANK = registerBlockItem(ModBlocks.FLUID_TANK);
+    public static final DeferredItem<BlockItem> PLANT_CASING = registerBlockItem(ModBlocks.PLANT_CASING);
+    public static final DeferredItem<BlockItem> PLANT_FRAME = registerBlockItem(ModBlocks.PLANT_FRAME);
+    public static final DeferredItem<BlockItem> PLANT_DRUM = registerBlockItem(ModBlocks.PLANT_DRUM);
+    public static final DeferredItem<BlockItem> PLANT_CONTROLLER = registerControllerItem("plant_controller", ModBlocks.PLANT_CONTROLLER);
+    public static final DeferredItem<BlockItem> ITEM_INPUT_HATCH = registerBlockItem(ModBlocks.ITEM_INPUT_HATCH);
+    public static final DeferredItem<BlockItem> ITEM_OUTPUT_HATCH = registerBlockItem(ModBlocks.ITEM_OUTPUT_HATCH);
+    public static final DeferredItem<BlockItem> ENERGY_HATCH = registerBlockItem(ModBlocks.ENERGY_HATCH);
+    public static final DeferredItem<BlockItem> ENERGY_HATCH_HV = registerBlockItem(ModBlocks.ENERGY_HATCH_HV);
+    public static final DeferredItem<BlockItem> MILL_CONTROLLER = registerControllerItem("mill_controller", ModBlocks.MILL_CONTROLLER);
+    public static final DeferredItem<BlockItem> REPAIR_BENCH = registerBlockItem(ModBlocks.REPAIR_BENCH);
+    public static final DeferredItem<BlockItem> LAMP = registerBlockItem(ModBlocks.LAMP);
+    public static final DeferredItem<BlockItem> CONVERTER = registerBlockItem(ModBlocks.CONVERTER);
+    public static final DeferredItem<BlockItem> BUILDER = registerBlockItem(ModBlocks.BUILDER);
     public static final DeferredItem<BlockItem> BATBOX = registerBlockItem(ModBlocks.BATBOX);
     public static final DeferredItem<BlockItem> CESU = registerBlockItem("cesu", ModBlocks.CESU, p -> p.rarity(Rarity.UNCOMMON));
     public static final DeferredItem<BlockItem> MFE = registerBlockItem("mfe", ModBlocks.MFE, p -> p.rarity(Rarity.UNCOMMON));
@@ -114,5 +138,14 @@ public class ModBlockItems {
     }
     public static <T extends BlockItem> DeferredItem<T> registerBlockItem(String name, Supplier<T> blockItemSupplier) {
         return BLOCK_ITEMS.register(name, blockItemSupplier);
+    }
+    private static DeferredItem<BlockItem> registerControllerItem(String name, DeferredBlock<? extends Block> block) {
+        return BLOCK_ITEMS.registerItem(name, props -> new BlockItem(block.get(), props.useBlockDescriptionPrefix()) {
+            @Override
+            public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+                builder.accept(Component.translatable("tooltip.iuce.plant_controller.1").withStyle(ChatFormatting.GRAY));
+                builder.accept(Component.translatable("tooltip.iuce.plant_controller.2").withStyle(ChatFormatting.GRAY));
+            }
+        });
     }
 }
