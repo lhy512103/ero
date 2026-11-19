@@ -42,6 +42,7 @@ final class M1LineTests {
 
     static void register(Map<String, Consumer<GameTestHelper>> tests) {
         tests.put("m1_steam_shares", M1LineTests::steamShares);
+        tests.put("m1_boiler_gas", M1LineTests::boilerGas);
         tests.put("m1_pipe_reach", M1LineTests::pipeReach);
         tests.put("m1_ethylene_line", M1LineTests::ethyleneLine);
         tests.put("m1_byproducts", M1LineTests::byproducts);
@@ -135,6 +136,42 @@ final class M1LineTests {
     }
 
     // ------------------------------------------------------------------ utility shares
+
+    /**
+     * A boiler with gas in its second tank: the tank only takes a gas on the flammable tag, and one
+     * charge of 250 mB fires the firebox for longer than a lump of coal would. Gas and the fuel slot
+     * both feed the same firebox; the slot goes first when it holds something burnable.
+     */
+    private static void boilerGas(GameTestHelper helper) {
+        newRound(helper);
+        helper.setBlock(ORIGIN, ModBlocks.BOILER.get());
+        UtilityPlantBlockEntity boiler = helper.getBlockEntity(ORIGIN, UtilityPlantBlockEntity.class);
+        check(helper, boiler.getInputTankCount() == 2, "the boiler must have a water tank and a gas tank");
+        boiler.getTank().fill(Fluids.WATER, 8_000);
+
+        Fluid ethylene = ModFluids.chemical("ethylene");
+        Fluid co2 = ModFluids.chemical("carbon_dioxide");
+        MachineTank firebox = boiler.getTanks().get(1);
+        check(helper, firebox.fill(co2, 1_000) == 0, "the firebox must not take a gas that is not flammable");
+        check(helper, firebox.fill(ethylene, 500) == 500, "the firebox must take flammable gas");
+        check(helper, boiler.ready(), "a boiler with gas and water must be ready");
+
+        ProcessMachineBlockEntity tank = machine(helper, "liquefaction_tank", 1);
+        give(tank, 0, new ItemStack(ModItems.ENZYME_PREPARATION.get()));
+        input(tank, 0).fill(ModFluids.chemical("starch_slurry"), 1_000);
+
+        newRound(helper);
+        poweredTick(tank);
+        newRound(helper);
+        poweredTick(tank);
+        boiler.tick();
+        check(helper, boiler.occupied() == 1, "the boiler must hand its share to the tank, it serves " + boiler.occupied());
+        check(helper, boiler.burningGas(), "the firebox must be running on gas when the fuel slot is empty");
+        check(helper, firebox.getAmount() == 250, "one ignition must take 250 mB of gas, " + firebox.getAmount() + " is left");
+        check(helper, boiler.getBurnTime() > UtilityPlantBlockEntity.GAS_SHARE_TICKS - 10,
+            "one charge of gas must keep the firebox lit, " + boiler.getBurnTime() + " share ticks are left");
+        helper.succeed();
+    }
 
     /**
      * The boiler gives eight steam shares, so eight tanks next to it run and the ninth stays idle

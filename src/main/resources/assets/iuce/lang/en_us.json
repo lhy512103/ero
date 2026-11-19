@@ -412,7 +412,7 @@
   "message.iuce.return_products.on": "Return products to feeder: ON (products go back to the container that supplied the materials)",
   "message.iuce.return_products.off": "Return products to feeder: OFF",
   "jei.iuce.chance": "%s%% chance",
-  "jei.iuce.catalyst": "Not consumed",
+  "jei.iuce.catalyst": "Not consumed (stays in the machine)",
   "block.iuce.chute": "Chute",
   "block.iuce.conveyor": "Conveyor I",
   "tooltip.iuce.status.undervoltage": "Underpowered: running slowly",
@@ -525,6 +525,9 @@
   "jei.iuce.catalyst_wear": "Loses %s durability per operation",
   "jei.iuce.process.card": "Needs process card: %s",
   "jei.iuce.process.utilities": "Utilities: %s",
+  "jei.iuce.catalyst_hint": "Catalyst: stays in its slot and is not used up by this recipe",
+  "jei.iuce.process.released": "Released: nothing is produced",
+  "jei.iuce.process.released_line": "The input is released here and gives no product",
   "jei.iuce.process.segments": "Segments: %s",
   "config.jade.plugin_iuce.multi_tank_info": "Multi-tank Levels",
   "item.iuce.bagasse": "Bagasse",
@@ -553,5 +556,6 @@
   "block.iuce.liquefaction_tank": "Liquefaction Tank",
   "block.iuce.saccharification_tank": "Saccharification Tank",
   "block.iuce.vent_stack": "Vent Stack",
-  "block.iuce.wet_mill": "Wet Mill"
+  "block.iuce.wet_mill": "Wet Mill",
+  "message.iuce.utility.gas": "Gas: %s / %s mB"
 }

@@ -106,6 +106,12 @@
 100. Added: Boilers and cooling towers supply a fixed number of machines each, and pipes carry the supplies to every machine they touch.
 101. Added: A boiler or cooling tower that runs dry stops serving at once, and a machine stopped for lack of steam keeps the progress it already made.
 102. Added: Ethanol, ethylene, sugar solution, stillage and other biological fluids join the gas and water tags.
+103. Added: The vent stack shows what it is throwing away, with a flame on top when it burns flammable gas and a smoke plume otherwise.
+104. Fixed: Joined pipes no longer show textures cutting through one another at bends and junctions.
+105. Fixed: JEI pages left fluid slots empty and only named the fluid in the tooltip.
+106. Fixed: JEI pages drew the catalyst as a second optional ingredient instead of a slot that is not used up.
+107. Added: The boiler can run on flammable gas, burning 250 mB per ignition instead of a solid fuel item.
+108. Improved: Fluid textures are redrawn as flowing water-like sheets with animated motion.
 
 ### 中文
 
@@ -211,3 +217,9 @@
 100. 新增：锅炉与冷却塔各自供应固定台数的机器，管道可把供应送到接触到的每一台机器。
 101. 新增：锅炉或冷却塔断供后立即停供，缺蒸汽的机器会保留已有进度。
 102. 新增：乙醇、乙烯、糖液、酒糟液等生物流体加入气体与水的标签。
+103. 新增：排气塔会显示排出的东西——烧可燃气体时塔顶有火焰，排其它气体时冒烟。
+104. 修复：相连的管道在弯头和岔口处出现材质互相穿透的问题。
+105. 修复：JEI 配方页的流体槽是空框，只能在提示里看到流体名。
+106. 修复：JEI 配方页把催化剂画成了第二种可选原料，其实它不会被消耗。
+107. 新增：锅炉可用可燃气体助燃，每 250 mB 顶一次燃烧，与固体燃料共用一个炉膛。
+108. 优化：流体贴图按原版水的观感重绘，并带流动动画。

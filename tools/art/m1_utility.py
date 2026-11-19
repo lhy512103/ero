@@ -314,20 +314,24 @@ def arm_faces(name, length_from, length_to):
 
 
 def pipe_models(name):
-    # Junction and lone-pipe core: a capped fitting on every open side.
+    # Junction core: a collar on every side, applied only where the pipe branches or ends.
     core_faces = {side: {"uv": [4, 4, 12, 12], "texture": "#cap"}
                   for side in ("north", "south", "east", "west", "up", "down")}
     core = {"parent": "minecraft:block/block", "textures": {"cap": T + name + "_cap", "particle": T + name},
             "elements": [{"from": [4, 4, 4], "to": [12, 12, 12], "faces": core_faces}]}
-    # Straight-run core along z, rotated by the blockstate for x and y runs; it has no end faces.
+    # Straight-run body along z, rotated by the blockstate for x and y runs. Its ends are blanked so
+    # a lone pipe that stops mid-block is closed instead of showing a hole into the block.
     straight_faces, straight_textures = arm_faces(name, 4, 12)
-    straight_faces.pop("north")
-    straight_faces.pop("south")
+    straight_faces["north"] = {"uv": [4, 4, 12, 12], "texture": "#cap"}
+    straight_faces["south"] = {"uv": [4, 4, 12, 12], "texture": "#cap"}
+    straight_textures = dict(straight_textures, cap=T + name + "_cap")
     straight = {"parent": "minecraft:block/block", "textures": straight_textures,
                 "elements": [{"from": [4, 4, 4], "to": [12, 12, 12], "faces": straight_faces}]}
     faces, side_textures = arm_faces(name, 0, 4)
     faces.pop("south")                      # buried in the core
-    faces["north"]["cullface"] = "north"
+    # Nothing at the outer end either: pipes never occlude, so a disc here is not culled and would
+    # sit coplanar with the next pipe's disc, which is what makes a joined run flicker.
+    faces.pop("north")
     side = {"parent": "minecraft:block/block", "textures": side_textures,
             "elements": [{"from": [4, 4, 0], "to": [12, 12, 4], "faces": faces}]}
     item_faces, item_textures = arm_faces(name, 0, 16)
@@ -368,19 +372,25 @@ AXES = {"z": ("north", "south"), "x": ("east", "west"), "y": ("up", "down")}
 
 
 def pipe_blockstate(name):
-    """A straight run shows a seamless body; junctions and lone pipes show the capped core."""
+    """Everything that runs along a single axis shows the seamless straight body; every other shape
+    (a lone pipe, a bend, a T, a cross) gets the capped core, so a junction never has a hollow middle
+    for the neighbouring block to show through."""
     sides = [side for pair in AXES.values() for side in pair]
-    junction = [{side: "false" for side in sides}]
-    axes = list(AXES)
-    for i, first in enumerate(axes):
-        for second in axes[i + 1:]:
-            for a in AXES[first]:
-                for b in AXES[second]:
-                    junction.append({a: "true", b: "true"})
-    parts = [{"when": {"OR": junction}, "apply": {"model": "iuce:block/" + name + "_core"}}]
+    straight_by_axis = {axis: [] for axis in AXES}
+    core_states = []
+    for mask in range(64):
+        state = {side: bool(mask & (1 << index)) for index, side in enumerate(sides)}
+        joined = {side for side in sides if state[side]}
+        # One axis only: every joined side belongs to that pair, and at least one of them joins.
+        axis = next((a for a, pair in AXES.items()
+                     if joined and joined <= set(pair)), None)
+        if axis is not None:
+            straight_by_axis[axis].append(state)
+        else:
+            core_states.append(state)
+    parts = [{"when": {"OR": core_states}, "apply": {"model": "iuce:block/" + name + "_core"}}]
     for axis, rotation in (("z", {}), ("x", {"y": 90}), ("y", {"x": 90})):
-        others = {side: "false" for other, pair in AXES.items() if other != axis for side in pair}
-        parts.append({"when": {"OR": [dict(others, **{side: "true"}) for side in AXES[axis]]},
+        parts.append({"when": {"OR": straight_by_axis[axis]},
                       "apply": dict({"model": "iuce:block/" + name + "_straight"}, **rotation)})
     side_model = "iuce:block/" + name + "_side"
     for direction, rotation in (("north", {}), ("east", {"y": 90}), ("south", {"y": 180}), ("west", {"y": 270}),

@@ -4,7 +4,8 @@
     "body": "iuce:block/machine/utility/cooling_water_pipe",
     "across": "iuce:block/machine/utility/cooling_water_pipe_across",
     "end": "iuce:block/machine/utility/cooling_water_pipe_end",
-    "particle": "iuce:block/machine/utility/cooling_water_pipe"
+    "particle": "iuce:block/machine/utility/cooling_water_pipe",
+    "cap": "iuce:block/machine/utility/cooling_water_pipe_cap"
   },
   "elements": [
     {
@@ -19,6 +20,24 @@
         12
       ],
       "faces": {
+        "north": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#cap"
+        },
+        "south": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#cap"
+        },
         "east": {
           "uv": [
             4,

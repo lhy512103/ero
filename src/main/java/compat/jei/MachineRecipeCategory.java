@@ -56,15 +56,19 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
         }
         if (recipe.getFluidInputTemplate().isPresent()) {
             var fluid = recipe.getFluidInputTemplate().get();
+            // Without the renderer JEI paints only the frame and the fluid appears from nowhere.
             builder.addInputSlot(INPUTS[in][0], INPUTS[in][1]).setStandardSlotBackground()
+                .setFluidRenderer(Math.max(1000, fluid.amount()), true, 16, 16)
                 .add(fluid.fluid().value(), fluid.amount());
             in++;
         }
         if (recipe.getCatalyst().isPresent() && in < INPUTS.length) {
-            builder.addInputSlot(INPUTS[in][0], INPUTS[in][1]).setStandardSlotBackground()
+            // A catalyst slot is not an ingredient: the machine keeps the item across runs.
+            builder.addSlot(mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION, INPUTS[in][0], INPUTS[in][1])
+                .setStandardSlotBackground()
                 .addItemStacks(stacks(recipe.getCatalyst().get(), 1))
-                .addRichTooltipCallback((view, tooltip) ->
-                    tooltip.add(Component.translatable("jei.iuce.catalyst").withStyle(ChatFormatting.GRAY)));
+                .addRichTooltipCallback((view, tooltip) -> tooltip.add(
+                    Component.translatable("jei.iuce.catalyst_hint").withStyle(ChatFormatting.AQUA)));
         }
 
         int out = 0;
@@ -86,6 +90,7 @@ public class MachineRecipeCategory extends AbstractRecipeCategory<RecipeHolder<M
         if (recipe.getFluidOutputTemplate().isPresent() && out < OUTPUTS.length) {
             var fluid = recipe.getFluidOutputTemplate().get();
             builder.addOutputSlot(OUTPUTS[out][0], OUTPUTS[out][1]).setStandardSlotBackground()
+                .setFluidRenderer(Math.max(1000, fluid.amount()), true, 16, 16)
                 .add(fluid.fluid().value(), fluid.amount());
         }
     }

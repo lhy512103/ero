@@ -8,11 +8,11 @@ import machine.utility.Utility;
 import machine.utility.UtilityConsumer;
 import machine.utility.UtilityNetwork;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.MenuProvider;import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -207,6 +207,29 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
 
         reportUtilityDemand();
         if (wasWorking != isWorking()) updateRunningState();
+        if (current != null && !stalled) emitRelease(current.value());
+    }
+
+    /**
+     * The vent stack burns what it is throwing away. A recipe with no products is a release, and the
+     * left-over is shown at the top of the tower: a gas on the flammable tag goes up as a flare, and
+     * anything else as a plume of smoke. Particles come from the server, so every player sees them.
+     */
+    private void emitRelease(ProcessRecipe recipe) {
+        if (!recipe.results().isEmpty() || !recipe.fluidResults().isEmpty()) return;
+        if (!(level instanceof ServerLevel server) || server.getGameTime() % 2 != 0) return;
+        if (recipe.fluids().isEmpty()) return;
+        FluidResource held = tanks.get(0).getResource();
+        if (held.isEmpty() || !recipe.fluids().getFirst().test(held)) return;
+        double x = worldPosition.getX() + 0.5, y = worldPosition.getY() + 1.0, z = worldPosition.getZ() + 0.5;
+        if (held.getFluid().is(fluid.FluidTags.FLAMMABLE_GASES)) {
+            server.sendParticles(ParticleTypes.FLAME, x, y + 0.15, z, 4, 0.12, 0.05, 0.12, 0.01);
+            server.sendParticles(ParticleTypes.SMOKE, x, y + 0.6, z, 2, 0.1, 0.15, 0.1, 0.01);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 1.1, z, 1, 0.08, 0.2, 0.08, 0.005);
+        } else {
+            server.sendParticles(ParticleTypes.CLOUD, x, y + 0.2, z, 2, 0.1, 0.08, 0.1, 0.01);
+            server.sendParticles(ParticleTypes.SMOKE, x, y + 0.7, z, 1, 0.08, 0.15, 0.08, 0.005);
+        }
     }
 
     /**

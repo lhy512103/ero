@@ -19,16 +19,6 @@
         4
       ],
       "faces": {
-        "north": {
-          "uv": [
-            4,
-            4,
-            12,
-            12
-          ],
-          "texture": "#end",
-          "cullface": "north"
-        },
         "east": {
           "uv": [
             12,

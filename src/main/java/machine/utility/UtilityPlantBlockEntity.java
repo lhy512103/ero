@@ -8,7 +8,10 @@ import energy.EUEnergyStorage;
 import energy.EUEnergyStorageImpl;
 import energy.EUVoltage;
 import fluid.FluidProvider;
+import fluid.FluidTags;
 import fluid.MachineTank;
+import fluid.MachineTanksHandler;
+import fluid.MultiTankProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -19,13 +22,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * The two blocks that supply a utility. They share one class because what differs is only what
@@ -41,7 +49,7 @@ import java.util.Map;
  * shares drink a bucket every 60 ticks and the tower only spends power when it is used.
  * </p>
  */
-public class UtilityPlantBlockEntity extends MachineBlockEntity implements EnergyDisplay, FluidProvider, UtilitySupplier, TickableBlockEntity {
+public class UtilityPlantBlockEntity extends MachineBlockEntity implements EnergyDisplay, FluidProvider, MultiTankProvider, UtilitySupplier, TickableBlockEntity {
 
     /** Which block this is. Registered blocks pick one; the definition holds the numbers. */
     public enum Kind {
@@ -75,8 +83,17 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
         }
     }
 
+    /** Millibuckets of gas one ignition of the firebox burns. */
+    public static final int GAS_CHARGE = 250;
+    /** Share ticks one charge of gas gives: a little more than a lump of coal, since gas has no hauling cost. */
+    public static final int GAS_SHARE_TICKS = 4000;
+
     private final Kind kind;
     private final MachineTank tank;
+    /** Flammable gas for the firebox; null on a block that does not burn fuel. */
+    @Nullable private final MachineTank gas;
+    private final List<MachineTank> tanks;
+    private final MachineTanksHandler fluidHandler;
     private final ItemStacksResourceHandler itemHandler;
     private final EUEnergyStorageImpl energyStorage;
     private final Map<Utility, Integer> occupied = new EnumMap<>(Utility.class);
@@ -84,11 +101,18 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
     /** Share ticks left in the firebox. */
     private int burnTime;
     private int totalBurnTime;
+    /** Whether the firebox is running on gas rather than on what is in the fuel slot. */
+    private boolean burningGas;
 
     public UtilityPlantBlockEntity(BlockPos pos, BlockState state, Kind kind) {
         super(ModBlockEntities.UTILITY_PLANT.get(), pos, state);
         this.kind = kind;
         this.tank = MachineTank.of(Fluids.WATER, kind.tankCapacity, this::setChanged);
+        this.gas = kind.burnsFuel
+            ? new MachineTank(kind.tankCapacity, resource -> resource.getFluid().is(FluidTags.FLAMMABLE_GASES), this::setChanged)
+            : null;
+        this.tanks = gas == null ? List.of(tank) : List.of(tank, gas);
+        this.fluidHandler = new MachineTanksHandler(tanks, tanks.size());
         this.energyStorage = new EUEnergyStorageImpl(kind.energyCapacity, EUVoltage.LV);
         this.itemHandler = new ItemStacksResourceHandler(1) {
             @Override
@@ -110,6 +134,9 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
     @Override public int[] getInputSlots() { return kind.burnsFuel ? new int[]{0} : new int[0]; }
     @Override public int[] getOutputSlots() { return new int[0]; }
     @Override public MachineTank getTank() { return tank; }
+    @Override public List<MachineTank> getTanks() { return tanks; }
+    @Override public int getInputTankCount() { return tanks.size(); }
+    @Override public ResourceHandler<FluidResource> getFluidHandler() { return fluidHandler; }
     @Override public EUEnergyStorage getEnergyStorage() { return energyStorage; }
     public Component getDisplayName() { return getBlockState().getBlock().getName(); }
 
@@ -128,9 +155,15 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
      */
     @Override
     public boolean ready() {
-        if (kind.burnsFuel) return tank.getAmount() >= kind.waterPerShare && (burnTime > 0 || fuelInFirebox());
+        if (kind.burnsFuel) {
+            return tank.getAmount() >= kind.waterPerShare && (burnTime > 0 || fuelInFirebox() || gasTank().getAmount() >= GAS_CHARGE);
+        }
         return energyStorage.getEnergyStored() >= kind.energyPerShare && tank.getAmount() >= kind.waterPerShare;
     }
+
+    /** The firebox's gas tank. Only the boiler has one; the cooling tower burns nothing. */
+    @Nullable
+    private MachineTank gasTank() { return gas; }
 
     /** Whether the firebox holds any fuel, without burning it to find out. */
     private boolean fuelInFirebox() {
@@ -194,18 +227,39 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
         if (level instanceof ServerLevel server) UtilityNetwork.of(server).invalidate();
     }
 
+    /**
+     * Loads one charge into the firebox: a single item from the fuel slot if there is one, otherwise
+     * a charge of gas. The slot comes first so a stack of coal is not left sitting while the gas
+     * tank drains.
+     */
     private void loadFuel() {
+        if (loadSolidFuel()) {
+            burningGas = false;
+            return;
+        }
+        MachineTank gas = gasTank();
+        if (gas == null || gas.getAmount() < GAS_CHARGE) return;
+        if (gas.drain(GAS_CHARGE) != GAS_CHARGE) return;
+        burningGas = true;
+        burnTime = GAS_SHARE_TICKS;
+        totalBurnTime = burnTime;
+        setChanged();
+    }
+
+    /** Moves one item from the fuel slot into the firebox; false when the slot has no usable fuel. */
+    private boolean loadSolidFuel() {
         ItemResource resource = itemHandler.getResource(0);
-        if (resource.isEmpty()) return;
+        if (resource.isEmpty()) return false;
         int value = fuelValue(resource.toStack(1));
-        if (value <= 0) return;
+        if (value <= 0) return false;
         try (Transaction tx = Transaction.openRoot()) {
-            if (itemHandler.extract(0, resource, 1, tx) != 1) return;
+            if (itemHandler.extract(0, resource, 1, tx) != 1) return false;
             tx.commit();
         }
         burnTime = value * kind.fuelMultiplier;
         totalBurnTime = burnTime;
         setChanged();
+        return true;
     }
 
     private int fuelValue(ItemStack stack) {
@@ -250,8 +304,16 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
     }
 
     public Component describe() {
-        return Component.translatable("message.iuce.utility.stored", tank.getAmount(), tank.getCapacity());
+        Component water = Component.translatable("message.iuce.utility.stored", tank.getAmount(), tank.getCapacity());
+        if (gas == null) return water;
+        return water.copy().append(Component.literal("  ")).append(
+            Component.translatable("message.iuce.utility.gas", gas.getAmount(), gas.getCapacity()));
     }
+
+    /** Whether the firebox is currently running on gas; for the panel and for tests. */
+    public boolean burningGas() { return burningGas; }
+    /** The gas tank, or null on a block that does not burn fuel. */
+    @Nullable public MachineTank gasTankForDisplay() { return gas; }
 
     /** Fuel in hand goes into the firebox one item at a time; false when it is not fuel or the slot is full. */
     public boolean insertFuel(Player player, ItemStack stack) {
@@ -273,7 +335,9 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
         output.putLong("energy", energyStorage.getEnergyStored());
         output.putInt("burnTime", burnTime);
         output.putInt("totalBurnTime", totalBurnTime);
-        tank.save(output, "Tank");
+        output.putBoolean("burningGas", burningGas);
+        tank.save(output, "WaterTank");
+        if (gas != null) gas.save(output, "GasTank");
         itemHandler.serialize(output);
     }
 
@@ -283,7 +347,9 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
         input.getLong("energy").ifPresent(energyStorage::setEnergy);
         burnTime = input.getIntOr("burnTime", 0);
         totalBurnTime = input.getIntOr("totalBurnTime", 0);
-        input.child("Tank").ifPresent(tank::deserialize);
+        burningGas = input.getBooleanOr("burningGas", false);
+        input.child("WaterTank").ifPresent(tank::deserialize);
+        if (gas != null) input.child("GasTank").ifPresent(gas::deserialize);
         itemHandler.deserialize(input);
     }
 
