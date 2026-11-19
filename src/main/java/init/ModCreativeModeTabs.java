@@ -219,7 +219,10 @@ public class ModCreativeModeTabs {
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup." + Ero.MOD_ID + ".machine"))
             .icon(() -> ModBlockItems.GENERATOR.get().getDefaultInstance())
-            .displayItems((parameters, output) -> MACHINES.forEach(output::accept))
+            .displayItems((parameters, output) -> {
+                MACHINES.forEach(output::accept);
+                machine.process.ProcessMachines.all().forEach(entry -> output.accept(entry.item()));
+            })
             .build()
     );
 }

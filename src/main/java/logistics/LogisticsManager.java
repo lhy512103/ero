@@ -235,24 +235,35 @@ public final class LogisticsManager {
         }
     }
 
-    /** Pumps and tanks feed machines; a pump's surplus goes into tanks. Machines are never drained. */
+    /**
+     * Pumps and tanks feed machines; a pump's surplus goes into tanks. Machines with several tanks
+     * hand their products to machines that use them first and to tanks otherwise. Single-tank
+     * machines are never drained.
+     */
     private static long fluids(LogisticsPortBlockEntity source, List<LogisticsPortBlockEntity> ports) {
         int role = source.fluidRole();
-        if (role != LogisticsPortBlockEntity.FLUID_PUMP && role != LogisticsPortBlockEntity.FLUID_TANK) return 0;
+        boolean machine = role == LogisticsPortBlockEntity.FLUID_MACHINE;
+        if (role != LogisticsPortBlockEntity.FLUID_PUMP && role != LogisticsPortBlockEntity.FLUID_TANK && !(machine && source.supplies())) return 0;
         ResourceHandler<FluidResource> from = source.fluidHandler();
         if (from == null) return 0;
         long total = 0;
         int budget = FLUID_RATE * INTERVAL;
-        for (int index = 0; index < from.size() && budget > 0; index++) {
+        int first = machine && source.getLevel().getBlockEntity(source.targetPos()) instanceof fluid.MultiTankProvider tanks
+            ? tanks.getInputTankCount() : 0;   // a machine only gives away what is in its output tanks
+        for (int index = first; index < from.size() && budget > 0; index++) {
             FluidResource resource = from.getResource(index);
             long stored = from.getAmountAsLong(index);
             if (resource.isEmpty() || stored <= 0) continue;
             int offered = (int) Math.min(stored, budget);
-            for (int pass = 0; pass < (role == LogisticsPortBlockEntity.FLUID_PUMP ? 2 : 1) && offered > 0; pass++) {
-                int wanted = pass == 0 ? LogisticsPortBlockEntity.FLUID_CONSUMER : LogisticsPortBlockEntity.FLUID_TANK;
+            boolean surplusToTanks = role == LogisticsPortBlockEntity.FLUID_PUMP || machine;
+            for (int pass = 0; pass < (surplusToTanks ? 2 : 1) && offered > 0; pass++) {
                 for (LogisticsPortBlockEntity target : ports) {
-                    if (target == source || offered <= 0 || !target.receives() || target.getChannel() != source.getChannel()
-                            || target.fluidRole() != wanted) continue;
+                    if (target == source || offered <= 0 || !target.receives() || target.getChannel() != source.getChannel()) continue;
+                    int targetRole = target.fluidRole();
+                    boolean wanted = pass == 0
+                        ? targetRole == LogisticsPortBlockEntity.FLUID_CONSUMER || targetRole == LogisticsPortBlockEntity.FLUID_MACHINE
+                        : targetRole == LogisticsPortBlockEntity.FLUID_TANK;
+                    if (!wanted) continue;
                     ResourceHandler<FluidResource> to = target.fluidHandler();
                     if (to == null) continue;
                     int room;

@@ -77,6 +77,7 @@ public class EroClient {
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.MACERATOR.get(), MaceratorScreen::new);
+        event.register(machine.process.ProcessMachines.MENU.get(), client.gui.ProcessMachineScreen::new);
         event.register(ModMenus.GENERATOR.get(), GeneratorScreen::new);
         event.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
         event.register(ModMenus.COMPRESSOR.get(), CompressorScreen::new);

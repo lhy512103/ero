@@ -71,6 +71,19 @@ public final class MachineInfoPanel {
         Map.entry(IndustrialWorkbenchScreen.class, new Info("industrial_workbench"))
     );
 
+    /** The info entry of a screen; process machines use their machine id when the language file has one. */
+    private static Info info(Screen screen) {
+        if (screen instanceof client.gui.ProcessMachineScreen process) {
+            String id = process.getMenu().def().id();
+            return hasInfo(id) ? new Info(id) : null;
+        }
+        return INFOS.get(screen.getClass());
+    }
+
+    public static boolean hasInfo(String id) {
+        return I18n.exists("info.iuce." + id + ".title");
+    }
+
     /** 当前展开介绍面板的界面（切换界面时自动复位） */
     private static Screen expandedScreen = null;
 
@@ -80,7 +93,7 @@ public final class MachineInfoPanel {
 
     public static void onMouseClicked(ScreenEvent.MouseButtonPressed.Pre event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> screen)) return;
-        if (!INFOS.containsKey(screen.getClass())) return;
+        if (info(screen) == null) return;
 
         double relX = event.getMouseX() - screen.getLeftPos();
         double relY = event.getMouseY() - screen.getTopPos();
@@ -102,7 +115,7 @@ public final class MachineInfoPanel {
      */
     public static void onRenderForeground(ContainerScreenEvent.Render.Foreground event) {
         AbstractContainerScreen<?> screen = event.getContainerScreen();
-        Info info = INFOS.get(screen.getClass());
+        Info info = info(screen);
         if (info == null) return;
 
         GuiGraphicsExtractor graphics = event.getGuiGraphics();

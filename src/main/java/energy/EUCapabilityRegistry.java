@@ -30,6 +30,7 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.INDUCTION_FURNACE.get());
         register(event, ModBlockEntities.ORE_WASHER.get());
         register(event, ModBlockEntities.ELECTROLYZER.get());
+        register(event, machine.process.ProcessMachines.BLOCK_ENTITY.get());
 
         // 储能箱
         register(event, ModBlockEntities.TRANSFORMER.get());
@@ -119,8 +120,8 @@ public final class EUCapabilityRegistry {
             (blockEntity, direction) -> blockEntity instanceof blockentity.MachineBlockEntity be
                 ? be.getAutomationItemHandler(direction) : null);
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, type,
-            (blockEntity, direction) -> blockEntity instanceof fluid.FluidProvider provider
-                ? provider.getTank() : null);
+            (blockEntity, direction) -> blockEntity instanceof fluid.MultiTankProvider tanks ? tanks.getFluidHandler()
+                : blockEntity instanceof fluid.FluidProvider provider ? provider.getTank() : null);
     }
 
     private static void registerCable(RegisterCapabilitiesEvent event,

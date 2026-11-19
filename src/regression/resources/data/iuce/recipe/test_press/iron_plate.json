@@ -1,0 +1,12 @@
+{
+  "type": "iuce:process",
+  "machine": "test_press",
+  "items": [
+    { "item": "minecraft:iron_ingot", "count": 2 }
+  ],
+  "results": [
+    { "id": "iuce:iron_plate", "count": 1 }
+  ],
+  "energy": 1600,
+  "time": 40
+}

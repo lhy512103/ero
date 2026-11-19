@@ -67,6 +67,21 @@ public class EroJeiPlugin implements IModPlugin {
     public static final Supplier<IRecipeHolderType<OptionalCraftingRecipe>> OPTIONAL_CRAFTING_RECIPE_TYPE =
         IRecipeHolderType.createDeferred(ModRecipes.OPTIONAL_CRAFTING_TYPE);
 
+    /** One JEI page per process machine, keyed by machine id. */
+    private static final Map<String, IRecipeType<RecipeHolder<recipe.ProcessRecipe>>> PROCESS_TYPES = new LinkedHashMap<>();
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, IRecipeType<RecipeHolder<recipe.ProcessRecipe>>> processTypes() {
+        if (PROCESS_TYPES.isEmpty()) {
+            for (var entry : machine.process.ProcessMachines.all()) {
+                PROCESS_TYPES.put(entry.def().id(), IRecipeType.create(
+                    Identifier.parse(Ero.MOD_ID + ":process_" + entry.def().id()),
+                    (Class<? extends RecipeHolder<recipe.ProcessRecipe>>) (Class<?>) RecipeHolder.class));
+            }
+        }
+        return PROCESS_TYPES;
+    }
+
     /** 缓存的 JEI 运行时实例 */
     private static IJeiRuntime jeiRuntime;
 
@@ -91,6 +106,11 @@ public class EroJeiPlugin implements IModPlugin {
             registration.addRecipeCategories(
                 new MachineRecipeCategory(registration.getJeiHelpers(), mt.recipeType, mt.displayName, mt.iconBlock.get())
             );
+        }
+
+        for (var entry : machine.process.ProcessMachines.all()) {
+            registration.addRecipeCategories(new ProcessRecipeCategory(registration.getJeiHelpers(),
+                processTypes().get(entry.def().id()), entry.block().get().getName(), entry.block().get()));
         }
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
@@ -130,6 +150,12 @@ public class EroJeiPlugin implements IModPlugin {
 
             LOGGER.info("[Ero JEI] 机器类型 '{}': {} 个配方", machineType, recipes.size());
             registration.addRecipes(mt.recipeType, recipes);
+        }
+
+        // 通用加工机配方按机器分页
+        for (var holder : recipeMap.byType(ModRecipes.PROCESS_TYPE.get())) {
+            var type = processTypes().get(holder.value().machine());
+            if (type != null) registration.addRecipes(type, List.of(holder));
         }
 
         // 注册工业合成配方
@@ -241,6 +267,10 @@ public class EroJeiPlugin implements IModPlugin {
             registration.addCraftingStation(MACHINE_TYPES.get(formerTypes[mode]).recipeType, item.MoldItem.forMode(mode));
         }
 
+        for (var entry : machine.process.ProcessMachines.all()) {
+            registration.addCraftingStation(processTypes().get(entry.def().id()), entry.block().get());
+        }
+
         // 工业合成
         registration.addCraftingStation(CRAFTING_RECIPE_TYPE.get(), ModBlocks.INDUSTRIAL_WORKBENCH.get());
         registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, ModBlocks.INDUSTRIAL_WORKBENCH.get());
@@ -254,6 +284,21 @@ public class EroJeiPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        // 通用加工机：箭头位置随机器布局变化
+        registration.addGuiContainerHandler(client.gui.ProcessMachineScreen.class,
+            new mezz.jei.api.gui.handlers.IGuiContainerHandler<>() {
+                @Override
+                public Collection<mezz.jei.api.gui.handlers.IGuiClickableArea> getGuiClickableAreas(
+                        client.gui.ProcessMachineScreen screen, double mouseX, double mouseY) {
+                    var menu = screen.getMenu();
+                    var type = processTypes().get(menu.def().id());
+                    if (type == null) return List.of();
+                    var arrow = menu.layout().arrow;
+                    return List.of(mezz.jei.api.gui.handlers.IGuiClickableArea.createBasic(arrow.x(), arrow.y(),
+                        machine.process.ProcessLayout.ARROW_W, machine.process.ProcessLayout.ARROW_H, type));
+                }
+            });
+
         // 打粉机 — 进度箭头 (79, 36, 16x22)
         registration.addRecipeClickArea(MaceratorScreen.class,
             79, 36, 16, 22,

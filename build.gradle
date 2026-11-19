@@ -250,11 +250,37 @@ tasks.register('validateContent', Exec) {
     description = 'Validates recipes, item assets, translations and guide pages.'
     commandLine providers.gradleProperty('pythonCommand').getOrElse('python'), 'tools/validate_content.py', projectDir.absolutePath
     inputs.dir('src/main/resources')
+    inputs.dir('src/regression/resources')
     inputs.files('tools/validate_content.py', 'src/main/java/item/ModItems.java', 'src/main/java/block/ModBlocks.java', 'src/main/java/block/ModBlockItems.java')
     outputs.upToDateWhen { true }
     enabled = !providers.gradleProperty('skipContentValidation').isPresent()
 }
 tasks.named('check') { dependsOn 'validateContent' }
+
+// The content tables must already be generated, and every closed loop must stay closed.
+tasks.register('checkBalance', Exec) {
+    group = 'verification'
+    description = 'Regenerates machine files and checks conversion loops and recipe cycles.'
+    commandLine providers.gradleProperty('pythonCommand').getOrElse('python'), 'tools/balance.py', projectDir.absolutePath
+    inputs.dir('tools/content')
+    inputs.dir('src/main/resources/data')
+    inputs.files('tools/balance.py')
+    outputs.upToDateWhen { true }
+    enabled = !providers.gradleProperty('skipContentValidation').isPresent()
+}
+tasks.register('generateContent', Exec) {
+    group = 'build'
+    description = 'Writes per-machine definitions and assets from tools/content; --check only reports.'
+    if (providers.gradleProperty('checkGenerated').isPresent()) {
+        commandLine providers.gradleProperty('pythonCommand').getOrElse('python'), 'tools/gen_content.py', '--check'
+    } else {
+        commandLine providers.gradleProperty('pythonCommand').getOrElse('python'), 'tools/gen_content.py'
+    }
+    inputs.dir('tools/content')
+    outputs.upToDateWhen { false }
+    enabled = !providers.gradleProperty('skipContentValidation').isPresent()
+}
+tasks.named('check') { dependsOn 'checkBalance' }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation

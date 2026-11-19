@@ -36,7 +36,7 @@ public class LogisticsPortBlockEntity extends BlockEntity {
     public static final int SUPPLY = 2;
 
     /** What the block behind the interface is, as far as fluids go. */
-    public static final int FLUID_NONE = 0, FLUID_PUMP = 1, FLUID_TANK = 2, FLUID_CONSUMER = 3;
+    public static final int FLUID_NONE = 0, FLUID_PUMP = 1, FLUID_TANK = 2, FLUID_CONSUMER = 3, FLUID_MACHINE = 4;
 
     private int mode = AUTO;
     @Nullable private Item filter;
@@ -85,10 +85,14 @@ public class LogisticsPortBlockEntity extends BlockEntity {
         return level == null ? null : level.getCapability(Capabilities.Fluid.BLOCK, targetPos(), facing().getOpposite());
     }
 
-    /** Pumps supply, fluid tanks store, machines with a tank consume; anything else is left alone. */
+    /**
+     * Pumps supply, fluid tanks store, machines with a tank consume, and machines with several tanks
+     * both consume (input tanks) and supply (output tanks); anything else is left alone.
+     */
     public int fluidRole() {
         BlockEntity target = level == null ? null : level.getBlockEntity(targetPos());
         if (target instanceof PumpBlockEntity) return FLUID_PUMP;
+        if (target instanceof fluid.MultiTankProvider) return FLUID_MACHINE;
         if (target instanceof FluidTankBlockEntity) return FLUID_TANK;
         return target instanceof MachineBlockEntity && target instanceof FluidProvider ? FLUID_CONSUMER : FLUID_NONE;
     }

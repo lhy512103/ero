@@ -77,6 +77,7 @@ public class Ero {
     private static void onDatapackSync(OnDatapackSyncEvent event) {
         // 请求将自定义配方类型同步到客户端
         event.sendRecipes(ModRecipes.MACHINE_TYPE.get());
+        event.sendRecipes(ModRecipes.PROCESS_TYPE.get());
         event.sendRecipes(ModRecipes.ERO_CRAFTING_TYPE.get());
         event.sendRecipes(ModRecipes.STANDARD_CRAFTING_TYPE.get());
         event.sendRecipes(ModRecipes.OPTIONAL_CRAFTING_TYPE.get());

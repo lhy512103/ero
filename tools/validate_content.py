@@ -63,6 +63,17 @@ USES_FLUID_INPUT = {"ore_washer": "minecraft:water", "electrolyzer": "minecraft:
 USES_FLUID_OUTPUT = set()
 USES_CATALYST = set()
 MAX_EU_PER_TICK = 128
+# EU/t per voltage tier, matching energy/EUVoltage.
+VOLTAGE = {"ULV": 8, "LV": 32, "MV": 128, "HV": 512, "EV": 2048, "IV": 8192,
+           "LuV": 32768, "ZPM": 131072, "UV": 524288, "UHV": 2097152}
+
+# Process machines (iuce:process) come from the generated definitions, not from STATION.
+PROCESS_SOURCES = (RES, ROOT + "/src/regression/resources/")
+# Whoever supplies these arrives with M1; a recipe may reference them, nothing else checks them.
+UTILITIES = {"steam", "cooling_water", "lubricant", "air"}
+SEGMENTS = {"side_feed", "screen", "filter", "die"}
+CARD_OPTIONS = 4          # each option may be set from 1 to this level
+CARD_SLOTS_MAX = 8        # module slots on a process card
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
@@ -85,6 +96,8 @@ TERMINAL = set(STATION.values()) | {
 WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex"}
 # Registered but intentionally unobtainable / not shown.
 NOT_CRAFTABLE = {"logo", "coolant"}
+# Test-only process machines (tools/content/regression.json): never crafted and never used.
+TEST_ONLY = {"test_press"}
 
 # ------------------------------------------------------------------ 1. JSON validity
 json_count = 0
@@ -136,16 +149,109 @@ def check_id(ref, where):
 
 
 # ------------------------------------------------------------------ 2. recipes
+process_machines = {}   # id -> definition, from the generated iuce/machines/_index*.json
+for source in PROCESS_SOURCES:
+    for index_name in ("iuce/machines/_index.json", "iuce/machines/_index_regression.json"):
+        index_path = source + index_name
+        if not os.path.exists(index_path):
+            continue
+        try:
+            index = json.loads(read(index_path))
+        except ValueError:
+            continue
+        for machine_id in index.get("machines", []):
+            path = source + "iuce/machines/" + machine_id + ".json"
+            try:
+                definition = json.loads(read(path))
+            except (IOError, ValueError):
+                errors.append("cannot read machine definition " + os.path.relpath(path, ROOT))
+                continue
+            if definition.get("id") != machine_id:
+                errors.append("%s: id does not match the index" % os.path.relpath(path, ROOT))
+            process_machines[machine_id] = definition
+for machine_id, definition in process_machines.items():
+    if definition.get("items_in", 1) > 9 or definition.get("items_out", 1) > 9:
+        errors.append("%s: at most 9 input and 9 output slots" % machine_id)
+    if definition.get("items_out", 1) < 1 and not definition.get("fluids_out"):
+        errors.append("%s: produces nothing (no output slot or tank)" % machine_id)
+    for key in ("fluids_in", "fluids_out"):
+        for capacity in definition.get(key, []):
+            if capacity < 1000:
+                errors.append("%s: %s tank of %d mB holds less than one bucket" % (machine_id, key, capacity))
+    if definition.get("voltage", "LV") not in VOLTAGE:
+        errors.append("%s: unknown voltage %s" % (machine_id, definition.get("voltage")))
+    if not os.path.exists(ASSETS + "blockstates/" + machine_id + ".json"):
+        errors.append("%s: missing blockstate (run tools/gen_content.py)" % machine_id)
+
 recipes = []  # (name, inputs, outputs, station or None)
 by_machine_input = defaultdict(list)
 by_crafting_shape = defaultdict(list)
-for path in sorted(glob.glob(RECIPES + "*/*.json")):
+by_process_input = defaultdict(list)
+process_paths = [p for p in glob.glob(RECIPES + "*/*.json")]
+process_paths += [p for p in glob.glob(ROOT + "/src/regression/resources/data/iuce/recipe/*/*.json")]
+for path in sorted(process_paths):
     name = os.path.relpath(path, RECIPES).replace("\\", "/")[:-5]
+    if path.startswith(ROOT + "/src/regression/"):
+        name = os.path.relpath(path, ROOT + "/src/regression/resources/data/iuce/recipe").replace("\\", "/")[:-5]
     try:
         data = json.loads(read(path))
     except ValueError:
         continue
     kind = data.get("type", "")
+    if kind == "iuce:process":
+        machine = data["machine"]
+        definition = process_machines.get(machine)
+        if definition is None:
+            errors.append("%s: unknown process machine %s" % (name, machine))
+            continue
+        capacity = definition.get("voltage", "LV")
+        items_in = [entry["item"] for entry in data.get("items", [])]
+        fluid_counts = [entry["amount"] for entry in data.get("fluids", [])]
+        if len(data.get("items", [])) > definition.get("items_in", 1):
+            errors.append("%s: %s has %d input slots, recipe wants %d" % (name, machine, definition.get("items_in", 1), len(items_in)))
+        for entry in data.get("items", []):
+            if entry.get("count", 1) < 1:
+                errors.append("%s: item input count must be positive" % name)
+        if len(fluid_counts) > len(definition.get("fluids_in", [])):
+            errors.append("%s: %s has %d input tanks, recipe wants %d" % (name, machine, len(definition.get("fluids_in", [])), len(fluid_counts)))
+        for i, amount in enumerate(fluid_counts):
+            if i < len(definition.get("fluids_in", [])) and amount > definition["fluids_in"][i]:
+                errors.append("%s: %d mB does not fit the %d mB input tank" % (name, amount, definition["fluids_in"][i]))
+        for entry in data.get("fluid_results", []):
+            if not any(entry["amount"] <= cap for cap in definition.get("fluids_out", [])):
+                errors.append("%s: %d mB of output has no tank big enough" % (name, entry["amount"]))
+        slots_out = definition.get("items_out", 1)
+        if len(data.get("results", [])) > slots_out:
+            warnings.append("%s: %d products but only %d output slots; the rest cannot leave" % (name, len(data.get("results", [])), slots_out))
+        if "catalyst" in data and not definition.get("catalyst_slot"):
+            errors.append("%s: %s has no catalyst slot" % (name, machine))
+        if "card" in data:
+            if not definition.get("card_slot"):
+                errors.append("%s: %s has no card slot" % (name, machine))
+            options = data["card"].get("options", {})
+            if len(options) > CARD_SLOTS_MAX:
+                errors.append("%s: a process card holds at most %d modules" % (name, CARD_SLOTS_MAX))
+            for option, level in options.items():
+                if not 1 <= level <= CARD_OPTIONS:
+                    errors.append("%s: card option %s must be 1-%d" % (name, option, CARD_OPTIONS))
+        for utility in data.get("utilities", []):
+            if utility not in UTILITIES:
+                errors.append("%s: unknown utility %s" % (name, utility))
+        for segment in data.get("segments", []):
+            if segment not in SEGMENTS:
+                errors.append("%s: unknown segment %s" % (name, segment))
+        if data["time"] <= 0:
+            errors.append("%s: time must be positive" % name)
+        elif data["energy"] / data["time"] > VOLTAGE[capacity]:
+            errors.append("%s: %.0f EU/t exceeds %s's %d EU/t" % (name, data["energy"] / data["time"], capacity, VOLTAGE[capacity]))
+        key = (machine, tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
+        by_process_input[key].append(name)
+        inputs = items_in
+        outputs = [entry["id"] for entry in data.get("results", [])]
+        recipes.append((name, inputs, outputs, "iuce:" + machine))
+        for ref in inputs + outputs:
+            check_id(ref, name)
+        continue
     if kind == "iuce:machine":
         machine = data["machine_type"]
         if machine not in STATION:
@@ -207,7 +313,7 @@ for path in sorted(glob.glob(RECIPES + "*/*.json")):
     for ref in recipes[-1][1] + recipes[-1][2]:
         check_id(ref, name)
 
-for names in list(by_machine_input.values()) + list(by_crafting_shape.values()):
+for names in list(by_machine_input.values()) + list(by_crafting_shape.values()) + list(by_process_input.values()):
     if len(names) > 1:
         errors.append("recipes with identical inputs: " + ", ".join(names))
 flattened = defaultdict(list)
@@ -236,14 +342,17 @@ while True:
         break
     have |= set(found)
     tier.update(found)
-for item in sorted({"iuce:" + name for name in all_items - NOT_CRAFTABLE} - have):
+for item in sorted({"iuce:" + name for name in all_items - NOT_CRAFTABLE - TEST_ONLY} - have):
     errors.append("unobtainable: " + item)
 
 used = {ref for _, inputs, _, _ in recipes for ref in inputs}
-for item in sorted(all_items):
+for item in sorted(all_items - set(process_machines) - TEST_ONLY):
     if ("iuce:" + item) in used or item in TERMINAL or item.endswith("_block") or item.endswith("_ore"):
         continue
     errors.append("no use for iuce:%s (add a recipe that consumes it, or list it in TERMINAL)" % item)
+for machine_id in sorted(set(process_machines) - TEST_ONLY):
+    if "iuce:" + machine_id not in used and machine_id not in TERMINAL:
+        errors.append("no use for iuce:%s (process machines need a recipe or a TERMINAL entry)" % machine_id)
 
 # ------------------------------------------------------------------ 3. assets and names
 languages = {}
@@ -310,7 +419,7 @@ for language_dir in sorted(glob.glob(GUIDE + "*/")):
             if structure not in structures:
                 errors.append("%s: missing structure %s" % (where, structure))
         for machine in re.findall(r"\{recipes:\s*([a-z0-9_]+)", text):
-            if machine not in STATION:
+            if machine not in STATION and machine not in process_machines:
                 errors.append("%s: unknown machine type %s" % (where, machine))
 for structure in sorted(structures):
     data = json.loads(read(GUIDE + "structures/" + structure + ".json"))

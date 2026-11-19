@@ -63,6 +63,7 @@ public final class RegressionTests {
         TESTS.put("upgrade_install_and_stacking", RegressionTests::upgrades);
         TESTS.put("multiblock_panels", RegressionTests::multiblockPanels);
         MachineTests.register(TESTS);
+        ProcessMachineTests.register(TESTS);
         StressTests.register(TESTS);
     }
     public static void register(IEventBus bus) {

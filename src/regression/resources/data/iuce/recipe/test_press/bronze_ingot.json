@@ -1,0 +1,13 @@
+{
+  "type": "iuce:process",
+  "machine": "test_press",
+  "items": [
+    { "item": "minecraft:iron_ingot" },
+    { "item": "iuce:tin_ingot" }
+  ],
+  "results": [
+    { "id": "iuce:bronze_ingot", "count": 1 }
+  ],
+  "energy": 2000,
+  "time": 50
+}
