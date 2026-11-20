@@ -47,7 +47,16 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
 
     /** Reasons a machine is not running, in the order they are checked. Index = sync id. */
     public static final List<String> REASONS = List.of("", "no_recipe", "no_card", "wrong_card", "no_catalyst",
-        "missing_input", "missing_utility", "missing_segment", "output_full", "tank_full");
+        "missing_input", "missing_utility", "missing_segment", "output_full", "tank_full", "needs_drying");
+    public static final List<String> MOLDS = List.of("crate", "pail", "pail_lid", "brick", "fitting", "housing", "emitter", "lamp_shade");
+    private int mold;
+    public int mold() { return mold; }
+    public void nextMold() {
+        mold = (mold + 1) % MOLDS.size();
+        current = null;
+        progress = 0;
+        setChanged();
+    }
 
     private final ProcessMachineDef def;
     private final List<MachineTank> tanks = new ArrayList<>();
@@ -256,6 +265,7 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         reason = "";
         int best = 0;
         for (RecipeHolder<ProcessRecipe> holder : ProcessRecipeCache.recipes(level, def.id())) {
+            if (def.id().equals("cnc_machining_center") && !holder.id().identifier().getPath().endsWith("/" + MOLDS.get(mold))) continue;
             String why = check(holder.value());
             if (why.isEmpty()) {
                 current = holder;
@@ -332,6 +342,7 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         int hits = countPresentInputs(recipe);
         int needed = recipe.items().size() + recipe.fluids().size();
         if (hits == 0 && needed > 0) return "no_recipe";                // nothing of this recipe is here
+        if (def.id().equals("injection_molder") && !itemHandler.getResource(0).toStack(1).has(PlasticComponents.DRIED.get())) return "needs_drying";
         if (recipe.card().isPresent()) {
             if (def.cardIndex() < 0 || itemHandler.getAmountAsInt(def.cardIndex()) <= 0) return "no_card";
             if (!ProcessCards.matches(itemHandler.getResource(def.cardIndex()).toStack(1), recipe.card().get())) return "wrong_card";
@@ -430,9 +441,22 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
      * @return empty on success, else "output_full" or "tank_full"
      */
     private String insertProducts(ProcessRecipe recipe, TransactionContext transaction, boolean roll) {
+        ItemStack feed = def.itemsIn() == 0 ? ItemStack.EMPTY : itemHandler.getResource(0).toStack(1);
         for (ProcessRecipe.Output output : recipe.results()) {
             if (roll && output.chance() < 1 && level.getRandom().nextFloat() >= output.chance()) continue;
             ItemStack stack = output.create();
+            if (def.id().equals("dehumidifying_dryer")) {
+                stack = feed.copyWithCount(stack.getCount());
+                stack.set(PlasticComponents.DRIED.get(), net.minecraft.util.Unit.INSTANCE);
+            } else if (def.id().equals("injection_molder")) {
+                if (stack.is(item.ModItems.SPRUE.get())) stack.set(PlasticComponents.SOURCE.get(), net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(feed.getItem()));
+                stack.copyFrom(net.minecraft.core.component.DataComponents.DYED_COLOR, feed);
+            } else if (def.id().equals("plastic_granulator")) {
+                var source = feed.get(PlasticComponents.SOURCE.get());
+                if (source == null) return "missing_input";
+                stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(source));
+                stack.copyFrom(net.minecraft.core.component.DataComponents.DYED_COLOR, feed);
+            }
             ItemResource resource = ItemResource.of(stack);
             int remaining = stack.getCount();
             // stack onto matching products first, then use empty slots
@@ -473,6 +497,7 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         int[] assigned = assignTanks(recipe);
         if (assigned == null || !itemsAvailable(recipe)) return;
         try (Transaction transaction = Transaction.openRoot()) {
+            if (!insertProducts(recipe, transaction, true).isEmpty()) return;
             for (ProcessRecipe.ItemInput input : recipe.items()) {
                 int needed = input.count();
                 for (int slot : getInputSlots()) {
@@ -488,7 +513,6 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
                 int amount = recipe.fluids().get(f).amount();
                 if (tank.extract(0, tank.getResource(), amount, transaction) != amount) return;
             }
-            if (!insertProducts(recipe, transaction, true).isEmpty()) return;
             recipe.catalyst().ifPresent(catalyst -> wearCatalyst(catalyst, transaction));
             transaction.commit();
         }
@@ -524,6 +548,8 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
 
     @Override
     protected void saveExtra(ValueOutput output) {
+        output.putInt("Mold", mold);
+        output.putInt("ProcessLayout", 1);
         for (int i = 0; i < tanks.size(); i++) tanks.get(i).save(output, "tank" + i);
         if (current != null) output.putString("recipe", current.id().identifier().toString());
     }
@@ -531,11 +557,25 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     @Override
     protected void loadExtra(ValueInput input) {
         for (int i = 0; i < tanks.size(); i++) {
-            int index = i;
-            input.child("tank" + i).ifPresent(child -> tanks.get(index).deserialize(child));
+            boolean old = input.getIntOr("ProcessLayout", 0) == 0;
+            int index = old && def.id().equals("polymerization_reactor") ? i + 2 : i;
+            if (index < tanks.size()) input.child("tank" + i).ifPresent(child -> tanks.get(index).deserialize(child));
         }
         current = null;
         searchNeeded = true;
+        mold = Math.clamp(input.getIntOr("Mold", 0), 0, MOLDS.size() - 1);
+        if (input.getIntOr("ProcessLayout", 0) == 0) {
+            int first = switch (def.id()) {
+                case "polymerization_reactor", "catalyst_prep_tank" -> 1;
+                case "evaporator", "distillation_column" -> 0;
+                default -> -1;
+            };
+            if (first >= 0) {
+                for (int slot = def.slotCount() - 1; slot > first; slot--)
+                    itemHandler.set(slot, itemHandler.getResource(slot - 1), itemHandler.getAmountAsInt(slot - 1));
+                itemHandler.set(first, ItemResource.EMPTY, 0);
+            }
+        }
         // the recipe is looked up again on the first tick; progress is kept if it is still the one that runs
         savedRecipe = input.getString("recipe").map(Identifier::tryParse).orElse(null);
     }

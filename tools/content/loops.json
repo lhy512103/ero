@@ -1,6 +1,11 @@
 {
-  "cycles": ["iuce:enzyme_preparation"],
+  "cycles": ["iuce:enzyme_preparation", "iuce:brine"],
   "loops": [
+    {
+      "name": "Chloralkali recombination",
+      "recipes": ["membrane_cell/electrolysis", "hcl_furnace/synthesis", "neutralizer/acid"],
+      "conserved": ["iuce:brine", "iuce:chlorine", "iuce:hydrogen", "iuce:hydrogen_chloride", "iuce:caustic_solution"]
+    },
     {
       "name": "PLA mother liquor recovery",
       "recipes": ["evaporator/recover_lactic_acid"],

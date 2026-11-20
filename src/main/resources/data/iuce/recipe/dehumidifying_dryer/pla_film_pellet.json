@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "dehumidifying_dryer",
+  "time": 100,
+  "energy": 1600,
+  "items": [
+    {
+      "item": "iuce:pla_film_pellet",
+      "count": 8
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pla_film_pellet",
+      "count": 8
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "iuce:block/toy_brick",
+  "textures": {
+    "0": "iuce:block/toy_brick_blue"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "iuce:process",
+  "machine": "additive_reactor",
+  "time": 100,
+  "energy": 1600,
+  "fluids": [
+    {
+      "fluid": "iuce:ethanol",
+      "amount": 250
+    },
+    {
+      "fluid": "iuce:chlorine",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:initiator",
+      "count": 4
+    }
+  ]
+}

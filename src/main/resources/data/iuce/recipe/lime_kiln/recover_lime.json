@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "lime_kiln",
+  "time": 160,
+  "energy": 5120,
+  "items": [
+    {
+      "item": "iuce:carbide_slag",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:quicklime",
+      "count": 1
+    }
+  ]
+}

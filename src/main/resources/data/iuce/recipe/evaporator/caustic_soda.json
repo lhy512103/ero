@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "evaporator",
+  "time": 120,
+  "energy": 1920,
+  "fluids": [
+    {
+      "fluid": "iuce:caustic_solution",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "results": [
+    {
+      "id": "iuce:caustic_soda",
+      "count": 2
+    }
+  ]
+}

@@ -615,7 +615,8 @@ final class MachineTests {
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, net.minecraft.world.phys.Vec3.ZERO)
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL, pickaxe));
             if (block == ModBlocks.RUBBER_LEAVES.get()) continue;   // leaves drop saplings by chance
-            check(helper, loot.size() == 1 && loot.get(0).is(block.asItem()), holder.getId() + " must drop itself, dropped " + loot);
+            var expected = block == ModBlocks.ROCK_SALT_ORE.get() ? ModItems.ROCK_SALT.get() : block.asItem();
+            check(helper, loot.size() == 1 && loot.get(0).is(expected), holder.getId() + " must drop " + expected + ", dropped " + loot);
         }
 
         BlockPos pos = new BlockPos(1, 1, 1);

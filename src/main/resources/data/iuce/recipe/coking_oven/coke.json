@@ -1,0 +1,28 @@
+{
+  "type": "iuce:process",
+  "machine": "coking_oven",
+  "time": 400,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "minecraft:coal",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:coke",
+      "count": 3
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:coke_oven_gas",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:coal_tar",
+      "amount": 250
+    }
+  ]
+}

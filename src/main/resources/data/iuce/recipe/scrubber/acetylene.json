@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "scrubber",
+  "time": 100,
+  "energy": 1600,
+  "fluids": [
+    {
+      "fluid": "iuce:crude_acetylene",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:caustic_solution",
+      "amount": 100
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:acetylene",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:spent_lye",
+      "amount": 100
+    }
+  ]
+}

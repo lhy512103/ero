@@ -1,0 +1,23 @@
+{
+  "type": "iuce:process",
+  "machine": "cnc_machining_center",
+  "time": 400,
+  "energy": 25600,
+  "items": [
+    {
+      "item": "iuce:tool_steel_ingot",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:mold_blank",
+      "count": 1,
+      "components": {
+        "minecraft:custom_data": {
+          "mold": "emitter"
+        }
+      }
+    }
+  ]
+}

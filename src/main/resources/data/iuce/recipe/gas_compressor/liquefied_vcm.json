@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "gas_compressor",
+  "time": 80,
+  "energy": 5120,
+  "fluids": [
+    {
+      "fluid": "iuce:vcm_gas",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:liquefied_vcm",
+      "amount": 1000
+    }
+  ]
+}

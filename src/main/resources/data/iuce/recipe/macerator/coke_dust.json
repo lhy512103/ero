@@ -1,0 +1,12 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "macerator",
+  "input": "iuce:coke",
+  "input_count": 1,
+  "result": {
+    "id": "iuce:coke_dust",
+    "count": 2
+  },
+  "time": 100,
+  "energy": 1600
+}

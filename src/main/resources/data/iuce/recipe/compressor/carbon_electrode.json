@@ -1,0 +1,11 @@
+{
+  "type": "iuce:machine",
+  "machine_type": "compressor",
+  "input": "iuce:electrode_mix",
+  "result": {
+    "id": "iuce:carbon_electrode",
+    "count": 1
+  },
+  "time": 100,
+  "energy": 1600
+}

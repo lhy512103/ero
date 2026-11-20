@@ -1,0 +1,29 @@
+{
+  "type": "iuce:process",
+  "machine": "vcm_converter",
+  "time": 160,
+  "energy": 15360,
+  "fluids": [
+    {
+      "fluid": "iuce:acetylene",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:hydrogen_chloride",
+      "amount": 500
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:mercury_free_catalyst",
+    "damage": 1
+  },
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:crude_vcm",
+      "amount": 500
+    }
+  ]
+}

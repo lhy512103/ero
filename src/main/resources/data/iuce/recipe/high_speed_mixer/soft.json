@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "high_speed_mixer",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:pvc_resin",
+      "count": 6
+    },
+    {
+      "item": "iuce:heat_stabilizer",
+      "count": 1
+    },
+    {
+      "item": "iuce:plasticizer",
+      "count": 3
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:soft_pvc_dry_blend",
+      "count": 8
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "color=white": {
+      "model": "iuce:block/toy_brick_white"
+    },
+    "color=orange": {
+      "model": "iuce:block/toy_brick_orange"
+    },
+    "color=magenta": {
+      "model": "iuce:block/toy_brick_magenta"
+    },
+    "color=light_blue": {
+      "model": "iuce:block/toy_brick_light_blue"
+    },
+    "color=yellow": {
+      "model": "iuce:block/toy_brick_yellow"
+    },
+    "color=lime": {
+      "model": "iuce:block/toy_brick_lime"
+    },
+    "color=pink": {
+      "model": "iuce:block/toy_brick_pink"
+    },
+    "color=gray": {
+      "model": "iuce:block/toy_brick_gray"
+    },
+    "color=light_gray": {
+      "model": "iuce:block/toy_brick_light_gray"
+    },
+    "color=cyan": {
+      "model": "iuce:block/toy_brick_cyan"
+    },
+    "color=purple": {
+      "model": "iuce:block/toy_brick_purple"
+    },
+    "color=blue": {
+      "model": "iuce:block/toy_brick_blue"
+    },
+    "color=brown": {
+      "model": "iuce:block/toy_brick_brown"
+    },
+    "color=green": {
+      "model": "iuce:block/toy_brick_green"
+    },
+    "color=red": {
+      "model": "iuce:block/toy_brick_red"
+    },
+    "color=black": {
+      "model": "iuce:block/toy_brick_black"
+    }
+  }
+}

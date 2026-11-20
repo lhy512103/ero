@@ -1,0 +1,28 @@
+{
+  "type": "iuce:process",
+  "machine": "acetylene_generator",
+  "time": 100,
+  "energy": 1600,
+  "items": [
+    {
+      "item": "iuce:calcium_carbide",
+      "count": 2
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:crude_acetylene",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:carbide_slurry",
+      "amount": 1000
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "plastic_granulator",
+  "time": 60,
+  "energy": 960,
+  "items": [
+    {
+      "item": "iuce:sprue",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pla_injection_pellet",
+      "count": 1
+    }
+  ]
+}

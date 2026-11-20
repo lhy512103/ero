@@ -77,6 +77,8 @@ CARD_SLOTS_MAX = 8        # module slots on a process card
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
+    "air_compressor", "crate", "toy_brick", "plastic_pail", "drip_emitter", "pipe_fitting",
+    "machine_housing", "rigid_pvc_dry_blend", "soft_pvc_dry_blend", "heavy_residue",
     "process_card", "process_design_table", "pla_injection_pellet", "pla_film_pellet",
     "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor", "factory_hub",
     "logistics_port", "silo", "fluid_tank", "configurator",
@@ -97,7 +99,7 @@ TERMINAL = set(STATION.values()) | {
     "bagasse", "distillers_grains",
 }
 # Obtained from the world rather than from a recipe.
-WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex"}
+WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex", "limestone", "rock_salt"}
 # Registered but intentionally unobtainable / not shown.
 NOT_CRAFTABLE = {"logo", "coolant", "creative_utility_source"}
 # Process machines that only take fluids away (venting, flaring): no output slot or tank on purpose.
@@ -258,6 +260,8 @@ for path in sorted(process_paths):
             errors.append("%s: a wearing catalyst leaves as spent catalyst, but %s has no output slot" % (name, machine))
         key = (machine, catalyst, json.dumps(data.get("card"), sort_keys=True),
                tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
+        if machine == "cnc_machining_center":
+            key += (json.dumps(data["results"][0].get("components"), sort_keys=True),)
         by_process_input[key].append(name)
         # the catalyst is not consumed, but the machine cannot run without one, so it counts as an input
         inputs = items_in + ([catalyst] if catalyst else [])
@@ -322,7 +326,9 @@ for path in sorted(process_paths):
         station = None if kind == "iuce:standard_crafting" else "iuce:industrial_workbench"
         recipes.append((name, inputs, [data["result"]["id"]], station))
     elif kind == "minecraft:smelting":
-        recipes.append((name, [data["ingredient"]], [data["result"]["id"]], None))
+        ingredient = data["ingredient"]
+        ref = ingredient["items"] if isinstance(ingredient, dict) else ingredient
+        recipes.append((name, [ref], [data["result"]["id"]], None))
     else:
         errors.append("%s: unknown recipe type %s" % (name, kind))
         continue

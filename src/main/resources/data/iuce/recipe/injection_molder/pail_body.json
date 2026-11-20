@@ -1,0 +1,30 @@
+{
+  "type": "iuce:process",
+  "machine": "injection_molder",
+  "time": 100,
+  "energy": 4800,
+  "items": [
+    {
+      "item": "iuce:pla_injection_pellet",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:pail_mold",
+    "damage": 0
+  },
+  "utilities": [
+    "air",
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:pail_body",
+      "count": 1
+    },
+    {
+      "id": "iuce:sprue",
+      "count": 1
+    }
+  ]
+}

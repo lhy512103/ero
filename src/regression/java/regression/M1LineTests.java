@@ -47,6 +47,9 @@ final class M1LineTests {
         tests.put("m1_ethylene_line", M1LineTests::ethyleneLine);
         tests.put("m1_byproducts", M1LineTests::byproducts);
         tests.put("m2_pla_line", M1LineTests::plaLine);
+        tests.put("m3_injection", M1LineTests::injection);
+        tests.put("legacy_pla_layout", M1LineTests::legacyLayout);
+        tests.put("m4_pvc", PvcLineTest::run);
     }
 
     // ------------------------------------------------------------------ helpers
@@ -405,6 +408,54 @@ final class M1LineTests {
         check(helper, fresh > 0 && recycled >= 1000 && pellets > 0, "both feeds and the pelletizer must run");
         check(helper, mother == input(recovery, 0).getAmount() + 2 * (recycled + output(recovery, 0).getAmount()),
             "mother liquor recovery drifted");
+        helper.succeed();
+    }
+
+    private static void legacyLayout(GameTestHelper helper) {
+        var original = machine(helper, "polymerization_reactor", 1);
+        give(original, 2, new ItemStack(ModItems.TIN_CATALYST.get()));
+        give(original, 3, machine.process.ProcessCards.write(new recipe.ProcessRecipe.CardRequirement("pla", Map.of("grade", 2))));
+        output(original, 0).setAmount(ModFluids.chemical("pla_melt_film"), 700);
+        var registries = helper.getLevel().registryAccess();
+        var tag = original.saveWithoutMetadata(registries);
+        tag.remove("ProcessLayout");
+        tag.put("tank0", tag.get("tank2").copy());
+        tag.remove("tank1");
+        tag.remove("tank2");
+        var copy = machine(helper, "polymerization_reactor", 3);
+        copy.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,registries,tag));
+        check(helper, copy.getItemHandler().getResource(copy.def().catalystIndex()).getItem() == ModItems.TIN_CATALYST.get(), "legacy catalyst moved");
+        check(helper, copy.getItemHandler().getResource(copy.def().cardIndex()).toStack(1).has(machine.process.ProcessCards.TYPE.get()), "legacy card moved");
+        check(helper, amount(output(copy, 0), ModFluids.chemical("pla_melt_film")) == 700, "legacy melt moved");
+        helper.succeed();
+    }
+
+    private static void injection(GameTestHelper helper) {
+        newRound(helper);
+        var dry = machine(helper, "dehumidifying_dryer", 1);
+        var mold = machine(helper, "injection_molder", 2);
+        var grind = machine(helper, "plastic_granulator", 3);
+        utilityBus(helper, 1, 3);
+        give(dry, 0, new ItemStack(ModItems.PLA_INJECTION_PELLET.get(), 8));
+        give(mold, 0, new ItemStack(ModItems.PLA_INJECTION_PELLET.get(), 8));
+        give(mold, mold.def().catalystIndex(), new ItemStack(ModItems.BRICK_MOLD.get()));
+        poweredTick(mold);
+        check(helper, mold.reason().equals("needs_drying"), "wet PLA must stop the injection molder");
+        for (int tick = 0; tick < 105; tick++) poweredTick(dry);
+        var dried = dry.getItemHandler().getResource(dry.def().outputStart());
+        check(helper, dried.toStack(1).has(machine.process.PlasticComponents.DRIED.get()), "dryer must mark the batch");
+        mold.getItemHandler().set(0, dried, 8);
+        for (int tick = 0; tick < 401; tick++) poweredTick(mold);
+        int out = mold.def().outputStart();
+        check(helper, count(mold, out) == 32 && count(mold, out+1) == 4, "four shots must yield 32 bricks and four sprues");
+        give(grind, 0, mold.getItemHandler().getResource(out+1).toStack(4));
+        for (int tick = 0; tick < 65; tick++) poweredTick(grind);
+        check(helper, count(grind, grind.def().outputStart()) == 1, "four sprues return one pellet");
+        mold.getItemHandler().set(out, ItemResource.EMPTY, 0);
+        mold.getItemHandler().set(0, dried, 6);
+        mold.getItemHandler().set(mold.def().catalystIndex(), ItemResource.of(new ItemStack(ModItems.CRATE_MOLD.get())), 1);
+        for (int tick = 0; tick < 105; tick++) poweredTick(mold);
+        check(helper, mold.getItemHandler().getResource(out).toStack(1).is(ModBlocks.CRATE.get().asItem()), "crate mold must produce a crate");
         helper.succeed();
     }
 

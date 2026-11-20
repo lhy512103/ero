@@ -89,6 +89,11 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> PLANTER = registerBlockItem(ModBlocks.PLANTER);
     // 公用工程 (Utility plants)
     public static final DeferredItem<BlockItem> BOILER = registerBlockItem(ModBlocks.BOILER);
+    public static final DeferredItem<BlockItem> TOY_BRICK = registerBlockItem(ModBlocks.TOY_BRICK);
+    public static final DeferredItem<BlockItem> CRATE = registerBlockItem(ModBlocks.CRATE);
+    public static final DeferredItem<BlockItem> ROCK_SALT_ORE = registerBlockItem(ModBlocks.ROCK_SALT_ORE);
+    public static final DeferredItem<BlockItem> LIMESTONE = registerBlockItem(ModBlocks.LIMESTONE);
+    public static final DeferredItem<BlockItem> AIR_COMPRESSOR = registerBlockItem(ModBlocks.AIR_COMPRESSOR);
     public static final DeferredItem<BlockItem> COOLING_TOWER = registerBlockItem(ModBlocks.COOLING_TOWER);
     public static final DeferredItem<BlockItem> CREATIVE_UTILITY_SOURCE = registerBlockItem(ModBlocks.CREATIVE_UTILITY_SOURCE);
     public static final DeferredItem<BlockItem> STEAM_PIPE = registerBlockItem(ModBlocks.STEAM_PIPE);

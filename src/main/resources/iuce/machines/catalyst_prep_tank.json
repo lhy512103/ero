@@ -2,7 +2,7 @@
   "id": "catalyst_prep_tank",
   "voltage": "LV",
   "buffer": 4000,
-  "items_in": 1,
+  "items_in": 2,
   "items_out": 1,
   "fluids_in": [
     8000

@@ -68,6 +68,10 @@ public class ModBlocks {
             .noOcclusion();
     }
 
+    public static final DeferredBlock<ColoredPlasticBlock> TOY_BRICK = BLOCKS.registerBlock("toy_brick", ColoredPlasticBlock::new, metalBlockProperties());
+    public static final DeferredBlock<CrateBlock> CRATE = BLOCKS.registerBlock("crate", CrateBlock::new, metalBlockProperties());
+    public static final DeferredBlock<Block> ROCK_SALT_ORE = BLOCKS.registerSimpleBlock("rock_salt_ore", metalBlockProperties());
+    public static final DeferredBlock<Block> LIMESTONE = BLOCKS.registerSimpleBlock("limestone", metalBlockProperties());
     public static final DeferredBlock<Block> TIN_ORE = BLOCKS.registerSimpleBlock("tin_ore", oreProperties());
     public static final DeferredBlock<Block> ZINC_ORE = BLOCKS.registerSimpleBlock("zinc_ore", oreProperties());
     public static final DeferredBlock<Block> ALUMINIUM_ORE = BLOCKS.registerSimpleBlock("aluminium_ore", oreProperties());
@@ -176,6 +180,8 @@ public class ModBlocks {
     // 公用工程 (Utility plants)
     public static final DeferredBlock<UtilityPlantBlock> BOILER = BLOCKS.registerBlock("boiler",
         p -> new UtilityPlantBlock(p, machine.utility.UtilityPlantBlockEntity.Kind.BOILER), machineProperties());
+    public static final DeferredBlock<UtilityPlantBlock> AIR_COMPRESSOR = BLOCKS.registerBlock("air_compressor",
+        p -> new UtilityPlantBlock(p, machine.utility.UtilityPlantBlockEntity.Kind.AIR_COMPRESSOR), machineProperties());
     public static final DeferredBlock<UtilityPlantBlock> COOLING_TOWER = BLOCKS.registerBlock("cooling_tower",
         p -> new UtilityPlantBlock(p, machine.utility.UtilityPlantBlockEntity.Kind.COOLING_TOWER), machineProperties());
     public static final DeferredBlock<CreativeUtilitySourceBlock> CREATIVE_UTILITY_SOURCE = BLOCKS.registerBlock("creative_utility_source",

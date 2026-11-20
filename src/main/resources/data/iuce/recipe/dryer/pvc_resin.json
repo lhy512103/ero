@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "dryer",
+  "time": 100,
+  "energy": 1600,
+  "items": [
+    {
+      "item": "iuce:wet_pvc",
+      "count": 4
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "results": [
+    {
+      "id": "iuce:pvc_resin",
+      "count": 4
+    }
+  ]
+}

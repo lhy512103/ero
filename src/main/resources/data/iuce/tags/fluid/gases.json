@@ -3,6 +3,16 @@
     "iuce:ethylene",
     "iuce:flowing_ethylene",
     "iuce:carbon_dioxide",
-    "iuce:flowing_carbon_dioxide"
+    "iuce:flowing_carbon_dioxide",
+    "iuce:coke_oven_gas",
+    "iuce:clean_coke_oven_gas",
+    "iuce:furnace_gas",
+    "iuce:crude_acetylene",
+    "iuce:acetylene",
+    "iuce:chlorine",
+    "iuce:hydrogen",
+    "iuce:hydrogen_chloride",
+    "iuce:crude_vcm",
+    "iuce:vcm_gas"
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "additive_reactor",
+  "time": 100,
+  "energy": 1600,
+  "items": [
+    {
+      "item": "iuce:naphthalene",
+      "count": 1
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:ethanol",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:plasticizer",
+      "count": 2
+    }
+  ]
+}

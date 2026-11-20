@@ -1,0 +1,6 @@
+{
+  "parent": "iuce:block/crate",
+  "textures": {
+    "0": "iuce:block/crate_white"
+  }
+}

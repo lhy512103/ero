@@ -11,6 +11,7 @@ public class ModRegistries {
         machine.process.ProcessMachines.bootstrap();   // adds blocks, items and types before the registers attach
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        machine.process.PlasticComponents.initialize();
         machine.process.ProcessCards.REGISTER.register(modEventBus);
         ModBlockItems.BLOCK_ITEMS.register(modEventBus);
         ModCreativeModeTabs.TABS.register(modEventBus);

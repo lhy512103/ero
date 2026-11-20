@@ -114,6 +114,9 @@
 108. Improved: Fluid textures are redrawn as flowing water-like sheets with animated motion.
 109. Added: Turn sugar cane into injection-grade or film-grade PLA pellets and recover lactic acid from mother liquor.
 110. Added: Write and copy PLA grade cards at a process design table.
+111. Added: Dry and injection-mold PLA into eight products with CNC-cut molds and recycle matching sprues.
+112. Added: Store goods in portable nine-slot crates, dye studded bricks, and transfer liquids in stackable plastic pails.
+113. Added: Process coal, limestone and rock salt into rigid or flexible PVC dry blends.
 
 ### 中文
 
@@ -227,3 +230,6 @@
 108. 优化：流体贴图按原版水的观感重绘，并带流动动画。
 109. 新增：甘蔗可制成注塑级或薄膜级聚乳酸颗粒，结晶母液可回收乳酸。
 110. 新增：工艺设计台可写入和复制聚乳酸牌号卡。
+111. 新增：干燥聚乳酸可用八种数控模具注塑成型，同源水口料可粉碎回收。
+112. 新增：九格周转箱可带库存搬运，凸点积木可染色，塑料桶可堆叠装液。
+113. 新增：煤、石灰岩和岩盐可经煤化工与氯碱产线制成硬质或软质聚氯乙烯干混料。

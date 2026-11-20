@@ -122,6 +122,11 @@ for loop in table.get("loops", []):
             net[ref] += amount
     if len(used) != len(loop["recipes"]):
         continue
+    if "conserved" in loop:
+        for ref in loop["conserved"]:
+            if net[ref] != 0:
+                errors.append("%s: %s drifted by %s" % (name, ref, net[ref]))
+        continue
     if "recovery" in loop:
         feed = -net[loop["feed"]]
         recovered = net[loop["product"]]

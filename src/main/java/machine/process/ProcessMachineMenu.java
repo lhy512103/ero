@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class ProcessMachineMenu extends AbstractContainerMenu {
     /** energy low/high, capacity low/high, progress, max progress, reason, short utility, have, need. */
-    private static final int FIXED_DATA = 10;
+    private static final int FIXED_DATA = 11;
     private static final int SHORT_UTILITY = 7, HAVE_SHARES = 8, NEED_SHARES = 9;
 
     private final ProcessMachineBlockEntity blockEntity;
@@ -78,6 +78,7 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
                         machine.utility.Utility short_ = blockEntity.shortUtility();
                         yield short_ == null ? 0 : short_.ordinal() + 1;
                     }
+                    case 10 -> blockEntity.mold();
                     case HAVE_SHARES -> blockEntity.freeShares();
                     case NEED_SHARES -> blockEntity.neededShares();
                     default -> {
@@ -102,6 +103,12 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
 
     public ProcessMachineBlockEntity blockEntity() { return blockEntity; }
     public ProcessMachineDef def() { return def; }
+    public int mold() { return data[10]; }
+    @Override public boolean clickMenuButton(Player player, int action) {
+        if (action != 0 || !stillValid(player) || !def.id().equals("cnc_machining_center")) return false;
+        blockEntity.nextMold();
+        return true;
+    }
     public ProcessLayout layout() { return layout; }
 
     public long energy() { return (data[0] & 0xFFFFFFFFL) | ((long) data[1] << 32); }

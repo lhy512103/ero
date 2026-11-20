@@ -54,6 +54,7 @@ public class UtilityPlantBlockEntity extends MachineBlockEntity implements Energ
     /** Which block this is. Registered blocks pick one; the definition holds the numbers. */
     public enum Kind {
         BOILER(Utility.STEAM, 8, 0, 1, 2, 20_000, 8_000, true),
+        AIR_COMPRESSOR(Utility.AIR, 8, 4, 0, 0, 0, 8000, false),
         COOLING_TOWER(Utility.COOLING_WATER, 8, 8, 2, 0, 64_000, 8_000, false);
 
         public final Utility utility;

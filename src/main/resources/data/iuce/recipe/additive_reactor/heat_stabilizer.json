@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "additive_reactor",
+  "time": 100,
+  "energy": 1600,
+  "items": [
+    {
+      "item": "iuce:purified_zinc_dust",
+      "count": 1
+    },
+    {
+      "item": "iuce:quicklime",
+      "count": 1
+    },
+    {
+      "item": "iuce:pe_wax",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:heat_stabilizer",
+      "count": 4
+    }
+  ]
+}

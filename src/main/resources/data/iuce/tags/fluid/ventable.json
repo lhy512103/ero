@@ -1,6 +1,9 @@
 {
   "values": [
     "iuce:carbon_dioxide",
-    "iuce:flowing_carbon_dioxide"
+    "iuce:flowing_carbon_dioxide",
+    "iuce:coke_oven_gas",
+    "iuce:clean_coke_oven_gas",
+    "iuce:furnace_gas"
   ]
 }

@@ -93,6 +93,7 @@ public class ModBlockEntities {
             new BlockEntityType<>(LogisticsPortBlockEntity::new, false, ModBlocks.LOGISTICS_PORT.get())
         );
 
+    public static final Supplier<BlockEntityType<CrateBlockEntity>> CRATE = BLOCK_ENTITIES.register("crate", () -> new BlockEntityType<>(CrateBlockEntity::new, false, ModBlocks.CRATE.get()));
     public static final Supplier<BlockEntityType<SiloBlockEntity>> SILO =
         BLOCK_ENTITIES.register("silo", () ->
             new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get())
@@ -188,7 +189,7 @@ public class ModBlockEntities {
         BLOCK_ENTITIES.register("utility_plant", () ->
             new BlockEntityType<>((pos, state) -> new machine.utility.UtilityPlantBlockEntity(pos, state,
                 ((block.UtilityPlantBlock) state.getBlock()).kind()), false,
-                ModBlocks.BOILER.get(), ModBlocks.COOLING_TOWER.get())
+                ModBlocks.BOILER.get(), ModBlocks.COOLING_TOWER.get(), ModBlocks.AIR_COMPRESSOR.get())
         );
 
     public static final Supplier<BlockEntityType<machine.utility.CreativeUtilitySourceBlockEntity>> CREATIVE_UTILITY_SOURCE =

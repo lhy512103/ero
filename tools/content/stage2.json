@@ -95,7 +95,7 @@
       "voltage": "LV",
       "buffer": 8000,
       "items_in": 0,
-      "items_out": 0,
+      "items_out": 1,
       "fluids_in": [
         8000
       ],
@@ -176,7 +176,7 @@
       "voltage": "LV",
       "buffer": 4000,
       "items_in": 0,
-      "items_out": 0,
+      "items_out": 1,
       "fluids_in": [
         8000
       ],
@@ -257,9 +257,12 @@
       "model": "tank",
       "voltage": "MV",
       "buffer": 16000,
-      "items_in": 1,
+      "items_in": 2,
       "items_out": 1,
-      "fluids_in": [],
+      "fluids_in": [
+        8000,
+        8000
+      ],
       "fluids_out": [
         8000
       ],
@@ -293,7 +296,7 @@
       "model": "tank",
       "voltage": "LV",
       "buffer": 4000,
-      "items_in": 1,
+      "items_in": 2,
       "items_out": 1,
       "fluids_in": [
         8000
@@ -303,6 +306,449 @@
       "card_slot": false,
       "upgrades": 4,
       "base_time": 100
+    },
+    {
+      "id": "dehumidifying_dryer",
+      "name_en": "Dehumidifying Dryer",
+      "name_zh": "除湿干燥机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "injection_molder",
+      "name_en": "Injection Molder",
+      "name_zh": "注塑机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 2,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "plastic_granulator",
+      "name_en": "Plastic Granulator",
+      "name_zh": "塑料粉碎机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 60,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "cnc_machining_center",
+      "name_en": "Cnc Machining Center",
+      "name_zh": "数控加工中心",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 400,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "coking_oven",
+      "name_en": "Coking Oven",
+      "name_zh": "炼焦炉",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 400,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": [
+        8000,
+        8000
+      ]
+    },
+    {
+      "id": "tar_distiller",
+      "name_en": "Tar Distiller",
+      "name_zh": "焦油蒸馏釜",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 200,
+      "items_in": 0,
+      "items_out": 2,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "lime_kiln",
+      "name_en": "Lime Kiln",
+      "name_zh": "石灰窑",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "carbide_furnace",
+      "name_en": "Carbide Furnace",
+      "name_zh": "电石炉",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 200,
+      "items_in": 2,
+      "items_out": 2,
+      "fluids_in": [],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "acetylene_generator",
+      "name_en": "Acetylene Generator",
+      "name_zh": "乙炔发生器",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ]
+    },
+    {
+      "id": "filter_press",
+      "name_en": "Filter Press",
+      "name_zh": "压滤机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "scrubber",
+      "name_en": "Scrubber",
+      "name_zh": "洗涤塔",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000,
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ]
+    },
+    {
+      "id": "brine_dissolver",
+      "name_en": "Brine Dissolver",
+      "name_zh": "化盐槽",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 80,
+      "items_in": 1,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "brine_purifier",
+      "name_en": "Brine Purifier",
+      "name_zh": "精制槽",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "membrane_cell",
+      "name_en": "Membrane Cell",
+      "name_zh": "离子膜电解槽",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 200,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000,
+        8000
+      ]
+    },
+    {
+      "id": "hcl_furnace",
+      "name_en": "Hcl Furnace",
+      "name_zh": "氯化氢合成炉",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000,
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "vcm_converter",
+      "name_en": "Vcm Converter",
+      "name_zh": "氯乙烯转化器",
+      "model": "tank",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000,
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "gas_compressor",
+      "name_en": "Gas Compressor",
+      "name_zh": "气体压缩机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 80,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "neutralizer",
+      "name_en": "Neutralizer",
+      "name_zh": "中和槽",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 80,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000,
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "water_treatment",
+      "name_en": "Water Treatment",
+      "name_zh": "水处理器",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 60,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "flash_tank",
+      "name_en": "Flash Tank",
+      "name_zh": "闪蒸罐",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ]
+    },
+    {
+      "id": "centrifuge",
+      "name_en": "Centrifuge",
+      "name_zh": "离心机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "additive_reactor",
+      "name_en": "Additive Reactor",
+      "name_zh": "助剂反应釜",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 3,
+      "items_out": 1,
+      "fluids_in": [
+        8000,
+        8000
+      ],
+      "fluids_out": []
+    },
+    {
+      "id": "high_speed_mixer",
+      "name_en": "High Speed Mixer",
+      "name_zh": "高混机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 4,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
     }
   ]
 }
