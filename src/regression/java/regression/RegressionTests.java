@@ -66,6 +66,7 @@ public final class RegressionTests {
         ProcessMachineTests.register(TESTS);
         M1LineTests.register(TESTS);
         StressTests.register(TESTS);
+        IntegratedPlantTests.register(TESTS);
     }
     public static void register(IEventBus bus) {
         var functions = DeferredRegister.<Consumer<GameTestHelper>>create(Registries.TEST_FUNCTION, "iuce");
@@ -75,7 +76,7 @@ public final class RegressionTests {
             var environment = event.registerEnvironment(id("regression"));
             TESTS.forEach((name, function) -> event.registerTest(id(name), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, id(name)),
-                new TestData<>(environment, id(LARGE.contains(name) ? "regression_large" : "regression_empty"), name.equals("stress_logistics_2000") ? 100000 : 100, 0, true))));
+                new TestData<>(environment, id(LARGE.contains(name) ? "regression_large" : "regression_empty"), (name.equals("stress_logistics_2000") || name.equals("factory_benchmark")) ? 100000 : 100, 0, true))));
         });
     }
     /** Tests that build a full-size multiblock and need a 24x12x24 arena. */

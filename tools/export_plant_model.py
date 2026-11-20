@@ -30,6 +30,7 @@ TILE_SIZE = 16
 PAD = 8
 
 SETTINGS = {
+    "twin_screw_extruder": {"offset": (0,0,0), "stretch": {"base_length":13, "bay_first":3, "bay_last":3, "stand_first":3, "stand_every":4, "stand_last":3}},
     "ore_processing_plant": {
         "offset": (8.0, 0.0, 56.0),
         "spinners": {

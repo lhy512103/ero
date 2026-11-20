@@ -95,6 +95,7 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<CrateBlockEntity>> CRATE = BLOCK_ENTITIES.register("crate", () -> new BlockEntityType<>(CrateBlockEntity::new, false, ModBlocks.CRATE.get()));
     public static final Supplier<BlockEntityType<DripPipeBlockEntity>> DRIP_PIPE = BLOCK_ENTITIES.register("drip_pipe", () -> new BlockEntityType<>(DripPipeBlockEntity::new,false,ModBlocks.DRIP_PIPE.get()));
+    public static final Supplier<BlockEntityType<PlantTankEntity>> PLANT_TANK = BLOCK_ENTITIES.register("plant_tank", () -> new BlockEntityType<>(PlantTankEntity::new,false,ModBlocks.FLUID_INPUT_HATCH.get(),ModBlocks.FLUID_OUTPUT_HATCH.get()));
     public static final Supplier<BlockEntityType<SiloBlockEntity>> SILO =
         BLOCK_ENTITIES.register("silo", () ->
             new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get(), ModBlocks.BULK_SILO.get())
@@ -107,17 +108,18 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<PlantControllerBlockEntity>> PLANT_CONTROLLER =
         BLOCK_ENTITIES.register("plant_controller", () ->
-            new BlockEntityType<>(PlantControllerBlockEntity::new, false, ModBlocks.PLANT_CONTROLLER.get(), ModBlocks.MILL_CONTROLLER.get())
+            new BlockEntityType<>(PlantControllerBlockEntity::new, false, ModBlocks.PLANT_CONTROLLER.get(), ModBlocks.MILL_CONTROLLER.get(),
+                ModBlocks.TWIN_SCREW_EXTRUDER.get(), ModBlocks.BIO_ETHYLENE_PLANT.get(), ModBlocks.CARBIDE_FURNACE_PLANT.get(), ModBlocks.COKE_OVEN_BATTERY.get(), ModBlocks.WASTE_HEAT_POWER_PLANT.get())
         );
 
     public static final Supplier<BlockEntityType<HatchBlockEntity>> ITEM_HATCH =
         BLOCK_ENTITIES.register("item_hatch", () ->
-            new BlockEntityType<>(HatchBlockEntity::new, false, ModBlocks.ITEM_INPUT_HATCH.get(), ModBlocks.ITEM_OUTPUT_HATCH.get())
+            new BlockEntityType<>(HatchBlockEntity::new, false, ModBlocks.ITEM_INPUT_HATCH.get(), ModBlocks.ITEM_OUTPUT_HATCH.get(), ModBlocks.MAINTENANCE_HATCH.get())
         );
 
     public static final Supplier<BlockEntityType<EnergyHatchBlockEntity>> ENERGY_HATCH =
         BLOCK_ENTITIES.register("energy_hatch", () ->
-            new BlockEntityType<>(EnergyHatchBlockEntity::new, false, ModBlocks.ENERGY_HATCH.get(), ModBlocks.ENERGY_HATCH_HV.get())
+            new BlockEntityType<>(EnergyHatchBlockEntity::new, false, ModBlocks.ENERGY_HATCH.get(), ModBlocks.ENERGY_HATCH_HV.get(), ModBlocks.GENERATION_HATCH.get())
         );
 
     public static final Supplier<BlockEntityType<RepairBenchBlockEntity>> REPAIR_BENCH =

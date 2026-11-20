@@ -42,7 +42,7 @@ public class PlantControllerBlock extends BaseEntityBlock {
     public static final BooleanProperty LEGACY = BooleanProperty.create("legacy");
     /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set with the blueprint terminal. */
     public static final net.minecraft.world.level.block.state.properties.IntegerProperty LENGTH =
-        net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 17);
+        net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 33);
 
     public PlantControllerBlock(Properties properties) {
         super(properties);
@@ -54,7 +54,7 @@ public class PlantControllerBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return !state.getValue(LEGACY) && state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+        return (state.is(ModBlocks.TWIN_SCREW_EXTRUDER.get()) || multiblock.PlantStructure.industrialId(state)==null) && !state.getValue(LEGACY) && state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override

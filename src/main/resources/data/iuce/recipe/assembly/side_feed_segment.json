@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:pipe_fitting"
+  ],
+  "result": {
+    "id": "iuce:side_feed_segment",
+    "count": 1
+  }
+}

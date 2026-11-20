@@ -33,10 +33,10 @@ public class BlueprintItem extends Item {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        if (player.isShiftKeyDown() && controller.isMill()) {
+        if (player.isShiftKeyDown() && controller.extensible()) {
             BlockState state = controller.getBlockState();
             int length = state.getValue(PlantControllerBlock.LENGTH);
-            length = length >= PlantControllerBlockEntity.MILL_MAX ? PlantControllerBlockEntity.MILL_MIN : length + 1;
+            length = controller.isMill() ? (length>=17?9:length+1) : (controller.getLength()>=33?controller.minimumLength():Math.min(33,PlantControllerBlockEntity.targetLength(state)+4));
             level.setBlock(context.getClickedPos(), state.setValue(PlantControllerBlock.LENGTH, length), Block.UPDATE_ALL);
             controller.markStructureDirty();
         }

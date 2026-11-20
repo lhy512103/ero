@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:carbide_furnace"
+  ],
+  "result": {
+    "id": "iuce:carbide_furnace_plant",
+    "count": 1
+  }
+}

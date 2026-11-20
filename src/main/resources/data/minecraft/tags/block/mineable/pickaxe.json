@@ -154,6 +154,21 @@
     "iuce:bulk_silo",
     "iuce:fluid_pipe",
     "iuce:bronze_fluid_pipe",
-    "iuce:gas_tank"
+    "iuce:gas_tank",
+    "iuce:twin_screw_extruder",
+    "iuce:bio_ethylene_plant",
+    "iuce:carbide_furnace_plant",
+    "iuce:coke_oven_battery",
+    "iuce:waste_heat_power_plant",
+    "iuce:main_feed_segment",
+    "iuce:melting_segment",
+    "iuce:side_feed_segment",
+    "iuce:mixing_segment",
+    "iuce:venting_segment",
+    "iuce:die_segment",
+    "iuce:fluid_input_hatch",
+    "iuce:fluid_output_hatch",
+    "iuce:generation_hatch",
+    "iuce:maintenance_hatch"
   ]
 }

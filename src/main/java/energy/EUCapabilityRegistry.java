@@ -60,6 +60,7 @@ public final class EUCapabilityRegistry {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.FLUID_TANK.get(), (tank, direction) -> tank.getTank());
         // 大机器的仓口
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.PLANT_TANK.get(), (hatch, side) -> hatch.getFluidHandler());
         register(event, ModBlockEntities.ENERGY_HATCH.get());
         // 电动修理台、电灯、能量转换器
         register(event, ModBlockEntities.REPAIR_BENCH.get());

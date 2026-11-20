@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:heating_coil"
+  ],
+  "result": {
+    "id": "iuce:melting_segment",
+    "count": 1
+  }
+}

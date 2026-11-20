@@ -20,7 +20,7 @@ public class EnergyHatchBlockEntity extends MachineBlockEntity implements Energy
 
     public EnergyHatchBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ENERGY_HATCH.get(), pos, state);
-        boolean hv = state.is(ModBlocks.ENERGY_HATCH_HV.get());
+        boolean hv = state.is(ModBlocks.ENERGY_HATCH_HV.get()) || state.is(ModBlocks.GENERATION_HATCH.get());
         this.storage = new EUEnergyStorageImpl(hv ? 80_000 : 20_000, hv ? EUVoltage.HV : EUVoltage.MV);
         this.parallel = hv ? 64 : 16;
     }
@@ -31,8 +31,8 @@ public class EnergyHatchBlockEntity extends MachineBlockEntity implements Energy
     @Override public String getMachineName() { return "energy_hatch"; }
     @Override public EUEnergyStorage getEnergyStorage() { return storage; }
     public EUEnergyStorageImpl storage() { return storage; }
-    @Override protected boolean canReceiveEU() { return true; }
-    @Override protected boolean canExtractEU() { return false; }
+    @Override protected boolean canReceiveEU() { return !getBlockState().is(ModBlocks.GENERATION_HATCH.get()); }
+    @Override protected boolean canExtractEU() { return getBlockState().is(ModBlocks.GENERATION_HATCH.get()); }
 
     @Override
     protected void saveAdditional(ValueOutput output) {

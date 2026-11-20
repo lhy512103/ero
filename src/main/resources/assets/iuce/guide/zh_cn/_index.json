@@ -2,6 +2,7 @@
   "title": "工业升级指南",
   "home": "welcome",
   "categories": [
+    {"id":"plastic","title":"塑料工业","icon":"iuce:pla_injection_pellet"},
     {
       "id": "start",
       "title": "入门",

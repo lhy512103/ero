@@ -6,7 +6,7 @@ import net.minecraft.core.Direction;
 /** Render state snapshot for {@link PlantControllerBlockEntityRenderer}. */
 public class PlantControllerRenderState extends BlockEntityRenderState {
     public boolean formed;
-    public boolean mill;
+    public boolean mill, screw;
     public boolean legacy;
     public boolean working;
     public Direction facing = Direction.NORTH;

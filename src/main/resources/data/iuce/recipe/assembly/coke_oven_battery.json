@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:coking_oven"
+  ],
+  "result": {
+    "id": "iuce:coke_oven_battery",
+    "count": 1
+  }
+}

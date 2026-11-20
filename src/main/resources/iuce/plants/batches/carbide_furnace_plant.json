@@ -1,0 +1,22 @@
+[
+  {
+    "id": "carbide",
+    "inputs": {
+      "iuce:quicklime": 1,
+      "iuce:coke": 1
+    },
+    "outputs": {
+      "iuce:calcium_carbide": 2
+    },
+    "fluids": {},
+    "products": {
+      "iuce:furnace_gas": 250
+    },
+    "tools": {
+      "iuce:carbon_electrode": 1
+    },
+    "energy": 13600,
+    "time": 300,
+    "segments": []
+  }
+]

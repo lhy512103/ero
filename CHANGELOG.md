@@ -122,6 +122,8 @@
 116. Added: Extrude pipe, film and insulated wire, irrigate fields with drip lines and protect crops with mulch.
 117. Added: Smoke natural rubber and vulcanize belts and seals for industrial equipment.
 118. Added: Move goods through tier II logistics ports and conveyors, dedicated fluid pipes, bulk silos and gas tanks.
+119. Added: Five integrated plants process plastics, coke and carbide or convert fuel into HV power and steam.
+120. Added: The plastic industry guide includes production routes, machine recipes and rotatable plant structures.
 
 ### 中文
 
@@ -243,3 +245,5 @@
 116. 新增：单螺杆可挤出管、膜和包覆线，滴灌管与地膜可保持耕地湿润。
 117. 新增：天然橡胶可经烟熏、密炼和硫化制成皮带与密封圈。
 118. 新增：二级物流接口、传送带、独立流体管网、大料仓与气罐可扩大工厂吞吐能力。
+119. 新增：五台联合设备可加工塑料、焦炭和电石，或把燃料转成高压电与蒸汽。
+120. 新增：塑料工业指南包含产线路线、机器配方和可旋转的多方块结构图。

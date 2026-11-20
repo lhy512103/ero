@@ -380,7 +380,9 @@ final class GuideBlocks {
      * {@code @id} marks a machine (drawn as a raised tile), {@code a + b} joins inputs.
      */
     static final class Flow implements Block {
-        private record Element(int type, ItemStack stack) {}   // 0 item, 1 station, 2 arrow, 3 plus
+        private record Element(int type, ItemStack stack, String fluid, int amount) {
+            Element(int type,ItemStack stack){this(type,stack,"",0);}
+        }
         private final List<Element> elements = new ArrayList<>();
         private final List<int[]> positions = new ArrayList<>();
 
@@ -392,6 +394,11 @@ final class GuideBlocks {
                 for (int p = 0; p < parts.length; p++) {
                     if (p > 0) elements.add(new Element(3, ItemStack.EMPTY));
                     String spec = parts[p].trim();
+                    if(spec.startsWith("~")){
+                        String[] fluid=spec.substring(1).split("\\*");
+                        elements.add(new Element(4,ItemStack.EMPTY,fluid[0],fluid.length>1?Integer.parseInt(fluid[1]):1000));
+                        continue;
+                    }
                     boolean station = spec.startsWith("@");
                     elements.add(new Element(station ? 1 : 0, GuideBook.stack(station ? spec.substring(1) : spec)));
                 }
@@ -399,7 +406,7 @@ final class GuideBlocks {
         }
 
         private static int widthOf(Element element) {
-            return switch (element.type) { case 1 -> 24; case 2 -> 22; case 3 -> 12; default -> 18; };
+            return switch (element.type) { case 1 -> 24; case 2 -> 22; case 3 -> 12; case 4 -> 85; default -> 18; };
         }
 
         @Override public int layout(Font font, int width) {
@@ -426,6 +433,13 @@ final class GuideBlocks {
                     }
                     case 2 -> GuideStyle.arrow(c.g, ex + 4, ey + 12, 14, GuideStyle.SLOT_DARK);
                     case 3 -> GuideStyle.text(c.g, c.font, "+", ex + 3, ey + 8, GuideStyle.MUTED);
+                    case 4 -> {
+                        var fluid=net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(net.minecraft.resources.Identifier.parse(element.fluid));
+                        int color=init.ModFluids.CHEMICALS.stream().filter(ch->("iuce:"+ch.id()).equals(element.fluid)).mapToInt(init.ModFluids.Chemical::color).findFirst().orElse(0xff5283be);
+                        c.g.fill(ex,ey+2,ex+8,ey+21,color);
+                        GuideStyle.text(c.g,c.font,fluid.getFluidType().getDescription().getString(),ex+10,ey+2,GuideStyle.TEXT);
+                        GuideStyle.text(c.g,c.font,element.amount+" mB",ex+10,ey+13,GuideStyle.MUTED);
+                    }
                     default -> c.slotItem(element.stack, ex, ey + 3);
                 }
             }

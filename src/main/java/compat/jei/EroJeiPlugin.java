@@ -101,6 +101,7 @@ public class EroJeiPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        for(String plant:PlantRecipeCategory.PLANTS)registration.addRecipeCategories(new PlantRecipeCategory(registration.getJeiHelpers(),plant));
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addRecipeCategories(
@@ -122,6 +123,7 @@ public class EroJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
+        for(String plant:PlantRecipeCategory.PLANTS)registration.addRecipes(PlantRecipeCategory.TYPES.get(plant),PlantRecipeCategory.recipes(plant));
         // MC 26.1 客户端的 level.recipeAccess() 返回 ClientRecipeContainer（不是 RecipeManager），
         // 因此需要从集成服务器获取 RecipeManager
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
@@ -256,6 +258,7 @@ public class EroJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        for(String plant:PlantRecipeCategory.PLANTS) registration.addCraftingStation(PlantRecipeCategory.TYPES.get(plant),PlantRecipeCategory.icon("iuce:"+plant));
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addCraftingStation(mt.recipeType, mt.iconBlock.get());

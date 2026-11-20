@@ -49,7 +49,19 @@ import java.util.Map;
  * when the controller is placed or loaded and again only after a block inside its box changed; the
  * check looks at no more than {@link StructureScan#BUDGET} blocks per tick.
  */
-public class PlantControllerBlockEntity extends BlockEntity {
+public class PlantControllerBlockEntity extends BlockEntity implements machine.utility.UtilitySupplier {
+    private String batchId="", stageStatus="";
+    private int operations, burnTicks;
+    private long batchPaid;
+    private final List<BlockPos> fluidIn=new ArrayList<>(),fluidOut=new ArrayList<>(),service=new ArrayList<>();
+    private final List<String> screwSegments=new ArrayList<>();
+    private String industrial(){return PlantStructure.industrialId(getBlockState());}
+    public boolean extensible(){return isMill() || getBlockState().is(ModBlocks.TWIN_SCREW_EXTRUDER.get()) || getBlockState().is(ModBlocks.COKE_OVEN_BATTERY.get());}
+    public int minimumLength(){return isMill()?9:getBlockState().is(ModBlocks.TWIN_SCREW_EXTRUDER.get())?13:17;}
+    @Override public BlockPos position(){return worldPosition;}
+    @Override public int shares(machine.utility.Utility u){return getBlockState().is(ModBlocks.WASTE_HEAT_POWER_PLANT.get()) && u==machine.utility.Utility.STEAM ? 64:0;}
+    @Override public void setOccupied(machine.utility.Utility u,int occupied){}
+    @Override public boolean ready(){return formed && burnTicks>0;}
     /** Ticks one batch takes at full power. */
     public static final int DURATION = 100;
     public static final int MILL_MIN = 9, MILL_MAX = 17;
@@ -89,7 +101,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     }
 
     public boolean isFormed() { return formed || (level != null && level.isClientSide() && getBlockState().getValue(PlantControllerBlock.FORMED)); }
-    public boolean isWorking() { return (level != null && level.isClientSide()) ? clientWorking : !pending.isEmpty(); }
+    public boolean isWorking() { return (level != null && level.isClientSide()) ? clientWorking : !pending.isEmpty() || formed && (!batchId.isEmpty() || burnTicks>0); }
     public int getProgress() { return progress; }
     public int getParallel() { return parallel; }
     public int getLength() { return length; }
@@ -118,8 +130,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     /** The length the structure of this controller is meant to have: fixed for the ore plant, chosen for the mill. */
     public static int targetLength(BlockState controller) {
-        return controller.is(ModBlocks.MILL_CONTROLLER.get()) ? controller.getValue(PlantControllerBlock.LENGTH)
-            : controller.getValue(PlantControllerBlock.LEGACY) ? 5 : PlantStructure.ORE_LENGTH;
+        return PlantStructure.length(controller);
     }
 
     private Direction facing() { return getBlockState().getValue(PlantControllerBlock.FACING); }
@@ -168,6 +179,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
         structureDirty = false;
         MultiblockManager.register(level, worldPosition, box());
         for (BlockPos pos : inputHatches) if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) hatch.setController(null);
+        fluidIn.clear();fluidOut.clear();service.clear();screwSegments.clear();
         energyHatches.clear();
         inputHatches.clear();
         outputHatches.clear();
@@ -183,7 +195,11 @@ public class PlantControllerBlockEntity extends BlockEntity {
         else if (!scanParts.get(pos).accepts(state, facing())) {
             scanFailure = Component.translatable("message.iuce.plant.wrong_part", pos.toShortString(), scanParts.get(pos).sample(facing()).getBlock().getName());
         }
-        else if (state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get())) energyHatches.add(pos);
+        else if (state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get()) || state.is(ModBlocks.GENERATION_HATCH.get())) energyHatches.add(pos);
+        else if(state.is(ModBlocks.FLUID_INPUT_HATCH.get())) fluidIn.add(pos);
+        else if(state.is(ModBlocks.FLUID_OUTPUT_HATCH.get())) fluidOut.add(pos);
+        else if(state.is(ModBlocks.MAINTENANCE_HATCH.get())) service.add(pos);
+        else if(scanParts.get(pos)==PlantStructure.Part.SEGMENT) screwSegments.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().replace("_segment",""));
         else if (state.is(ModBlocks.ITEM_INPUT_HATCH.get())) inputHatches.add(pos);
         else if (state.is(ModBlocks.ITEM_OUTPUT_HATCH.get())) outputHatches.add(pos);
         return scanFailure == null;
@@ -197,15 +213,18 @@ public class PlantControllerBlockEntity extends BlockEntity {
             else if (inputHatches.isEmpty()) scanFailure = Component.translatable("message.iuce.plant.no_input_hatch");
             else if (outputHatches.isEmpty()) scanFailure = Component.translatable("message.iuce.plant.no_output_hatch");
         }
+        if(scanFailure==null && screwSegments.contains("side_feed") && (screwSegments.indexOf("melting")<0 || screwSegments.indexOf("side_feed")<screwSegments.indexOf("melting"))) scanFailure=Component.translatable("message.iuce.plant.segment_order");
+        if(scanFailure==null && getBlockState().is(ModBlocks.CARBIDE_FURNACE_PLANT.get()) && energyHatches.size()>4) scanFailure=Component.translatable("message.iuce.plant.too_many_hatches");
         formed = scanFailure == null;
         if (formed) {
             for (BlockPos pos : inputHatches) if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) hatch.setController(worldPosition);
-            int tier = 0;
+            int tier = Integer.MAX_VALUE;
             for (BlockPos pos : energyHatches) {
-                if (level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch) tier = Math.max(tier, hatch.parallel());
+                if (level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch) tier = Math.min(tier, hatch.parallel());
             }
             // a longer mill runs more at once: up to twice as many at full length
             double stretch = isMill() ? 1 + (length - MILL_MIN) / (double) (MILL_MAX - MILL_MIN) : 1;
+            if(industrial()!=null && extensible()) stretch=Math.min(4,1+(length-minimumLength())/4);
             parallel = (int) (tier * stretch);
         } else {
             problem = scanFailure;
@@ -221,7 +240,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     private void setFormedParts(BlockState controllerState, boolean value) {
         if (level == null || level.isClientSide()) return;
-        boolean hide = value && !controllerState.getValue(PlantControllerBlock.LEGACY);
+        boolean hide = value && (industrial()==null || controllerState.is(ModBlocks.TWIN_SCREW_EXTRUDER.get())) && !controllerState.getValue(PlantControllerBlock.LEGACY);
         Direction facing = controllerState.getValue(PlantControllerBlock.FACING);
         for (PlantStructure.Cell cell : PlantStructure.cells(worldPosition, facing, controllerState)) {
             BlockPos pos = cell.pos();
@@ -332,12 +351,14 @@ public class PlantControllerBlockEntity extends BlockEntity {
 
     /** True when the machine has a process for the item. */
     public boolean canProcess(ItemResource resource) {
+        if(formed && industrial()!=null) return getBlockState().is(ModBlocks.WASTE_HEAT_POWER_PLANT.get()) || multiblock.PlantBatch.all(industrial()).stream().anyMatch(b->b.inputs().keySet().stream().anyMatch(k->multiblock.PlantBatch.matches(resource.toStack(1),k)));
         return formed && level instanceof ServerLevel server && ProcessChain.get(server, steps(), resource.getItem()).isPresent();
     }
 
     public Component describe() {
         if (scan != null) return Component.translatable("message.iuce.plant.scanning");
         if (!formed) return Component.translatable("message.iuce.plant.unformed", problem);
+        if(!stageStatus.isEmpty()) return Component.translatable(stageStatus);
         if (isMill() && getMold().isEmpty()) return Component.translatable("message.iuce.plant.no_mold");
         if (pending.isEmpty()) return Component.translatable("message.iuce.plant.idle", parallel);
         if (blocked) return Component.translatable("message.iuce.plant.blocked");
@@ -352,6 +373,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
             finishScan();
         }
         if (!formed) return;
+        if (industrial()!=null) { industrialTick(server);syncWorking();return; }
         if (pending.isEmpty()) {
             if (idleTicks++ % 10 == 0) tryStart(server);
             syncWorking();
@@ -376,8 +398,70 @@ public class PlantControllerBlockEntity extends BlockEntity {
         syncWorking();
     }
 
+    private List<PlantTankEntity> tankPorts(List<BlockPos> positions) {
+        return positions.stream().map(level::getBlockEntity).filter(PlantTankEntity.class::isInstance).map(PlantTankEntity.class::cast).toList();
+    }
+
+    private void industrialTick(ServerLevel server) {
+        if(getBlockState().is(ModBlocks.WASTE_HEAT_POWER_PLANT.get())) { generatePower(server);return; }
+        if(batchId.isEmpty() && idleTicks++%10!=0)return;
+        var ports=new multiblock.PlantBatch.Ports(inventories(inputHatches),inventories(outputHatches),inventories(service),tankPorts(fluidIn),tankPorts(fluidOut));
+        var recipes=multiblock.PlantBatch.all(industrial());
+        multiblock.PlantBatch selected=null;
+        if(batchId.isEmpty()){
+            stageStatus="";
+            for(var recipe:recipes){
+                if(!recipe.transfer(ports,1,false))continue;
+                if(!screwSegments.containsAll(recipe.segments())){stageStatus="message.iuce.plant.missing_segments";continue;}
+                int low=1,high=parallel;
+                while(low<high){
+                    int mid=(low+high+1)/2;
+                    if(recipe.transfer(ports,mid,false))low=mid;else high=mid-1;
+                }
+                operations=low;batchId=recipe.id();selected=recipe;progress=0;batchPaid=0;break;
+            }
+        }else for(var recipe:recipes)if(recipe.id().equals(batchId)){selected=recipe;break;}
+        if(selected==null){batchId="";return;}
+        if(!screwSegments.containsAll(selected.segments())){stageStatus="message.iuce.plant.missing_segments";return;}
+        if(!selected.transfer(ports,operations,false)){stageStatus="message.iuce.plant.batch_stalled";return;}
+        long total=selected.energy()*operations;
+        long due=total*Math.min(progress+1,selected.time())/selected.time();
+        long limit=0;
+        for(var pos:energyHatches)if(level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch)limit+=hatch.storage().getVoltage().getMaxVoltage();
+        batchPaid+=drawEnergy(Math.min(limit,Math.max(0,due-batchPaid)));
+        if(batchPaid>=due)progress=Math.min(selected.time(),progress+1);
+        stageStatus=batchPaid<due?"message.iuce.plant.starved":"message.iuce.plant.processing";
+        if(progress==selected.time() && selected.transfer(ports,operations,true)){batchId="";progress=0;batchPaid=0;stageStatus="";}
+        setChanged();
+    }
+
+    private void generatePower(ServerLevel server){
+        if(burnTicks==0){
+            if(idleTicks++%10!=0)return;
+            try(var tx=Transaction.openRoot()){
+                for(var hatch:tankPorts(fluidIn))for(var tank:hatch.getTanks()){
+                    var gas=tank.getResource();
+                    if(burnTicks==0 && !gas.isEmpty() && gas.getFluid().is(fluid.FluidTags.FLAMMABLE_GASES) && tank.getAmount()>=250 && tank.extract(0,gas,250,tx)==250)burnTicks=100;
+                }
+                for(var inv:inventories(inputHatches))for(int i=0;i<inv.size() && burnTicks==0;i++){
+                    var fuel=inv.getResource(i);
+                    int duration=fuel.toStack(1).getBurnTime(net.minecraft.world.item.crafting.RecipeType.SMELTING,server.fuelValues());
+                    if(duration>0 && inv.extract(i,fuel,1,tx)==1)burnTicks=duration;
+                }
+                if(burnTicks>0)tx.commit();
+            }
+        }
+        if(burnTicks>0){
+            for(var pos:energyHatches)if(level.getBlockEntity(pos) instanceof EnergyHatchBlockEntity hatch){
+                var storage=hatch.storage();
+                storage.setEnergy(Math.min(storage.getMaxEnergyStored(),storage.getEnergyStored()+512));hatch.setChanged();
+            }
+            burnTicks--;setChanged();
+        }
+    }
+
     private void syncWorking() {
-        boolean working = !pending.isEmpty();
+        boolean working = isWorking();
         if (working != lastSyncedWorking && level != null && !level.isClientSide()) {
             lastSyncedWorking = working;
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
@@ -485,7 +569,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
-        tag.putBoolean("Working", !pending.isEmpty());
+        tag.putBoolean("Working", isWorking());
         return tag;
     }
 
@@ -498,6 +582,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+        output.putString("IndustrialBatch",batchId);output.putInt("Operations",operations);output.putLong("BatchPaid",batchPaid);output.putInt("BurnTicks",burnTicks);
         output.putInt("Progress", progress);
         output.putLong("EnergyPerTick", energyPerTick);
         output.putLong("Paid", paid);
@@ -508,6 +593,7 @@ public class PlantControllerBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+        batchId=input.getStringOr("IndustrialBatch","");operations=input.getIntOr("Operations",0);batchPaid=input.getLongOr("BatchPaid",0);burnTicks=input.getIntOr("BurnTicks",0);
         progress = input.getIntOr("Progress", 0);
         energyPerTick = input.getLong("EnergyPerTick").orElse(0L);
         paid = input.getLong("Paid").orElse(0L);

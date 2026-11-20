@@ -1,0 +1,20 @@
+[
+  {
+    "id": "coke",
+    "inputs": {
+      "minecraft:coal": 4
+    },
+    "outputs": {
+      "iuce:coke": 3
+    },
+    "fluids": {},
+    "products": {
+      "iuce:coke_oven_gas": 500,
+      "iuce:coal_tar": 250
+    },
+    "tools": {},
+    "energy": 3200,
+    "time": 400,
+    "segments": []
+  }
+]

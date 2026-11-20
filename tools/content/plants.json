@@ -1,0 +1,225 @@
+{
+  "twin_screw_extruder": {
+    "bio_pe_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/bio_pe_pellet",
+          1
+        ],
+        [
+          "strand_pelletizer/bio_pe_pellet",
+          1
+        ]
+      ],
+      "segments": [
+        "main_feed",
+        "melting",
+        "die"
+      ]
+    },
+    "rigid_pvc_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/rigid_pvc_pellet",
+          1
+        ],
+        [
+          "strand_pelletizer/rigid_pvc_pellet",
+          2
+        ]
+      ],
+      "segments": [
+        "main_feed",
+        "melting",
+        "venting",
+        "die"
+      ]
+    },
+    "soft_pvc_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/soft_pvc_pellet",
+          1
+        ],
+        [
+          "strand_pelletizer/soft_pvc_pellet",
+          2
+        ]
+      ],
+      "segments": [
+        "main_feed",
+        "melting",
+        "venting",
+        "die"
+      ]
+    },
+    "filled_pe_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/filled_pe_pellet",
+          1
+        ],
+        [
+          "strand_pelletizer/filled_pe_pellet",
+          2
+        ]
+      ],
+      "segments": [
+        "main_feed",
+        "melting",
+        "side_feed",
+        "die"
+      ]
+    },
+    "color_masterbatch": {
+      "steps": [
+        [
+          "compounding_extruder/color_masterbatch",
+          1
+        ],
+        [
+          "strand_pelletizer/color_masterbatch",
+          1
+        ]
+      ],
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_pla_injection_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_pla_injection_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:pla_injection_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_pla_film_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_pla_film_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:pla_film_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_bio_pe_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_bio_pe_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:bio_pe_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_rigid_pvc_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_rigid_pvc_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:rigid_pvc_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_soft_pvc_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_soft_pvc_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:soft_pvc_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    },
+    "color_filled_pe_pellet": {
+      "steps": [
+        [
+          "compounding_extruder/color_filled_pe_pellet",
+          1
+        ]
+      ],
+      "carrier": "iuce:filled_pe_pellet",
+      "segments": [
+        "main_feed",
+        "melting",
+        "mixing",
+        "die"
+      ]
+    }
+  },
+  "bio_ethylene_plant": {
+    "ethylene": {
+      "steps": [
+        [
+          "fermenter/fermented_wash",
+          1
+        ],
+        [
+          "distillation_column/ethanol",
+          1
+        ],
+        [
+          "dehydration_reactor/ethylene",
+          1
+        ]
+      ]
+    }
+  },
+  "carbide_furnace_plant": {
+    "carbide": {
+      "steps": [
+        [
+          "carbide_furnace/carbide",
+          1
+        ],
+        [
+          "macerator/calcium_carbide",
+          1
+        ]
+      ]
+    }
+  },
+  "coke_oven_battery": {
+    "coke": {
+      "steps": [
+        [
+          "coking_oven/coke",
+          1
+        ]
+      ]
+    }
+  }
+}

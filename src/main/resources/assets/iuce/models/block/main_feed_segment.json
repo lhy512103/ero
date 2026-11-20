@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "iuce:block/main_feed_segment",
+    "side": "iuce:block/machine/process/box_side",
+    "top": "iuce:block/machine/process/box_top"
+  }
+}

@@ -197,6 +197,10 @@ for code, field in (("zh_cn", "name_zh"), ("en_us", "name_en")):
     if changed:
         write(lang_path, lang)
 
+from plant_recipes import compile_plants
+for plant, batches in compile_plants(ROOT).items():
+    write(MAIN + "iuce/plants/batches/" + plant + ".json", batches)
+
 if CHECK:
     if errors:
         raise SystemExit("%d generated file(s) out of date; run tools/gen_content.py" % len(errors))

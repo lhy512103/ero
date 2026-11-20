@@ -146,6 +146,21 @@ public class ModBlocks {
         PlantDrumBlock::new, () -> machineProperties().get().noOcclusion());
     public static final DeferredBlock<PlantControllerBlock> PLANT_CONTROLLER = BLOCKS.registerBlock("plant_controller",
         PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> TWIN_SCREW_EXTRUDER = BLOCKS.registerBlock("twin_screw_extruder", PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> BIO_ETHYLENE_PLANT = BLOCKS.registerBlock("bio_ethylene_plant", PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> CARBIDE_FURNACE_PLANT = BLOCKS.registerBlock("carbide_furnace_plant", PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> COKE_OVEN_BATTERY = BLOCKS.registerBlock("coke_oven_battery", PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<PlantControllerBlock> WASTE_HEAT_POWER_PLANT = BLOCKS.registerBlock("waste_heat_power_plant", PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<Block> MAIN_FEED_SEGMENT = BLOCKS.registerSimpleBlock("main_feed_segment", metalBlockProperties());
+    public static final DeferredBlock<Block> MELTING_SEGMENT = BLOCKS.registerSimpleBlock("melting_segment", metalBlockProperties());
+    public static final DeferredBlock<Block> SIDE_FEED_SEGMENT = BLOCKS.registerSimpleBlock("side_feed_segment", metalBlockProperties());
+    public static final DeferredBlock<Block> MIXING_SEGMENT = BLOCKS.registerSimpleBlock("mixing_segment", metalBlockProperties());
+    public static final DeferredBlock<Block> VENTING_SEGMENT = BLOCKS.registerSimpleBlock("venting_segment", metalBlockProperties());
+    public static final DeferredBlock<Block> DIE_SEGMENT = BLOCKS.registerSimpleBlock("die_segment", metalBlockProperties());
+    public static final DeferredBlock<PlantTankBlock> FLUID_INPUT_HATCH = BLOCKS.registerBlock("fluid_input_hatch", PlantTankBlock::new, machineProperties());
+    public static final DeferredBlock<PlantTankBlock> FLUID_OUTPUT_HATCH = BLOCKS.registerBlock("fluid_output_hatch", PlantTankBlock::new, machineProperties());
+    public static final DeferredBlock<MachineBlock> GENERATION_HATCH = BLOCKS.registerBlock("generation_hatch", p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
+    public static final DeferredBlock<HatchBlock> MAINTENANCE_HATCH = BLOCKS.registerBlock("maintenance_hatch", HatchBlock::new, machineProperties());
     public static final DeferredBlock<HatchBlock> ITEM_INPUT_HATCH = BLOCKS.registerBlock("item_input_hatch",
         HatchBlock::new, machineProperties());
     public static final DeferredBlock<HatchBlock> ITEM_OUTPUT_HATCH = BLOCKS.registerBlock("item_output_hatch",

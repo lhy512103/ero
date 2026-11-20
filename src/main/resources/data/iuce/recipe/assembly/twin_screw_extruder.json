@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:compounding_extruder"
+  ],
+  "result": {
+    "id": "iuce:twin_screw_extruder",
+    "count": 1
+  }
+}

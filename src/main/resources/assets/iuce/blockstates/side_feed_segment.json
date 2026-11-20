@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "iuce:block/side_feed_segment"
+    }
+  }
+}

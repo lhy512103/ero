@@ -76,7 +76,29 @@ CARD_OPTIONS = 4          # each option may be set from 1 to this level
 CARD_SLOTS_MAX = 8        # module slots on a process card
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
+from plant_recipes import compile_plants
+for plant, batches in compile_plants(ROOT).items():
+    path = os.path.join(ROOT, "src/main/resources/iuce/plants/batches", plant + ".json")
+    with open(path, encoding="utf8") as handle:
+        if json.load(handle) != batches:
+            raise SystemExit("Stale integrated plant batches: " + plant)
+
 TERMINAL = set(STATION.values()) | {
+    "twin_screw_extruder",
+    "bio_ethylene_plant",
+    "carbide_furnace_plant",
+    "coke_oven_battery",
+    "waste_heat_power_plant",
+    "main_feed_segment",
+    "melting_segment",
+    "side_feed_segment",
+    "mixing_segment",
+    "venting_segment",
+    "die_segment",
+    "fluid_input_hatch",
+    "fluid_output_hatch",
+    "generation_hatch",
+    "maintenance_hatch",
     "mulch_film_pe", "mulch_film_pla", "mulched_farmland", "waste_film", "drip_pipe",
     "fluid_pipe", "bronze_fluid_pipe", "conveyor_ii", "logistics_port_ii", "bulk_silo", "gas_tank",
     "air_compressor", "crate", "toy_brick", "plastic_pail", "drip_emitter", "pipe_fitting",
@@ -433,7 +455,8 @@ for language_dir in sorted(glob.glob(GUIDE + "*/")):
         if not category or category.group(1).strip() not in categories:
             errors.append(where + ": unknown category")
         for ref in set(re.findall(r"\b(?:iuce|minecraft):[a-z0-9_]+", text)):
-            check_id(ref, where)
+            if ("~" + ref) not in text:
+                check_id(ref, where)
         links = re.findall(r"\]\(([a-z0-9_/]+)\)", text)
         for cards in re.findall(r"\{cards:([^}]*)\}", text):
             links += [entry.strip() for entry in cards.split(",") if entry.strip()]

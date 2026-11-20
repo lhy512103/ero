@@ -109,6 +109,7 @@ neoForge {
             if (providers.gradleProperty('regressionTests').isPresent()) {
                 systemProperty 'iuce.regressionTests', 'true'
                 if (providers.gradleProperty('sparkBenchmark').isPresent()) systemProperty 'iuce.sparkBenchmark', 'true'
+                if (providers.gradleProperty('factoryBenchmark').isPresent()) systemProperty 'iuce.factoryBenchmark', 'true'
             }
         }
 

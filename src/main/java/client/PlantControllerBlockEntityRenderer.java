@@ -44,7 +44,8 @@ public class PlantControllerBlockEntityRenderer implements BlockEntityRenderer<P
     ) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTicks, cameraPosition, breakProgress);
         BlockState blockState = blockEntity.getBlockState();
-        state.formed = blockState.getValue(PlantControllerBlock.FORMED);
+        state.screw = blockState.is(block.ModBlocks.TWIN_SCREW_EXTRUDER.get());
+        state.formed = blockState.getValue(PlantControllerBlock.FORMED) && (state.screw || multiblock.PlantStructure.industrialId(blockState)==null);
         state.mill = blockEntity.isMill();
         state.legacy = blockState.getValue(PlantControllerBlock.LEGACY);
         state.working = blockEntity.isWorking();
@@ -82,7 +83,7 @@ public class PlantControllerBlockEntityRenderer implements BlockEntityRenderer<P
     @Override
     public void submit(PlantControllerRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         if (!state.formed || state.legacy) return;
-        PlantModel model = PlantModel.get(state.mill ? PlantModel.ROLLING_MILL : PlantModel.ORE_PLANT);
+        PlantModel model = PlantModel.get(state.screw ? "twin_screw_extruder" : state.mill ? PlantModel.ROLLING_MILL : PlantModel.ORE_PLANT);
         if (model == null) return;
 
         poseStack.pushPose();

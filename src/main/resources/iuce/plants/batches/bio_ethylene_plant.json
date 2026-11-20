@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ethylene",
+    "inputs": {},
+    "outputs": {},
+    "fluids": {
+      "iuce:sugar_solution": 1000
+    },
+    "products": {
+      "iuce:carbon_dioxide": 250,
+      "iuce:stillage": 500,
+      "iuce:ethylene": 500,
+      "iuce:process_water": 250
+    },
+    "tools": {
+      "iuce:yeast_culture": 0,
+      "iuce:activated_alumina": 1
+    },
+    "energy": 6560,
+    "time": 480,
+    "segments": []
+  }
+]

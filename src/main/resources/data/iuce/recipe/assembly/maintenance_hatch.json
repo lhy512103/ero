@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:repair_bench"
+  ],
+  "result": {
+    "id": "iuce:maintenance_hatch",
+    "count": 1
+  }
+}
