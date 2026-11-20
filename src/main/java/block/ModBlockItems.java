@@ -70,6 +70,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> ENERGY_HATCH_HV = registerBlockItem(ModBlocks.ENERGY_HATCH_HV);
     public static final DeferredItem<BlockItem> MILL_CONTROLLER = registerControllerItem("mill_controller", ModBlocks.MILL_CONTROLLER);
     public static final DeferredItem<BlockItem> REPAIR_BENCH = registerBlockItem(ModBlocks.REPAIR_BENCH);
+    public static final DeferredItem<BlockItem> PROCESS_DESIGN_TABLE = registerBlockItem(ModBlocks.PROCESS_DESIGN_TABLE);
     public static final DeferredItem<BlockItem> LAMP = registerBlockItem(ModBlocks.LAMP);
     public static final DeferredItem<BlockItem> CONVERTER = registerBlockItem(ModBlocks.CONVERTER);
     public static final DeferredItem<BlockItem> BUILDER = registerBlockItem(ModBlocks.BUILDER);

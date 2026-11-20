@@ -1,11 +1,18 @@
 {
   "machines": [
+    "catalyst_prep_tank",
+    "crystallizer",
     "dehydration_reactor",
+    "depolymerization_reactor",
     "distillation_column",
     "dryer",
+    "evaporator",
     "fermenter",
     "liquefaction_tank",
+    "oligomerization_reactor",
+    "polymerization_reactor",
     "saccharification_tank",
+    "strand_pelletizer",
     "vent_stack",
     "wet_mill"
   ]

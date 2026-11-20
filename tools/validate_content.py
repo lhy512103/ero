@@ -77,6 +77,7 @@ CARD_SLOTS_MAX = 8        # module slots on a process card
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
+    "process_card", "process_design_table", "pla_injection_pellet", "pla_film_pellet",
     "generator", "geothermal_generator", "industrial_workbench", "pump", "transformer", "chute", "conveyor", "factory_hub",
     "logistics_port", "silo", "fluid_tank", "configurator",
     "plant_controller", "plant_frame", "plant_drum", "item_input_hatch", "item_output_hatch", "energy_hatch",
@@ -255,7 +256,8 @@ for path in sorted(process_paths):
         catalyst = data.get("catalyst", {}).get("item")
         if catalyst and data["catalyst"].get("damage", 0) > 0 and definition.get("items_out", 1) < 1:
             errors.append("%s: a wearing catalyst leaves as spent catalyst, but %s has no output slot" % (name, machine))
-        key = (machine, catalyst, tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
+        key = (machine, catalyst, json.dumps(data.get("card"), sort_keys=True),
+               tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
         by_process_input[key].append(name)
         # the catalyst is not consumed, but the machine cannot run without one, so it counts as an input
         inputs = items_in + ([catalyst] if catalyst else [])

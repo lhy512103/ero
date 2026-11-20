@@ -42,7 +42,7 @@ public class ModCreativeModeTabs {
         ModBlockItems.ENERGY_HATCH,
         ModBlockItems.ENERGY_HATCH_HV,
         ModBlockItems.MILL_CONTROLLER,
-        ModBlockItems.REPAIR_BENCH,
+        ModBlockItems.REPAIR_BENCH, ModBlockItems.PROCESS_DESIGN_TABLE,
         ModBlockItems.LAMP,
         ModBlockItems.CONVERTER,
         ModBlockItems.BUILDER,
@@ -149,7 +149,8 @@ public class ModCreativeModeTabs {
     private static final List<DeferredItem<? extends Item>> BIOLOGICAL = List.of(
         ModItems.BAGASSE, ModItems.DISTILLERS_GRAINS, ModItems.ENZYME_PREPARATION,
         ModItems.YEAST_CULTURE, ModItems.LACTIC_CULTURE, ModItems.ASPERGILLUS_CULTURE,
-        ModItems.ACTIVATED_ALUMINA, ModItems.SPENT_CATALYST
+        ModItems.ACTIVATED_ALUMINA, ModItems.SPENT_CATALYST, ModItems.LACTIDE, ModItems.TIN_CATALYST,
+        ModItems.PLA_INJECTION_PELLET, ModItems.PLA_FILM_PELLET, ModItems.PROCESS_CARD
     );
 
     private static final List<DeferredItem<? extends Item>> CASINGS = List.of(

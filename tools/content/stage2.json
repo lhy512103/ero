@@ -167,6 +167,142 @@
       "card_slot": false,
       "upgrades": 0,
       "base_time": 20
+    },
+    {
+      "id": "evaporator",
+      "name_en": "Evaporator",
+      "name_zh": "浓缩罐",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 120
+    },
+    {
+      "id": "oligomerization_reactor",
+      "name_en": "Oligomerization Reactor",
+      "name_zh": "低聚釜",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 0,
+      "items_out": 0,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000,
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160
+    },
+    {
+      "id": "depolymerization_reactor",
+      "name_en": "Depolymerization Reactor",
+      "name_zh": "解聚釜",
+      "model": "tank",
+      "voltage": "MV",
+      "buffer": 16000,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 160
+    },
+    {
+      "id": "crystallizer",
+      "name_en": "Crystallizer",
+      "name_zh": "结晶器",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 200
+    },
+    {
+      "id": "polymerization_reactor",
+      "name_en": "Polymerization Reactor",
+      "name_zh": "聚合釜",
+      "model": "tank",
+      "voltage": "MV",
+      "buffer": 16000,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": [
+        8000
+      ],
+      "catalyst_slot": true,
+      "card_slot": true,
+      "upgrades": 4,
+      "base_time": 200
+    },
+    {
+      "id": "strand_pelletizer",
+      "name_en": "Strand Pelletizer",
+      "name_zh": "水浴切粒机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 80
+    },
+    {
+      "id": "catalyst_prep_tank",
+      "name_en": "Catalyst Prep Tank",
+      "name_zh": "催化剂配制罐",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 4000,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [],
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100
     }
   ]
 }

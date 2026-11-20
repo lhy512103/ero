@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "minecraft:glass_bottle",
+      "iuce:iron_plate"
+    ],
+    [
+      "iuce:iron_gear",
+      "iuce:machine_casing",
+      "iuce:iron_gear"
+    ],
+    [
+      "iuce:circuit",
+      "iuce:electric_motor",
+      "iuce:circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:catalyst_prep_tank",
+    "count": 1
+  }
+}

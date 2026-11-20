@@ -100,6 +100,14 @@
     "iuce:liquefaction_tank",
     "iuce:saccharification_tank",
     "iuce:vent_stack",
-    "iuce:wet_mill"
+    "iuce:wet_mill",
+    "iuce:catalyst_prep_tank",
+    "iuce:crystallizer",
+    "iuce:depolymerization_reactor",
+    "iuce:evaporator",
+    "iuce:oligomerization_reactor",
+    "iuce:polymerization_reactor",
+    "iuce:strand_pelletizer",
+    "iuce:process_design_table"
   ]
 }

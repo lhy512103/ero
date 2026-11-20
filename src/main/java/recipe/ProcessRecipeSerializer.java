@@ -61,7 +61,7 @@ public final class ProcessRecipeSerializer {
         Codec.intRange(0, 1 << 20).optionalFieldOf("damage", 0).forGetter(ProcessRecipe.Catalyst::damage)
     ).apply(i, ProcessRecipe.Catalyst::new));
 
-    private static final Codec<ProcessRecipe.CardRequirement> CARD = RecordCodecBuilder.create(i -> i.group(
+    public static final Codec<ProcessRecipe.CardRequirement> CARD = RecordCodecBuilder.create(i -> i.group(
         Codec.STRING.fieldOf("family").forGetter(ProcessRecipe.CardRequirement::family),
         Codec.unboundedMap(Codec.STRING, Codec.intRange(1, 4)).optionalFieldOf("options", Map.of())
             .forGetter(ProcessRecipe.CardRequirement::options)

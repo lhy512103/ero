@@ -112,6 +112,8 @@
 106. Fixed: JEI pages drew the catalyst as a second optional ingredient instead of a slot that is not used up.
 107. Added: The boiler can run on flammable gas, burning 250 mB per ignition instead of a solid fuel item.
 108. Improved: Fluid textures are redrawn as flowing water-like sheets with animated motion.
+109. Added: Turn sugar cane into injection-grade or film-grade PLA pellets and recover lactic acid from mother liquor.
+110. Added: Write and copy PLA grade cards at a process design table.
 
 ### 中文
 
@@ -223,3 +225,5 @@
 106. 修复：JEI 配方页把催化剂画成了第二种可选原料，其实它不会被消耗。
 107. 新增：锅炉可用可燃气体助燃，每 250 mB 顶一次燃烧，与固体燃料共用一个炉膛。
 108. 优化：流体贴图按原版水的观感重绘，并带流动动画。
+109. 新增：甘蔗可制成注塑级或薄膜级聚乳酸颗粒，结晶母液可回收乳酸。
+110. 新增：工艺设计台可写入和复制聚乳酸牌号卡。

@@ -129,7 +129,7 @@ public class ProcessRecipeCategory extends AbstractRecipeCategory<RecipeHolder<P
         String seconds = String.format(Locale.ROOT, "%.1f", recipe.time() / 20.0);
         lines.add(Component.translatable("guide.iuce.recipe.cost", recipe.energy(), seconds, recipe.energyPerTick()));
         recipe.card().ifPresent(card -> lines.add(Component.translatable("jei.iuce.process.card",
-            Component.translatable("item.iuce.process_card." + card.family()))));
+            machine.process.ProcessCards.label(card))));
         if (!recipe.utilities().isEmpty()) lines.add(Component.translatable("jei.iuce.process.utilities", names(recipe.utilities(), "utility")));
         if (!recipe.segments().isEmpty()) lines.add(Component.translatable("jei.iuce.process.segments", names(recipe.segments(), "segment")));
         if (releases(recipe)) lines.add(Component.translatable("jei.iuce.process.released_line").withStyle(ChatFormatting.GRAY));

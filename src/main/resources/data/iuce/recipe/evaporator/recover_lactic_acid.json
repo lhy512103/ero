@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "evaporator",
+  "time": 120,
+  "energy": 1920,
+  "fluids": [
+    {
+      "fluid": "iuce:lactide_mother_liquor",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:lactic_acid",
+      "amount": 500
+    }
+  ],
+  "utilities": [
+    "steam"
+  ]
+}

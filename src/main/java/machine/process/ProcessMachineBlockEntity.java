@@ -334,7 +334,9 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         if (hits == 0 && needed > 0) return "no_recipe";                // nothing of this recipe is here
         if (recipe.card().isPresent()) {
             if (def.cardIndex() < 0 || itemHandler.getAmountAsInt(def.cardIndex()) <= 0) return "no_card";
-            return "wrong_card";                                        // process cards arrive in M2
+            if (!ProcessCards.matches(itemHandler.getResource(def.cardIndex()).toStack(1), recipe.card().get())) return "wrong_card";
+        } else if (def.cardIndex() >= 0 && itemHandler.getAmountAsInt(def.cardIndex()) > 0) {
+            return "wrong_card";
         }
         if (recipe.catalyst().isPresent()) {
             int slot = def.catalystIndex();

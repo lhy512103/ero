@@ -144,6 +144,7 @@ public class ModBlocks {
         p -> new EnergyHatchBlock(p, blockentity.EnergyHatchBlockEntity::new, ModBlockEntities.ENERGY_HATCH), machineProperties());
     public static final DeferredBlock<PlantControllerBlock> MILL_CONTROLLER = BLOCKS.registerBlock("mill_controller",
         PlantControllerBlock::new, machineProperties());
+    public static final DeferredBlock<ProcessDesignTableBlock> PROCESS_DESIGN_TABLE = BLOCKS.registerBlock("process_design_table", ProcessDesignTableBlock::new, machineProperties());
     public static final DeferredBlock<RepairBenchBlock> REPAIR_BENCH = BLOCKS.registerBlock("repair_bench",
         RepairBenchBlock::new, machineProperties());
     public static final DeferredBlock<MachineBlock> LAMP = BLOCKS.registerBlock("lamp",

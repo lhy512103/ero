@@ -79,7 +79,7 @@ public final class RegressionTests {
         });
     }
     /** Tests that build a full-size multiblock and need a 24x12x24 arena. */
-    private static final java.util.Set<String> LARGE = java.util.Set.of("open_industrial_multiblocks");
+    private static final java.util.Set<String> LARGE = java.util.Set.of("open_industrial_multiblocks", "m2_pla_line");
     private static Identifier id(String name) { return Identifier.fromNamespaceAndPath("iuce", name); }
     private static void check(GameTestHelper helper, boolean value, String message) { helper.assertTrue(value, message); }
     private static MachineBlockEntity machine(GameTestHelper helper, int x, Block block) {

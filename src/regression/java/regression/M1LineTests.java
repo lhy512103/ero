@@ -46,6 +46,7 @@ final class M1LineTests {
         tests.put("m1_pipe_reach", M1LineTests::pipeReach);
         tests.put("m1_ethylene_line", M1LineTests::ethyleneLine);
         tests.put("m1_byproducts", M1LineTests::byproducts);
+        tests.put("m2_pla_line", M1LineTests::plaLine);
     }
 
     // ------------------------------------------------------------------ helpers
@@ -336,6 +337,74 @@ final class M1LineTests {
             check(helper, !"output_full".equals(machine.reason()) && !"tank_full".equals(machine.reason()),
                 machine.def().id() + " jammed with '" + machine.reason() + "' after " + tick + " ticks");
         }
+        helper.succeed();
+    }
+
+    /** Drives the sugar and recovery branches for ten minutes of machine time. */
+    private static void plaLine(GameTestHelper helper) {
+        newRound(helper);
+        var mill = machine(helper, "wet_mill", 1);
+        var fermenter = machine(helper, "fermenter", 2);
+        var evaporator = machine(helper, "evaporator", 3);
+        var oligomer = machine(helper, "oligomerization_reactor", 4);
+        var depolymer = machine(helper, "depolymerization_reactor", 5);
+        var crystals = machine(helper, "crystallizer", 6);
+        var polymer = machine(helper, "polymerization_reactor", 7);
+        var cutter = machine(helper, "strand_pelletizer", 8);
+        var recovery = machine(helper, "evaporator", 9);
+        var prep = machine(helper, "catalyst_prep_tank", 10);
+        utilityBus(helper, 1, 11);
+        give(fermenter, fermenter.def().catalystIndex(), new ItemStack(ModItems.LACTIC_CULTURE.get()));
+        give(prep, 0, new ItemStack(ModItems.PURIFIED_TIN_DUST.get(), 4));
+        input(prep, 0).fill(ModFluids.chemical("ethanol"), 500);
+        for (var target : List.of(depolymer, polymer)) {
+            for (int i = 0; i < 110; i++) poweredTick(prep);
+            int slot = prep.def().outputStart();
+            check(helper, count(prep, slot) == 1, "catalyst preparation must supply one catalyst");
+            give(target, target.def().catalystIndex(), prep.getItemHandler().getResource(slot).toStack(1));
+            prep.getItemHandler().set(slot, ItemResource.EMPTY, 0);
+        }
+        int fresh = 0, recycled = 0, mother = 0, fed = 0, pellets = 0;
+        boolean wroteCard = false;
+        for (int tick = 0; tick < 12000; tick++) {
+            if (count(mill, 0) == 0) give(mill, 0, new ItemStack(Items.SUGAR_CANE, 64));
+            input(mill, 0).fill(Fluids.WATER, 500);
+            mill.getItemHandler().set(mill.def().outputStart(), ItemResource.EMPTY, 0);
+            pump(mill, 0, fermenter, 0, ModFluids.chemical("sugar_solution"), 8000);
+            pump(fermenter, 0, evaporator, 0, ModFluids.chemical("lactic_broth"), 8000);
+            fresh += pump(evaporator, 0, oligomer, 0, ModFluids.chemical("lactic_acid"), 8000);
+            recycled += pump(recovery, 0, oligomer, 0, ModFluids.chemical("lactic_acid"), 8000);
+            output(evaporator, 1).drain(8000);
+            output(oligomer, 1).drain(8000);
+            pump(oligomer, 0, depolymer, 0, ModFluids.chemical("pla_oligomer"), 8000);
+            pump(depolymer, 0, crystals, 0, ModFluids.chemical("crude_lactide"), 8000);
+            mother += pump(crystals, 0, recovery, 0, ModFluids.chemical("lactide_mother_liquor"), 8000);
+            int slot = crystals.def().outputStart();
+            if (count(crystals, slot) > 0) {
+                int n = count(crystals, slot);
+                give(polymer, 0, crystals.getItemHandler().getResource(slot).toStack(n));
+                crystals.getItemHandler().set(slot, ItemResource.EMPTY, 0);
+                fed += n;
+            }
+            pump(polymer, 0, cutter, 0, ModFluids.chemical("pla_melt_film"), 8000);
+            for (var m : List.of(mill, fermenter, evaporator, oligomer, depolymer, crystals, polymer, cutter, recovery)) poweredTick(m);
+            if (!wroteCard && fed > 0) {
+                check(helper, "no_card".equals(polymer.reason()), "polymerization requires a card");
+                give(polymer, polymer.def().cardIndex(), machine.process.ProcessCards.write(
+                    new recipe.ProcessRecipe.CardRequirement("pla", Map.of("grade", 2))));
+                wroteCard = true;
+            }
+            int finished = count(cutter, cutter.def().outputStart());
+            if (finished > 0) {
+                check(helper, cutter.getItemHandler().getResource(cutter.def().outputStart()).toStack(1)
+                    .is(ModItems.PLA_FILM_PELLET.get()), "film card must produce film pellets");
+                pellets += finished;
+                cutter.getItemHandler().set(cutter.def().outputStart(), ItemResource.EMPTY, 0);
+            }
+        }
+        check(helper, fresh > 0 && recycled >= 1000 && pellets > 0, "both feeds and the pelletizer must run");
+        check(helper, mother == input(recovery, 0).getAmount() + 2 * (recycled + output(recovery, 0).getAmount()),
+            "mother liquor recovery drifted");
         helper.succeed();
     }
 

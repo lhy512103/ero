@@ -166,6 +166,11 @@ public class ModItems {
     public static final DeferredItem<Item> ACTIVATED_ALUMINA = ITEMS.registerSimpleItem("activated_alumina",
         properties -> properties.durability(256));
     public static final DeferredItem<Item> SPENT_CATALYST = registerSimpleItem("spent_catalyst");
+    public static final DeferredItem<Item> LACTIDE = registerSimpleItem("lactide");
+    public static final DeferredItem<Item> PLA_INJECTION_PELLET = registerSimpleItem("pla_injection_pellet");
+    public static final DeferredItem<Item> PLA_FILM_PELLET = registerSimpleItem("pla_film_pellet");
+    public static final DeferredItem<Item> PROCESS_CARD = registerSimpleItem("process_card");
+    public static final DeferredItem<Item> TIN_CATALYST = ITEMS.registerSimpleItem("tin_catalyst", p -> p.durability(128));
 
     // 工具 (Tools)
     public static final DeferredItem<GuideItem> GUIDE = registerItem("guide", GuideItem::new);

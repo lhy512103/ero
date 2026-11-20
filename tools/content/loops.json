@@ -1,4 +1,12 @@
 {
   "cycles": ["iuce:enzyme_preparation"],
-  "loops": []
+  "loops": [
+    {
+      "name": "PLA mother liquor recovery",
+      "recipes": ["evaporator/recover_lactic_acid"],
+      "feed": "iuce:lactide_mother_liquor",
+      "product": "iuce:lactic_acid",
+      "recovery": 0.5
+    }
+  ]
 }

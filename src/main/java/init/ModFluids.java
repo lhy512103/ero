@@ -79,7 +79,13 @@ public class ModFluids {
         liquid("stillage", 0xFF5E4426),
         gas("ethylene", 0xFFDCE6B8),
         gas("carbon_dioxide", 0xFFB9BCC2),
-        liquid("process_water", 0xFF7FB3D5));
+        liquid("process_water", 0xFF7FB3D5),
+        liquid("lactic_acid", 0xFFE3E6BF),
+        liquid("pla_oligomer", 0xFFE3CF98),
+        liquid("crude_lactide", 0xFFC6AA74),
+        liquid("lactide_mother_liquor", 0xFFAAAB81),
+        liquid("pla_melt_injection", 0xFFD8BD9E),
+        liquid("pla_melt_film", 0xFFADD7C9));
 
     private static final List<DeferredHolder<FluidType, FluidType>> TYPES = new ArrayList<>();
     private static final List<DeferredHolder<Fluid, ? extends FlowingFluid>> STILL = new ArrayList<>();

@@ -122,6 +122,12 @@ for loop in table.get("loops", []):
             net[ref] += amount
     if len(used) != len(loop["recipes"]):
         continue
+    if "recovery" in loop:
+        feed = -net[loop["feed"]]
+        recovered = net[loop["product"]]
+        if feed <= 0 or recovered != feed * loop["recovery"]:
+            errors.append("%s: recovered %s from %s, expected %.1f%%" % (name, recovered, feed, 100 * loop["recovery"]))
+        continue
     main = loop["main"]
     if net[main] >= 0:
         warnings.append("%s: the loop makes its own %s, so it never needs make-up" % (name, main))

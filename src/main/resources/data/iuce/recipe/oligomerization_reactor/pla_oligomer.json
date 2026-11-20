@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "oligomerization_reactor",
+  "time": 160,
+  "energy": 3840,
+  "fluids": [
+    {
+      "fluid": "iuce:lactic_acid",
+      "amount": 500
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:pla_oligomer",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:process_water",
+      "amount": 100
+    }
+  ],
+  "utilities": [
+    "steam"
+  ]
+}
