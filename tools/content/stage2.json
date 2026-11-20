@@ -75,11 +75,11 @@
       "items_out": 1,
       "fluids_in": [
         8000,
-        4000
+        8000
       ],
       "fluids_out": [
         8000,
-        4000
+        8000
       ],
       "catalyst_slot": true,
       "card_slot": false,
@@ -123,7 +123,7 @@
       ],
       "fluids_out": [
         8000,
-        4000
+        8000
       ],
       "catalyst_slot": true,
       "card_slot": false,
@@ -143,7 +143,9 @@
       "fluids_in": [
         8000
       ],
-      "fluids_out": [],
+      "fluids_out": [
+        8000
+      ],
       "catalyst_slot": false,
       "card_slot": false,
       "upgrades": 4,
@@ -160,7 +162,7 @@
       "items_in": 0,
       "items_out": 0,
       "fluids_in": [
-        16000
+        8000
       ],
       "fluids_out": [],
       "catalyst_slot": false,
@@ -264,6 +266,7 @@
         8000
       ],
       "fluids_out": [
+        8000,
         8000
       ],
       "catalyst_slot": true,
@@ -278,7 +281,7 @@
       "model": "box",
       "voltage": "LV",
       "buffer": 4000,
-      "items_in": 0,
+      "items_in": 1,
       "items_out": 1,
       "fluids_in": [
         8000
@@ -299,6 +302,7 @@
       "items_in": 2,
       "items_out": 1,
       "fluids_in": [
+        8000,
         8000
       ],
       "fluids_out": [],
@@ -746,6 +750,192 @@
       "upgrades": 4,
       "base_time": 100,
       "items_in": 4,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "solvent_recovery_tower",
+      "name_en": "Solvent Recovery Tower",
+      "name_zh": "溶剂回收塔",
+      "model": "column",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 0,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "compounding_extruder",
+      "name_en": "Compounding Extruder",
+      "name_zh": "双螺杆挤出机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 3,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "single_screw_extruder",
+      "name_en": "Single Screw Extruder",
+      "name_zh": "单螺杆挤出机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 2,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "cooling_tank",
+      "name_en": "Cooling Tank",
+      "name_zh": "冷却水槽",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "haul_off_cutter",
+      "name_en": "Haul Off Cutter",
+      "name_zh": "牵引切割机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "film_winder",
+      "name_en": "Film Winder",
+      "name_zh": "收卷机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "coagulation_tank",
+      "name_en": "Coagulation Tank",
+      "name_zh": "凝固槽",
+      "model": "tank",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [
+        8000
+      ],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "sheeting_press",
+      "name_en": "Sheeting Press",
+      "name_zh": "压片机",
+      "model": "box",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": [
+        8000
+      ]
+    },
+    {
+      "id": "smokehouse",
+      "name_en": "Smokehouse",
+      "name_zh": "烟熏房",
+      "model": "column",
+      "voltage": "LV",
+      "buffer": 8000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 2,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "rubber_mixer",
+      "name_en": "Rubber Mixer",
+      "name_zh": "密炼机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": false,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 3,
+      "items_out": 1,
+      "fluids_in": [],
+      "fluids_out": []
+    },
+    {
+      "id": "vulcanizer",
+      "name_en": "Vulcanizer",
+      "name_zh": "硫化机",
+      "model": "box",
+      "voltage": "MV",
+      "buffer": 16000,
+      "catalyst_slot": true,
+      "card_slot": false,
+      "upgrades": 4,
+      "base_time": 100,
+      "items_in": 1,
       "items_out": 1,
       "fluids_in": [],
       "fluids_out": []

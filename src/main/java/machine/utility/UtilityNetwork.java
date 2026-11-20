@@ -233,7 +233,8 @@ public final class UtilityNetwork {
             if (entity instanceof UtilityConsumer) machines.add(current);
             for (Direction direction : Direction.values()) {
                 BlockPos next = current.relative(direction);
-                if (!visited.add(next)) continue;
+                if (!level.hasChunkAt(next) || !block.FluidPipeBlock.open(level.getBlockState(current),direction)
+                        || !block.FluidPipeBlock.open(level.getBlockState(next),direction.getOpposite()) || !visited.add(next)) continue;
                 if (ModBlocks.isUtilityPipe(level.getBlockState(next))) {
                     walked.add(next);
                     queue.add(next);

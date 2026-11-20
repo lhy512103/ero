@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "iuce:block/drip_pipe",
+    "particle": "#all"
+  },
+  "elements": [
+    {
+      "from": [
+        6.0,
+        0,
+        0.0
+      ],
+      "to": [
+        10.0,
+        5,
+        16.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "down": {
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

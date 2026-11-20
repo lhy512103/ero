@@ -1,6 +1,7 @@
 {
   "cycles": ["iuce:enzyme_preparation", "iuce:brine"],
   "loops": [
+    {"name":"PE slurry solvent recovery","recipes":["polymerization_reactor/pe_slurry","centrifuge/wet_pe_powder","dryer/pe_powder","solvent_recovery_tower/pe_wax"],"main":"iuce:solvent_naphtha","amount":1000,"loss":0.02},
     {
       "name": "Chloralkali recombination",
       "recipes": ["membrane_cell/electrolysis", "hcl_furnace/synthesis", "neutralizer/acid"],

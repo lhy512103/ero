@@ -16,10 +16,11 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 /** Silo: 64 stacks of a single kind of item. Right-click with items to put them in, with an empty hand to take a stack. */
 public class SiloBlockEntity extends BlockEntity {
     public static final long CAPACITY = 64 * 64;
-    private final SiloInventory inventory = new SiloInventory(CAPACITY, this::setChanged);
+    private final SiloInventory inventory;
 
     public SiloBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.SILO.get(), pos, state);
+        inventory = new SiloInventory(state.is(block.ModBlocks.BULK_SILO.get()) ? 4096L * 64 : CAPACITY, this::setChanged);
     }
 
     public SiloInventory getInventory() { return inventory; }
@@ -27,7 +28,7 @@ public class SiloBlockEntity extends BlockEntity {
     public Component describe() {
         if (inventory.getAmount() <= 0) return Component.translatable("message.iuce.silo.empty");
         return Component.translatable("message.iuce.silo.status", inventory.getResource().toStack(1).getHoverName(),
-            inventory.getAmount(), CAPACITY);
+            inventory.getAmount(), inventory.getCapacity());
     }
 
     public boolean deposit(Player player, ItemStack stack) {

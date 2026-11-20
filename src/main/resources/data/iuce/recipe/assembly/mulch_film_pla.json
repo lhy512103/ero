@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:pla_film_roll",
+    "iuce:pla_film_roll"
+  ],
+  "result": {
+    "id": "iuce:mulch_film_pla",
+    "count": 8
+  }
+}

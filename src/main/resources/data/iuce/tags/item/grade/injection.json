@@ -1,5 +1,7 @@
 {
   "values": [
-    "iuce:pla_injection_pellet"
+    "iuce:pla_injection_pellet",
+    "iuce:bio_pe_pellet",
+    "iuce:filled_pe_pellet"
   ]
 }

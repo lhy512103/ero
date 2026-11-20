@@ -1,0 +1,27 @@
+{
+  "type": "iuce:process",
+  "machine": "strand_pelletizer",
+  "time": 80,
+  "energy": 1280,
+  "items": [
+    {
+      "item": {
+        "neoforge:ingredient_type": "neoforge:components",
+        "items": "iuce:strand",
+        "components": {
+          "iuce:strand_product": "iuce:filled_pe_pellet"
+        }
+      },
+      "count": 4
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:filled_pe_pellet",
+      "count": 4
+    }
+  ]
+}

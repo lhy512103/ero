@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "iuce:solvent_recovery_tower"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "iuce:blocks/solvent_recovery_tower"
+}

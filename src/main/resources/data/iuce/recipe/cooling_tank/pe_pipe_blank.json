@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "cooling_tank",
+  "time": 60,
+  "energy": 480,
+  "items": [
+    {
+      "item": "iuce:hot_pe_pipe",
+      "count": 1
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:pe_pipe_blank",
+      "count": 1
+    }
+  ]
+}

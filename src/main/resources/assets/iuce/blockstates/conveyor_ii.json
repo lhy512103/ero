@@ -1,0 +1,196 @@
+{
+  "variants": {
+    "ascending=false,descending=false,facing=north,shape=straight": {
+      "model": "iuce:block/conveyor_ii",
+      "y": 0
+    },
+    "ascending=false,descending=true,facing=north,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 0
+    },
+    "ascending=true,descending=false,facing=north,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=true,descending=true,facing=north,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=false,descending=false,facing=north,shape=left": {
+      "model": "iuce:block/conveyor_ii_curve_left",
+      "y": 0
+    },
+    "ascending=false,descending=true,facing=north,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 0
+    },
+    "ascending=true,descending=false,facing=north,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=true,descending=true,facing=north,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=false,descending=false,facing=north,shape=right": {
+      "model": "iuce:block/conveyor_ii_curve_right",
+      "y": 0
+    },
+    "ascending=false,descending=true,facing=north,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 0
+    },
+    "ascending=true,descending=false,facing=north,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=true,descending=true,facing=north,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 0
+    },
+    "ascending=false,descending=false,facing=east,shape=straight": {
+      "model": "iuce:block/conveyor_ii",
+      "y": 90
+    },
+    "ascending=false,descending=true,facing=east,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 90
+    },
+    "ascending=true,descending=false,facing=east,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=true,descending=true,facing=east,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=false,descending=false,facing=east,shape=left": {
+      "model": "iuce:block/conveyor_ii_curve_left",
+      "y": 90
+    },
+    "ascending=false,descending=true,facing=east,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 90
+    },
+    "ascending=true,descending=false,facing=east,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=true,descending=true,facing=east,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=false,descending=false,facing=east,shape=right": {
+      "model": "iuce:block/conveyor_ii_curve_right",
+      "y": 90
+    },
+    "ascending=false,descending=true,facing=east,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 90
+    },
+    "ascending=true,descending=false,facing=east,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=true,descending=true,facing=east,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 90
+    },
+    "ascending=false,descending=false,facing=south,shape=straight": {
+      "model": "iuce:block/conveyor_ii",
+      "y": 180
+    },
+    "ascending=false,descending=true,facing=south,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 180
+    },
+    "ascending=true,descending=false,facing=south,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=true,descending=true,facing=south,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=false,descending=false,facing=south,shape=left": {
+      "model": "iuce:block/conveyor_ii_curve_left",
+      "y": 180
+    },
+    "ascending=false,descending=true,facing=south,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 180
+    },
+    "ascending=true,descending=false,facing=south,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=true,descending=true,facing=south,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=false,descending=false,facing=south,shape=right": {
+      "model": "iuce:block/conveyor_ii_curve_right",
+      "y": 180
+    },
+    "ascending=false,descending=true,facing=south,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 180
+    },
+    "ascending=true,descending=false,facing=south,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=true,descending=true,facing=south,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 180
+    },
+    "ascending=false,descending=false,facing=west,shape=straight": {
+      "model": "iuce:block/conveyor_ii",
+      "y": 270
+    },
+    "ascending=false,descending=true,facing=west,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 270
+    },
+    "ascending=true,descending=false,facing=west,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    },
+    "ascending=true,descending=true,facing=west,shape=straight": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    },
+    "ascending=false,descending=false,facing=west,shape=left": {
+      "model": "iuce:block/conveyor_ii_curve_left",
+      "y": 270
+    },
+    "ascending=false,descending=true,facing=west,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 270
+    },
+    "ascending=true,descending=false,facing=west,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    },
+    "ascending=true,descending=true,facing=west,shape=left": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    },
+    "ascending=false,descending=false,facing=west,shape=right": {
+      "model": "iuce:block/conveyor_ii_curve_right",
+      "y": 270
+    },
+    "ascending=false,descending=true,facing=west,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp_down",
+      "y": 270
+    },
+    "ascending=true,descending=false,facing=west,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    },
+    "ascending=true,descending=true,facing=west,shape=right": {
+      "model": "iuce:block/conveyor_ii_ramp",
+      "y": 270
+    }
+  }
+}

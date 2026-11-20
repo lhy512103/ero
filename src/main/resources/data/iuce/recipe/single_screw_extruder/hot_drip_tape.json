@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "single_screw_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:bio_pe_pellet",
+      "count": 2
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:pipe_die"
+  },
+  "results": [
+    {
+      "id": "iuce:hot_drip_tape",
+      "count": 1
+    }
+  ]
+}

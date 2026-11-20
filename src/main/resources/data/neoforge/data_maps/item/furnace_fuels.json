@@ -20,6 +20,9 @@
     },
     "iuce:coke": {
       "burn_time": 2400
+    },
+    "iuce:waste_film": {
+      "burn_time": 100
     }
   }
 }

@@ -12,5 +12,7 @@ public final class PlasticComponents {
         () -> DataComponentType.<Identifier>builder().persistent(Identifier.CODEC).build());
     public static final Supplier<DataComponentType<Identifier>> PAIL_FLUID = ProcessCards.REGISTER.register("pail_fluid",
         () -> DataComponentType.<Identifier>builder().persistent(Identifier.CODEC).build());
+    public static final Supplier<DataComponentType<Identifier>> STRAND_PRODUCT = ProcessCards.REGISTER.register("strand_product",
+        () -> DataComponentType.<Identifier>builder().persistent(Identifier.CODEC).build());
     public static void initialize() {}
 }

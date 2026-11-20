@@ -94,6 +94,14 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> ROCK_SALT_ORE = registerBlockItem(ModBlocks.ROCK_SALT_ORE);
     public static final DeferredItem<BlockItem> LIMESTONE = registerBlockItem(ModBlocks.LIMESTONE);
     public static final DeferredItem<BlockItem> AIR_COMPRESSOR = registerBlockItem(ModBlocks.AIR_COMPRESSOR);
+    public static final DeferredItem<BlockItem> CONVEYOR_II = registerBlockItem(ModBlocks.CONVEYOR_II);
+    public static final DeferredItem<BlockItem> LOGISTICS_PORT_II = registerBlockItem(ModBlocks.LOGISTICS_PORT_II);
+    public static final DeferredItem<BlockItem> BULK_SILO = registerBlockItem(ModBlocks.BULK_SILO);
+    public static final DeferredItem<BlockItem> GAS_TANK = registerBlockItem(ModBlocks.GAS_TANK);
+    public static final DeferredItem<BlockItem> FLUID_PIPE = registerBlockItem(ModBlocks.FLUID_PIPE);
+    public static final DeferredItem<BlockItem> BRONZE_FLUID_PIPE = registerBlockItem(ModBlocks.BRONZE_FLUID_PIPE);
+    public static final DeferredItem<BlockItem> DRIP_PIPE = registerBlockItem(ModBlocks.DRIP_PIPE);
+    public static final DeferredItem<BlockItem> MULCHED_FARMLAND = registerBlockItem(ModBlocks.MULCHED_FARMLAND);
     public static final DeferredItem<BlockItem> COOLING_TOWER = registerBlockItem(ModBlocks.COOLING_TOWER);
     public static final DeferredItem<BlockItem> CREATIVE_UTILITY_SOURCE = registerBlockItem(ModBlocks.CREATIVE_UTILITY_SOURCE);
     public static final DeferredItem<BlockItem> STEAM_PIPE = registerBlockItem(ModBlocks.STEAM_PIPE);

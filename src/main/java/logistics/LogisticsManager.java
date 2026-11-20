@@ -54,12 +54,15 @@ public final class LogisticsManager {
         final List<BlockPos> ports;
         int rest, skip;
 
-        Network(List<BlockPos> ports) { this.ports = ports; }
+        final boolean fluid;
+        Network(List<BlockPos> ports, boolean fluid) { this.ports = ports; this.fluid = fluid; }
     }
 
     private static final class State {
         final Set<BlockPos> ports = new HashSet<>();
         List<Network> networks = List.of();
+        final Map<BlockPos,Network> waterPipes = new java.util.HashMap<>();
+        final Set<BlockPos> dedicated = new HashSet<>();
         boolean dirty = true;
     }
 
@@ -120,7 +123,7 @@ public final class LogisticsManager {
         State state = STATES.get(level);
         if (state == null) return List.of();
         if (state.dirty) rebuild(level, state);
-        for (Network network : state.networks) if (network.ports.contains(port)) return network.ports;
+        for (Network network : state.networks) if (!network.fluid && network.ports.contains(port)) return network.ports;
         return List.of();
     }
 
@@ -139,7 +142,7 @@ public final class LogisticsManager {
                 network.skip--;
                 continue;
             }
-            if (process(level, network.ports) > 0) {
+            if (process(level, network, state) > 0) {
                 network.rest = 0;
                 network.skip = 0;
             } else {
@@ -156,6 +159,9 @@ public final class LogisticsManager {
             if (level.isLoaded(pos) && !(level.getBlockState(pos).getBlock() instanceof LogisticsPortBlock)) iterator.remove();
         }
         List<Network> networks = new ArrayList<>();
+        state.waterPipes.clear();
+        state.dedicated.clear();
+        for (boolean fluid : new boolean[]{false,true}) {
         Set<BlockPos> joined = new HashSet<>();
         for (BlockPos start : state.ports) {
             if (!level.isLoaded(start) || !joined.add(start)) continue;
@@ -165,28 +171,53 @@ public final class LogisticsManager {
             ArrayDeque<BlockPos> queue = new ArrayDeque<>();
             // an interface joins the network through the pipe behind it
             BlockPos behind = start.relative(level.getBlockState(start).getValue(LogisticsPortBlock.FACING).getOpposite());
-            if (level.isLoaded(behind) && level.getBlockState(behind).getBlock() instanceof PneumaticPipeBlock && pipes.add(behind)) queue.add(behind);
+            Direction face = level.getBlockState(start).getValue(LogisticsPortBlock.FACING);
+            for (Direction side : Direction.values()) {
+                if (side == face || (!fluid && !start.relative(side).equals(behind))) continue;
+                BlockPos adjacent=start.relative(side);
+                if (!level.isLoaded(adjacent)) continue;
+                var candidate=level.getBlockState(adjacent);
+                if (candidate.getBlock() instanceof PneumaticPipeBlock && (candidate.getBlock() instanceof block.FluidPipeBlock)==fluid
+                        && block.FluidPipeBlock.open(candidate,side.getOpposite()) && pipes.add(adjacent)) queue.add(adjacent);
+            }
             while (!queue.isEmpty() && pipes.size() < MAX_PIPES) {
                 BlockPos current = queue.poll();
                 for (Direction direction : Direction.values()) {
                     BlockPos next = current.relative(direction);
                     if (!level.isLoaded(next)) continue;
                     BlockState nextState = level.getBlockState(next);
-                    if (nextState.getBlock() instanceof PneumaticPipeBlock) {
+                    if (!block.FluidPipeBlock.open(level.getBlockState(current),direction) || !block.FluidPipeBlock.open(nextState,direction.getOpposite())) continue;
+                    if (nextState.getBlock() instanceof PneumaticPipeBlock && (nextState.getBlock() instanceof block.FluidPipeBlock)==fluid) {
                         if (pipes.add(next)) queue.add(next);
                     } else if (nextState.getBlock() instanceof LogisticsPortBlock
-                            && nextState.getValue(LogisticsPortBlock.FACING) == direction && joined.add(next)) {
+                            && (fluid ? nextState.getValue(LogisticsPortBlock.FACING) != direction.getOpposite() : nextState.getValue(LogisticsPortBlock.FACING) == direction) && joined.add(next)) {
                         members.add(next);
                     }
                 }
             }
-            if (members.size() > 1) networks.add(new Network(members));
+            Network net=new Network(members,fluid);
+            if (members.size() > 1) networks.add(net);
+            if(fluid && !pipes.isEmpty()) { state.dedicated.addAll(members); for(BlockPos pipe:pipes) state.waterPipes.put(pipe,net); }
+        }
         }
         state.networks = networks;
     }
 
     /** Moves what there is to move and returns how much that was (items plus millibuckets). */
-    private static long process(ServerLevel level, List<BlockPos> network) {
+    public static boolean hasWater(Level level, BlockPos pipe) {
+        State state=STATES.get(level);
+        if (!(level instanceof ServerLevel server) || state==null) return false;
+        if(state.dirty) rebuild(server,state);
+        Network supply=state.waterPipes.get(pipe);
+        if(supply==null) return false;
+        for(BlockPos pos:supply.ports) if(level.getBlockEntity(pos) instanceof LogisticsPortBlockEntity port && port.supplies()) {
+            var tanks=port.fluidHandler();
+            if(tanks!=null) for(int i=0;i<tanks.size();i++) if(tanks.getAmountAsLong(i)>0 && tanks.getResource(i).getFluid().isSame(net.minecraft.world.level.material.Fluids.WATER)) return true;
+        }
+        return false;
+    }
+    private static long process(ServerLevel level, Network group, State state) {
+        List<BlockPos> network=group.ports;
         List<LogisticsPortBlockEntity> ports = new ArrayList<>(network.size());
         for (BlockPos pos : network) {
             if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof LogisticsPortBlockEntity port) ports.add(port);
@@ -195,11 +226,12 @@ public final class LogisticsManager {
         long total = 0;
         for (LogisticsPortBlockEntity source : ports) {
             if (!source.supplies()) continue;
-            total += fluids(source, ports);
+            if (group.fluid || !state.dedicated.contains(source.getBlockPos())) total += fluids(source, ports, group.fluid ? Set.of() : state.dedicated);
+            if(group.fluid) continue;
             ResourceHandler<ItemResource> handler = source.handler();
             if (handler == null) continue;
             boolean storage = source.isStorage();
-            int budget = RATE * INTERVAL;
+            int budget = (source.getBlockState().is(block.ModBlocks.LOGISTICS_PORT_II.get()) ? 4096 : RATE) * INTERVAL;
             for (int index = 0; index < handler.size() && budget > 0; index++) {
                 ItemResource resource = handler.getResource(index);
                 long stored = handler.getAmountAsLong(index);
@@ -240,14 +272,14 @@ public final class LogisticsManager {
      * hand their products to machines that use them first and to tanks otherwise. Single-tank
      * machines are never drained.
      */
-    private static long fluids(LogisticsPortBlockEntity source, List<LogisticsPortBlockEntity> ports) {
+    private static long fluids(LogisticsPortBlockEntity source, List<LogisticsPortBlockEntity> ports, Set<BlockPos> separate) {
         int role = source.fluidRole();
         boolean machine = role == LogisticsPortBlockEntity.FLUID_MACHINE;
         if (role != LogisticsPortBlockEntity.FLUID_PUMP && role != LogisticsPortBlockEntity.FLUID_TANK && !(machine && source.supplies())) return 0;
         ResourceHandler<FluidResource> from = source.fluidHandler();
         if (from == null) return 0;
         long total = 0;
-        int budget = FLUID_RATE * INTERVAL;
+        int budget = (source.getBlockState().is(block.ModBlocks.LOGISTICS_PORT_II.get()) ? 64000 : FLUID_RATE) * INTERVAL;
         int first = machine && source.getLevel().getBlockEntity(source.targetPos()) instanceof fluid.MultiTankProvider tanks
             ? tanks.getInputTankCount() : 0;   // a machine only gives away what is in its output tanks
         for (int index = first; index < from.size() && budget > 0; index++) {
@@ -258,7 +290,7 @@ public final class LogisticsManager {
             boolean surplusToTanks = role == LogisticsPortBlockEntity.FLUID_PUMP || machine;
             for (int pass = 0; pass < (surplusToTanks ? 2 : 1) && offered > 0; pass++) {
                 for (LogisticsPortBlockEntity target : ports) {
-                    if (target == source || offered <= 0 || !target.receives() || target.getChannel() != source.getChannel()) continue;
+                    if (target == source || offered <= 0 || separate.contains(target.getBlockPos()) || !target.receives() || target.getChannel() != source.getChannel()) continue;
                     int targetRole = target.fluidRole();
                     boolean wanted = pass == 0
                         ? targetRole == LogisticsPortBlockEntity.FLUID_CONSUMER || targetRole == LogisticsPortBlockEntity.FLUID_MACHINE

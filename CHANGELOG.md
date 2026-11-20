@@ -117,6 +117,11 @@
 111. Added: Dry and injection-mold PLA into eight products with CNC-cut molds and recycle matching sprues.
 112. Added: Store goods in portable nine-slot crates, dye studded bricks, and transfer liquids in stackable plastic pails.
 113. Added: Process coal, limestone and rock salt into rigid or flexible PVC dry blends.
+114. Added: Polymerize bioethylene into polyethylene and recover 98% of the slurry solvent.
+115. Added: Compound, color and pelletize plastic strands with a twin-screw extruder.
+116. Added: Extrude pipe, film and insulated wire, irrigate fields with drip lines and protect crops with mulch.
+117. Added: Smoke natural rubber and vulcanize belts and seals for industrial equipment.
+118. Added: Move goods through tier II logistics ports and conveyors, dedicated fluid pipes, bulk silos and gas tanks.
 
 ### 中文
 
@@ -233,3 +238,8 @@
 111. 新增：干燥聚乳酸可用八种数控模具注塑成型，同源水口料可粉碎回收。
 112. 新增：九格周转箱可带库存搬运，凸点积木可染色，塑料桶可堆叠装液。
 113. 新增：煤、石灰岩和岩盐可经煤化工与氯碱产线制成硬质或软质聚氯乙烯干混料。
+114. 新增：生物乙烯可聚合成聚乙烯，每批可回收 98% 的浆液溶剂。
+115. 新增：双螺杆可填充、着色和挤出料条，切粒后保留牌号与颜色。
+116. 新增：单螺杆可挤出管、膜和包覆线，滴灌管与地膜可保持耕地湿润。
+117. 新增：天然橡胶可经烟熏、密炼和硫化制成皮带与密封圈。
+118. 新增：二级物流接口、传送带、独立流体管网、大料仓与气罐可扩大工厂吞吐能力。

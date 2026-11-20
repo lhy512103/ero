@@ -1,0 +1,11 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:pe_wax",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "minecraft:candle",
+    "count": 1
+  }
+}

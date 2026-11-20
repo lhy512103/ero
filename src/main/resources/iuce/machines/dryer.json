@@ -7,7 +7,9 @@
   "fluids_in": [
     8000
   ],
-  "fluids_out": [],
+  "fluids_out": [
+    8000
+  ],
   "catalyst_slot": false,
   "card_slot": false,
   "upgrades": 4,

@@ -615,6 +615,10 @@ final class MachineTests {
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, net.minecraft.world.phys.Vec3.ZERO)
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL, pickaxe));
             if (block == ModBlocks.RUBBER_LEAVES.get()) continue;   // leaves drop saplings by chance
+            if (block == ModBlocks.MULCHED_FARMLAND.get()) {
+                check(helper, loot.size()==2 && loot.stream().anyMatch(s -> s.is(ModItems.WASTE_FILM.get())), "PE mulch returns waste film");
+                continue;
+            }
             var expected = block == ModBlocks.ROCK_SALT_ORE.get() ? ModItems.ROCK_SALT.get() : block.asItem();
             check(helper, loot.size() == 1 && loot.get(0).is(expected), holder.getId() + " must drop " + expected + ", dropped " + loot);
         }

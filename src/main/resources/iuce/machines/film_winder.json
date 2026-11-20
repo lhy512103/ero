@@ -1,0 +1,13 @@
+{
+  "id": "film_winder",
+  "voltage": "LV",
+  "buffer": 8000,
+  "catalyst_slot": false,
+  "card_slot": false,
+  "upgrades": 4,
+  "base_time": 100,
+  "items_in": 1,
+  "items_out": 1,
+  "fluids_in": [],
+  "fluids_out": []
+}

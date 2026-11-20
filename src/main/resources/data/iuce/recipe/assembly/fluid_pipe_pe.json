@@ -1,0 +1,14 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:pe_pipe",
+    "iuce:pe_pipe",
+    "iuce:pe_pipe",
+    "iuce:pe_pipe",
+    "iuce:pipe_fitting"
+  ],
+  "result": {
+    "id": "iuce:fluid_pipe",
+    "count": 8
+  }
+}

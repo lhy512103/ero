@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "centrifuge",
+  "time": 100,
+  "energy": 4800,
+  "fluids": [
+    {
+      "fluid": "iuce:pe_slurry",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:wet_pe_powder",
+      "count": 4
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:pe_mother_liquor",
+      "amount": 900
+    }
+  ]
+}

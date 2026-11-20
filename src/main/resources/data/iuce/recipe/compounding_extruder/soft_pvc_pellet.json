@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "compounding_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:soft_pvc_dry_blend",
+      "count": 8
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:strand",
+      "count": 8,
+      "components": {
+        "iuce:strand_product": "iuce:soft_pvc_pellet"
+      }
+    }
+  ]
+}

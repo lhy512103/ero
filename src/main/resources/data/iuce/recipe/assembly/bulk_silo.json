@@ -1,0 +1,16 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:steel_plate",
+    "iuce:steel_plate",
+    "iuce:steel_plate",
+    "iuce:steel_plate",
+    "iuce:rubber_seal",
+    "iuce:rubber_seal",
+    "iuce:silo"
+  ],
+  "result": {
+    "id": "iuce:bulk_silo",
+    "count": 1
+  }
+}

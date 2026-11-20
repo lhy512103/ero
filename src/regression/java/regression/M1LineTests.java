@@ -50,6 +50,10 @@ final class M1LineTests {
         tests.put("m3_injection", M1LineTests::injection);
         tests.put("legacy_pla_layout", M1LineTests::legacyLayout);
         tests.put("m4_pvc", PvcLineTest::run);
+        tests.put("m5_solvent", M1LineTests::solvent);
+        tests.put("m6_colored_strand", M1LineTests::coloredStrand);
+        tests.put("m7_drip", M1LineTests::drip);
+        tests.put("m8_vulcanizer", M1LineTests::rubber);
     }
 
     // ------------------------------------------------------------------ helpers
@@ -408,6 +412,104 @@ final class M1LineTests {
         check(helper, fresh > 0 && recycled >= 1000 && pellets > 0, "both feeds and the pelletizer must run");
         check(helper, mother == input(recovery, 0).getAmount() + 2 * (recycled + output(recovery, 0).getAmount()),
             "mother liquor recovery drifted");
+        var film=machine(helper,"single_screw_extruder",1);
+        var winder=machine(helper,"film_winder",2);
+        give(film,0,new ItemStack(ModItems.PLA_FILM_PELLET.get(),8));
+        give(film,film.def().catalystIndex(),new ItemStack(ModItems.FILM_DIE.get()));
+        newRound(helper);
+        for(int t=0;t<205;t++) poweredTick(film);
+        int bubbles=film.def().outputStart();
+        give(winder,0,film.getItemHandler().getResource(bubbles).toStack(count(film,bubbles)));
+        for(int t=0;t<125;t++) poweredTick(winder);
+        var rolls=winder.getItemHandler().getResource(winder.def().outputStart()).toStack(count(winder,winder.def().outputStart()));
+        check(helper,rolls.is(ModItems.PLA_FILM_ROLL.get()) && rolls.getCount()==2,"sugar line must supply two film rolls");
+        var grid=net.minecraft.world.item.crafting.CraftingInput.of(2,1,List.of(rolls.copyWithCount(1),rolls.copyWithCount(1)));
+        var assembly=helper.getLevel().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING,grid,helper.getLevel()).orElseThrow();
+        check(helper,assembly.value().assemble(grid).is(ModItems.MULCH_FILM_PLA.get()),"two rolls must assemble into mulch");
+        helper.succeed();
+    }
+
+    private static void solvent(GameTestHelper helper) {
+        newRound(helper);
+        var reactor=machine(helper,"polymerization_reactor",1);
+        var centrifuge=machine(helper,"centrifuge",2);
+        var dryer=machine(helper,"dryer",3);
+        var tower=machine(helper,"solvent_recovery_tower",4);
+        utilityBus(helper,1,4);
+        var solvent=ModFluids.chemical("solvent_naphtha");
+        int used=0, recovered=0, reserve=1000;
+        for(int t=0;t<24000;t++) {
+            if (count(reactor,0)==0 && reserve>=1000) {
+                give(reactor,0,new ItemStack(ModItems.POLYOLEFIN_CATALYST.get()));
+                input(reactor,0).fill(ModFluids.chemical("ethylene"),1000);
+                input(reactor,1).fill(solvent,1000); reserve-=1000;used+=1000;
+            }
+            pump(reactor,0,centrifuge,0,ModFluids.chemical("pe_slurry"),1000);
+            output(reactor,1).drain(1000);
+            pump(centrifuge,0,tower,0,ModFluids.chemical("pe_mother_liquor"),900);
+            int slot=centrifuge.def().outputStart();
+            if(count(centrifuge,slot)>0) {
+                give(dryer,0,centrifuge.getItemHandler().getResource(slot).toStack(count(centrifuge,slot)));
+                centrifuge.getItemHandler().set(slot,ItemResource.EMPTY,0);
+            }
+            for(var m:List.of(reactor,centrifuge,dryer,tower)) poweredTick(m);
+            int returned=output(dryer,0).drain(1000)+output(tower,0).drain(1000);
+            reserve+=returned;recovered+=returned;
+            if(reserve==980) reserve+=20;
+            dryer.getItemHandler().set(dryer.def().outputStart(),ItemResource.EMPTY,0);
+            tower.getItemHandler().set(tower.def().outputStart(),ItemResource.EMPTY,0);
+        }
+        int complete=recovered/980;
+        check(helper,complete>35 && recovered%980<=100 && used/1000-complete<=1,"PE solvent inventory drifted: "+used+" / "+recovered);
+        helper.succeed();
+    }
+
+    private static void coloredStrand(GameTestHelper helper) {
+        newRound(helper);
+        var extruder=machine(helper,"compounding_extruder",1);
+        var pelletizer=machine(helper,"strand_pelletizer",2);
+        utilityBus(helper,1,2);
+        give(extruder,0,new ItemStack(ModItems.BIO_PE_PELLET.get(),4));
+        give(extruder,1,new ItemStack(Items.RED_DYE,4));
+        for(int t=0;t<105;t++) poweredTick(extruder);
+        int slot=extruder.def().outputStart();
+        var strand=extruder.getItemHandler().getResource(slot).toStack(count(extruder,slot));
+        check(helper,strand.is(ModItems.STRAND.get()) && strand.getCount()==4,"red dye must create four strands");
+        give(pelletizer,0,strand);
+        for(int t=0;t<90;t++) poweredTick(pelletizer);
+        var pellets=pelletizer.getItemHandler().getResource(pelletizer.def().outputStart()).toStack(1);
+        check(helper,pellets.is(ModItems.COLOR_MASTERBATCH.get()) && pellets.get(net.minecraft.core.component.DataComponents.DYE)==net.minecraft.world.item.DyeColor.RED,"red masterbatch must retain its grade and color");
+        helper.succeed();
+    }
+
+    private static void drip(GameTestHelper helper) {
+        var tankPos=new BlockPos(1,1,2);
+        helper.setBlock(tankPos,ModBlocks.FLUID_TANK.get());
+        var tank=helper.getBlockEntity(tankPos,blockentity.FluidTankBlockEntity.class).getTank();
+        tank.fill(Fluids.WATER,1000);
+        for(int x=2;x<10;x++) {
+            var p=new BlockPos(x,1,2);
+            helper.setBlock(p,ModBlocks.DRIP_PIPE.get().defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING,net.minecraft.core.Direction.EAST));
+            for(int z:List.of(1,3)) helper.setBlock(new BlockPos(x,1,z),Blocks.FARMLAND);
+        }
+        for(int pass=0;pass<2;pass++) {
+            if(pass==1)tank.drain(1000);
+            for(int x=2;x<10;x++) {
+                helper.getBlockEntity(new BlockPos(x,1,2),blockentity.DripPipeBlockEntity.class).refresh();
+                for(int z:List.of(1,3))check(helper,net.neoforged.neoforge.common.FarmlandWaterManager.hasBlockWaterTicket(helper.getLevel(),helper.absolutePos(new BlockPos(x,1,z)))==(pass==0),"drip supply follows tank");
+            }
+        }
+        helper.succeed();
+    }
+
+    private static void rubber(GameTestHelper helper) {
+        newRound(helper);
+        var plant=machine(helper,"vulcanizer",1);
+        utilityBus(helper,1,2);
+        give(plant,0,new ItemStack(ModItems.RUBBER_COMPOUND.get(),4));
+        give(plant,plant.def().catalystIndex(),new ItemStack(ModItems.BELT_MOLD.get()));
+        for(int t=0;t<165;t++) poweredTick(plant);
+        check(helper,plant.getItemHandler().getResource(plant.def().outputStart()).getItem()==ModItems.RUBBER_BELT.get(),"steam and belt mold must vulcanize one belt");
         helper.succeed();
     }
 

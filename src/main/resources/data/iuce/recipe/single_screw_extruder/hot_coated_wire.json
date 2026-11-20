@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "single_screw_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "#iuce:grade/cable_jacket",
+      "count": 2
+    },
+    {
+      "item": "iuce:copper_cable",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:coating_die"
+  },
+  "results": [
+    {
+      "id": "iuce:hot_coated_wire",
+      "count": 4
+    }
+  ]
+}

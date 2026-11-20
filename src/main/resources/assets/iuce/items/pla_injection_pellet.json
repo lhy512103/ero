@@ -1,1 +1,12 @@
-{"model":{"type":"minecraft:model","model":"iuce:item/pla_injection_pellet"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "iuce:item/pla_injection_pellet",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": 16777215
+      }
+    ]
+  }
+}

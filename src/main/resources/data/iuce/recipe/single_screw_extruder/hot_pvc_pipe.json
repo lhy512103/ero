@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "single_screw_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:rigid_pvc_pellet",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:pipe_die"
+  },
+  "utilities": [
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:hot_pvc_pipe",
+      "count": 1
+    }
+  ]
+}

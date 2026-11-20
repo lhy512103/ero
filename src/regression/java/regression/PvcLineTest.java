@@ -97,6 +97,20 @@ final class PvcLineTest {
         helper.assertTrue(stock.getOrDefault(item("carbide_slag"),0)<=1,"slag must return to the kiln");
         helper.assertTrue(stock.getOrDefault(ModFluids.chemical("spent_lye"),0)<1000,"spent lye must return to the brine supply");
         helper.assertTrue(stock.getOrDefault(ModFluids.chemical("process_water"),0)<1000,"treatment must keep up with waste water");
+        ItemStack batch=new ItemStack(item("rigid_pvc_dry_blend"),8);
+        for(String id:List.of("compounding_extruder","strand_pelletizer","single_screw_extruder","cooling_tank","haul_off_cutter")){
+            BlockPos pos=new BlockPos(1,1,1);
+            helper.setBlock(pos,ProcessMachines.get(id).block().get());
+            var station=helper.getBlockEntity(pos,ProcessMachineBlockEntity.class);
+            station.getItemHandler().set(0,ItemResource.of(batch),batch.getCount());
+            if(id.equals("single_screw_extruder"))station.getItemHandler().set(station.def().catalystIndex(),ItemResource.of(new ItemStack(item("pipe_die"))),1);
+            UtilityNetwork.of(helper.getLevel()).clear();
+            for(int t=0;t<205;t++){var energy=(EUEnergyStorageImpl)station.getEnergyStorage();energy.setEnergy(energy.getMaxEnergyStored());station.tick();}
+            int slot=station.def().outputStart();
+            batch=station.getItemHandler().getResource(slot).toStack(station.getItemHandler().getAmountAsInt(slot));
+            helper.assertTrue(!batch.isEmpty(),id+" must produce the next intermediate");
+        }
+        helper.assertTrue(batch.is(item("pvc_pipe")) && batch.getCount()==16,"coal line must deliver sixteen PVC pipes");
         helper.succeed();
     }
 }

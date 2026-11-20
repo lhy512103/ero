@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "single_screw_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:pla_film_pellet",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:film_die"
+  },
+  "utilities": [
+    "air"
+  ],
+  "results": [
+    {
+      "id": "iuce:pla_film_bubble",
+      "count": 1
+    }
+  ]
+}

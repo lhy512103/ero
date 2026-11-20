@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "film_winder",
+  "time": 60,
+  "energy": 960,
+  "items": [
+    {
+      "item": "iuce:pe_film_bubble",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pe_film_roll",
+      "count": 1
+    }
+  ]
+}

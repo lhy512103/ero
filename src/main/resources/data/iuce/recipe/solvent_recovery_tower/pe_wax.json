@@ -1,0 +1,27 @@
+{
+  "type": "iuce:process",
+  "machine": "solvent_recovery_tower",
+  "time": 160,
+  "energy": 5120,
+  "fluids": [
+    {
+      "fluid": "iuce:pe_mother_liquor",
+      "amount": 900
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:solvent_naphtha",
+      "amount": 880
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pe_wax",
+      "count": 1
+    }
+  ]
+}

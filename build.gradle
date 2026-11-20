@@ -108,6 +108,7 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             if (providers.gradleProperty('regressionTests').isPresent()) {
                 systemProperty 'iuce.regressionTests', 'true'
+                if (providers.gradleProperty('sparkBenchmark').isPresent()) systemProperty 'iuce.sparkBenchmark', 'true'
             }
         }
 

@@ -5,7 +5,7 @@
   "energy": 4800,
   "items": [
     {
-      "item": "iuce:pla_injection_pellet",
+      "item": "#iuce:grade/injection",
       "count": 6
     }
   ],

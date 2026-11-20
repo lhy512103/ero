@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_casing",
+    "iuce:circuit",
+    "iuce:electric_motor",
+    "iuce:tin_plate"
+  ],
+  "result": {
+    "id": "iuce:coagulation_tank",
+    "count": 1
+  }
+}

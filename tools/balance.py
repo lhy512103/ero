@@ -61,12 +61,18 @@ for path in sorted(glob.glob(RES + "data/iuce/recipe/*/*.json")):
     if kind == "iuce:process":
         inputs, outputs = {}, {}
         for entry in data.get("items", []):
-            inputs[entry["item"]] = inputs.get(entry["item"], 0) + entry.get("count", 1)
+            ref = entry["item"]
+            if isinstance(ref, dict):
+                ref = ref["items"] + "=" + json.dumps(ref.get("components", {}), sort_keys=True)
+            inputs[ref] = inputs.get(ref, 0) + entry.get("count", 1)
         for entry in data.get("fluids", []):
             inputs[entry["fluid"]] = inputs.get(entry["fluid"], 0) + entry["amount"]
         for entry in data.get("results", []):
             if entry.get("chance", 1) >= 1:
-                outputs[entry["id"]] = outputs.get(entry["id"], 0) + entry.get("count", 1)
+                ref = entry["id"]
+                if "components" in entry:
+                    ref += "=" + json.dumps(entry["components"], sort_keys=True)
+                outputs[ref] = outputs.get(ref, 0) + entry.get("count", 1)
         for entry in data.get("fluid_results", []):
             outputs[entry["fluid"]] = outputs.get(entry["fluid"], 0) + entry["amount"]
         add(name, data["machine"], inputs, outputs, data["time"], data["energy"])
@@ -121,6 +127,10 @@ for loop in table.get("loops", []):
         for ref, amount in recipe["out"].items():
             net[ref] += amount
     if len(used) != len(loop["recipes"]):
+        continue
+    if "loss" in loop:
+        if -net[loop["main"]] != loop["amount"] * loop["loss"]:
+            errors.append("%s: net solvent loss %s" % (name, -net[loop["main"]]))
         continue
     if "conserved" in loop:
         for ref in loop["conserved"]:
@@ -193,7 +203,18 @@ for start in sorted(graph):
                 product = 1.0
                 for _, step_gain, _ in steps + [(target, gain, recipe)]:
                     product *= step_gain
-                best[key] = max(best.get(key, 0.0), product)
+                ledger = defaultdict(float)
+                quantity = 1.0
+                for index, (_, step_gain, operation) in enumerate(steps + [(target, gain, recipe)]):
+                    batch = recipes[operation]
+                    runs = quantity / batch["in"][path[index]]
+                    for ref, count in batch["in"].items():
+                        ledger[ref] -= runs * count
+                    for ref, count in batch["out"].items():
+                        ledger[ref] += runs * count
+                    quantity *= step_gain
+                if all(value >= -1e-8 for value in ledger.values()):
+                    best[key] = max(best.get(key, 0.0), product)
             elif target not in path and len(path) < CYCLE_DEPTH:
                 stack.append((target, path + [target], steps + [(target, gain, recipe)]))
 if steps_taken >= CYCLE_BUDGET:

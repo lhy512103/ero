@@ -1,0 +1,14 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:pvc_pipe",
+    "iuce:pvc_pipe",
+    "iuce:pvc_pipe",
+    "iuce:pvc_pipe",
+    "iuce:pipe_fitting"
+  ],
+  "result": {
+    "id": "iuce:fluid_pipe",
+    "count": 8
+  }
+}

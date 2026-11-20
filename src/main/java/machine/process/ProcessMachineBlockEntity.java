@@ -48,11 +48,16 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     /** Reasons a machine is not running, in the order they are checked. Index = sync id. */
     public static final List<String> REASONS = List.of("", "no_recipe", "no_card", "wrong_card", "no_catalyst",
         "missing_input", "missing_utility", "missing_segment", "output_full", "tank_full", "needs_drying");
-    public static final List<String> MOLDS = List.of("crate", "pail", "pail_lid", "brick", "fitting", "housing", "emitter", "lamp_shade");
+    public static final List<String> MOLDS = List.of("crate", "pail", "pail_lid", "brick", "fitting", "housing", "emitter", "lamp_shade",
+        "pipe_die", "film_die", "coating_die", "belt_mold", "seal_mold");
+    public static String toolItem(int selection) {
+        String tool = MOLDS.get(selection);
+        return selection < 8 ? tool + "_mold" : tool;
+    }
     private int mold;
     public int mold() { return mold; }
     public void nextMold() {
-        mold = (mold + 1) % MOLDS.size();
+        mold = (mold + 1) % (def.id().equals("single_screw_extruder") ? 2 : MOLDS.size());
         current = null;
         progress = 0;
         setChanged();
@@ -137,11 +142,14 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     @Override
     public boolean acceptsAutomationInput(int slot, ItemResource resource) {
         if (slot == def.catalystIndex()) return itemHandler.getAmountAsInt(slot) == 0 && isCatalyst(resource.toStack(1));
+        if (def.id().equals("compounding_extruder") && (slot == 2) != resource.toStack(1).is(item.ModItems.CALCIUM_CARBONATE.get())) return false;
         return usesItem(resource);
     }
 
     @Override
     public int requestSlot(ItemResource resource) {
+        if (def.id().equals("compounding_extruder") && usesItem(resource))
+            return resource.toStack(1).is(item.ModItems.CALCIUM_CARBONATE.get()) ? slotFor(resource, 2) : slotFor(resource, 0, 1);
         if (usesItem(resource)) return slotFor(resource, getInputSlots());
         int catalyst = def.catalystIndex();
         if (catalyst >= 0 && itemHandler.getAmountAsInt(catalyst) == 0 && isCatalyst(resource.toStack(1))) return catalyst;
@@ -266,6 +274,10 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         int best = 0;
         for (RecipeHolder<ProcessRecipe> holder : ProcessRecipeCache.recipes(level, def.id())) {
             if (def.id().equals("cnc_machining_center") && !holder.id().identifier().getPath().endsWith("/" + MOLDS.get(mold))) continue;
+            if (def.id().equals("single_screw_extruder")) {
+                String path = holder.id().identifier().getPath();
+                if (path.endsWith("/hot_pe_pipe") && mold == 1 || path.endsWith("/hot_drip_tape") && mold == 0) continue;
+            }
             String why = check(holder.value());
             if (why.isEmpty()) {
                 current = holder;
@@ -342,7 +354,10 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         int hits = countPresentInputs(recipe);
         int needed = recipe.items().size() + recipe.fluids().size();
         if (hits == 0 && needed > 0) return "no_recipe";                // nothing of this recipe is here
-        if (def.id().equals("injection_molder") && !itemHandler.getResource(0).toStack(1).has(PlasticComponents.DRIED.get())) return "needs_drying";
+        if (def.id().equals("injection_molder") && itemHandler.getResource(0).toStack(1).is(item.ModItems.PLA_INJECTION_PELLET.get())
+                && !itemHandler.getResource(0).toStack(1).has(PlasticComponents.DRIED.get())) return "needs_drying";
+        if (def.id().equals("compounding_extruder") && recipe.items().stream().anyMatch(i -> i.test(new ItemStack(item.ModItems.CALCIUM_CARBONATE.get())))
+                && !itemHandler.getResource(2).toStack(1).is(item.ModItems.CALCIUM_CARBONATE.get())) return "missing_input";
         if (recipe.card().isPresent()) {
             if (def.cardIndex() < 0 || itemHandler.getAmountAsInt(def.cardIndex()) <= 0) return "no_card";
             if (!ProcessCards.matches(itemHandler.getResource(def.cardIndex()).toStack(1), recipe.card().get())) return "wrong_card";
@@ -457,6 +472,19 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
                 stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(source));
                 stack.copyFrom(net.minecraft.core.component.DataComponents.DYED_COLOR, feed);
             }
+            if (def.id().equals("compounding_extruder") || def.id().equals("strand_pelletizer") || def.id().equals("single_screw_extruder")
+                    || def.id().equals("cooling_tank") || def.id().equals("haul_off_cutter") || def.id().equals("film_winder") || def.id().equals("injection_molder")) {
+                var dyeType = net.minecraft.core.component.DataComponents.DYE;
+                for (int slot : getInputSlots()) {
+                    var dye = itemHandler.getResource(slot).toStack(1).get(dyeType);
+                    if (dye == null) continue;
+                    stack.set(dyeType, dye);
+                    stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(dye.getTextureDiffuseColor()));
+                    if (stack.is(block.ModBlocks.CRATE.get().asItem()) || stack.is(block.ModBlocks.TOY_BRICK.get().asItem()))
+                        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE, net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(block.ColoredPlasticBlock.COLOR,dye));
+                    break;
+                }
+            }
             ItemResource resource = ItemResource.of(stack);
             int remaining = stack.getCount();
             // stack onto matching products first, then use empty slots
@@ -549,7 +577,7 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     @Override
     protected void saveExtra(ValueOutput output) {
         output.putInt("Mold", mold);
-        output.putInt("ProcessLayout", 1);
+        output.putInt("ProcessLayout", 2);
         for (int i = 0; i < tanks.size(); i++) tanks.get(i).save(output, "tank" + i);
         if (current != null) output.putString("recipe", current.id().identifier().toString());
     }
@@ -559,7 +587,8 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
         for (int i = 0; i < tanks.size(); i++) {
             boolean old = input.getIntOr("ProcessLayout", 0) == 0;
             int index = old && def.id().equals("polymerization_reactor") ? i + 2 : i;
-            if (index < tanks.size()) input.child("tank" + i).ifPresent(child -> tanks.get(index).deserialize(child));
+            int mapped = index + (input.getIntOr("ProcessLayout",0) < 2 && def.id().equals("catalyst_prep_tank") && i >= 1 ? 1 : 0);
+            if (mapped < tanks.size()) input.child("tank" + i).ifPresent(child -> tanks.get(mapped).deserialize(child));
         }
         current = null;
         searchNeeded = true;
@@ -575,6 +604,10 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
                     itemHandler.set(slot, itemHandler.getResource(slot - 1), itemHandler.getAmountAsInt(slot - 1));
                 itemHandler.set(first, ItemResource.EMPTY, 0);
             }
+        }
+        if (input.getIntOr("ProcessLayout",0) < 2 && def.id().equals("strand_pelletizer")) {
+            for (int slot = def.slotCount()-1; slot > 0; slot--) itemHandler.set(slot,itemHandler.getResource(slot-1),itemHandler.getAmountAsInt(slot-1));
+            itemHandler.set(0,ItemResource.EMPTY,0);
         }
         // the recipe is looked up again on the first tick; progress is kept if it is still the one that runs
         savedRecipe = input.getString("recipe").map(Identifier::tryParse).orElse(null);

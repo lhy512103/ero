@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "compounding_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:bio_pe_pellet",
+      "count": 4
+    },
+    {
+      "item": "#c:dyes",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:strand",
+      "count": 4,
+      "components": {
+        "iuce:strand_product": "iuce:color_masterbatch"
+      }
+    }
+  ]
+}

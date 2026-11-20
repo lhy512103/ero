@@ -5,6 +5,7 @@
   "items_in": 2,
   "items_out": 1,
   "fluids_in": [
+    8000,
     8000
   ],
   "fluids_out": [],

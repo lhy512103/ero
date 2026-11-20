@@ -105,7 +105,7 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
     public ProcessMachineDef def() { return def; }
     public int mold() { return data[10]; }
     @Override public boolean clickMenuButton(Player player, int action) {
-        if (action != 0 || !stillValid(player) || !def.id().equals("cnc_machining_center")) return false;
+        if (action != 0 || !stillValid(player) || !(def.id().equals("cnc_machining_center") || def.id().equals("single_screw_extruder"))) return false;
         blockEntity.nextMold();
         return true;
     }

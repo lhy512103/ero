@@ -24,7 +24,7 @@ public class ColoredPlasticBlock extends Block {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder) { builder.add(COLOR); }
     @Override protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         DyeColor dye = stack.get(net.minecraft.core.component.DataComponents.DYE);
-        if (dye == null) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (dye == null || this == ModBlocks.TOY_BRICK.get()) return InteractionResult.TRY_WITH_EMPTY_HAND;
         if (!level.isClientSide() && state.getValue(COLOR) != dye) {
             level.setBlock(pos,state.setValue(COLOR,dye),3);
             stack.consume(1,player);

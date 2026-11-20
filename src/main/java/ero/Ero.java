@@ -51,6 +51,7 @@ public class Ero {
 
         // 首次进入世界时赠送一本指南
         NeoForge.EVENT_BUS.addListener(Ero::onPlayerLogin);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, block.MulchedFarmland::harvested);
     }
 
     private static void onLevelTick(LevelTickEvent.Post event) {

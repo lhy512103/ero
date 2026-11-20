@@ -77,6 +77,8 @@ CARD_SLOTS_MAX = 8        # module slots on a process card
 
 # Items that are an end in themselves: machines, tools, upgrades, fuel, decoration.
 TERMINAL = set(STATION.values()) | {
+    "mulch_film_pe", "mulch_film_pla", "mulched_farmland", "waste_film", "drip_pipe",
+    "fluid_pipe", "bronze_fluid_pipe", "conveyor_ii", "logistics_port_ii", "bulk_silo", "gas_tank",
     "air_compressor", "crate", "toy_brick", "plastic_pail", "drip_emitter", "pipe_fitting",
     "machine_housing", "rigid_pvc_dry_blend", "soft_pvc_dry_blend", "heavy_residue",
     "process_card", "process_design_table", "pla_injection_pellet", "pla_film_pellet",
@@ -99,7 +101,7 @@ TERMINAL = set(STATION.values()) | {
     "bagasse", "distillers_grains",
 }
 # Obtained from the world rather than from a recipe.
-WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex", "limestone", "rock_salt"}
+WORLD_SOURCES = {"rubber_wood", "rubber_leaves", "rubber_sapling", "raw_latex", "limestone", "rock_salt", "waste_film", "mulched_farmland"}
 # Registered but intentionally unobtainable / not shown.
 NOT_CRAFTABLE = {"logo", "coolant", "creative_utility_source"}
 # Process machines that only take fluids away (venting, flaring): no output slot or tank on purpose.
@@ -216,7 +218,7 @@ for path in sorted(process_paths):
             errors.append("%s: unknown process machine %s" % (name, machine))
             continue
         capacity = definition.get("voltage", "LV")
-        items_in = [entry["item"] for entry in data.get("items", [])]
+        items_in = [entry["item"] if isinstance(entry["item"], str) else entry["item"]["items"] for entry in data.get("items", [])]
         fluid_counts = [entry["amount"] for entry in data.get("fluids", [])]
         if len(data.get("items", [])) > definition.get("items_in", 1):
             errors.append("%s: %s has %d input slots, recipe wants %d" % (name, machine, definition.get("items_in", 1), len(items_in)))
@@ -260,6 +262,9 @@ for path in sorted(process_paths):
             errors.append("%s: a wearing catalyst leaves as spent catalyst, but %s has no output slot" % (name, machine))
         key = (machine, catalyst, json.dumps(data.get("card"), sort_keys=True),
                tuple(items_in) + tuple("fluid:" + entry["fluid"] for entry in data.get("fluids", [])))
+        key += (tuple(json.dumps(entry["item"],sort_keys=True) for entry in data.get("items", [])),)
+        if machine == "single_screw_extruder" and name.endswith("/hot_drip_tape"):
+            key += ("drip_tape",)
         if machine == "cnc_machining_center":
             key += (json.dumps(data["results"][0].get("components"), sort_keys=True),)
         by_process_input[key].append(name)

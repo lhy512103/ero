@@ -136,6 +136,24 @@
     "iuce:crate",
     "iuce:rock_salt_ore",
     "iuce:limestone",
-    "iuce:air_compressor"
+    "iuce:air_compressor",
+    "iuce:coagulation_tank",
+    "iuce:compounding_extruder",
+    "iuce:cooling_tank",
+    "iuce:film_winder",
+    "iuce:haul_off_cutter",
+    "iuce:rubber_mixer",
+    "iuce:sheeting_press",
+    "iuce:single_screw_extruder",
+    "iuce:smokehouse",
+    "iuce:solvent_recovery_tower",
+    "iuce:vulcanizer",
+    "iuce:drip_pipe",
+    "iuce:conveyor_ii",
+    "iuce:logistics_port_ii",
+    "iuce:bulk_silo",
+    "iuce:fluid_pipe",
+    "iuce:bronze_fluid_pipe",
+    "iuce:gas_tank"
   ]
 }

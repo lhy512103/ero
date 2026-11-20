@@ -103,6 +103,8 @@ public class ModFluids {
         liquid("deionized_water", 0xFF99CDDB),
         liquid("pvc_slurry", 0xFFBDC8C4),
         liquid("stripped_pvc_slurry", 0xFFCDD3CE),
+        liquid("pe_slurry", 0xFFCFD6C8),
+        liquid("pe_mother_liquor", 0xFFB9BE9A),
         liquid("lactic_acid", 0xFFE3E6BF),
         liquid("pla_oligomer", 0xFFE3CF98),
         liquid("crude_lactide", 0xFFC6AA74),

@@ -1,0 +1,28 @@
+{
+  "type": "iuce:process",
+  "machine": "catalyst_prep_tank",
+  "time": 100,
+  "energy": 3200,
+  "items": [
+    {
+      "item": "iuce:purified_aluminium_dust",
+      "count": 1
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:chlorine",
+      "amount": 250
+    },
+    {
+      "fluid": "iuce:solvent_naphtha",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:polyolefin_catalyst",
+      "count": 4
+    }
+  ]
+}

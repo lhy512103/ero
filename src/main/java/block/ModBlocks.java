@@ -119,6 +119,14 @@ public class ModBlocks {
         TransformerBlock::new, machineProperties());
     public static final DeferredBlock<ChuteBlock> CHUTE = BLOCKS.registerBlock("chute",
         ChuteBlock::new, () -> machineProperties().get().destroyTime(2.0f).noOcclusion());
+    public static final DeferredBlock<ConveyorBlock> CONVEYOR_II = BLOCKS.registerBlock("conveyor_ii", ConveyorBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<LogisticsPortBlock> LOGISTICS_PORT_II = BLOCKS.registerBlock("logistics_port_ii", LogisticsPortBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<StorageBlock> BULK_SILO = BLOCKS.registerBlock("bulk_silo", p -> new StorageBlock(p, false), () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<StorageBlock> GAS_TANK = BLOCKS.registerBlock("gas_tank", p -> new StorageBlock(p, true), () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<FluidPipeBlock> FLUID_PIPE = BLOCKS.registerBlock("fluid_pipe", FluidPipeBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<FluidPipeBlock> BRONZE_FLUID_PIPE = BLOCKS.registerBlock("bronze_fluid_pipe", FluidPipeBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<DripPipeBlock> DRIP_PIPE = BLOCKS.registerBlock("drip_pipe", DripPipeBlock::new, () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<MulchedFarmland> MULCHED_FARMLAND = BLOCKS.registerBlock("mulched_farmland", MulchedFarmland::new, () -> net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND));
     public static final DeferredBlock<ConveyorBlock> CONVEYOR = BLOCKS.registerBlock("conveyor",
         ConveyorBlock::new, () -> machineProperties().get().destroyTime(1.0f).noOcclusion());
     public static final DeferredBlock<FactoryHubBlock> FACTORY_HUB = BLOCKS.registerBlock("factory_hub",
@@ -205,7 +213,7 @@ public class ModBlocks {
 
     /** Whether the state is one of the utility pipes; the utility network walks through them. */
     public static boolean isUtilityPipe(net.minecraft.world.level.block.state.BlockState state) {
-        return state.getBlock() instanceof UtilityPipeBlock;
+        return state.getBlock() instanceof UtilityPipeBlock || state.getBlock() instanceof FluidPipeBlock;
     }
 
     // 冷却液流体方块

@@ -1,5 +1,11 @@
 # Development and regression checks
 
+## M5–M9 verification
+
+The dedicated regression server passed 117 required tests. The polyethylene line ran for 24,000 machine ticks. The molding and PVC fixtures continue through PLA film assembly and PVC pipe cutting. The drip-line fixture verifies hydration and withdrawal across sixteen farmland blocks.
+
+With Spark 1.10.187 for NeoForge in the regression runtime, the active logistics benchmark measured 0.266 ms per game tick on this workstation. It connects 2,000 pneumatic pipe blocks and 300 tier II interfaces, continually refills a source and empties a receiver, warms up for 200 transfer rounds and measures 1,000 more. It times the transfer rounds and divides by the four-tick scheduling interval. Topology reconstruction, world setup and unrelated server tick time are excluded. Spark used its Java sampler on Windows. A standalone Spark report was not verified.
+
 ## Commands
 
 ```powershell

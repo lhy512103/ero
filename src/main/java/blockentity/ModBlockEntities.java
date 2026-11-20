@@ -90,18 +90,19 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<LogisticsPortBlockEntity>> LOGISTICS_PORT =
         BLOCK_ENTITIES.register("logistics_port", () ->
-            new BlockEntityType<>(LogisticsPortBlockEntity::new, false, ModBlocks.LOGISTICS_PORT.get())
+            new BlockEntityType<>(LogisticsPortBlockEntity::new, false, ModBlocks.LOGISTICS_PORT.get(), ModBlocks.LOGISTICS_PORT_II.get())
         );
 
     public static final Supplier<BlockEntityType<CrateBlockEntity>> CRATE = BLOCK_ENTITIES.register("crate", () -> new BlockEntityType<>(CrateBlockEntity::new, false, ModBlocks.CRATE.get()));
+    public static final Supplier<BlockEntityType<DripPipeBlockEntity>> DRIP_PIPE = BLOCK_ENTITIES.register("drip_pipe", () -> new BlockEntityType<>(DripPipeBlockEntity::new,false,ModBlocks.DRIP_PIPE.get()));
     public static final Supplier<BlockEntityType<SiloBlockEntity>> SILO =
         BLOCK_ENTITIES.register("silo", () ->
-            new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get())
+            new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get(), ModBlocks.BULK_SILO.get())
         );
 
     public static final Supplier<BlockEntityType<FluidTankBlockEntity>> FLUID_TANK =
         BLOCK_ENTITIES.register("fluid_tank", () ->
-            new BlockEntityType<>(FluidTankBlockEntity::new, false, ModBlocks.FLUID_TANK.get())
+            new BlockEntityType<>(FluidTankBlockEntity::new, false, ModBlocks.FLUID_TANK.get(), ModBlocks.GAS_TANK.get())
         );
 
     public static final Supplier<BlockEntityType<PlantControllerBlockEntity>> PLANT_CONTROLLER =

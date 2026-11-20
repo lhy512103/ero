@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "vulcanizer",
+  "time": 160,
+  "energy": 7680,
+  "items": [
+    {
+      "item": "iuce:rubber_compound",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:belt_mold"
+  },
+  "utilities": [
+    "steam"
+  ],
+  "results": [
+    {
+      "id": "iuce:rubber_belt",
+      "count": 1
+    }
+  ]
+}

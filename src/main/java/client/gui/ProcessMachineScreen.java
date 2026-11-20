@@ -38,7 +38,7 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     protected void init() {
         super.init();
         titleLabelX = (imageWidth - font.width(title)) / 2;
-        if (menu.def().id().equals("cnc_machining_center")) {
+        if (menu.def().id().equals("cnc_machining_center") || menu.def().id().equals("single_screw_extruder")) {
             addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("›"),
                 b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
                 .bounds(leftPos + imageWidth - 22, topPos + 4, 16, 14).build());
@@ -52,9 +52,9 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         energy(g);
         for (int i = 0; i < layout.tanks.size(); i++) tank(g, i);
         arrow(g);
-        if (menu.def().id().equals("cnc_machining_center")) {
-            String mold = machine.process.ProcessMachineBlockEntity.MOLDS.get(menu.mold());
-            g.item(new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("iuce:" + mold + "_mold"))), leftPos + imageWidth - 42, topPos + 3);
+        if (menu.def().id().equals("cnc_machining_center") || menu.def().id().equals("single_screw_extruder")) {
+            String mold = menu.def().id().equals("single_screw_extruder") ? (menu.mold() == 0 ? "pe_pipe" : "drip_tape") : machine.process.ProcessMachineBlockEntity.toolItem(menu.mold());
+            g.item(new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("iuce:" + mold))), leftPos + imageWidth - 42, topPos + 3);
         }
         status(g);
         if (client.gui.component.MachineInfoPanel.hasInfo(menu.def().id())) infoButton(g);

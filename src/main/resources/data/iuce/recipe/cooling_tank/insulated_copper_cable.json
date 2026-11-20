@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "cooling_tank",
+  "time": 60,
+  "energy": 480,
+  "items": [
+    {
+      "item": "iuce:hot_coated_wire",
+      "count": 4
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:insulated_copper_cable",
+      "count": 4
+    }
+  ]
+}

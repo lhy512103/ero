@@ -1,0 +1,22 @@
+{
+  "type": "iuce:process",
+  "machine": "compounding_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:filled_pe_pellet",
+      "count": 25
+    },
+    {
+      "item": "iuce:color_masterbatch",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:filled_pe_pellet",
+      "count": 25
+    }
+  ]
+}
