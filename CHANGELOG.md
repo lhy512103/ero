@@ -138,6 +138,7 @@
 132. Fixed: Middle-click picking, Jade previews and break particles for coloured bricks and crates now match their actual colour.
 133. Fixed: Pickaxe mining tags now load properly for all machines and blocks, and mulched farmland mines faster with a shovel; missing break particles on cables and formed plant parts are restored.
 134. Improved: Crates now hold 27 slots with a custom industrial GUI matching the electric furnace and compressor panels.
+135. Fixed: Upward-facing crates stacked on another crate no longer show missing-texture strips on their front.
 
 ### 中文
 
@@ -275,3 +276,4 @@
 132. 修复：彩色积木与周转箱的鼠标中键拾取、Jade 提示图标及破坏粒子始终显示为白色的问题。
 133. 修复：因测试方块混入挖掘标签导致全模组机器与方块镐子挖掘失效的问题，补全地膜耕地铲掘标签及线缆、成型多方块零件的破坏粒子。
 134. 优化：周转箱扩容至 27 格，并更换为与电炉、压缩机风格一致的工业面板界面。
+135. 修复：朝上摆放并叠在其他周转箱上的周转箱正面不再出现紫黑贴图缺失条纹。

@@ -4,7 +4,7 @@
       "model": "iuce:block/crate_white"
     },
     "color=white,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_white_rack"
+      "model": "iuce:block/crate_white"
     },
     "color=white,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_white_open"
@@ -108,7 +108,7 @@
       "model": "iuce:block/crate_orange"
     },
     "color=orange,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_orange_rack"
+      "model": "iuce:block/crate_orange"
     },
     "color=orange,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_orange_open"
@@ -212,7 +212,7 @@
       "model": "iuce:block/crate_magenta"
     },
     "color=magenta,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_magenta_rack"
+      "model": "iuce:block/crate_magenta"
     },
     "color=magenta,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_magenta_open"
@@ -316,7 +316,7 @@
       "model": "iuce:block/crate_light_blue"
     },
     "color=light_blue,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_light_blue_rack"
+      "model": "iuce:block/crate_light_blue"
     },
     "color=light_blue,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_light_blue_open"
@@ -420,7 +420,7 @@
       "model": "iuce:block/crate_yellow"
     },
     "color=yellow,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_yellow_rack"
+      "model": "iuce:block/crate_yellow"
     },
     "color=yellow,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_yellow_open"
@@ -524,7 +524,7 @@
       "model": "iuce:block/crate_lime"
     },
     "color=lime,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_lime_rack"
+      "model": "iuce:block/crate_lime"
     },
     "color=lime,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_lime_open"
@@ -628,7 +628,7 @@
       "model": "iuce:block/crate_pink"
     },
     "color=pink,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_pink_rack"
+      "model": "iuce:block/crate_pink"
     },
     "color=pink,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_pink_open"
@@ -732,7 +732,7 @@
       "model": "iuce:block/crate_gray"
     },
     "color=gray,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_gray_rack"
+      "model": "iuce:block/crate_gray"
     },
     "color=gray,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_gray_open"
@@ -836,7 +836,7 @@
       "model": "iuce:block/crate_light_gray"
     },
     "color=light_gray,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_light_gray_rack"
+      "model": "iuce:block/crate_light_gray"
     },
     "color=light_gray,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_light_gray_open"
@@ -940,7 +940,7 @@
       "model": "iuce:block/crate_cyan"
     },
     "color=cyan,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_cyan_rack"
+      "model": "iuce:block/crate_cyan"
     },
     "color=cyan,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_cyan_open"
@@ -1044,7 +1044,7 @@
       "model": "iuce:block/crate_purple"
     },
     "color=purple,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_purple_rack"
+      "model": "iuce:block/crate_purple"
     },
     "color=purple,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_purple_open"
@@ -1148,7 +1148,7 @@
       "model": "iuce:block/crate_blue"
     },
     "color=blue,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_blue_rack"
+      "model": "iuce:block/crate_blue"
     },
     "color=blue,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_blue_open"
@@ -1252,7 +1252,7 @@
       "model": "iuce:block/crate_brown"
     },
     "color=brown,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_brown_rack"
+      "model": "iuce:block/crate_brown"
     },
     "color=brown,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_brown_open"
@@ -1356,7 +1356,7 @@
       "model": "iuce:block/crate_green"
     },
     "color=green,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_green_rack"
+      "model": "iuce:block/crate_green"
     },
     "color=green,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_green_open"
@@ -1460,7 +1460,7 @@
       "model": "iuce:block/crate_red"
     },
     "color=red,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_red_rack"
+      "model": "iuce:block/crate_red"
     },
     "color=red,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_red_open"
@@ -1564,7 +1564,7 @@
       "model": "iuce:block/crate_black"
     },
     "color=black,facing=up,open=false,stacked=true": {
-      "model": "iuce:block/crate_black_rack"
+      "model": "iuce:block/crate_black"
     },
     "color=black,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_black_open"
