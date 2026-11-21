@@ -43,15 +43,28 @@
             for (let y = 0; y < 16; y += 3) for (let x = 0; x < 16; x++) t.tint(x, y, STEEL[1], 0.25);
             t.bevel(0, 0, 15, 15, PAINT[2], PAINT[1]);
         }),
-        // Diamond tread plate.
+        // Diamond tread plate: matches the formed deck texture (brushed steel, crisp 2px lugs, weld border).
         checker_plate: () => paint(t => {
-            noise(t, 0, 0, 15, 15, STEEL[1], STEEL[2], 21, 0.55, 0.08);
-            const lug = (x, y, dir) => {
-                const pts = dir ? [[0, 0], [1, 1], [2, 2]] : [[0, 2], [1, 1], [2, 0]];
-                pts.forEach(([dx, dy], i) => t.px(x + dx, y + dy, i === 2 ? STEEL[0] : STEEL[4]));
-            };
-            for (let y = 0; y < 16; y += 4) for (let x = 0; x < 16; x += 4) lug(x + ((y >> 2) % 2) * 2, y, ((x + y) >> 2) % 2 === 0);
-            t.bevel(0, 0, 15, 15, STEEL[3], FRAME[1]);
+            noise(t, 0, 0, 15, 15, STEEL[2], STEEL[4], 21, 0.5, 0.06);
+            for (let y = 0; y < 16; y += 4) for (let x = 0; x < 16; x += 4) {
+                const o = (y >> 2) & 1 ? 2 : 0;
+                if ((y >> 2) & 1) { t.px(x + o, y + 1, STEEL[4]); t.px(x + o + 1, y + 1, STEEL[1]); }
+                else { t.px(x + 1, y, STEEL[4]); t.px(x + 1, y + 1, STEEL[1]); }
+            }
+            for (let i = 0; i < 16; i++) {
+                t.px(i, 0, mix(STEEL[1], STEEL[2], (i * 5 % 4) / 4));
+                t.px(0, i, mix(STEEL[1], STEEL[2], (i * 5 % 4) / 4));
+                t.tint(i, 1, [0, 0, 0], 0.22);
+                t.tint(1, i, [0, 0, 0], 0.22);
+            }
+        }),
+        // Rolled channel side for checker plate & stairs, matching the formed skid texture.
+        checker_plate_side: () => paint(t => {
+            noise(t, 0, 0, 15, 15, PAINT[1], PAINT[3], 22, 0.5, 0.06);
+            t.rect(0, 0, 15, 0, PAINT[4]); t.rect(0, 1, 15, 1, PAINT[3]); t.rect(0, 2, 15, 2, PAINT[0]);
+            t.rect(0, 13, 15, 13, PAINT[3]); t.rect(0, 14, 15, 14, PAINT[1]); t.rect(0, 15, 15, 15, PAINT[0]);
+            for (const x of [3, 11]) { bolt(t, x, 5); bolt(t, x, 9); }
+            t.rect(15, 3, 15, 12, PAINT[0]);
         }),
         // Pressed bar grating: bearing bars along z, twisted cross bars, open in between.
         steel_grating: () => paint(t => {
@@ -65,14 +78,28 @@
             noise(t, 0, 0, 15, 15, GALV[1], GALV[2], 23, 0.5, 0.08);
             t.rect(0, 0, 15, 0, GALV[3]); t.rect(0, 15, 15, 15, GALV[0]);
         }),
-        // Safety-yellow handrail pipe, lit from the upper left.
+        // Industrial tubular steel handrail: dark gunmetal steel with subtle brushed highlight.
         steel_handrail: () => paint(t => {
             for (let x = 0; x < 16; x++) {
-                const c = x < 4 ? YELLOW[3] : x < 9 ? YELLOW[2] : x < 13 ? YELLOW[1] : YELLOW[0];
+                const c = x < 4 ? PAINT[4] : x < 9 ? PAINT[3] : x < 13 ? PAINT[2] : PAINT[1];
                 for (let y = 0; y < 16; y++) t.px(x, y, c);
             }
             const r = rng(25);
-            for (let i = 0; i < 10; i++) t.tint(Math.floor(r() * 16), Math.floor(r() * 16), [90, 60, 30], 0.25);
+            for (let i = 0; i < 10; i++) t.tint(Math.floor(r() * 16), Math.floor(r() * 16), [30, 36, 42], 0.25);
+        }),
+        // Industrial steel ladder: dark painted stringers with galvanized non-slip rungs and mounting brackets.
+        steel_ladder: () => paint(t => {
+            for (const x0 of [2, 12]) {
+                for (let y = 0; y < 16; y++) {
+                    t.px(x0, y, PAINT[3]); t.px(x0 + 1, y, PAINT[1]);
+                }
+            }
+            for (const y of [2, 6, 10, 14]) {
+                t.rect(2, y, 13, y, GALV[3]);
+                t.rect(2, y + 1, 13, y + 1, GALV[0]);
+                for (let x = 4; x <= 11; x += 2) t.px(x, y, GALV[2]);
+                t.px(2, y, PAINT[4]); t.px(13, y, PAINT[0]);
+            }
         }),
         // Process pipe: painted barrel with a bolted flange band at the top of each block.
         process_pipe: () => paint(t => {

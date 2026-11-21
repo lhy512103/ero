@@ -67,6 +67,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> STEEL_GRATING = registerBlockItem(ModBlocks.STEEL_GRATING);
     public static final DeferredItem<BlockItem> STEEL_STAIRS = registerBlockItem(ModBlocks.STEEL_STAIRS);
     public static final DeferredItem<BlockItem> STEEL_HANDRAIL = registerBlockItem(ModBlocks.STEEL_HANDRAIL);
+    public static final DeferredItem<BlockItem> STEEL_LADDER = registerBlockItem(ModBlocks.STEEL_LADDER);
     public static final DeferredItem<BlockItem> PROCESS_PIPE = registerBlockItem(ModBlocks.PROCESS_PIPE);
     public static final DeferredItem<BlockItem> FURNACE_SHELL = registerBlockItem(ModBlocks.FURNACE_SHELL);
     public static final DeferredItem<BlockItem> REFRACTORY_BRICKS = registerBlockItem(ModBlocks.REFRACTORY_BRICKS);

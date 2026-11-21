@@ -766,5 +766,6 @@
   "message.iuce.plant.missing_segments": "Required screw segment missing",
   "message.iuce.plant.batch_stalled": "Check feed, service tools and output capacity",
   "message.iuce.plant.processing": "Processing integrated batch",
-  "message.iuce.plant.too_many_hatches": "At most four energy hatches"
+  "message.iuce.plant.too_many_hatches": "At most four energy hatches",
+  "block.iuce.steel_ladder": "Steel Ladder"
 }

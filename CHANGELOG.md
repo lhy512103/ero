@@ -143,6 +143,9 @@
 137. Added: A Gas Output Hatch; gaseous products of industrial plants now leave through it instead of the fluid output hatch.
 138. Improved: All seven multiblocks are built from structural blocks laid out like their formed model, so the unformed frame already resembles the finished machine.
 139. Improved: Every multiblock shows a new detailed industrial 3D model once formed, with supported beams, platforms and realistic textures.
+140. Added: A climbable Steel Ladder block for multiblock platforms and general building.
+141. Improved: Redrew checker plate, steel stairs and steel handrail textures and models to match the industrial steel look.
+142. Improved: Redesigned the Twin-Screw Extruder layout and formed model, and replaced oversized bright-blue housings on the Rolling Mill and Ore Processing Plant with cast-steel frames.
 
 ### 中文
 
@@ -285,3 +288,6 @@
 137. 新增：气体输出仓，联合装置的气体产物改由其输出，不再走流体输出仓。
 138. 优化：七台多方块全部改用结构方块搭建，摆放位置与成型后的模型一一对应。
 139. 优化：所有多方块成型后显示全新的工业化 3D 模型，钢梁均有支撑，贴图更贴近真实设备。
+140. 新增：可攀爬的钢爬梯方块，可用于多方块平台上下与建筑装饰。
+141. 优化：重绘花纹钢板、钢制楼梯与钢管护栏贴图和模型，风格与成型后的工业钢结构一致。
+142. 优化：重做双螺杆挤出机的成型前后结构与模型，并将轧机、矿石处理厂等处的亮蓝色大柱子和箱体改为铸钢机架。

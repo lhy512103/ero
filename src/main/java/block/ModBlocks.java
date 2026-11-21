@@ -159,6 +159,8 @@ public class ModBlocks {
         p -> new SteelStairsBlock(CHECKER_PLATE.get().defaultBlockState(), p), () -> metalBlockProperties().get().noOcclusion());
     public static final DeferredBlock<SteelHandrailBlock> STEEL_HANDRAIL = BLOCKS.registerBlock("steel_handrail",
         SteelHandrailBlock::new, () -> metalBlockProperties().get().noOcclusion());
+    public static final DeferredBlock<SteelLadderBlock> STEEL_LADDER = BLOCKS.registerBlock("steel_ladder",
+        SteelLadderBlock::new, () -> metalBlockProperties().get().noOcclusion());
     public static final DeferredBlock<ProcessPipeBlock> PROCESS_PIPE = BLOCKS.registerBlock("process_pipe",
         ProcessPipeBlock::new, () -> machineProperties().get().noOcclusion());
     public static final DeferredBlock<StructureBlock> FURNACE_SHELL = BLOCKS.registerBlock("furnace_shell", StructureBlock::new, metalBlockProperties());

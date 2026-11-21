@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/stairs",
   "textures": {
-    "bottom": "iuce:block/structure/checker_plate",
+    "bottom": "iuce:block/structure/checker_plate_side",
     "top": "iuce:block/structure/checker_plate",
-    "side": "iuce:block/structure/checker_plate"
+    "side": "iuce:block/structure/checker_plate_side"
   }
 }

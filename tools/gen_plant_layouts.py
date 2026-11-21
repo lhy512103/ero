@@ -107,8 +107,9 @@ def carbide_furnace_plant():
     # Electrodes in a triangle round the furnace centre.
     for i, d in ((5, 4), (6, 6), (4, 6)):
         g.fill(i, i, d, d, 8, 16, "e")
-    # Front ports: cooling water in, maintenance, furnace gas out.
+    # Front ports: cooling water in, maintenance, furnace gas out, plus ladder up to both decks.
     g.row(1, 0, "    LMQ    ")
+    g.fill(1, 1, 0, 0, 1, 12, "m")
     return {"base_y": 0, "minimum": 11, "maximum": 11, "repeat_start": 3, "repeat_size": 4, "layers": g.layers()}
 
 
@@ -194,38 +195,29 @@ TWIN_STRETCH = {"base_length": 13, "bay_first": 3, "bay_last": 3, "stand_first":
 
 
 def twin_screw_extruder():
-    def base(g, d):
-        # Bed: checker plate, two sill beams with the barrel pedestal between them.
-        g.fill(0, 4, d, d, 0, 0, "c")
-        g.row(1, d, ".ACA.")
-
     def bay(g, d):
-        base(g, d)
-        g.set(2, d, 2, "G")
-        g.set(0, d, 4, "A"); g.set(4, d, 4, "A")
+        g.fill(0, 4, d, d, 0, 0, "c")
+        g.row(1, d, ".AGA.")
 
     def stand(g, d):
-        base(g, d)
-        g.set(2, d, 2, "G")
-        # Portal frame carrying the cable tray and the barrel cooling header.
-        g.fill(0, 0, d, d, 1, 3, "V"); g.fill(4, 4, d, d, 1, 3, "V")
-        g.row(4, d, "BBBBB")
+        bay(g, d)
+        g.set(2, d, 2, "p")
 
     def head(g):
-        g.row(0, 0, "cI@Oc"); g.row(1, 0, "VLMRV"); g.row(2, 0, "V.C.V"); g.row(3, 0, "V...V"); g.row(4, 0, "BBBBB")
-        # Gearbox, then the first barrel segment with the feed hopper over it.
-        base(g, 1); g.row(2, 1, ".CCC."); g.row(4, 1, "A...A")
-        bay(g, 2); g.set(2, 2, 3, "t")
+        g.row(0, 0, "cI@Oc"); g.row(1, 0, ".LMR.")
+        # Drive motor and gearbox, then the feed segment with its hopper.
+        g.fill(0, 4, 1, 1, 0, 0, "c"); g.row(1, 1, ".CCC.")
+        bay(g, 2); g.set(2, 2, 2, "t")
 
     def tail(g, shift):
         bay(g, 10 + shift)
         d = 11 + shift
-        base(g, d); g.set(2, d, 2, "C"); g.row(4, d, "A...A")
-        # Strand bath and pelletiser under the end portal.
+        g.fill(0, 4, d, d, 0, 0, "c"); g.set(2, d, 1, "C")
+        # Cooling water bath and pelletiser.
         d = 12 + shift
-        g.row(0, d, "ccHcc"); g.row(1, d, "VtttV"); g.row(2, d, "V.C.V"); g.row(3, d, "V...V"); g.row(4, d, "BBBBB")
+        g.row(0, d, "ccHcc"); g.row(1, d, ".ttt.")
 
-    return stretched(5, 5, 13, 33, TWIN_STRETCH, head, bay, stand, tail)
+    return stretched(5, 3, 13, 33, TWIN_STRETCH, head, bay, stand, tail)
 
 
 COKE_STRETCH = {"base_length": 17, "bay_first": 2, "bay_last": 2, "stand_first": 3, "stand_every": 2, "stand_last": 3}
@@ -252,8 +244,9 @@ def coke_oven_battery():
     def head(g):
         g.row(0, 0, "cccI@Occc")
         g.row(1, 0, "...LMRQ..")
-        # Gas offtake from the collecting main down to the gas hatch, and the end buckstay frame.
+        # Gas offtake from the collecting main down to the gas hatch, ladder to the charging deck, and the end buckstay frame.
         g.fill(6, 6, 0, 0, 2, 7, "p")
+        g.fill(0, 0, 0, 0, 1, 5, "m")
         stand(g, 1)
 
     def tail(g, shift):
@@ -290,12 +283,13 @@ def bio_ethylene_plant():
     g.fill(3, 5, 2, 14, 6, 6, "q")
     # Gas line from the rack down to the gas hatch.
     g.fill(6, 6, 1, 1, 1, 6, "p")
-    # Ethanol column with a ring platform half way and its reflux drum.
+    # Ethanol column with a ring platform half way, ladder up to it, and its reflux drum.
     g.fill(1, 1, 12, 12, 1, 8, "t")
     for i in range(0, 3):
         for d in range(11, 14):
             if (i, d) != (1, 12):
                 g.set(i, d, 5, "f")
+    g.fill(0, 0, 10, 10, 1, 5, "m")
     g.fill(0, 0, 14, 15, 1, 1, "t")
     # Dehydration reactor, its fired heater and the heater stack.
     g.fill(7, 7, 12, 12, 1, 5, "t")

@@ -19,10 +19,11 @@ public final class PlantStructure {
         CASING, SOCKET, INPUT, OUTPUT, POWER, FRAME_UP, FRAME_ALONG, FRAME_ACROSS, DRUM_UP, DRUM_ALONG, DRUM_ACROSS,
         FLUID_IN, FLUID_OUT, MAINTENANCE, GENERATION, HV, SEGMENT,
         GRATING, CHECKER, HANDRAIL, REFRACTORY, SHELL, TANK, PIPE_UP, PIPE_ALONG, PIPE_ACROSS,
-        STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT, GAS_OUT, ELECTRODE;
+        STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT, GAS_OUT, ELECTRODE,
+        LADDER_BACK, LADDER_FRONT, LADDER_RIGHT, LADDER_LEFT;
 
         /** Layout symbol of each part, in declaration order. */
-        public static final String SYMBOLS = "CSIOEVABXYZLRMJHGgcfkutpqrswxyQe";
+        public static final String SYMBOLS = "CSIOEVABXYZLRMJHGgcfkutpqrswxyQelmno";
 
         public boolean canFillWithCasing() { return this == CASING || this == SOCKET; }
 
@@ -43,6 +44,8 @@ public final class PlantStructure {
                     .setValue(RotatedPillarBlock.AXIS, axis(facing));
                 case STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT -> ModBlocks.STEEL_STAIRS.get().defaultBlockState()
                     .setValue(StairBlock.FACING, climb(facing));
+                case LADDER_BACK, LADDER_FRONT, LADDER_RIGHT, LADDER_LEFT -> ModBlocks.STEEL_LADDER.get().defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LadderBlock.FACING, ladderFacing(facing));
                 case MAINTENANCE -> ModBlocks.MAINTENANCE_HATCH.get().defaultBlockState();
                 case GENERATION -> ModBlocks.GENERATION_HATCH.get().defaultBlockState();
                 case HV -> ModBlocks.ENERGY_HATCH_HV.get().defaultBlockState();
@@ -76,6 +79,15 @@ public final class PlantStructure {
             };
         }
 
+        private Direction ladderFacing(Direction facing) {
+            return switch (this) {
+                case LADDER_FRONT -> facing;
+                case LADDER_RIGHT -> facing.getClockWise();
+                case LADDER_LEFT -> facing.getCounterClockWise();
+                default -> facing.getOpposite();
+            };
+        }
+
         public boolean accepts(BlockState state, Direction facing) {
             return switch (this) {
                 case SOCKET -> state.is(ModBlocks.PLANT_CASING.get()) || state.is(ModBlocks.ITEM_INPUT_HATCH.get())
@@ -86,6 +98,8 @@ public final class PlantStructure {
                      GRATING, CHECKER, HANDRAIL, REFRACTORY, SHELL, TANK -> state.is(sample(facing).getBlock());
                 case STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT -> state.is(ModBlocks.STEEL_STAIRS.get())
                     && state.getValue(StairBlock.FACING) == climb(facing);
+                case LADDER_BACK, LADDER_FRONT, LADDER_RIGHT, LADDER_LEFT -> state.is(ModBlocks.STEEL_LADDER.get())
+                    && state.getValue(net.minecraft.world.level.block.LadderBlock.FACING) == ladderFacing(facing);
                 case SEGMENT -> state.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK,net.minecraft.resources.Identifier.parse("iuce:screw_segments")));
                 default -> state.is(sample(facing).getBlock()) && state.getValue(RotatedPillarBlock.AXIS) == axis(facing);
             };

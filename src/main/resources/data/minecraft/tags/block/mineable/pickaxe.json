@@ -178,6 +178,7 @@
     "iuce:furnace_shell",
     "iuce:tank_shell",
     "iuce:gas_output_hatch",
-    "iuce:graphite_electrode"
+    "iuce:graphite_electrode",
+    "iuce:steel_ladder"
   ]
 }

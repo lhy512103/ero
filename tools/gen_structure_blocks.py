@@ -91,8 +91,14 @@ def grating():
     state("steel_grating", {"formed=false": {"model": "iuce:block/steel_grating"}, "formed=true": EMPTY})
 
 
+def checker_plate():
+    model("checker_plate", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": TEX + "checker_plate", "bottom": TEX + "checker_plate_side", "side": TEX + "checker_plate_side"}})
+    state("checker_plate", {"formed=false": {"model": "iuce:block/checker_plate"}, "formed=true": EMPTY})
+
+
 def stairs():
-    textures = {"bottom": TEX + "checker_plate", "top": TEX + "checker_plate", "side": TEX + "checker_plate"}
+    textures = {"bottom": TEX + "checker_plate_side", "top": TEX + "checker_plate", "side": TEX + "checker_plate_side"}
     for kind, parent in (("", "stairs"), ("_inner", "inner_stairs"), ("_outer", "outer_stairs")):
         model("steel_stairs" + kind, {"parent": "minecraft:block/" + parent, "textures": textures})
     base = {"east": 0, "south": 90, "west": 180, "north": 270}
@@ -117,17 +123,38 @@ def stairs():
 def handrail():
     t = {"particle": TEX + "steel_handrail", "rail": TEX + "steel_handrail"}
     box = lambda a, b: {"from": a, "to": b, "faces": faces("#rail")}
-    model("steel_handrail_post", {"textures": t, "elements": [box([7, 0, 7], [9, 16, 9]), box([6.5, 14, 6.5], [9.5, 16, 9.5])]})
+    model("steel_handrail_post", {"textures": t, "elements": [
+        box([6.5, 0, 6.5], [9.5, 1, 9.5]),
+        box([7.25, 1, 7.25], [8.75, 15.5, 8.75]),
+        box([7, 14.5, 7], [9, 16, 9])]})
     # Top and knee rails running north from the post.
-    model("steel_handrail_side", {"textures": t, "elements": [box([7.25, 14, 0], [8.75, 15.5, 7]), box([7.25, 7, 0], [8.75, 8.5, 7])]})
+    model("steel_handrail_side", {"textures": t, "elements": [
+        box([7.5, 14.5, 0], [8.5, 15.5, 7.25]),
+        box([7.5, 7.5, 0], [8.5, 8.5, 7.25])]})
     model("steel_handrail_inventory", {"parent": "minecraft:block/block", "textures": t, "elements": [
-        box([2, 0, 7], [4, 16, 9]), box([12, 0, 7], [14, 16, 9]), box([0, 14, 7.25], [16, 15.5, 8.75]), box([0, 7, 7.25], [16, 8.5, 8.75])]})
+        box([2, 0, 7.25], [3.5, 16, 8.75]), box([12.5, 0, 7.25], [14, 16, 8.75]),
+        box([0, 14.5, 7.5], [16, 15.5, 8.5]), box([0, 7.5, 7.5], [16, 8.5, 8.5])]})
     parts = [{"when": {"formed": "false"}, "apply": {"model": "iuce:block/steel_handrail_post"}}]
     for side, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
         apply = {"model": "iuce:block/steel_handrail_side", "uvlock": True}
         if y: apply["y"] = y
         parts.append({"when": {"formed": "false", side: "true"}, "apply": apply})
     state("steel_handrail", multipart=parts)
+
+
+def ladder():
+    model("steel_ladder", {"ambientocclusion": False, "textures": {
+        "particle": TEX + "steel_ladder", "texture": TEX + "steel_ladder"},
+        "elements": [{"from": [0, 0, 15.2], "to": [16, 16, 15.2], "shade": False, "faces": {
+            "north": {"uv": [0, 0, 16, 16], "texture": "#texture"},
+            "south": {"uv": [0, 0, 16, 16], "texture": "#texture"}}}]})
+    variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        entry = {"model": "iuce:block/steel_ladder"}
+        if y: entry["y"] = y
+        variants[f"facing={facing},formed=false"] = entry
+        variants[f"facing={facing},formed=true"] = EMPTY
+    state("steel_ladder", variants)
 
 
 def gas_hatch():
@@ -137,14 +164,16 @@ def gas_hatch():
 
 
 def main():
-    for name in ("checker_plate", "refractory_bricks", "furnace_shell", "tank_shell"):
+    for name in ("refractory_bricks", "furnace_shell", "tank_shell"):
         cube(name, name)
+    checker_plate()
     h_beam()
     process_pipe()
     process_pipe("graphite_electrode")
     grating()
     stairs()
     handrail()
+    ladder()
     gas_hatch()
 
 

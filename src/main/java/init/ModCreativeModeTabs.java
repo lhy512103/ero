@@ -40,6 +40,7 @@ public class ModCreativeModeTabs {
         ModBlockItems.STEEL_GRATING,
         ModBlockItems.STEEL_STAIRS,
         ModBlockItems.STEEL_HANDRAIL,
+        ModBlockItems.STEEL_LADDER,
         ModBlockItems.PROCESS_PIPE,
         ModBlockItems.FURNACE_SHELL,
         ModBlockItems.REFRACTORY_BRICKS,
