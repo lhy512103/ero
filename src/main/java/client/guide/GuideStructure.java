@@ -72,7 +72,11 @@ public final class GuideStructure {
     @Nullable
     public PlantModel model() {
         if (machine == null) return null;
-        return PlantModel.get(machine.equals("mill_controller") ? PlantModel.ROLLING_MILL : PlantModel.ORE_PLANT);
+        return PlantModel.get(switch (machine) {
+            case "mill_controller" -> PlantModel.ROLLING_MILL;
+            case "plant_controller" -> PlantModel.ORE_PLANT;
+            default -> machine;
+        });
     }
 
     /**
@@ -121,7 +125,12 @@ public final class GuideStructure {
     }
 
     private static Optional<GuideStructure> load(String name) {
-        if (name.equals("ore_plant") || name.equals("rolling_mill")) return Optional.of(plant(name.equals("rolling_mill")));
+        if (name.equals("ore_plant") || name.equals("rolling_mill"))
+            return Optional.of(plant((name.equals("rolling_mill") ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get()));
+        Block named = BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("iuce", name));
+        if (named instanceof PlantControllerBlock && PlantStructure.formedModel(
+                named.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false)) != null)
+            return Optional.of(plant(named));
         Optional<Resource> resource = GuideBook.resource("guide/structures/" + name + ".json");
         if (resource.isEmpty()) return Optional.empty();
         try (BufferedReader reader = resource.get().openAsReader()) {
@@ -154,8 +163,7 @@ public final class GuideStructure {
         }
     }
 
-    private static GuideStructure plant(boolean mill) {
-        var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
+    private static GuideStructure plant(Block controller) {
         // The book shows the machine facing the reader: controller front towards south-west.
         Direction facing = Direction.SOUTH;
         var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false).setValue(PlantControllerBlock.FACING, facing);

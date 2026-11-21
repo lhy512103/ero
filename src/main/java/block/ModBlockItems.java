@@ -63,6 +63,15 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> PLANT_CASING = registerBlockItem(ModBlocks.PLANT_CASING);
     public static final DeferredItem<BlockItem> PLANT_FRAME = registerBlockItem(ModBlocks.PLANT_FRAME);
     public static final DeferredItem<BlockItem> PLANT_DRUM = registerBlockItem(ModBlocks.PLANT_DRUM);
+    public static final DeferredItem<BlockItem> CHECKER_PLATE = registerBlockItem(ModBlocks.CHECKER_PLATE);
+    public static final DeferredItem<BlockItem> STEEL_GRATING = registerBlockItem(ModBlocks.STEEL_GRATING);
+    public static final DeferredItem<BlockItem> STEEL_STAIRS = registerBlockItem(ModBlocks.STEEL_STAIRS);
+    public static final DeferredItem<BlockItem> STEEL_HANDRAIL = registerBlockItem(ModBlocks.STEEL_HANDRAIL);
+    public static final DeferredItem<BlockItem> PROCESS_PIPE = registerBlockItem(ModBlocks.PROCESS_PIPE);
+    public static final DeferredItem<BlockItem> FURNACE_SHELL = registerBlockItem(ModBlocks.FURNACE_SHELL);
+    public static final DeferredItem<BlockItem> REFRACTORY_BRICKS = registerBlockItem(ModBlocks.REFRACTORY_BRICKS);
+    public static final DeferredItem<BlockItem> GRAPHITE_ELECTRODE = registerBlockItem(ModBlocks.GRAPHITE_ELECTRODE);
+    public static final DeferredItem<BlockItem> TANK_SHELL = registerBlockItem(ModBlocks.TANK_SHELL);
     public static final DeferredItem<BlockItem> PLANT_CONTROLLER = registerControllerItem("plant_controller", ModBlocks.PLANT_CONTROLLER);
     public static final DeferredItem<BlockItem> ITEM_INPUT_HATCH = registerBlockItem(ModBlocks.ITEM_INPUT_HATCH);
     public static final DeferredItem<BlockItem> ITEM_OUTPUT_HATCH = registerBlockItem(ModBlocks.ITEM_OUTPUT_HATCH);
@@ -115,6 +124,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> DIE_SEGMENT = registerBlockItem(ModBlocks.DIE_SEGMENT);
     public static final DeferredItem<BlockItem> FLUID_INPUT_HATCH = registerBlockItem(ModBlocks.FLUID_INPUT_HATCH);
     public static final DeferredItem<BlockItem> FLUID_OUTPUT_HATCH = registerBlockItem(ModBlocks.FLUID_OUTPUT_HATCH);
+    public static final DeferredItem<BlockItem> GAS_OUTPUT_HATCH = registerBlockItem(ModBlocks.GAS_OUTPUT_HATCH);
     public static final DeferredItem<BlockItem> GENERATION_HATCH = registerBlockItem(ModBlocks.GENERATION_HATCH);
     public static final DeferredItem<BlockItem> MAINTENANCE_HATCH = registerBlockItem(ModBlocks.MAINTENANCE_HATCH);
     public static final DeferredItem<BlockItem> COOLING_TOWER = registerBlockItem(ModBlocks.COOLING_TOWER);

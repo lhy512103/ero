@@ -44,8 +44,8 @@ public class PlantControllerBlockEntityRenderer implements BlockEntityRenderer<P
     ) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTicks, cameraPosition, breakProgress);
         BlockState blockState = blockEntity.getBlockState();
-        state.screw = blockState.is(block.ModBlocks.TWIN_SCREW_EXTRUDER.get());
-        state.formed = blockState.getValue(PlantControllerBlock.FORMED) && (state.screw || multiblock.PlantStructure.industrialId(blockState)==null);
+        state.model = multiblock.PlantStructure.formedModel(blockState);
+        state.formed = blockState.getValue(PlantControllerBlock.FORMED) && state.model != null;
         state.mill = blockEntity.isMill();
         state.legacy = blockState.getValue(PlantControllerBlock.LEGACY);
         state.working = blockEntity.isWorking();
@@ -83,7 +83,7 @@ public class PlantControllerBlockEntityRenderer implements BlockEntityRenderer<P
     @Override
     public void submit(PlantControllerRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         if (!state.formed || state.legacy) return;
-        PlantModel model = PlantModel.get(state.screw ? "twin_screw_extruder" : state.mill ? PlantModel.ROLLING_MILL : PlantModel.ORE_PLANT);
+        PlantModel model = PlantModel.get(state.model);
         if (model == null) return;
 
         poseStack.pushPose();
@@ -106,7 +106,11 @@ public class PlantControllerBlockEntityRenderer implements BlockEntityRenderer<P
     @Override
     public AABB getRenderBoundingBox(PlantControllerBlockEntity blockEntity) {
         BoundingBox box = blockEntity.box();
-        return new AABB(box.minX() - 1.0, box.minY(), box.minZ() - 1.0, box.maxX() + 2.0, box.maxY() + 5.0, box.maxZ() + 2.0);
+        // Formed models may rise well above the block layout (stacks, electrode columns).
+        String name = multiblock.PlantStructure.formedModel(blockEntity.getBlockState());
+        PlantModel model = name == null ? null : PlantModel.get(name);
+        double top = Math.max(box.maxY() + 5.0, model == null ? 0 : blockEntity.getBlockPos().getY() + model.max.y + 1.0);
+        return new AABB(box.minX() - 1.0, box.minY(), box.minZ() - 1.0, box.maxX() + 2.0, top, box.maxZ() + 2.0);
     }
 
     @Override

@@ -95,7 +95,7 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<CrateBlockEntity>> CRATE = BLOCK_ENTITIES.register("crate", () -> new BlockEntityType<>(CrateBlockEntity::new, false, ModBlocks.CRATE.get()));
     public static final Supplier<BlockEntityType<DripPipeBlockEntity>> DRIP_PIPE = BLOCK_ENTITIES.register("drip_pipe", () -> new BlockEntityType<>(DripPipeBlockEntity::new,false,ModBlocks.DRIP_PIPE.get()));
-    public static final Supplier<BlockEntityType<PlantTankEntity>> PLANT_TANK = BLOCK_ENTITIES.register("plant_tank", () -> new BlockEntityType<>(PlantTankEntity::new,false,ModBlocks.FLUID_INPUT_HATCH.get(),ModBlocks.FLUID_OUTPUT_HATCH.get()));
+    public static final Supplier<BlockEntityType<PlantTankEntity>> PLANT_TANK = BLOCK_ENTITIES.register("plant_tank", () -> new BlockEntityType<>(PlantTankEntity::new,false,ModBlocks.FLUID_INPUT_HATCH.get(),ModBlocks.FLUID_OUTPUT_HATCH.get(),ModBlocks.GAS_OUTPUT_HATCH.get()));
     public static final Supplier<BlockEntityType<SiloBlockEntity>> SILO =
         BLOCK_ENTITIES.register("silo", () ->
             new BlockEntityType<>(SiloBlockEntity::new, false, ModBlocks.SILO.get(), ModBlocks.BULK_SILO.get())

@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "axis=y,formed=false": {
+      "model": "iuce:block/process_pipe"
+    },
+    "axis=y,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "axis=z,formed=false": {
+      "model": "iuce:block/process_pipe",
+      "x": 90
+    },
+    "axis=z,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "axis=x,formed=false": {
+      "model": "iuce:block/process_pipe",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

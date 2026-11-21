@@ -40,14 +40,22 @@ public final class PlantModel {
         float x1, float y1, float z1,
         float x2, float y2, float z2,
         float x3, float y3, float z3,
-        float nx, float ny, float nz,
-        float u0, float v0, float u1, float v1
+        float[] normals,
+        float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3
     ) {
+        /** One normal for all four corners. */
+        Quad(float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3,
+             float nx, float ny, float nz, float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3) {
+            this(x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, new float[]{nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz},
+                u0, v0, u1, v1, u2, v2, u3, v3);
+        }
+
         public void emit(PoseStack.Pose pose, VertexConsumer consumer, int light) {
-            consumer.addVertex(pose, x0, y0, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
-            consumer.addVertex(pose, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
-            consumer.addVertex(pose, x2, y2, z2).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
-            consumer.addVertex(pose, x3, y3, z3).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
+            float[] n = normals;
+            consumer.addVertex(pose, x0, y0, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, n[0], n[1], n[2]);
+            consumer.addVertex(pose, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, n[3], n[4], n[5]);
+            consumer.addVertex(pose, x2, y2, z2).setColor(255, 255, 255, 255).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, n[6], n[7], n[8]);
+            consumer.addVertex(pose, x3, y3, z3).setColor(255, 255, 255, 255).setUv(u3, v3).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, n[9], n[10], n[11]);
         }
     }
 
@@ -155,6 +163,24 @@ public final class PlantModel {
                         uv.get(2).getAsFloat(), uv.get(3).getAsFloat()
                     ));
                 }
+            }
+            // Free-form faces (round shells, elbows, cones): four corners in order, each x, y, z, u, v, nx, ny, nz.
+            for (JsonElement elem : GsonHelper.getAsJsonArray(root, "quads", new JsonArray())) {
+                JsonObject face = elem.getAsJsonObject();
+                String part = GsonHelper.getAsString(face, "part");
+                String section = GsonHelper.getAsString(face, "section", "head");
+                JsonObject spin = spinDefs.get(part);
+                if (spin != null) spinnerSection.put(part, section);
+                Vector3f pivot = spin == null ? new Vector3f() : vec3(spin.getAsJsonArray("pivot"));
+                JsonArray v = face.getAsJsonArray("v");
+                float[] c = new float[32];
+                for (int i = 0; i < 32; i++) c[i] = v.get(i).getAsFloat();
+                float[] normals = new float[12];
+                for (int i = 0; i < 4; i++) System.arraycopy(c, i * 8 + 5, normals, i * 3, 3);
+                parts.computeIfAbsent(section, key -> new LinkedHashMap<>()).computeIfAbsent(part, key -> new ArrayList<>()).add(new Quad(
+                    c[0] - pivot.x, c[1] - pivot.y, c[2] - pivot.z, c[8] - pivot.x, c[9] - pivot.y, c[10] - pivot.z,
+                    c[16] - pivot.x, c[17] - pivot.y, c[18] - pivot.z, c[24] - pivot.x, c[25] - pivot.y, c[26] - pivot.z,
+                    normals, c[3], c[4], c[11], c[12], c[19], c[20], c[27], c[28]));
             }
             Map<String, Section> sections = new LinkedHashMap<>();
             for (var entry : parts.entrySet()) {
@@ -267,7 +293,7 @@ public final class PlantModel {
             p2.x, p2.y, p2.z,
             p3.x, p3.y, p3.z,
             n.x, n.y, n.z,
-            u0, v0, u1, v1
+            u0, v0, u0, v1, u1, v1, u1, v0
         );
     }
 

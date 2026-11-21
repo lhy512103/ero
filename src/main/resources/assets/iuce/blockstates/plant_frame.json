@@ -3,20 +3,20 @@
     "axis=y,formed=false": {
       "model": "iuce:block/plant_frame"
     },
+    "axis=y,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
     "axis=z,formed=false": {
       "model": "iuce:block/plant_frame",
       "x": 90
+    },
+    "axis=z,formed=true": {
+      "model": "iuce:block/plant_empty"
     },
     "axis=x,formed=false": {
       "model": "iuce:block/plant_frame",
       "x": 90,
       "y": 90
-    },
-    "axis=y,formed=true": {
-      "model": "iuce:block/plant_empty"
-    },
-    "axis=z,formed=true": {
-      "model": "iuce:block/plant_empty"
     },
     "axis=x,formed=true": {
       "model": "iuce:block/plant_empty"

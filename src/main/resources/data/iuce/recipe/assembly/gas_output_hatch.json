@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:gas_tank"
+  ],
+  "result": {
+    "id": "iuce:gas_output_hatch",
+    "count": 1
+  }
+}

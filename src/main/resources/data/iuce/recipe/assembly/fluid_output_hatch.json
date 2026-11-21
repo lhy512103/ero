@@ -3,7 +3,7 @@
   "input": [
     "iuce:machine_housing",
     "iuce:advanced_circuit",
-    "iuce:gas_tank"
+    "iuce:fluid_tank"
   ],
   "result": {
     "id": "iuce:fluid_output_hatch",

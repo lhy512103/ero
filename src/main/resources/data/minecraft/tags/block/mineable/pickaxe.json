@@ -168,6 +168,16 @@
     "iuce:fluid_input_hatch",
     "iuce:fluid_output_hatch",
     "iuce:generation_hatch",
-    "iuce:maintenance_hatch"
+    "iuce:maintenance_hatch",
+    "iuce:checker_plate",
+    "iuce:steel_grating",
+    "iuce:steel_stairs",
+    "iuce:steel_handrail",
+    "iuce:process_pipe",
+    "iuce:refractory_bricks",
+    "iuce:furnace_shell",
+    "iuce:tank_shell",
+    "iuce:gas_output_hatch",
+    "iuce:graphite_electrode"
   ]
 }

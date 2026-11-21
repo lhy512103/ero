@@ -139,6 +139,10 @@
 133. Fixed: Pickaxe mining tags now load properly for all machines and blocks, and mulched farmland mines faster with a shovel; missing break particles on cables and formed plant parts are restored.
 134. Improved: Crates now hold 27 slots with a custom industrial GUI matching the electric furnace and compressor panels.
 135. Fixed: Upward-facing crates stacked on another crate no longer show missing-texture strips on their front.
+136. Added: Structural building blocks — H-beam, checker plate, steel grating, steel stairs, handrail, process pipe, refractory bricks, furnace shell, tank shell and graphite electrode.
+137. Added: A Gas Output Hatch; gaseous products of industrial plants now leave through it instead of the fluid output hatch.
+138. Improved: All seven multiblocks are built from structural blocks laid out like their formed model, so the unformed frame already resembles the finished machine.
+139. Improved: Every multiblock shows a new detailed industrial 3D model once formed, with supported beams, platforms and realistic textures.
 
 ### 中文
 
@@ -277,3 +281,7 @@
 133. 修复：因测试方块混入挖掘标签导致全模组机器与方块镐子挖掘失效的问题，补全地膜耕地铲掘标签及线缆、成型多方块零件的破坏粒子。
 134. 优化：周转箱扩容至 27 格，并更换为与电炉、压缩机风格一致的工业面板界面。
 135. 修复：朝上摆放并叠在其他周转箱上的周转箱正面不再出现紫黑贴图缺失条纹。
+136. 新增：H型钢、花纹钢板、钢格栅、钢楼梯、护栏、工艺管道、耐火砖、炉壳、罐壳与石墨电极等结构建筑方块。
+137. 新增：气体输出仓，联合装置的气体产物改由其输出，不再走流体输出仓。
+138. 优化：七台多方块全部改用结构方块搭建，摆放位置与成型后的模型一一对应。
+139. 优化：所有多方块成型后显示全新的工业化 3D 模型，钢梁均有支撑，贴图更贴近真实设备。

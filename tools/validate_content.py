@@ -97,6 +97,9 @@ TERMINAL = set(STATION.values()) | {
     "die_segment",
     "fluid_input_hatch",
     "fluid_output_hatch",
+    "gas_output_hatch",
+    # structural building blocks: multiblock parts that also serve for building
+    "steel_grating", "steel_stairs", "steel_handrail", "process_pipe", "furnace_shell", "tank_shell", "graphite_electrode",
     "generation_hatch",
     "maintenance_hatch",
     "mulch_film_pe", "mulch_film_pla", "mulched_farmland", "waste_film", "drip_pipe",

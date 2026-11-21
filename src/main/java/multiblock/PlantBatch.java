@@ -33,7 +33,7 @@ public record PlantBatch(String id, Map<String,Integer> inputs, Map<String,Integ
             stack.is(BuiltInRegistries.ITEM.getValue(Identifier.parse(ref)));
     }
     public record Ports(List<ItemStacksResourceHandler> in,List<ItemStacksResourceHandler> out,
-                        List<ItemStacksResourceHandler> maintenance,List<PlantTankEntity> supply,List<PlantTankEntity> drain) {}
+                        List<ItemStacksResourceHandler> maintenance,List<PlantTankEntity> supply,List<PlantTankEntity> drain,List<PlantTankEntity> vent) {}
     public boolean transfer(Ports ports,int batches,boolean commit) {
         try(var tx=Transaction.openRoot()){
             net.minecraft.world.item.DyeColor color=null;
@@ -76,9 +76,11 @@ public record PlantBatch(String id, Map<String,Integer> inputs, Map<String,Integ
                 if(left>0)return false;
             }
             for(var entry:products.entrySet()) {
-                var resource=FluidResource.of(BuiltInRegistries.FLUID.getValue(Identifier.parse(entry.getKey())));
+                var fluid=BuiltInRegistries.FLUID.getValue(Identifier.parse(entry.getKey()));
+                var resource=FluidResource.of(fluid);
                 int left=entry.getValue()*batches;
-                for(var hatch:ports.drain)for(var tank:hatch.getTanks())if(left>0)left-=tank.insert(0,resource,left,tx);
+                // gases leave through the gas output hatch, liquids through the fluid output hatch
+                for(var hatch:fluid.getFluidType().isLighterThanAir()?ports.vent:ports.drain)for(var tank:hatch.getTanks())if(left>0)left-=tank.insert(0,resource,left,tx);
                 if(left>0)return false;
             }
             for(var entry:outputs.entrySet()){

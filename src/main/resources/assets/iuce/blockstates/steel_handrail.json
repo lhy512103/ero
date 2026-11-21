@@ -1,0 +1,55 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "formed": "false"
+      },
+      "apply": {
+        "model": "iuce:block/steel_handrail_post"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "north": "true"
+      },
+      "apply": {
+        "model": "iuce:block/steel_handrail_side",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "east": "true"
+      },
+      "apply": {
+        "model": "iuce:block/steel_handrail_side",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "south": "true"
+      },
+      "apply": {
+        "model": "iuce:block/steel_handrail_side",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "west": "true"
+      },
+      "apply": {
+        "model": "iuce:block/steel_handrail_side",
+        "uvlock": true,
+        "y": 270
+      }
+    }
+  ]
+}

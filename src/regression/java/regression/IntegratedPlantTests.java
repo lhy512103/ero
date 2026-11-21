@@ -76,7 +76,9 @@ final class IntegratedPlantTests {
         var output=((HatchBlockEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.OUTPUT))).getInventory();
         var tools=((HatchBlockEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.MAINTENANCE))).getInventory();
         var tankIn=((PlantTankEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.FLUID_IN))).getTanks();
-        var tankOut=((PlantTankEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.FLUID_OUT))).getTanks();
+        var tankOut=new ArrayList<fluid.MachineTank>();
+        for(var part:List.of(PlantStructure.Part.FLUID_OUT,PlantStructure.Part.GAS_OUT))
+            if(hatches.containsKey(part))tankOut.addAll(((PlantTankEntity)level.getBlockEntity(hatches.get(part))).getTanks());
         var energy=((EnergyHatchBlockEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.HV))).storage();
         int tested=0;
         for(var recipe:PlantBatch.all(id)){
@@ -109,6 +111,9 @@ final class IntegratedPlantTests {
             for(var entry:recipe.products().entrySet()){
                 int amount=tankOut.stream().filter(t->!t.isEmpty() && BuiltInRegistries.FLUID.getKey(t.getResource().getFluid()).toString().equals(entry.getKey())).mapToInt(fluid.MachineTank::getAmount).sum();
                 h.assertTrue(amount==entry.getValue(),"wrong fluid output "+entry.getKey());
+                boolean gas=BuiltInRegistries.FLUID.getValue(Identifier.parse(entry.getKey())).getFluidType().isLighterThanAir();
+                if(gas)h.assertTrue(((PlantTankEntity)level.getBlockEntity(hatches.get(PlantStructure.Part.GAS_OUT))).getTanks().stream()
+                    .anyMatch(t->!t.isEmpty() && BuiltInRegistries.FLUID.getKey(t.getResource().getFluid()).toString().equals(entry.getKey())),entry.getKey()+" must leave through the gas output hatch");
             }
             for(int i=0;i<output.size();i++)output.set(i,ItemResource.EMPTY,0);
             tested++;

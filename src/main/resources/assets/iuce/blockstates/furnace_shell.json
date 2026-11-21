@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "iuce:block/furnace_shell"
+    },
+    "formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

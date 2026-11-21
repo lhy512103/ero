@@ -54,7 +54,7 @@ public class PlantControllerBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return (state.is(ModBlocks.TWIN_SCREW_EXTRUDER.get()) || multiblock.PlantStructure.industrialId(state)==null) && !state.getValue(LEGACY) && state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override

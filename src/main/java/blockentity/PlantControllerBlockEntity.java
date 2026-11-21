@@ -53,7 +53,7 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
     private String batchId="", stageStatus="";
     private int operations, burnTicks;
     private long batchPaid;
-    private final List<BlockPos> fluidIn=new ArrayList<>(),fluidOut=new ArrayList<>(),service=new ArrayList<>();
+    private final List<BlockPos> fluidIn=new ArrayList<>(),fluidOut=new ArrayList<>(),gasOut=new ArrayList<>(),service=new ArrayList<>();
     private final List<String> screwSegments=new ArrayList<>();
     private String industrial(){return PlantStructure.industrialId(getBlockState());}
     public boolean extensible(){return isMill() || getBlockState().is(ModBlocks.TWIN_SCREW_EXTRUDER.get()) || getBlockState().is(ModBlocks.COKE_OVEN_BATTERY.get());}
@@ -179,7 +179,7 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         structureDirty = false;
         MultiblockManager.register(level, worldPosition, box());
         for (BlockPos pos : inputHatches) if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) hatch.setController(null);
-        fluidIn.clear();fluidOut.clear();service.clear();screwSegments.clear();
+        fluidIn.clear();fluidOut.clear();gasOut.clear();service.clear();screwSegments.clear();
         energyHatches.clear();
         inputHatches.clear();
         outputHatches.clear();
@@ -198,6 +198,7 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         else if (state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get()) || state.is(ModBlocks.GENERATION_HATCH.get())) energyHatches.add(pos);
         else if(state.is(ModBlocks.FLUID_INPUT_HATCH.get())) fluidIn.add(pos);
         else if(state.is(ModBlocks.FLUID_OUTPUT_HATCH.get())) fluidOut.add(pos);
+        else if(state.is(ModBlocks.GAS_OUTPUT_HATCH.get())) gasOut.add(pos);
         else if(state.is(ModBlocks.MAINTENANCE_HATCH.get())) service.add(pos);
         else if(scanParts.get(pos)==PlantStructure.Part.SEGMENT) screwSegments.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().replace("_segment",""));
         else if (state.is(ModBlocks.ITEM_INPUT_HATCH.get())) inputHatches.add(pos);
@@ -240,26 +241,16 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
 
     private void setFormedParts(BlockState controllerState, boolean value) {
         if (level == null || level.isClientSide()) return;
-        boolean hide = value && (industrial()==null || controllerState.is(ModBlocks.TWIN_SCREW_EXTRUDER.get())) && !controllerState.getValue(PlantControllerBlock.LEGACY);
+        boolean hide = value && PlantStructure.formedModel(controllerState) != null;
         Direction facing = controllerState.getValue(PlantControllerBlock.FACING);
         for (PlantStructure.Cell cell : PlantStructure.cells(worldPosition, facing, controllerState)) {
             BlockPos pos = cell.pos();
             if (!level.isLoaded(pos)) continue;
             BlockState s = level.getBlockState(pos);
-            Boolean prop = null;
-            if (s.getBlock() instanceof PlantCasingBlock) prop = s.getValue(PlantCasingBlock.FORMED);
-            else if (s.getBlock() instanceof PlantFrameBlock) prop = s.getValue(PlantFrameBlock.FORMED);
-            else if (s.getBlock() instanceof PlantDrumBlock) prop = s.getValue(PlantDrumBlock.FORMED);
-            else if (s.getBlock() instanceof HatchBlock) prop = s.getValue(HatchBlock.FORMED);
-            else if (s.getBlock() instanceof EnergyHatchBlock) prop = s.getValue(EnergyHatchBlock.FORMED);
-            if (prop != null && prop != hide) {
-                BlockState next = s;
-                if (s.getBlock() instanceof PlantCasingBlock) next = s.setValue(PlantCasingBlock.FORMED, hide);
-                else if (s.getBlock() instanceof PlantFrameBlock) next = s.setValue(PlantFrameBlock.FORMED, hide);
-                else if (s.getBlock() instanceof PlantDrumBlock) next = s.setValue(PlantDrumBlock.FORMED, hide);
-                else if (s.getBlock() instanceof HatchBlock) next = s.setValue(HatchBlock.FORMED, hide);
-                else if (s.getBlock() instanceof EnergyHatchBlock) next = s.setValue(EnergyHatchBlock.FORMED, hide);
-                level.setBlock(pos, next, Block.UPDATE_ALL);
+            // every part block names its hide flag "formed"
+            if (s.getBlock().getStateDefinition().getProperty("formed") instanceof net.minecraft.world.level.block.state.properties.BooleanProperty prop
+                && s.getValue(prop) != hide) {
+                level.setBlock(pos, s.setValue(prop, hide), Block.UPDATE_ALL);
             }
         }
     }
@@ -405,7 +396,7 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
     private void industrialTick(ServerLevel server) {
         if(getBlockState().is(ModBlocks.WASTE_HEAT_POWER_PLANT.get())) { generatePower(server);return; }
         if(batchId.isEmpty() && idleTicks++%10!=0)return;
-        var ports=new multiblock.PlantBatch.Ports(inventories(inputHatches),inventories(outputHatches),inventories(service),tankPorts(fluidIn),tankPorts(fluidOut));
+        var ports=new multiblock.PlantBatch.Ports(inventories(inputHatches),inventories(outputHatches),inventories(service),tankPorts(fluidIn),tankPorts(fluidOut),tankPorts(gasOut));
         var recipes=multiblock.PlantBatch.all(industrial());
         multiblock.PlantBatch selected=null;
         if(batchId.isEmpty()){

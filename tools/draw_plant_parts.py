@@ -408,7 +408,7 @@ def main():
 
     build_empty_model()
     build_casing_models()
-    build_frame_model()
+    # plant_frame (the H-beam) is now written by tools/gen_structure_blocks.py
     build_drum_model()
     build_controller_models()
     build_hatch_models()

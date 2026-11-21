@@ -5,6 +5,7 @@ import block.PlantControllerBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
@@ -16,7 +17,12 @@ public final class PlantStructure {
 
     public enum Part {
         CASING, SOCKET, INPUT, OUTPUT, POWER, FRAME_UP, FRAME_ALONG, FRAME_ACROSS, DRUM_UP, DRUM_ALONG, DRUM_ACROSS,
-        FLUID_IN, FLUID_OUT, MAINTENANCE, GENERATION, HV, SEGMENT;
+        FLUID_IN, FLUID_OUT, MAINTENANCE, GENERATION, HV, SEGMENT,
+        GRATING, CHECKER, HANDRAIL, REFRACTORY, SHELL, TANK, PIPE_UP, PIPE_ALONG, PIPE_ACROSS,
+        STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT, GAS_OUT, ELECTRODE;
+
+        /** Layout symbol of each part, in declaration order. */
+        public static final String SYMBOLS = "CSIOEVABXYZLRMJHGgcfkutpqrswxyQe";
 
         public boolean canFillWithCasing() { return this == CASING || this == SOCKET; }
 
@@ -25,6 +31,18 @@ public final class PlantStructure {
                 case CASING, SOCKET -> ModBlocks.PLANT_CASING.get().defaultBlockState();
                 case FLUID_IN -> ModBlocks.FLUID_INPUT_HATCH.get().defaultBlockState();
                 case FLUID_OUT -> ModBlocks.FLUID_OUTPUT_HATCH.get().defaultBlockState();
+                case GAS_OUT -> ModBlocks.GAS_OUTPUT_HATCH.get().defaultBlockState();
+                case GRATING -> ModBlocks.STEEL_GRATING.get().defaultBlockState();
+                case ELECTRODE -> ModBlocks.GRAPHITE_ELECTRODE.get().defaultBlockState();
+                case CHECKER -> ModBlocks.CHECKER_PLATE.get().defaultBlockState();
+                case HANDRAIL -> ModBlocks.STEEL_HANDRAIL.get().defaultBlockState();
+                case REFRACTORY -> ModBlocks.REFRACTORY_BRICKS.get().defaultBlockState();
+                case SHELL -> ModBlocks.FURNACE_SHELL.get().defaultBlockState();
+                case TANK -> ModBlocks.TANK_SHELL.get().defaultBlockState();
+                case PIPE_UP, PIPE_ALONG, PIPE_ACROSS -> ModBlocks.PROCESS_PIPE.get().defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, axis(facing));
+                case STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT -> ModBlocks.STEEL_STAIRS.get().defaultBlockState()
+                    .setValue(StairBlock.FACING, climb(facing));
                 case MAINTENANCE -> ModBlocks.MAINTENANCE_HATCH.get().defaultBlockState();
                 case GENERATION -> ModBlocks.GENERATION_HATCH.get().defaultBlockState();
                 case HV -> ModBlocks.ENERGY_HATCH_HV.get().defaultBlockState();
@@ -42,9 +60,19 @@ public final class PlantStructure {
 
         private Direction.Axis axis(Direction facing) {
             return switch (this) {
-                case FRAME_ALONG, DRUM_ALONG -> facing.getAxis();
-                case FRAME_ACROSS, DRUM_ACROSS -> facing.getClockWise().getAxis();
+                case FRAME_ALONG, DRUM_ALONG, PIPE_ALONG -> facing.getAxis();
+                case FRAME_ACROSS, DRUM_ACROSS, PIPE_ACROSS -> facing.getClockWise().getAxis();
                 default -> Direction.Axis.Y;
+            };
+        }
+
+        /** The way a flight of stairs climbs: away from the controller, towards it, or across. */
+        private Direction climb(Direction facing) {
+            return switch (this) {
+                case STAIRS_FRONT -> facing;
+                case STAIRS_RIGHT -> facing.getClockWise();
+                case STAIRS_LEFT -> facing.getCounterClockWise();
+                default -> facing.getOpposite();
             };
         }
 
@@ -54,7 +82,10 @@ public final class PlantStructure {
                     || state.is(ModBlocks.ITEM_OUTPUT_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH.get())
                     || state.is(ModBlocks.ENERGY_HATCH_HV.get());
                 case POWER -> state.is(ModBlocks.ENERGY_HATCH.get()) || state.is(ModBlocks.ENERGY_HATCH_HV.get());
-                case INPUT, OUTPUT, CASING, FLUID_IN, FLUID_OUT, MAINTENANCE, GENERATION, HV -> state.is(sample(facing).getBlock());
+                case INPUT, OUTPUT, CASING, FLUID_IN, FLUID_OUT, GAS_OUT, MAINTENANCE, GENERATION, HV,
+                     GRATING, CHECKER, HANDRAIL, REFRACTORY, SHELL, TANK -> state.is(sample(facing).getBlock());
+                case STAIRS_BACK, STAIRS_FRONT, STAIRS_RIGHT, STAIRS_LEFT -> state.is(ModBlocks.STEEL_STAIRS.get())
+                    && state.getValue(StairBlock.FACING) == climb(facing);
                 case SEGMENT -> state.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK,net.minecraft.resources.Identifier.parse("iuce:screw_segments")));
                 default -> state.is(sample(facing).getBlock()) && state.getValue(RotatedPillarBlock.AXIS) == axis(facing);
             };
@@ -87,6 +118,15 @@ public final class PlantStructure {
             default -> null;
         };
     }
+    private static final java.util.Set<String> MODELLED = java.util.Set.of("twin_screw_extruder", "carbide_furnace_plant", "coke_oven_battery",
+        "bio_ethylene_plant", "waste_heat_power_plant");
+    /** Name of the assembled 3D model drawn once the machine forms, or null when its blocks stay visible. */
+    public static String formedModel(BlockState state) {
+        if (!(state.getBlock() instanceof PlantControllerBlock) || state.getValue(PlantControllerBlock.LEGACY)) return null;
+        String id = industrialId(state);
+        if (id == null) return state.is(ModBlocks.MILL_CONTROLLER.get()) ? "rolling_mill" : "ore_processing_plant";
+        return MODELLED.contains(id) ? id : null;
+    }
     private static Definition definition(BlockState state) {
         String id=industrialId(state);
         if(id==null) {
@@ -102,7 +142,7 @@ public final class PlantStructure {
     }
     public static int length(BlockState state) {
         var d=definition(state);
-        if(d.layouts()!=null) return state.is(ModBlocks.MILL_CONTROLLER.get()) ? Math.clamp(state.getValue(PlantControllerBlock.LENGTH),9,17)
+        if(d.layouts()!=null && d.maximum()==0) return state.is(ModBlocks.MILL_CONTROLLER.get()) ? Math.clamp(state.getValue(PlantControllerBlock.LENGTH),9,17)
             : state.getValue(PlantControllerBlock.LEGACY)?5:ORE_LENGTH;
         return Math.clamp(state.getValue(PlantControllerBlock.LENGTH),d.minimum(),d.maximum());
     }
@@ -116,7 +156,7 @@ public final class PlantStructure {
             for(int x=0;x<row.length();x++) {
                 char symbol=row.charAt(x);
                 if(symbol=='.'||symbol=='@') continue;
-                Part part=Part.values()["CSIOEVABXYZLRMJHG".indexOf(symbol)];
+                Part part=Part.values()[Part.SYMBOLS.indexOf(symbol)];
                 cells.add(new Cell(at(origin,facing,depth,x-row.length()/2,y+d.base_y()),part));
             }
         }
@@ -124,7 +164,7 @@ public final class PlantStructure {
     }
     public static BoundingBox bounds(BlockPos origin,Direction facing,BlockState state) {
         var d=definition(state);
-        int max=d.layouts()==null?d.maximum():state.is(ModBlocks.MILL_CONTROLLER.get())?17:length(state);
+        int max=d.maximum()>0?d.maximum():state.is(ModBlocks.MILL_CONTROLLER.get())?17:length(state);
         var layers=d.layersAt(max);
         int radius=layers.getFirst().getFirst().length()/2;
         return BoundingBox.fromCorners(at(origin,facing,0,-radius,d.base_y()),at(origin,facing,max-1,radius,d.base_y()+layers.size()-1));

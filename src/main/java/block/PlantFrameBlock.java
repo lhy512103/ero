@@ -13,9 +13,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PlantFrameBlock extends RotatedPillarBlock {
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
-    private static final VoxelShape X = box(0, 2, 2, 16, 14, 14);
-    private static final VoxelShape Y = box(2, 0, 2, 14, 16, 14);
-    private static final VoxelShape Z = box(2, 2, 0, 14, 14, 16);
+    // H section: flanges facing north and south of the y model, rotated with the axis.
+    private static final VoxelShape Y = net.minecraft.world.phys.shapes.Shapes.or(box(0, 0, 0, 16, 16, 3), box(0, 0, 13, 16, 16, 16), box(6.5, 0, 3, 9.5, 16, 13));
+    private static final VoxelShape Z = net.minecraft.world.phys.shapes.Shapes.or(box(0, 0, 0, 16, 3, 16), box(0, 13, 0, 16, 16, 16), box(6.5, 3, 0, 9.5, 13, 16));
+    private static final VoxelShape X = net.minecraft.world.phys.shapes.Shapes.or(box(0, 0, 0, 16, 3, 16), box(0, 13, 0, 16, 16, 16), box(0, 3, 6.5, 16, 13, 9.5));
 
     public PlantFrameBlock(Properties properties) {
         super(properties);
