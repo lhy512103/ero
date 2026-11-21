@@ -1,6 +1,125 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "iuce:block/toy_brick"
+    "type": "minecraft:select",
+    "property": "minecraft:block_state",
+    "block_state_property": "color",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "iuce:block/toy_brick"
+    },
+    "cases": [
+      {
+        "when": "white",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_white"
+        }
+      },
+      {
+        "when": "orange",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_orange"
+        }
+      },
+      {
+        "when": "magenta",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_magenta"
+        }
+      },
+      {
+        "when": "light_blue",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_light_blue"
+        }
+      },
+      {
+        "when": "yellow",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_yellow"
+        }
+      },
+      {
+        "when": "lime",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_lime"
+        }
+      },
+      {
+        "when": "pink",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_pink"
+        }
+      },
+      {
+        "when": "gray",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_gray"
+        }
+      },
+      {
+        "when": "light_gray",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_light_gray"
+        }
+      },
+      {
+        "when": "cyan",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_cyan"
+        }
+      },
+      {
+        "when": "purple",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_purple"
+        }
+      },
+      {
+        "when": "blue",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_blue"
+        }
+      },
+      {
+        "when": "brown",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_brown"
+        }
+      },
+      {
+        "when": "green",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_green"
+        }
+      },
+      {
+        "when": "red",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_red"
+        }
+      },
+      {
+        "when": "black",
+        "model": {
+          "type": "minecraft:model",
+          "model": "iuce:block/toy_brick_black"
+        }
+      }
+    ]
   }
 }

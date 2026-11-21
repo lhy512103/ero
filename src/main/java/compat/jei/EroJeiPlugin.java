@@ -286,6 +286,18 @@ public class EroJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerItemSubtypes(mezz.jei.api.registration.ISubtypeRegistration registration) {
+        // each dye colour of crates and toy bricks is its own ingredient in the JEI list
+        for (var item : List.of(block.ModBlocks.CRATE.get().asItem(), block.ModBlocks.TOY_BRICK.get().asItem())) {
+            registration.registerSubtypeInterpreter(item, (stack, context) -> {
+                var state = stack.get(net.minecraft.core.component.DataComponents.BLOCK_STATE);
+                var color = state == null ? null : state.get(block.ColoredPlasticBlock.COLOR);
+                return color == null ? "white" : color.getName();
+            });
+        }
+    }
+
+    @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         // 通用加工机：箭头位置随机器布局变化
         registration.addGuiContainerHandler(client.gui.ProcessMachineScreen.class,

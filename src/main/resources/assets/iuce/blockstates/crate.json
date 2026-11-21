@@ -1,100 +1,196 @@
 {
   "variants": {
-    "color=white,stacked=false": {
+    "color=white,open=false,stacked=false": {
       "model": "iuce:block/crate_white"
     },
-    "color=white,stacked=true": {
+    "color=white,open=false,stacked=true": {
       "model": "iuce:block/crate_white_rack"
     },
-    "color=orange,stacked=false": {
+    "color=white,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open"
+    },
+    "color=white,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open"
+    },
+    "color=orange,open=false,stacked=false": {
       "model": "iuce:block/crate_orange"
     },
-    "color=orange,stacked=true": {
+    "color=orange,open=false,stacked=true": {
       "model": "iuce:block/crate_orange_rack"
     },
-    "color=magenta,stacked=false": {
+    "color=orange,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open"
+    },
+    "color=orange,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open"
+    },
+    "color=magenta,open=false,stacked=false": {
       "model": "iuce:block/crate_magenta"
     },
-    "color=magenta,stacked=true": {
+    "color=magenta,open=false,stacked=true": {
       "model": "iuce:block/crate_magenta_rack"
     },
-    "color=light_blue,stacked=false": {
+    "color=magenta,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open"
+    },
+    "color=magenta,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open"
+    },
+    "color=light_blue,open=false,stacked=false": {
       "model": "iuce:block/crate_light_blue"
     },
-    "color=light_blue,stacked=true": {
+    "color=light_blue,open=false,stacked=true": {
       "model": "iuce:block/crate_light_blue_rack"
     },
-    "color=yellow,stacked=false": {
+    "color=light_blue,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open"
+    },
+    "color=light_blue,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open"
+    },
+    "color=yellow,open=false,stacked=false": {
       "model": "iuce:block/crate_yellow"
     },
-    "color=yellow,stacked=true": {
+    "color=yellow,open=false,stacked=true": {
       "model": "iuce:block/crate_yellow_rack"
     },
-    "color=lime,stacked=false": {
+    "color=yellow,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open"
+    },
+    "color=yellow,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open"
+    },
+    "color=lime,open=false,stacked=false": {
       "model": "iuce:block/crate_lime"
     },
-    "color=lime,stacked=true": {
+    "color=lime,open=false,stacked=true": {
       "model": "iuce:block/crate_lime_rack"
     },
-    "color=pink,stacked=false": {
+    "color=lime,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open"
+    },
+    "color=lime,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open"
+    },
+    "color=pink,open=false,stacked=false": {
       "model": "iuce:block/crate_pink"
     },
-    "color=pink,stacked=true": {
+    "color=pink,open=false,stacked=true": {
       "model": "iuce:block/crate_pink_rack"
     },
-    "color=gray,stacked=false": {
+    "color=pink,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open"
+    },
+    "color=pink,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open"
+    },
+    "color=gray,open=false,stacked=false": {
       "model": "iuce:block/crate_gray"
     },
-    "color=gray,stacked=true": {
+    "color=gray,open=false,stacked=true": {
       "model": "iuce:block/crate_gray_rack"
     },
-    "color=light_gray,stacked=false": {
+    "color=gray,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open"
+    },
+    "color=gray,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open"
+    },
+    "color=light_gray,open=false,stacked=false": {
       "model": "iuce:block/crate_light_gray"
     },
-    "color=light_gray,stacked=true": {
+    "color=light_gray,open=false,stacked=true": {
       "model": "iuce:block/crate_light_gray_rack"
     },
-    "color=cyan,stacked=false": {
+    "color=light_gray,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open"
+    },
+    "color=light_gray,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open"
+    },
+    "color=cyan,open=false,stacked=false": {
       "model": "iuce:block/crate_cyan"
     },
-    "color=cyan,stacked=true": {
+    "color=cyan,open=false,stacked=true": {
       "model": "iuce:block/crate_cyan_rack"
     },
-    "color=purple,stacked=false": {
+    "color=cyan,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open"
+    },
+    "color=cyan,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open"
+    },
+    "color=purple,open=false,stacked=false": {
       "model": "iuce:block/crate_purple"
     },
-    "color=purple,stacked=true": {
+    "color=purple,open=false,stacked=true": {
       "model": "iuce:block/crate_purple_rack"
     },
-    "color=blue,stacked=false": {
+    "color=purple,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open"
+    },
+    "color=purple,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open"
+    },
+    "color=blue,open=false,stacked=false": {
       "model": "iuce:block/crate_blue"
     },
-    "color=blue,stacked=true": {
+    "color=blue,open=false,stacked=true": {
       "model": "iuce:block/crate_blue_rack"
     },
-    "color=brown,stacked=false": {
+    "color=blue,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open"
+    },
+    "color=blue,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open"
+    },
+    "color=brown,open=false,stacked=false": {
       "model": "iuce:block/crate_brown"
     },
-    "color=brown,stacked=true": {
+    "color=brown,open=false,stacked=true": {
       "model": "iuce:block/crate_brown_rack"
     },
-    "color=green,stacked=false": {
+    "color=brown,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open"
+    },
+    "color=brown,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open"
+    },
+    "color=green,open=false,stacked=false": {
       "model": "iuce:block/crate_green"
     },
-    "color=green,stacked=true": {
+    "color=green,open=false,stacked=true": {
       "model": "iuce:block/crate_green_rack"
     },
-    "color=red,stacked=false": {
+    "color=green,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open"
+    },
+    "color=green,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open"
+    },
+    "color=red,open=false,stacked=false": {
       "model": "iuce:block/crate_red"
     },
-    "color=red,stacked=true": {
+    "color=red,open=false,stacked=true": {
       "model": "iuce:block/crate_red_rack"
     },
-    "color=black,stacked=false": {
+    "color=red,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open"
+    },
+    "color=red,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open"
+    },
+    "color=black,open=false,stacked=false": {
       "model": "iuce:block/crate_black"
     },
-    "color=black,stacked=true": {
+    "color=black,open=false,stacked=true": {
       "model": "iuce:block/crate_black_rack"
+    },
+    "color=black,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open"
+    },
+    "color=black,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open"
     }
   }
 }

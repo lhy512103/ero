@@ -57,8 +57,6 @@ public class ModCreativeModeTabs {
         ModBlockItems.PLANTER,
         // 公用工程
         ModBlockItems.BOILER,
-        ModBlockItems.TOY_BRICK,
-        ModBlockItems.CRATE,
         ModBlockItems.ROCK_SALT_ORE,
         ModBlockItems.LIMESTONE,
         ModBlockItems.AIR_COMPRESSOR,
@@ -340,6 +338,15 @@ public class ModCreativeModeTabs {
             .icon(() -> ModBlockItems.GENERATOR.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 MACHINES.forEach(output::accept);
+                // one stack per dye colour so every colour shows in the tab and in JEI
+                for (var coloured : List.of(ModBlockItems.TOY_BRICK, ModBlockItems.CRATE)) {
+                    for (net.minecraft.world.item.DyeColor dye : net.minecraft.world.item.DyeColor.values()) {
+                        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(coloured.get());
+                        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                            net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(block.ColoredPlasticBlock.COLOR, dye));
+                        output.accept(stack);
+                    }
+                }
                 machine.process.ProcessMachines.all().forEach(entry -> output.accept(entry.item()));
             })
             .build()

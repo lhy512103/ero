@@ -1,8 +1,10 @@
 {
-  "format_version": "26.3",
-  "credit": "Made with Blockbench",
+  "parent": "minecraft:block/block",
   "textures": {
-    "0": "iuce:block/crate_white"
+    "side": "iuce:block/crate",
+    "top": "iuce:block/crate_top",
+    "inner": "iuce:block/crate_inner",
+    "particle": "#side"
   },
   "elements": [
     {
@@ -25,7 +27,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "east": {
           "uv": [
@@ -34,7 +36,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "south": {
           "uv": [
@@ -43,7 +45,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "west": {
           "uv": [
@@ -52,7 +54,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "up": {
           "uv": [
@@ -61,7 +63,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#top"
         },
         "down": {
           "uv": [
@@ -70,10 +72,9 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         }
       }
     }
-  ],
-  "parent": "minecraft:block/block"
+  ]
 }

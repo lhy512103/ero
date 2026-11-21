@@ -6,6 +6,7 @@
     "iuce:aluminium_ore",
     "iuce:deep_tin_ore",
     "iuce:deep_zinc_ore",
-    "iuce:deep_aluminium_ore"
+    "iuce:deep_aluminium_ore",
+    "iuce:rock_salt_ore"
   ]
 }

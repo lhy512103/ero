@@ -1,7 +1,10 @@
 {
   "parent": "iuce:block/crate",
   "textures": {
-    "0": "iuce:block/crate_pink"
+    "side": "iuce:block/crate_pink",
+    "top": "iuce:block/crate_pink_top",
+    "inner": "iuce:block/crate_pink_inner",
+    "particle": "#side"
   },
   "elements": [
     {
@@ -24,7 +27,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "east": {
           "uv": [
@@ -33,7 +36,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "south": {
           "uv": [
@@ -42,7 +45,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "west": {
           "uv": [
@@ -51,7 +54,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         },
         "up": {
           "uv": [
@@ -60,7 +63,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#top"
         },
         "down": {
           "uv": [
@@ -69,7 +72,7 @@
             16,
             16
           ],
-          "texture": "#0"
+          "texture": "#side"
         }
       }
     },

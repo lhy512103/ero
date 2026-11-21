@@ -2,7 +2,8 @@
   "format_version": "26.3",
   "credit": "Made with Blockbench",
   "textures": {
-    "0": "iuce:block/toy_brick_white"
+    "0": "iuce:block/toy_brick_white",
+    "particle": "#0"
   },
   "elements": [
     {
