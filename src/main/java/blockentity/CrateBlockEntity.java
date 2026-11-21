@@ -59,7 +59,10 @@ public class CrateBlockEntity extends DispenserBlockEntity {
     }
     private void playSound(SoundEvent sound) {
         if (level == null) return;
-        level.playSound(null, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5,
-            sound, SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+        net.minecraft.core.Direction facing = getBlockState().getValue(CrateBlock.FACING);
+        double x = worldPosition.getX() + 0.5 + facing.getStepX() / 2.0;
+        double y = worldPosition.getY() + 0.5 + facing.getStepY() / 2.0;
+        double z = worldPosition.getZ() + 0.5 + facing.getStepZ() / 2.0;
+        level.playSound(null, x, y, z, sound, SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() * 0.1F + 0.9F);
     }
 }

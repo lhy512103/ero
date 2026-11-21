@@ -1,0 +1,6 @@
+{
+  "parent": "iuce:block/toy_brick_edge_south",
+  "textures": {
+    "0": "iuce:block/toy_brick_gray"
+  }
+}

@@ -75,7 +75,7 @@ public class ModBlocks {
             .noOcclusion();
     }
 
-    public static final DeferredBlock<ColoredPlasticBlock> TOY_BRICK = BLOCKS.registerBlock("toy_brick", ColoredPlasticBlock::new, metalBlockProperties());
+    public static final DeferredBlock<ToyBrickBlock> TOY_BRICK = BLOCKS.registerBlock("toy_brick", ToyBrickBlock::new, () -> metalBlockProperties().get().noOcclusion());
     public static final DeferredBlock<CrateBlock> CRATE = BLOCKS.registerBlock("crate", CrateBlock::new, metalBlockProperties());
     public static final DeferredBlock<Block> ROCK_SALT_ORE = BLOCKS.registerSimpleBlock("rock_salt_ore", oreProperties());
     public static final DeferredBlock<Block> LIMESTONE = BLOCKS.registerSimpleBlock("limestone", softStoneProperties());

@@ -47,7 +47,7 @@ public class CraftingRecipeSerializer {
                 for (Ingredient ingredient : recipe.getInputs()) {
                     Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
                 }
-                ItemStack.STREAM_CODEC.encode(buf, recipe.getOutput());
+                ItemStackTemplate.STREAM_CODEC.encode(buf, recipe.getOutputTemplate());
             },
             buf -> {
                 boolean shaped = buf.readBoolean();
@@ -62,19 +62,17 @@ public class CraftingRecipeSerializer {
                     for (int i = 0; i < inputSize; i++) {
                         inputs.add(Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
                     }
-                    ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
+                    ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
                     return CraftingRecipe.createShaped(inputs, emptySlots, gridW, gridH,
-                        new ItemStackTemplate(output.getItem(), output.getCount()),
-                        recipeType, () -> serializer);
+                        output, recipeType, () -> serializer);
                 }
                 int size = buf.readVarInt();
                 List<Ingredient> inputs = new ArrayList<>();
                 for (int i = 0; i < size; i++) {
                     inputs.add(Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
                 }
-                ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
-                return CraftingRecipe.create(inputs, new ItemStackTemplate(output.getItem(), output.getCount()),
-                    recipeType, () -> serializer);
+                ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
+                return CraftingRecipe.create(inputs, output, recipeType, () -> serializer);
             }
         );
     }

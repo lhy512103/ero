@@ -1,0 +1,16 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:crate",
+    "minecraft:gray_dye"
+  ],
+  "result": {
+    "id": "iuce:crate",
+    "count": 1,
+    "components": {
+      "minecraft:block_state": {
+        "color": "gray"
+      }
+    }
+  }
+}

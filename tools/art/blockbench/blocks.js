@@ -87,22 +87,20 @@
         g.rect(14, 1, 15, 15, t.lo); g.rect(1, 14, 15, 15, t.lo);
     }
 
-    // A glossy studded brick; every face shares this texture so it stays uniform at the edges.
+    // A glossy studded brick: uniform plastic interior for seamless connected tiling, with crisp bevelled borders.
     function brick(g, base) {
         const lum = (base[0] * 0.3 + base[1] * 0.59 + base[2] * 0.11) / 255;
         const hi = light(base, lum > 0.8 ? 0.0 : 0.28);
         const lo = dark(base, lum > 0.8 ? 0.16 : 0.22);
         const edge = dark(base, lum > 0.8 ? 0.28 : 0.4);
+        const r = A.rng(73);
         for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-            const t = (x + y) / 30;
-            g.px(x, y, mix(light(base, lum > 0.8 ? 0 : 0.08), dark(base, 0.08), t));
+            const v = r();
+            g.px(x, y, v < 0.2 ? dark(base, 0.025) : v > 0.8 ? light(base, 0.025) : base);
         }
         g.rect(0, 0, 15, 0, hi); g.rect(0, 0, 0, 15, hi);
         g.rect(0, 15, 15, 15, edge); g.rect(15, 0, 15, 15, edge);
         g.rect(1, 14, 14, 14, lo); g.rect(14, 1, 14, 14, lo);
-        // the gloss streak of injection-moulded ABS
-        for (let i = 0; i < 4; i++) g.px(2 + i, 4 - i, light(base, 0.5));
-        g.px(2, 2, light(base, 0.6));
     }
 
     function stone(g, seed, base, spots) {

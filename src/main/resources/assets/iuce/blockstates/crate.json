@@ -1,196 +1,1668 @@
 {
   "variants": {
-    "color=white,open=false,stacked=false": {
+    "color=white,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_white"
     },
-    "color=white,open=false,stacked=true": {
+    "color=white,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_white_rack"
     },
-    "color=white,open=true,stacked=false": {
+    "color=white,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_white_open"
     },
-    "color=white,open=true,stacked=true": {
+    "color=white,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_white_open"
     },
-    "color=orange,open=false,stacked=false": {
+    "color=white,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_white",
+      "x": 180
+    },
+    "color=white,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_white",
+      "x": 180
+    },
+    "color=white,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open",
+      "x": 180
+    },
+    "color=white,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open",
+      "x": 180
+    },
+    "color=white,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_white",
+      "x": 90
+    },
+    "color=white,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_white",
+      "x": 90
+    },
+    "color=white,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90
+    },
+    "color=white,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90
+    },
+    "color=white,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 90
+    },
+    "color=white,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 90
+    },
+    "color=white,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=white,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=white,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 180
+    },
+    "color=white,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 180
+    },
+    "color=white,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=white,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=white,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 270
+    },
+    "color=white,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_white",
+      "x": 90,
+      "y": 270
+    },
+    "color=white,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=white,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_white_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=orange,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_orange"
     },
-    "color=orange,open=false,stacked=true": {
+    "color=orange,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_orange_rack"
     },
-    "color=orange,open=true,stacked=false": {
+    "color=orange,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_orange_open"
     },
-    "color=orange,open=true,stacked=true": {
+    "color=orange,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_orange_open"
     },
-    "color=magenta,open=false,stacked=false": {
+    "color=orange,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_orange",
+      "x": 180
+    },
+    "color=orange,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_orange",
+      "x": 180
+    },
+    "color=orange,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 180
+    },
+    "color=orange,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 180
+    },
+    "color=orange,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_orange",
+      "x": 90
+    },
+    "color=orange,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_orange",
+      "x": 90
+    },
+    "color=orange,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90
+    },
+    "color=orange,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90
+    },
+    "color=orange,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 90
+    },
+    "color=orange,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 90
+    },
+    "color=orange,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=orange,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=orange,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 180
+    },
+    "color=orange,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 180
+    },
+    "color=orange,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=orange,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=orange,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 270
+    },
+    "color=orange,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_orange",
+      "x": 90,
+      "y": 270
+    },
+    "color=orange,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=orange,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_orange_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=magenta,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_magenta"
     },
-    "color=magenta,open=false,stacked=true": {
+    "color=magenta,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_magenta_rack"
     },
-    "color=magenta,open=true,stacked=false": {
+    "color=magenta,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_magenta_open"
     },
-    "color=magenta,open=true,stacked=true": {
+    "color=magenta,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_magenta_open"
     },
-    "color=light_blue,open=false,stacked=false": {
+    "color=magenta,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_magenta",
+      "x": 180
+    },
+    "color=magenta,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_magenta",
+      "x": 180
+    },
+    "color=magenta,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 180
+    },
+    "color=magenta,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 180
+    },
+    "color=magenta,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90
+    },
+    "color=magenta,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90
+    },
+    "color=magenta,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90
+    },
+    "color=magenta,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90
+    },
+    "color=magenta,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 90
+    },
+    "color=magenta,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 90
+    },
+    "color=magenta,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=magenta,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=magenta,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 180
+    },
+    "color=magenta,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 180
+    },
+    "color=magenta,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=magenta,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=magenta,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 270
+    },
+    "color=magenta,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_magenta",
+      "x": 90,
+      "y": 270
+    },
+    "color=magenta,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=magenta,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_magenta_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_blue,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_light_blue"
     },
-    "color=light_blue,open=false,stacked=true": {
+    "color=light_blue,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_light_blue_rack"
     },
-    "color=light_blue,open=true,stacked=false": {
+    "color=light_blue,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_light_blue_open"
     },
-    "color=light_blue,open=true,stacked=true": {
+    "color=light_blue,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_light_blue_open"
     },
-    "color=yellow,open=false,stacked=false": {
+    "color=light_blue,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 180
+    },
+    "color=light_blue,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 180
+    },
+    "color=light_blue,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 180
+    },
+    "color=light_blue,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 180
+    },
+    "color=light_blue,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90
+    },
+    "color=light_blue,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90
+    },
+    "color=light_blue,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90
+    },
+    "color=light_blue,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90
+    },
+    "color=light_blue,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_blue,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_blue,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_blue,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_blue,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_blue,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_blue,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_blue,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_blue,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_blue,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_blue",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_blue,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_blue,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_blue_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=yellow,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_yellow"
     },
-    "color=yellow,open=false,stacked=true": {
+    "color=yellow,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_yellow_rack"
     },
-    "color=yellow,open=true,stacked=false": {
+    "color=yellow,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_yellow_open"
     },
-    "color=yellow,open=true,stacked=true": {
+    "color=yellow,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_yellow_open"
     },
-    "color=lime,open=false,stacked=false": {
+    "color=yellow,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_yellow",
+      "x": 180
+    },
+    "color=yellow,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_yellow",
+      "x": 180
+    },
+    "color=yellow,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 180
+    },
+    "color=yellow,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 180
+    },
+    "color=yellow,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90
+    },
+    "color=yellow,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90
+    },
+    "color=yellow,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90
+    },
+    "color=yellow,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90
+    },
+    "color=yellow,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 90
+    },
+    "color=yellow,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 90
+    },
+    "color=yellow,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=yellow,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=yellow,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 180
+    },
+    "color=yellow,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 180
+    },
+    "color=yellow,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=yellow,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=yellow,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 270
+    },
+    "color=yellow,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_yellow",
+      "x": 90,
+      "y": 270
+    },
+    "color=yellow,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=yellow,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_yellow_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=lime,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_lime"
     },
-    "color=lime,open=false,stacked=true": {
+    "color=lime,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_lime_rack"
     },
-    "color=lime,open=true,stacked=false": {
+    "color=lime,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_lime_open"
     },
-    "color=lime,open=true,stacked=true": {
+    "color=lime,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_lime_open"
     },
-    "color=pink,open=false,stacked=false": {
+    "color=lime,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_lime",
+      "x": 180
+    },
+    "color=lime,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_lime",
+      "x": 180
+    },
+    "color=lime,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 180
+    },
+    "color=lime,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 180
+    },
+    "color=lime,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_lime",
+      "x": 90
+    },
+    "color=lime,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_lime",
+      "x": 90
+    },
+    "color=lime,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90
+    },
+    "color=lime,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90
+    },
+    "color=lime,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 90
+    },
+    "color=lime,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 90
+    },
+    "color=lime,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=lime,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=lime,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 180
+    },
+    "color=lime,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 180
+    },
+    "color=lime,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=lime,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=lime,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 270
+    },
+    "color=lime,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_lime",
+      "x": 90,
+      "y": 270
+    },
+    "color=lime,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=lime,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_lime_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=pink,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_pink"
     },
-    "color=pink,open=false,stacked=true": {
+    "color=pink,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_pink_rack"
     },
-    "color=pink,open=true,stacked=false": {
+    "color=pink,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_pink_open"
     },
-    "color=pink,open=true,stacked=true": {
+    "color=pink,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_pink_open"
     },
-    "color=gray,open=false,stacked=false": {
+    "color=pink,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_pink",
+      "x": 180
+    },
+    "color=pink,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_pink",
+      "x": 180
+    },
+    "color=pink,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 180
+    },
+    "color=pink,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 180
+    },
+    "color=pink,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_pink",
+      "x": 90
+    },
+    "color=pink,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_pink",
+      "x": 90
+    },
+    "color=pink,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90
+    },
+    "color=pink,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90
+    },
+    "color=pink,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 90
+    },
+    "color=pink,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 90
+    },
+    "color=pink,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=pink,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=pink,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 180
+    },
+    "color=pink,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 180
+    },
+    "color=pink,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=pink,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=pink,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 270
+    },
+    "color=pink,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_pink",
+      "x": 90,
+      "y": 270
+    },
+    "color=pink,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=pink,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_pink_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=gray,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_gray"
     },
-    "color=gray,open=false,stacked=true": {
+    "color=gray,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_gray_rack"
     },
-    "color=gray,open=true,stacked=false": {
+    "color=gray,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_gray_open"
     },
-    "color=gray,open=true,stacked=true": {
+    "color=gray,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_gray_open"
     },
-    "color=light_gray,open=false,stacked=false": {
+    "color=gray,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_gray",
+      "x": 180
+    },
+    "color=gray,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_gray",
+      "x": 180
+    },
+    "color=gray,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 180
+    },
+    "color=gray,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 180
+    },
+    "color=gray,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_gray",
+      "x": 90
+    },
+    "color=gray,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_gray",
+      "x": 90
+    },
+    "color=gray,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90
+    },
+    "color=gray,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90
+    },
+    "color=gray,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 90
+    },
+    "color=gray,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 90
+    },
+    "color=gray,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=gray,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=gray,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 180
+    },
+    "color=gray,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 180
+    },
+    "color=gray,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=gray,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=gray,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 270
+    },
+    "color=gray,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_gray",
+      "x": 90,
+      "y": 270
+    },
+    "color=gray,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=gray,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_gray_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_gray,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_light_gray"
     },
-    "color=light_gray,open=false,stacked=true": {
+    "color=light_gray,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_light_gray_rack"
     },
-    "color=light_gray,open=true,stacked=false": {
+    "color=light_gray,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_light_gray_open"
     },
-    "color=light_gray,open=true,stacked=true": {
+    "color=light_gray,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_light_gray_open"
     },
-    "color=cyan,open=false,stacked=false": {
+    "color=light_gray,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 180
+    },
+    "color=light_gray,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 180
+    },
+    "color=light_gray,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 180
+    },
+    "color=light_gray,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 180
+    },
+    "color=light_gray,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90
+    },
+    "color=light_gray,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90
+    },
+    "color=light_gray,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90
+    },
+    "color=light_gray,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90
+    },
+    "color=light_gray,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_gray,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_gray,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_gray,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=light_gray,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_gray,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_gray,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_gray,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=light_gray,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_gray,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_light_gray",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_gray,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=light_gray,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_light_gray_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=cyan,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_cyan"
     },
-    "color=cyan,open=false,stacked=true": {
+    "color=cyan,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_cyan_rack"
     },
-    "color=cyan,open=true,stacked=false": {
+    "color=cyan,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_cyan_open"
     },
-    "color=cyan,open=true,stacked=true": {
+    "color=cyan,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_cyan_open"
     },
-    "color=purple,open=false,stacked=false": {
+    "color=cyan,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_cyan",
+      "x": 180
+    },
+    "color=cyan,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_cyan",
+      "x": 180
+    },
+    "color=cyan,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 180
+    },
+    "color=cyan,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 180
+    },
+    "color=cyan,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90
+    },
+    "color=cyan,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90
+    },
+    "color=cyan,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90
+    },
+    "color=cyan,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90
+    },
+    "color=cyan,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 90
+    },
+    "color=cyan,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 90
+    },
+    "color=cyan,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=cyan,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=cyan,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 180
+    },
+    "color=cyan,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 180
+    },
+    "color=cyan,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=cyan,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=cyan,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 270
+    },
+    "color=cyan,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_cyan",
+      "x": 90,
+      "y": 270
+    },
+    "color=cyan,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=cyan,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_cyan_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=purple,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_purple"
     },
-    "color=purple,open=false,stacked=true": {
+    "color=purple,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_purple_rack"
     },
-    "color=purple,open=true,stacked=false": {
+    "color=purple,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_purple_open"
     },
-    "color=purple,open=true,stacked=true": {
+    "color=purple,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_purple_open"
     },
-    "color=blue,open=false,stacked=false": {
+    "color=purple,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_purple",
+      "x": 180
+    },
+    "color=purple,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_purple",
+      "x": 180
+    },
+    "color=purple,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 180
+    },
+    "color=purple,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 180
+    },
+    "color=purple,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_purple",
+      "x": 90
+    },
+    "color=purple,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_purple",
+      "x": 90
+    },
+    "color=purple,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90
+    },
+    "color=purple,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90
+    },
+    "color=purple,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 90
+    },
+    "color=purple,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 90
+    },
+    "color=purple,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=purple,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=purple,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 180
+    },
+    "color=purple,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 180
+    },
+    "color=purple,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=purple,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=purple,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 270
+    },
+    "color=purple,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_purple",
+      "x": 90,
+      "y": 270
+    },
+    "color=purple,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=purple,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_purple_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=blue,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_blue"
     },
-    "color=blue,open=false,stacked=true": {
+    "color=blue,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_blue_rack"
     },
-    "color=blue,open=true,stacked=false": {
+    "color=blue,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_blue_open"
     },
-    "color=blue,open=true,stacked=true": {
+    "color=blue,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_blue_open"
     },
-    "color=brown,open=false,stacked=false": {
+    "color=blue,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_blue",
+      "x": 180
+    },
+    "color=blue,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_blue",
+      "x": 180
+    },
+    "color=blue,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 180
+    },
+    "color=blue,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 180
+    },
+    "color=blue,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_blue",
+      "x": 90
+    },
+    "color=blue,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_blue",
+      "x": 90
+    },
+    "color=blue,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90
+    },
+    "color=blue,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90
+    },
+    "color=blue,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 90
+    },
+    "color=blue,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 90
+    },
+    "color=blue,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=blue,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=blue,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 180
+    },
+    "color=blue,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 180
+    },
+    "color=blue,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=blue,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=blue,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 270
+    },
+    "color=blue,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_blue",
+      "x": 90,
+      "y": 270
+    },
+    "color=blue,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=blue,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_blue_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=brown,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_brown"
     },
-    "color=brown,open=false,stacked=true": {
+    "color=brown,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_brown_rack"
     },
-    "color=brown,open=true,stacked=false": {
+    "color=brown,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_brown_open"
     },
-    "color=brown,open=true,stacked=true": {
+    "color=brown,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_brown_open"
     },
-    "color=green,open=false,stacked=false": {
+    "color=brown,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_brown",
+      "x": 180
+    },
+    "color=brown,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_brown",
+      "x": 180
+    },
+    "color=brown,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 180
+    },
+    "color=brown,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 180
+    },
+    "color=brown,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_brown",
+      "x": 90
+    },
+    "color=brown,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_brown",
+      "x": 90
+    },
+    "color=brown,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90
+    },
+    "color=brown,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90
+    },
+    "color=brown,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 90
+    },
+    "color=brown,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 90
+    },
+    "color=brown,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=brown,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=brown,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 180
+    },
+    "color=brown,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 180
+    },
+    "color=brown,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=brown,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=brown,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 270
+    },
+    "color=brown,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_brown",
+      "x": 90,
+      "y": 270
+    },
+    "color=brown,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=brown,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_brown_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=green,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_green"
     },
-    "color=green,open=false,stacked=true": {
+    "color=green,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_green_rack"
     },
-    "color=green,open=true,stacked=false": {
+    "color=green,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_green_open"
     },
-    "color=green,open=true,stacked=true": {
+    "color=green,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_green_open"
     },
-    "color=red,open=false,stacked=false": {
+    "color=green,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_green",
+      "x": 180
+    },
+    "color=green,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_green",
+      "x": 180
+    },
+    "color=green,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open",
+      "x": 180
+    },
+    "color=green,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open",
+      "x": 180
+    },
+    "color=green,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_green",
+      "x": 90
+    },
+    "color=green,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_green",
+      "x": 90
+    },
+    "color=green,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90
+    },
+    "color=green,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90
+    },
+    "color=green,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 90
+    },
+    "color=green,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 90
+    },
+    "color=green,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=green,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=green,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 180
+    },
+    "color=green,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 180
+    },
+    "color=green,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=green,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=green,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 270
+    },
+    "color=green,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_green",
+      "x": 90,
+      "y": 270
+    },
+    "color=green,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=green,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_green_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=red,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_red"
     },
-    "color=red,open=false,stacked=true": {
+    "color=red,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_red_rack"
     },
-    "color=red,open=true,stacked=false": {
+    "color=red,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_red_open"
     },
-    "color=red,open=true,stacked=true": {
+    "color=red,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_red_open"
     },
-    "color=black,open=false,stacked=false": {
+    "color=red,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_red",
+      "x": 180
+    },
+    "color=red,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_red",
+      "x": 180
+    },
+    "color=red,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open",
+      "x": 180
+    },
+    "color=red,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open",
+      "x": 180
+    },
+    "color=red,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_red",
+      "x": 90
+    },
+    "color=red,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_red",
+      "x": 90
+    },
+    "color=red,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90
+    },
+    "color=red,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90
+    },
+    "color=red,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 90
+    },
+    "color=red,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 90
+    },
+    "color=red,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=red,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=red,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 180
+    },
+    "color=red,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 180
+    },
+    "color=red,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=red,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=red,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 270
+    },
+    "color=red,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_red",
+      "x": 90,
+      "y": 270
+    },
+    "color=red,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=red,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_red_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=black,facing=up,open=false,stacked=false": {
       "model": "iuce:block/crate_black"
     },
-    "color=black,open=false,stacked=true": {
+    "color=black,facing=up,open=false,stacked=true": {
       "model": "iuce:block/crate_black_rack"
     },
-    "color=black,open=true,stacked=false": {
+    "color=black,facing=up,open=true,stacked=false": {
       "model": "iuce:block/crate_black_open"
     },
-    "color=black,open=true,stacked=true": {
+    "color=black,facing=up,open=true,stacked=true": {
       "model": "iuce:block/crate_black_open"
+    },
+    "color=black,facing=down,open=false,stacked=false": {
+      "model": "iuce:block/crate_black",
+      "x": 180
+    },
+    "color=black,facing=down,open=false,stacked=true": {
+      "model": "iuce:block/crate_black",
+      "x": 180
+    },
+    "color=black,facing=down,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open",
+      "x": 180
+    },
+    "color=black,facing=down,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open",
+      "x": 180
+    },
+    "color=black,facing=north,open=false,stacked=false": {
+      "model": "iuce:block/crate_black",
+      "x": 90
+    },
+    "color=black,facing=north,open=false,stacked=true": {
+      "model": "iuce:block/crate_black",
+      "x": 90
+    },
+    "color=black,facing=north,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90
+    },
+    "color=black,facing=north,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90
+    },
+    "color=black,facing=east,open=false,stacked=false": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 90
+    },
+    "color=black,facing=east,open=false,stacked=true": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 90
+    },
+    "color=black,facing=east,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=black,facing=east,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 90
+    },
+    "color=black,facing=south,open=false,stacked=false": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 180
+    },
+    "color=black,facing=south,open=false,stacked=true": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 180
+    },
+    "color=black,facing=south,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=black,facing=south,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 180
+    },
+    "color=black,facing=west,open=false,stacked=false": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 270
+    },
+    "color=black,facing=west,open=false,stacked=true": {
+      "model": "iuce:block/crate_black",
+      "x": 90,
+      "y": 270
+    },
+    "color=black,facing=west,open=true,stacked=false": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 270
+    },
+    "color=black,facing=west,open=true,stacked=true": {
+      "model": "iuce:block/crate_black_open",
+      "x": 90,
+      "y": 270
     }
   }
 }

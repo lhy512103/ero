@@ -131,6 +131,9 @@
 125. Improved: Crates are redrawn with ribs, a hand slot and a visible interior when open.
 126. Improved: The brass ingot texture is redrawn.
 127. Improved: Rock salt ore now needs a stone pickaxe or better to drop.
+128. Improved: Crates can be placed facing any of the six directions and open like a barrel without an overhanging lid.
+129. Improved: Studded bricks can be placed in all six directions and merge seamlessly with adjacent bricks of the same colour and facing.
+130. Added: Crafting dyeing recipes for all 16 colours of crates and studded bricks, keeping crate contents intact when re-dyed.
 
 ### 中文
 
@@ -261,3 +264,6 @@
 125. 优化：重绘周转箱，增加筋条、提手孔，打开时可看到内部。
 126. 优化：重绘黄铜锭贴图。
 127. 优化：盐岩矿需要石镐或更好的镐才能掉落。
+128. 优化：周转箱支持六向摆放，并采用类似木桶的开盖表现。
+129. 优化：积木支持六向摆放，相邻同色同朝向积木会自动无缝连接纹理。
+130. 新增：全部 16 种颜色的周转箱与积木染色合成配方，周转箱染色时保留内部物品。
