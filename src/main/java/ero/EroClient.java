@@ -90,6 +90,7 @@ public class EroClient {
         event.register(machine.process.ProcessMachines.MENU.get(), client.gui.ProcessMachineScreen::new);
         event.register(ModMenus.GENERATOR.get(), GeneratorScreen::new);
         event.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
+        event.register(ModMenus.CRATE.get(), client.gui.CrateScreen::new);
         event.register(ModMenus.COMPRESSOR.get(), CompressorScreen::new);
         event.register(ModMenus.METAL_FORMER.get(), machine.metal_former.screen.MetalFormerScreen::new);
         event.register(ModMenus.EXTRACTOR.get(), ExtractorScreen::new);

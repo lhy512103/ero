@@ -1,6 +1,0 @@
-{
-  "parent": "iuce:block/toy_brick_edge_west",
-  "textures": {
-    "0": "iuce:block/toy_brick_pink"
-  }
-}

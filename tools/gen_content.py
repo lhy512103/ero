@@ -175,14 +175,24 @@ every = sorted(by_output["main"] + by_output["regression"], key=lambda machine: 
 for machine in every:
     generate(machine)
 
-# mineable/pickaxe, keeping the existing order and adding only missing ids
+# mineable/pickaxe: main only gets main machines (a missing regression-only id like test_press
+# would cause Minecraft to reject the entire minecraft:mineable/pickaxe tag in-game).
+regression_ids = {"iuce:" + machine["id"] for machine in by_output["regression"]}
+main_machines = sorted(by_output["main"], key=lambda machine: machine["id"])
 pickaxe_path = MAIN + "data/minecraft/tags/block/mineable/pickaxe.json"
 pickaxe = load(ROOT + "/" + pickaxe_path)
-present = pickaxe.get("values", [])
-absent = ["iuce:" + machine["id"] for machine in every if "iuce:" + machine["id"] not in present]
-if absent:
+present = [entry for entry in pickaxe.get("values", []) if entry not in regression_ids]
+absent = ["iuce:" + machine["id"] for machine in main_machines if "iuce:" + machine["id"] not in present]
+if len(present) != len(pickaxe.get("values", [])) or absent:
     pickaxe["values"] = present + absent
     write(pickaxe_path, pickaxe)
+if by_output["regression"]:
+    reg_pickaxe_path = REGRESSION + "data/minecraft/tags/block/mineable/pickaxe.json"
+    reg_machines = sorted(by_output["regression"], key=lambda machine: machine["id"])
+    write(reg_pickaxe_path, {
+        "replace": False,
+        "values": ["iuce:" + machine["id"] for machine in reg_machines],
+    })
 
 # names: only fill in what the language files do not have yet
 for code, field in (("zh_cn", "name_zh"), ("en_us", "name_en")):

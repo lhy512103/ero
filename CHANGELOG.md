@@ -134,6 +134,10 @@
 128. Improved: Crates can be placed facing any of the six directions and open like a barrel without an overhanging lid.
 129. Improved: Studded bricks can be placed in all six directions and merge seamlessly with adjacent bricks of the same colour and facing.
 130. Added: Crafting dyeing recipes for all 16 colours of crates and studded bricks, keeping crate contents intact when re-dyed.
+131. Improved: Placing a studded brick or crate against another inherits its facing unless sneaking, making rows and sheets align naturally.
+132. Fixed: Middle-click picking, Jade previews and break particles for coloured bricks and crates now match their actual colour.
+133. Fixed: Pickaxe mining tags now load properly for all machines and blocks, and mulched farmland mines faster with a shovel; missing break particles on cables and formed plant parts are restored.
+134. Improved: Crates now hold 27 slots with a custom industrial GUI matching the electric furnace and compressor panels.
 
 ### 中文
 
@@ -267,3 +271,7 @@
 128. 优化：周转箱支持六向摆放，并采用类似木桶的开盖表现。
 129. 优化：积木支持六向摆放，相邻同色同朝向积木会自动无缝连接纹理。
 130. 新增：全部 16 种颜色的周转箱与积木染色合成配方，周转箱染色时保留内部物品。
+131. 优化：对着已有积木或周转箱摆放时自动沿用其朝向（潜行时按点击面或视角转向），拼装成排或大片时更自然。
+132. 修复：彩色积木与周转箱的鼠标中键拾取、Jade 提示图标及破坏粒子始终显示为白色的问题。
+133. 修复：因测试方块混入挖掘标签导致全模组机器与方块镐子挖掘失效的问题，补全地膜耕地铲掘标签及线缆、成型多方块零件的破坏粒子。
+134. 优化：周转箱扩容至 27 格，并更换为与电炉、压缩机风格一致的工业面板界面。

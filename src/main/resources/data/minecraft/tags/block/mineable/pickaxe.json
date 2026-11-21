@@ -86,7 +86,6 @@
     "iuce:lamp",
     "iuce:converter",
     "iuce:builder",
-    "iuce:test_press",
     "iuce:boiler",
     "iuce:cooling_tower",
     "iuce:creative_utility_source",

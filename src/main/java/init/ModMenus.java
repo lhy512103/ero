@@ -105,4 +105,7 @@ public class ModMenus {
             (IContainerFactory<IndustrialWorkbenchMenu>) (id, inv, data) -> new IndustrialWorkbenchMenu(id, inv,
                 (machine.workbench.IndustrialWorkbenchBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
         ));
+
+    public static final Supplier<MenuType<block.CrateMenu>> CRATE =
+        MENUS.register("crate", () -> new MenuType<>(block.CrateMenu::new, net.minecraft.world.flag.FeatureFlags.VANILLA_SET));
 }

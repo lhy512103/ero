@@ -1,21 +1,33 @@
 package blockentity;
 
 import block.CrateBlock;
+import block.CrateMenu;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.ContainerUser;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
-public class CrateBlockEntity extends DispenserBlockEntity {
+public class CrateBlockEntity extends RandomizableContainerBlockEntity {
+    public static final int CONTAINER_SIZE = CrateMenu.CRATE_SLOTS;
+
+    private NonNullList<ItemStack> items = NonNullList.withSize(CONTAINER_SIZE, ItemStack.EMPTY);
+
     // Same open/close bookkeeping as the vanilla barrel: the lid opens for the first viewer and closes after the last.
     private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
         @Override protected void onOpen(Level level, BlockPos pos, BlockState state) {
@@ -33,9 +45,54 @@ public class CrateBlockEntity extends DispenserBlockEntity {
         }
     };
 
-    public CrateBlockEntity(BlockPos pos, BlockState state) { super(ModBlockEntities.CRATE.get(), pos, state); }
-    @Override protected Component getDefaultName() { return getBlockState().getBlock().getName(); }
-    @Override public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+    public CrateBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.CRATE.get(), pos, state);
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        if (!this.trySaveLootTable(output)) {
+            ContainerHelper.saveAllItems(output, this.items);
+        }
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        if (!this.tryLoadLootTable(input)) {
+            ContainerHelper.loadAllItems(input, this.items);
+        }
+    }
+
+    @Override
+    public int getContainerSize() {
+        return CONTAINER_SIZE;
+    }
+
+    @Override
+    protected NonNullList<ItemStack> getItems() {
+        return this.items;
+    }
+
+    @Override
+    protected void setItems(NonNullList<ItemStack> items) {
+        this.items = items;
+    }
+
+    @Override
+    protected Component getDefaultName() {
+        return getBlockState().getBlock().getName();
+    }
+
+    @Override
+    protected AbstractContainerMenu createMenu(int containerId, Inventory inventory) {
+        return new CrateMenu(containerId, inventory, this);
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         // The loot table copies the container component onto the crate.
     }
 

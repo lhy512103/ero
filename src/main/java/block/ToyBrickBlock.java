@@ -83,9 +83,19 @@ public class ToyBrickBlock extends ColoredPlasticBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockItemStateProperties props = context.getItemInHand().get(DataComponents.BLOCK_STATE);
         DyeColor color = props != null ? props.get(COLOR) : null;
+        Direction facing = context.getClickedFace();
+        // When placing against an existing brick without sneaking, inherit its orientation so
+        // adjacent bricks align naturally into flat sheets/walls instead of flipping sideways.
+        if (!context.isSecondaryUseActive()) {
+            BlockPos clickedOn = context.getClickedPos().relative(context.getClickedFace().getOpposite());
+            BlockState clickedState = context.getLevel().getBlockState(clickedOn);
+            if (clickedState.is(this)) {
+                facing = clickedState.getValue(FACING);
+            }
+        }
         BlockState state = defaultBlockState()
             .setValue(COLOR, color != null ? color : DyeColor.WHITE)
-            .setValue(FACING, context.getClickedFace());
+            .setValue(FACING, facing);
         return withConnections(state, context.getLevel(), context.getClickedPos());
     }
 

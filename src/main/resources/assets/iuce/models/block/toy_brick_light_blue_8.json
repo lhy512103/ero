@@ -1,0 +1,7 @@
+{
+  "parent": "iuce:block/toy_brick_conn_8",
+  "textures": {
+    "0": "iuce:block/toy_brick_light_blue",
+    "particle": "iuce:block/toy_brick_light_blue"
+  }
+}

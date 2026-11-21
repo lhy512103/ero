@@ -44,8 +44,22 @@ public class CrateBlock extends ColoredPlasticBlock implements EntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
+        net.minecraft.world.item.component.BlockItemStateProperties props =
+            context.getItemInHand().get(net.minecraft.core.component.DataComponents.BLOCK_STATE);
+        net.minecraft.world.item.DyeColor color = props != null ? props.get(COLOR) : null;
+        Direction facing = context.getNearestLookingDirection().getOpposite();
+        // When placing against an existing crate without sneaking, match its facing so rows
+        // and stacks of crates stay uniformly aligned.
+        if (!context.isSecondaryUseActive()) {
+            BlockPos clickedOn = context.getClickedPos().relative(context.getClickedFace().getOpposite());
+            BlockState clickedState = context.getLevel().getBlockState(clickedOn);
+            if (clickedState.is(this)) {
+                facing = clickedState.getValue(FACING);
+            }
+        }
         return defaultBlockState()
-            .setValue(FACING, context.getNearestLookingDirection().getOpposite())
+            .setValue(COLOR, color != null ? color : net.minecraft.world.item.DyeColor.WHITE)
+            .setValue(FACING, facing)
             .setValue(STACKED, context.getLevel().getBlockState(context.getClickedPos().below()).is(this));
     }
 
