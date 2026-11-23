@@ -163,30 +163,30 @@ MILL_STRETCH = {"base_length": 9, "bay_first": 2, "bay_last": 2, "stand_first": 
 
 
 def mill():
-    # Layer 0 is the roll pit below the floor, layer 1 is floor level; the strip runs down the middle.
+    # Layer 0 is the scale-flume foundation below the floor, layer 1 is pass-line floor level.
     def bay(g, d):
-        g.row(0, d, "..CCCCC..")
-        g.row(1, d, "..AZZZA..")
+        g.row(0, d, ".ccCCCcc.")
+        g.row(1, d, ".fAZZZAr.")
 
     def stand(g, d):
-        # Four-high stand between two housing posts: backup roll in the pit, work rolls at the pass
-        # line, top backup roll, then the crosshead with the screw-down. Spindles and motor on +x.
-        g.row(0, d, "..VZZZVCC")
-        g.row(1, d, "..VZZZVrC")
+        # Twin closed-top mill housings (V) with work & backup rolls (Z), top tie-bridge (BgggB),
+        # twin hydraulic AGC cylinders (p), and pinion gearbox + drive motor (CC) on the +x bedplate.
+        g.row(0, d, ".ccCCCcc.")
+        g.row(1, d, ".fVZZZVCC")
         g.row(2, d, "..VZZZV..")
-        g.row(3, d, "..BBBBB..")
-        g.row(4, d, "....C....")
+        g.row(3, d, "..BgggB..")
+        g.row(4, d, "..p...p..")
 
     def head(g):
-        g.row(0, 0, "CCCCCCCCC"); g.row(1, 0, "S.cI@Oc.S")
-        g.row(0, 1, "CCCCCCCCC"); g.row(1, 1, "S.AZZZA.S")
+        g.row(0, 0, "ccccccccc"); g.row(1, 0, "S.CI@OC.S")
+        g.row(0, 1, "ccCCCCCcc"); g.row(1, 1, "S.AZZZA.S")
 
     def tail(g, shift):
         d = 7 + shift
-        g.row(0, d, "CCCCCCCCC"); g.row(1, d, "S.AZZZA.S")
-        # Down-coiler: mandrel between two housing plates.
+        g.row(0, d, "ccccccccc"); g.row(1, d, "S.AZZZA.S"); g.row(2, d, "..B...B..")
+        # Down-coiler: mandrel and coil between twin cast housing frames.
         d = 8 + shift
-        g.row(0, d, "CCCCCCCCC"); g.row(1, d, "SECZZZC.S"); g.row(2, d, "..CZZZC..")
+        g.row(0, d, "ccccccccc"); g.row(1, d, "SECZZZC.S"); g.row(2, d, "..CZZZC..")
 
     return stretched(9, 5, 9, 17, MILL_STRETCH, head, bay, stand, tail, base_y=-1)
 
@@ -225,10 +225,11 @@ COKE_STRETCH = {"base_length": 17, "bay_first": 2, "bay_last": 2, "stand_first":
 
 def coke_oven_battery():
     def oven(g, d):
-        # One oven chamber running across the battery on its regenerator, the charging deck on top,
+        # One oven chamber running across the battery on its regenerator, side bench rails, the charging deck on top,
         # charging car rails, the ascension pipe and the gas collecting main.
         g.fill(1, 7, d, d, 0, 4, "k")
         g.set(0, d, 0, "c"); g.set(8, d, 0, "c")
+        g.set(0, d, 1, "f"); g.set(8, d, 1, "f")
         g.fill(1, 7, d, d, 5, 5, "c")
         g.set(2, d, 6, "A"); g.set(4, d, 6, "A")
         g.set(6, d, 6, "p")

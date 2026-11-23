@@ -146,6 +146,7 @@
 140. Added: A climbable Steel Ladder block for multiblock platforms and general building.
 141. Improved: Redrew checker plate, steel stairs and steel handrail textures and models to match the industrial steel look.
 142. Improved: Redesigned the Twin-Screw Extruder layout and formed model, and replaced oversized bright-blue housings on the Rolling Mill and Ore Processing Plant with cast-steel frames.
+143. Improved: Extendable rolling mills, extruders and coke ovens now carry their steel grain and mechanical fittings across repeated sections.
 
 ### 中文
 
@@ -291,3 +292,4 @@
 140. 新增：可攀爬的钢爬梯方块，可用于多方块平台上下与建筑装饰。
 141. 优化：重绘花纹钢板、钢制楼梯与钢管护栏贴图和模型，风格与成型后的工业钢结构一致。
 142. 优化：重做双螺杆挤出机的成型前后结构与模型，并将轧机、矿石处理厂等处的亮蓝色大柱子和箱体改为铸钢机架。
+143. 优化：轧制联合机、双螺杆挤出机和焦炉组加长后，钢板纹理连续，机架、管路和炉门细节随各段延伸。

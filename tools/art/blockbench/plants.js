@@ -80,24 +80,27 @@
     const ARROW_OUT = ['..#..', '.###.', '#.#.#', '..#..', '..#..'];
 
     const TEXTURES = {
-        // Checker plate for the skid top: one big welded panel every four blocks.
+        // Checker plate for the skid top: subtle low-contrast industrial anti-slip chevron plate.
         deck: [64, 64, t => {
-            steel(t, 3, C.steel[2], C.steel[4], false);
-            for (let y = 0; y < 64; y += 4) for (let x = 0; x < 64; x += 4) {
-                const o = (y >> 2) & 1 ? 2 : 0;
-                if ((y >> 2) & 1) { t.px(x + o, y + 1, C.steel[5]); t.px(x + o + 1, y + 1, C.steel[1]); }
-                else { t.px(x + 1, y, C.steel[5]); t.px(x + 1, y + 1, C.steel[1]); }
+            steel(t, 3, C.steel[2], C.steel[3], false);
+            for (let y = 0; y < 64; y += 8) for (let x = 0; x < 64; x += 8) {
+                const alt = ((x >> 3) + (y >> 3)) & 1;
+                for (let k = 0; k < 3; k++) {
+                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
+                    t.px(lx, ly, mix(C.steel[3], C.steel[4], 0.48));
+                    t.px(lx, ly + 1, mix(C.steel[2], C.steel[1], 0.32));
+                }
             }
             weldH(t, 0, 0, 63); weldV(t, 0, 0, 63);
-            grime(t, 4, [60, 52, 44], 0.35, false);
+            grime(t, 4, [56, 50, 44], 0.22, false);
         }],
-        // Skid side: a rolled channel with a lip at top and bottom.
+        // Skid side: a rolled channel beam with top and bottom flanges.
         skid: [64, 16, t => {
-            steel(t, 5, C.frame[2], C.frame[4], false);
-            t.rect(0, 0, 63, 0, C.frame[4]); t.rect(0, 1, 63, 1, light(C.frame[4], 0.25)); t.rect(0, 2, 63, 2, C.frame[1]);
-            t.rect(0, 13, 63, 13, C.frame[4]); t.rect(0, 14, 63, 14, C.frame[1]); t.rect(0, 15, 63, 15, C.frame[0]);
-            for (let x = 0; x < 64; x += 16) { rivet(t, x + 3, 5); rivet(t, x + 3, 9); weldV(t, x + 15, 3, 12); }
-            grime(t, 6, [50, 44, 38], 0.5, true);
+            steel(t, 5, C.frame[2], C.frame[3], false);
+            t.rect(0, 0, 63, 0, C.frame[4]); t.rect(0, 1, 63, 1, C.frame[3]); t.rect(0, 2, 63, 2, C.frame[1]);
+            t.rect(0, 13, 63, 13, C.frame[3]); t.rect(0, 14, 63, 14, C.frame[1]); t.rect(0, 15, 63, 15, C.frame[0]);
+            for (const x of [0, 32]) { weldV(t, x + 31, 3, 12); rivet(t, x + 3, 7); }
+            grime(t, 6, [46, 42, 38], 0.35, true);
         }],
         // Furnace shell: rolled plates, vertical and horizontal butt welds, heat tint near the top.
         shell: [64, 80, t => {
@@ -241,7 +244,13 @@
             icon(t, ['...##', '..##.', '.####', '..##.', '.##..', '##...'], 5, 4, [250, 210, 70]);
             for (const [x, y] of [[1, 1], [13, 1], [1, 13], [13, 13]]) rivet(t, x, y);
         }],
-        cabinet: [32, 32, t => { steel(t, 32, C.steel[2], C.steel[4], false); weldV(t, 0, 0, 31); weldH(t, 0, 0, 31); for (let y = 4; y < 32; y += 8) rivet(t, 2, y); }],
+        cabinet: [32, 32, t => {
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 31, 0, C.steel[4]); t.rect(0, 0, 0, 31, C.steel[4]);
+            t.rect(31, 0, 31, 31, C.steel[1]); t.rect(0, 31, 31, 31, C.steel[1]);
+            t.rect(3, 3, 28, 3, C.steel[1]); t.rect(3, 28, 28, 28, C.steel[4]);
+            t.rect(3, 3, 3, 28, C.steel[1]); t.rect(28, 3, 28, 28, C.steel[4]);
+        }],
         gauge: [8, 8, t => { t.each((x, y) => { const r = Math.hypot(x - 3.5, y - 3.5); t.px(x, y, r > 3.6 ? C.steel[1] : [236, 236, 228]); }); t.px(3, 3, C.red); t.px(4, 2, C.red); t.px(5, 1, C.red); }],
         flange_gas: [16, 16, t => {
             t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.yellow : C.dark); });
@@ -285,14 +294,32 @@
     const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
     const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
 
+    const scene = [];
+    // Outliner groups the shapes being drawn belong to: stretch sections (bay, stand, tail) and
+    // spinners, whose group origin is the pivot they turn about.
+    const groupPath = [];
+    const pathKey = () => groupPath.map(g => g.name).join('/');
+
     class Shape {
-        constructor(name, smooth) { this.name = name; this.smooth = smooth; this.verts = {}; this.faces = []; this.n = 0; }
+        constructor(name, smooth) {
+            this.name = name; this.smooth = smooth; this.verts = {}; this.faces = []; this.n = 0;
+            this.path = groupPath.slice(); this.pathKey = pathKey(); this.byPath = { [this.pathKey]: this };
+        }
         v(p) {
             const key = p.map(c => Math.round(c * 1000)).join(',');
             if (!this.verts[key]) this.verts[key] = { id: 'v' + (this.n++), p: p.map(c => Math.round(c * 1000) / 1000) };
             return this.verts[key].id;
         }
         face(points, tex, uvs) {
+            const cur = pathKey();
+            if (this.pathKey !== cur) {
+                if (!this.byPath[cur]) {
+                    const sub = new Shape(this.name, this.smooth);
+                    scene.push(sub);
+                    this.byPath[cur] = sub;
+                }
+                return this.byPath[cur].face(points, tex, uvs);
+            }
             const ids = [], keep = [];
             points.forEach((p, i) => { const id = this.v(p); if (!ids.includes(id)) { ids.push(id); keep.push(uvs[i]); } });
             if (ids.length >= 3) this.faces.push({ ids, tex, uvs: keep });
@@ -300,11 +327,7 @@
         }
     }
 
-    const scene = [];
-    // Outliner groups the shapes being drawn belong to: stretch sections (bay, stand, tail) and
-    // spinners, whose group origin is the pivot they turn about.
-    const groupPath = [];
-    function shape(name, smooth) { const s = new Shape(name, smooth); s.path = groupPath.slice(); scene.push(s); return s; }
+    function shape(name, smooth) { const s = new Shape(name, smooth); scene.push(s); return s; }
     function within(name, origin, draw) { groupPath.push({ name, origin: origin || [0, 0, 0] }); try { draw(); } finally { groupPath.pop(); } }
 
     // A flat rectangle p + U*a + V*b (a in 0..la, b in 0..lb), normal U x V. Cut on the world grid of
@@ -441,13 +464,15 @@
                 s.face([rings[i].ring[j], rings[i].ring[j1], rings[i + 1].ring[j1], rings[i + 1].ring[j]], tex, [[u0, w0], [u1, w0], [u1, w1], [u0, w1]]);
             }
         }
-        const capTex = opt.cap;
+        const closed = Math.hypot(...sub(points[0], points[points.length - 1])) < 1e-3;
+        const capTex = closed || opt.cap === false ? null : (opt.cap || tex);
         if (capTex) {
             const c = shape(name, false);
             const [CW, CH] = TEXTURES[capTex];
             for (const [end, flip] of [[0, true], [rings.length - 1, false]]) {
                 if (opt.capEnds && !opt.capEnds.includes(end === 0 ? 'start' : 'end')) continue;
                 const ring = rings[end].ring, center = samples[end].p, r = rf(samples[end].d);
+                if (r < 1e-3) continue;
                 const tan = samples[end].tan, ax = norm(sub(ring[0], center)), ay = cross(tan, ax);
                 const uv = p => { const d = sub(p, center); return [CW / 2 + dot(d, ax) / (2 * r) * CW, CH / 2 - dot(d, ay) / (2 * r) * CH]; };
                 for (let j = 0; j < seg; j++) {
@@ -692,12 +717,12 @@
         // trimmers on the long pair.
         hbeam(fr, [hole[0], 122, 14], [hole[0], 122, 162], 10); hbeam(fr, [hole[1], 122, 14], [hole[1], 122, 162], 10);
         for (const z of [hole[2], hole[3]]) hbeam(fr, [hole[0] + 5, 122, z], [hole[1] - 5, 122, z], 10);
-        for (const z of [14, 162]) rail([[-66, 128, z], [-66, 146, z], [82, 146, z], [82, 128, z]]);
-        for (const x of [-66, 82]) rail([[x, 146, 14], [x, 146, 162]]);
-        for (const x of [-30, 0, 30, 60]) { rail([[x, 128, 14], [x, 146, 14]]); rail([[x, 128, 162], [x, 146, 162]]); }
-        for (const z of [40, 88, 136]) { rail([[-66, 128, z], [-66, 146, z]]); rail([[82, 128, z], [82, 146, z]]); }
-        rail([[-66, 137, 14], [82, 137, 14]], 0.7); rail([[-66, 137, 162], [82, 137, 162]], 0.7);
-        rail([[-66, 137, 14], [-66, 137, 162]], 0.7); rail([[82, 137, 14], [82, 137, 162]], 0.7);
+        for (const z of [14, 162]) rail([[-66, 129, z], [-66, 146, z], [82, 146, z], [82, 129, z]]);
+        for (const x of [-66, 82]) rail([[x, 146, 15.2], [x, 146, 160.8]]);
+        for (const x of [-30, 0, 30, 60]) { rail([[x, 129, 14], [x, 145, 14]], 0.75); rail([[x, 129, 162], [x, 145, 162]], 0.75); }
+        for (const z of [40, 88, 136]) { rail([[-66, 129, z], [-66, 145, z]], 0.75); rail([[82, 129, z], [82, 145, z]], 0.75); }
+        rail([[-65, 137, 14], [81, 137, 14]], 0.65); rail([[-65, 137, 162], [81, 137, 162]], 0.65);
+        rail([[-66, 137, 15], [-66, 137, 161]], 0.65); rail([[82, 137, 15], [82, 137, 161]], 0.65);
         // Electrode deck higher up with a round opening rail around the columns.
         gr2(deck, -66, 14, 82, 162, 200);
         function gr2(s, x0, z0, x1, z1, y) {
@@ -707,20 +732,19 @@
         hbeam(fr, [-24, 194, 14], [-24, 194, 162], 10); hbeam(fr, [40, 194, 14], [40, 194, 162], 10);
         for (const z of [44, 132]) hbeam(fr, [-19, 194, z], [35, 194, z], 10);
         for (const z of [14, 162]) rail([[-66, 218, z], [82, 218, z]]);
-        for (const x of [-66, 82]) rail([[x, 218, 14], [x, 218, 162]]);
-        for (const [x, z] of [[-66, 14], [82, 14], [-66, 162], [82, 162], [8, 14], [8, 162], [-66, 88], [82, 88]]) rail([[x, 200, z], [x, 218, z]]);
-        // Crane girder across the top with a hoist trolley for electrode changes.
+        for (const x of [-66, 82]) rail([[x, 218, 15.2], [x, 218, 160.8]]);
+        for (const [x, z] of [[-66, 14], [82, 14], [-66, 162], [82, 162], [8, 14], [8, 162], [-66, 88], [82, 88]]) rail([[x, 201, z], [x, 217, z]], 0.75);
         // Crane girder across the top, sitting on the side ring beams with a bearing plate at each end.
-        hbeam(fr, [-78, 286, cz], [94, 286, cz], 12);
-        for (const x of [-72, 88]) box(fr, [x - 6, 280, cz - 8], [x + 6, 280.5, cz + 8], 'frame');
+        hbeam(fr, [-78, 287, cz], [94, 287, cz], 12);
+        for (const x of [-72, 88]) box(fr, [x - 6, 280, cz - 8], [x + 6, 281, cz + 8], 'frame', ['down', 'up']);
         const hoist = shape('hoist', false);
-        box(hoist, [-2, 270, cz - 10], [18, 280, cz + 10], 'cabinet');
+        box(hoist, [-2, 270, cz - 10], [18, 281, cz + 10], 'cabinet');
         tube('hoist', 8, cz, 0.6, 252, 270, 'pipe', { seg: 4 });
         // Caged ladder up the front-left corner to the main deck and on to the electrode deck.
         const ladder = shape('ladder', false);
-        for (const [y0, y1, z] of [[16, 146, 4], [128, 218, 4]]) {
+        for (const [y0, y1, z] of [[16, 146, 4], [146, 218, 4]]) {
             for (const x of [-62, -52]) box(ladder, [x - 1, y0, z - 1], [x + 1, y1, z + 1], 'frame');
-            for (let y = y0 + 6; y < Math.min(y1, y0 === 16 ? 128 : 200); y += 6) box(ladder, [-61, y, z - 0.5], [-53, y + 1, z + 0.5], 'pipe');
+            for (let y = y0 + 6; y < Math.min(y1, y0 === 16 ? 128 : 200); y += 6) box(ladder, [-61, y, z - 0.5], [-53, y + 1, z + 0.5], 'pipe', ['east', 'west']);
             for (let y = y0 + 36; y < y1 - 4; y += 14) sweep('cage', fillet([[-63, y, z], [-63, y, z - 8], [-51, y, z - 8], [-51, y, z]], 4, 4), 0.6, 'frame', { seg: 6 });
             for (const x of [-63, -57, -51]) strut('cage', [x, y0 + 36, z - 8 + (x === -57 ? 0 : 3)], [x, y1 - 6, z - 8 + (x === -57 ? 0 : 3)], 0.5);
         }
@@ -782,10 +806,16 @@
             box(shape('base', false), [X(0), 0, z0], [X(1), 16, z0 + 16], { up: 'deck', all: 'skid' }, ['down', ...skip]);
             box(shape('base', false), [X(8), 0, z0], [X(9), 16, z0 + 16], { up: 'deck', all: 'skid' }, ['down', ...skip]);
             for (const [x, out] of [[X(1), -1], [X(8), 1]]) {
-                const door = shape('door', false), xo = x + out * 2.5;
-                box(shape('glow_door', false), [x, 10, z0 + 1.5], [x + out * 0.5, 76, z0 + 14.5], 'glow');
-                box(door, [x, 12, z0 + 2.5], [x + out * 2, 74, z0 + 13.5], 'door');
-                for (const y of [24, 46, 64]) box(door, [x + out * 2, y, z0 + 1.5], [xo, y + 3, z0 + 14.5], 'frame');
+                const door = shape('door', false), skipIn = [out < 0 ? 'east' : 'west'];
+                box(shape('glow_door', false), [x, 10, z0 + 1.5], [x + out * 0.6, 76, z0 + 14.5], 'glow', skipIn);
+                sweep('door_spindle', [[x + out * 3.5, 21, z0 + 8], [x + out * 3.5, 67, z0 + 8]], 0.8, 'pipe', { seg: 8, cap: 'cast' });
+                box(door, [x + out * 0.6, 12, z0 + 2.5], [x + out * 2.2, 74, z0 + 13.5], 'door', skipIn);
+                for (const y of [24, 46, 64]) box(door, [x + out * 2.2, y, z0 + 1.5], [x + out * 2.9, y + 3, z0 + 14.5], 'frame', skipIn);
+            }
+            for (const rx of [X(0) + 1.5, X(9) - 1.5]) {
+                rail([[rx, 32, z0], [rx, 32, z0 + 16]], 0.8);
+                rail([[rx, 24, z0], [rx, 24, z0 + 16]], 0.6);
+                if (stand) rail([[rx, 16, z0 + 8], [rx, 31.1, z0 + 8]], 0.7);
             }
             const rails = shape('rail', false);
             for (const x of [-24, 8]) { box(rails, [x - 3, 96, z0], [x + 3, 97.5, z0 + 16], 'frame', ['north', 'south']); box(rails, [x - 1, 97.5, z0], [x + 1, 101, z0 + 16], 'pipe', ['north', 'south']); }
@@ -822,66 +852,85 @@
     BUILD.twin_screw_extruder = function () {
         const w = 5, X = i => cellX(w, i);
         const fr = shape('frame', false);
-        // Low-slung industrial bedplate + side rail guides + twin-lobe barrel at y=24.
+        // Low-slung industrial bedplate + side rail guides + cable tray + twin-lobe barrel at y=25.
         const railPair = d => {
             const z0 = d * 16;
             for (const x of [-14, 30]) {
-                box(fr, [x - 2, 16, z0], [x + 2, 22, z0 + 16], 'frame', ['north', 'south', 'down']);
-                box(fr, [x - 3, 22, z0], [x + 3, 24, z0 + 16], 'frame', ['north', 'south']);
+                box(fr, [x - 2, 16, z0], [x + 2, 22, z0 + 16], 'frame', ['down']);
+                box(fr, [x - 3, 22, z0], [x + 3, 24, z0 + 16], 'frame');
             }
+            // Side cable tray along +x rail and cooling water return along -x rail.
+            box(fr, [22, 24, z0], [26, 25.5, z0 + 16], 'cabinet');
         };
         const barrel = d => {
             const z0 = d * 16;
             skid(w, 0, 5, d, d + 1);
             railPair(d);
-            box(shape('pedestal', false), [2, 16, z0 + 4], [14, 20, z0 + 12], 'cast', ['down']);
-            // Twin-lobe barrel: two overlapping cylinder bores + ceramic heater jackets + thermocouple + water cooling line.
+            box(shape('pedestal', false), [1, 16, z0 + 3], [15, 20.5, z0 + 13], 'cast', ['down']);
+            box(fr, [-12, 18, z0 + 5], [28, 20, z0 + 11], 'frame');
+            // Twin-lobe barrel: figure-8 clam-shell barrel block + bolted side flanges + ceramic heater bands.
             for (const bx of [5, 11]) sweep('barrel', [[bx, 25, z0], [bx, 25, z0 + 16]], 4.2, 'pipe', { seg: 12 });
-            for (const bx of [5, 11]) sweep('heater', [[bx, 25, z0 + 2], [bx, 25, z0 + 14]], 5.0, 'ceramic', { seg: 12, noTile: true });
-            box(shape('terminal', false), [4, 29.5, z0 + 5], [12, 31.5, z0 + 11], 'cabinet');
-            tube('thermo', 8, z0 + 8, 0.7, 31.5, 34, 'copper', { seg: 6 });
-            sweep('cooling', [[-2, 26, z0], [-2, 26, z0 + 16]], 1.0, 'water', { seg: 8 });
-            box(fr, [-2, 24, z0 + 7], [1, 26, z0 + 9], 'frame');
+            for (const bx of [5, 11]) sweep('heater', [[bx, 25, z0 + 2], [bx, 25, z0 + 14]], 5.1, 'ceramic', { seg: 12, noTile: true });
+            box(fr, [-0.5, 23.5, z0 + 1], [16.5, 26.5, z0 + 2], 'pipe');
+            box(fr, [-0.5, 23.5, z0 + 14], [16.5, 26.5, z0 + 15], 'pipe');
+            box(shape('terminal', false), [4, 30.2, z0 + 5], [12, 32, z0 + 11], 'cabinet');
+            tube('thermo', 10, z0 + 9, 0.7, 32, 34.5, 'copper', { seg: 6 });
+            sweep('cooling', [[-4, 26, z0], [-4, 26, z0 + 16]], 1.1, 'water', { seg: 8 });
+            box(fr, [-4, 24, z0 + 7], [0.5, 26, z0 + 9], 'frame');
         };
         const bay = d => barrel(d);
         const stand = d => {
             barrel(d);
-            // Devolatilization vacuum vent dome and riser pipe on stand sections.
-            tube('vent', 8, d * 16 + 8, 3.0, 29, 36, 'cast', { seg: 12, cap: 'pipe', capEnds: ['end'] });
-            tube('vent', 8, d * 16 + 8, 1.8, 36, 48, 'pipe', { seg: 10, cap: 'pipe', capEnds: ['end'] });
+            const zc = d * 16 + 8;
+            // Devolatilization vacuum vent dome, sight-port condenser pot and vacuum header riser.
+            tube('vent', 8, zc, 3.2, 29.5, 36, 'cast', { seg: 12, cap: 'pipe', capEnds: ['end'] });
+            band('vent', 8, zc, 3.0, 4.2, 35, 36.5, 'pipe', 12);
+            sweep('vent_line', fillet([[8, 36.5, zc], [8, 44, zc], [-10, 44, zc], [-10, 36, zc]], 3, 4), 1.5, 'pipe', { seg: 8 });
+            tube('condenser_pot', -10, zc, 3.2, 24, 36, 'vessel', { seg: 12, cap: 'pipe' });
         };
-        // Head: bedplate, front ports + control desk, finned AC drive motor + ribbed cast-iron gearbox, feed hopper.
+        // Head: bedplate, front ports + control desk, finned AC drive motor + twin-shaft gearbox, feed hopper.
         skid(w, 0, 1, 0, 1); skid(w, 4, 5, 0, 1);
         ports(w, 'north', 0, { 0: '.I@O.', 1: '.LMR.' });
         skid(w, 0, 5, 1, 2);
-        // Finned AC motor (slate-blue) + cooling shroud + terminal box + coupling + ribbed cast-iron gearbox.
-        sweep('motor', [[8, 25, 16], [8, 25, 25]], 6.0, 'blue', { seg: 16, noTile: true, cap: 'pipe', capEnds: ['start'] });
-        for (let z = 17.5; z < 24.5; z += 1.8) sweep('motor', [[8, 25, z], [8, 25, z + 0.7]], 6.7, 'blue', { seg: 16, noTile: true });
-        box(shape('motor', false), [5, 30.5, 18], [11, 33, 23], 'cabinet');
-        box(shape('gearbox', false), [-6, 16, 25], [22, 34, 32], 'cast', ['down']);
-        for (const x of [-4, 20]) box(fr, [x - 1, 16, 25], [x + 1, 33, 32], 'frame', ['down']);
-        // Feed segment (d=2) with stainless conical feed hopper.
+        railPair(1);
+        // Finned AC motor on cast pedestal + coupling guard + heavy twin-shaft reduction gearbox.
+        box(shape('pedestal', false), [2, 16, 16.5], [14, 19.5, 24.5], 'cast', ['down']);
+        sweep('motor', [[8, 25, 16.2], [8, 25, 24.5]], 5.8, 'blue', { seg: 16, noTile: true, cap: 'pipe' });
+        for (let z = 17.4; z < 24.0; z += 1.6) sweep('motor', [[8, 25, z], [8, 25, z + 0.6]], 6.6, 'blue', { seg: 16, noTile: true });
+        box(shape('motor', false), [5, 30.8, 18], [11, 33.5, 23], 'cabinet');
+        box(shape('gearbox', false), [-6, 16, 24.8], [22, 34, 31.8], 'cast', ['down']);
+        box(shape('gearbox', false), [-4, 34, 25.8], [20, 35.5, 30.8], 'cabinet', ['down']);
+        for (const x of [-4, 20]) box(fr, [x - 1, 16, 24.6], [x + 1, 33, 31.9], 'frame', ['down']);
+        // Feed segment (d=2) with gravimetric feeder throat and stainless conical feed hopper.
         barrel(2);
-        hopper('hopper', 8, 40, [7, 7], [3.5, 3.5], 32, 48, 'vessel');
-        box(shape('hopper', false), [1, 47, 33], [15, 48, 47], 'pipe');
+        box(shape('feeder', false), [3, 29.5, 35], [13, 33, 45], 'cast');
+        hopper('hopper', 8, 40, [7.5, 7.5], [3.8, 3.8], 33, 47, 'vessel');
+        for (const [a, b] of [[[0.5, 32.5], [15.5, 34]], [[0.5, 46], [15.5, 47.5]], [[0.5, 34], [2, 46]], [[14, 34], [15.5, 46]]])
+            box(shape('hopper', false), [a[0], 46.5, a[1]], [b[0], 48, b[1]], 'pipe');
         within('bay', null, () => bay(3));
         within('stand', null, () => stand(3));
-        // Tail: last barrel, tapered die head with strand nozzles, stainless water cooling bath, pelletiser.
+        // Tail: last barrel, hinged screen-changer & tapered die head, stainless water cooling bath, strand pelletiser.
         within('tail', null, () => {
             bay(10);
             skid(w, 0, 5, 11, 12);
-            box(shape('die', false), [2, 16, 180], [14, 21, 188], 'cast', ['down']);
-            sweep('die', [[8, 25, 176], [8, 25, 188]], d => 5.5 - d * 0.12, 'cast', { seg: 16, noTile: true, cap: 'pipe' });
-            box(shape('die', false), [3, 21, 188], [13, 29, 192], 'pipe');
-            skid(w, 0, 1, 12, 13); skid(w, 4, 5, 12, 13);
-            skid(w, 0, 5, 12, 13);
+            railPair(11);
+            box(shape('die', false), [1, 16, 178], [15, 21.5, 189], 'cast', ['down']);
+            box(shape('die', false), [-1, 20.5, 176.2], [17, 30.5, 180], 'cast');
+            sweep('die', [[8, 25, 180], [8, 25, 189]], d => 5.6 - d * 0.14, 'cast', { seg: 16, noTile: true, cap: 'pipe' });
+            box(shape('die', false), [3, 21.5, 189], [13, 28.5, 191.8], 'pipe');
+            // d=12: non-overlapping skids around the rear HV port at cell i=2.
+            skid(w, 0, 2, 12, 13); skid(w, 3, 5, 12, 13);
             ports(w, 'south', 12, { 0: '..H..' });
-            // Stainless cooling trough with water and submerged guide rollers, plus compact pelletiser at end.
-            box(shape('bath', false), [-10, 16, 192], [26, 26, 204], 'vessel', ['up', 'down']);
-            box(shape('bath', false), [-8, 24.5, 193], [24, 25, 203], 'water');
-            for (const x of [4, 8, 12]) sweep('strand', [[x, 25.5, 192], [x, 23.5, 198], [x, 25.5, 204]], 0.5, 'orange', { seg: 4 });
-            box(shape('pelletiser', false), [-4, 16, 203], [20, 30, 208], 'cast', ['down']);
-            box(shape('pelletiser', false), [1, 24, 202], [15, 31, 208], { all: 'orange', up: 'cabinet' });
+            // Stainless cooling trough on legs with water bath, guide rollers, air-knife dryer and strand pelletiser.
+            for (const z of [194, 201]) for (const x of [-8, 22]) box(fr, [x, 16, z], [x + 2, 20, z + 2], 'frame', ['down']);
+            for (const [a, b] of [[[-10, 192], [26, 193.5]], [[-10, 201.5], [26, 203]], [[-10, 193.5], [-8.5, 201.5]], [[24.5, 193.5], [26, 201.5]]])
+                box(shape('bath', false), [a[0], 20, a[1]], [b[0], 26.5, b[1]], 'vessel');
+            box(shape('bath', false), [-8.5, 20, 193.5], [24.5, 24.8, 201.5], { up: 'water', all: 'vessel' });
+            for (const z of [195.5, 199.5]) sweep('guide_roll', [[-8, 25.5, z], [24, 25.5, z]], 0.9, 'roll', { seg: 8 });
+            for (const x of [4, 8, 12]) sweep('strand', [[x, 25.5, 191.8], [x, 25.0, 197.5], [x, 26.0, 203.2]], 0.5, 'orange', { seg: 6 });
+            box(shape('pelletiser', false), [-3, 16, 203.2], [19, 25, 207.8], 'cast', ['down']);
+            box(shape('pelletiser', false), [0, 25, 203.2], [16, 32, 207.8], { all: 'orange', up: 'cabinet' }, ['down']);
+            box(shape('pelletiser', false), [16, 20, 204.2], [21, 24, 206.8], 'pipe');
         });
     };
 
@@ -1018,61 +1067,156 @@
     BUILD.rolling_mill = function () {
         const w = 9, X = i => cellX(w, i);
         const fr = shape('frame', false);
-        // Floor-level row d: sockets at both edges, the side frames and one roll of the roller table.
-        const table = (d, spinner) => {
-            const z0 = d * 16;
-            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, z0], [X(i) + 16, 16, z0 + 16], 'cabinet');
-            for (const x of [-24, 40]) hbeam(fr, [x, 8, z0], [x, 8, z0 + 16], 12);
-            within(spinner, [8, 8, z0 + 8], () => sweep('roll', [[-18, 8, z0 + 8], [34, 8, z0 + 8]], 5, 'roll', { seg: 12, cap: 'pipe' }));
+        // Solid scale-flume foundation slice along z0..z1: operator walkway on -x, recessed dark pit in middle, drive bedplate on +x.
+        const millBed = (z0, z1, fullCorners) => {
+            const base = shape('base', false);
+            if (!fullCorners) {
+                // Run the headers below the rear edge of the drive bed, clear of motor pedestals.
+                sweep('lube_hdr', [[49, 4.5, z0], [49, 4.5, z1]], 1.4, 'orange', { seg: 8 });
+                sweep('cool_hdr', [[51.9, 4.5, z0], [51.9, 4.5, z1]], 1.0, 'water', { seg: 8 });
+                box(fr, [47, 0, z0 + 1], [54, 3.2, z0 + 3], 'frame', ['down']);
+            }
+            box(base, [fullCorners ? X(0) : X(1), -16, z0], [-20, 0, z1], { up: 'deck', all: 'skid' }, ['down']);
+            box(base, [-20, -16, z0], [36, -12, z1], { up: 'cavity', all: 'skid' }, ['down']);
+            box(base, [36, -16, z0], [X(9), 0, z1], { up: 'deck', all: 'skid' }, ['down']);
         };
-        const strip = (z0, z1) => box(shape('strip', false), [-8, 13, z0], [24, 13.5, z1], 'roll', ['north', 'south']);
-        // Head: foundation, ports and the entry table.
-        box(shape('base', false), [X(0), -16, 0], [X(9), 0, 32], { up: 'deck', all: 'skid' }, ['down']);
-        for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 0], [X(i) + 16, 16, 16], 'cabinet');
-        for (const i of [2, 6]) skid(w, i, i + 1, 0, 1, 0, 16);
+        // Roller-table bay furniture at row d: side frames, bearing blocks, side guides, table roll and hot strip.
+        const rollerTable = (d, spinner, walkway) => {
+            const z0 = d * 16, z1 = z0 + 16;
+            const tbl = shape('table', false);
+            for (const [x0, x1] of [[-26, -20], [36, 42]]) {
+                box(tbl, [x0, 0, z0], [x1, 13, z1], 'frame', ['down']);
+                box(tbl, [x0 - 0.5, 5, z0 + 5], [x1 + 0.5, 11, z0 + 11], 'cast');
+            }
+            for (const [x0, x1] of [[-15, -13], [29, 31]]) box(tbl, [x0, 12, z0], [x1, 15.2, z1], 'pipe');
+            within(spinner, [8, 8, z0 + 8], () => sweep('roll', [[-20, 8, z0 + 8], [36, 8, z0 + 8]], 4.4, 'roll', { seg: 14, cap: 'pipe' }));
+            box(shape('strip', false), [-12, 12.6, z0], [28, 13.3, z1], 'roll');
+            if (walkway) {
+                box(shape('walkway', false), [X(1) + 1, 0, z0], [X(2) - 1, 1.5, z1], 'grating', ['down']);
+                rail([[X(1) + 1.5, 14, z0], [X(1) + 1.5, 14, z1]], 0.8);
+                rail([[X(1) + 1.5, 7.5, z0], [X(1) + 1.5, 7.5, z1]], 0.6);
+
+            }
+        };
+
+        // Head (d = 0..1): entry foundation, ports, control cabinets and entry guide table.
+        box(shape('base', false), [X(0), -16, 0], [X(9), 0, 16], { up: 'deck', all: 'skid' }, ['down']);
+        for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 0], [X(i) + 16, 16, 16], 'cabinet', ['down']);
+        for (const i of [2, 6]) box(shape('housing', false), [X(i) + 1, 0, 1], [X(i) + 15, 16, 15], 'cast', ['down']);
         ports(w, 'north', 0, { 1: '...I@O...' }, -16);
-        table(1, 'entry_roll');
-        strip(16, 32);
+        millBed(16, 32, true);
+        for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 16], [X(i) + 16, 16, 32], 'cabinet', ['down']);
+        rollerTable(1, 'entry_roll', false);
+
+        // Bay (modelled at d = 2): continuous pit, roller table, operator walkway and drive-side headers.
         within('bay', null, () => {
-            box(shape('pit', false), [X(2), -16, 32], [X(7), 0, 48], { up: 'cavity', all: 'skid' }, ['north', 'south', 'down']);
-            for (const x of [-24, 40]) hbeam(fr, [x, 8, 32], [x, 8, 48], 12);
-            within('bay_roll', [8, 8, 40], () => sweep('roll', [[-18, 8, 40], [34, 8, 40]], 5, 'roll', { seg: 12, cap: 'pipe' }));
-            strip(32, 48);
+            millBed(32, 48, false);
+            rollerTable(2, 'bay_roll', true);
+            rail([[X(1) + 1.5, 1.5, 40], [X(1) + 1.5, 13.1, 40]], 0.7);
         });
-        // Four-high stand: sculpted cast-steel closed-top mill housings, machined inner window ways,
-        // backup and work rolls, hydraulic screw-down on top, drive spindle and finned motor on the +x side.
+
+        // Four-high stand (modelled at d = 2): twin sculpted closed-top cast-steel housings with open bearing windows,
+        // individual hydraulic AGC cylinders, top tie-bridge, four rolls, pinion stand, twin spindles and finned mill motor.
         within('stand', null, () => {
+            millBed(32, 48, false);
+            box(shape('walkway', false), [X(1) + 1, 0, 32], [X(2) - 1, 1.5, 48], 'grating', ['down']);
+            rail([[X(1) + 1.5, 14, 32], [X(1) + 1.5, 14, 48]], 0.8);
+            rail([[X(1) + 1.5, 1.5, 40], [X(1) + 1.5, 13.1, 40]], 0.7);
             const cast = shape('housing', false);
-            for (const x of [X(2), X(6)]) {
-                box(cast, [x + 1, -16, 32], [x + 15, -10, 48], 'cast', ['down']);
-                box(cast, [x + 2, -10, 33], [x + 14, 34, 47], 'cast');
-                box(cast, [x + 3, -6, 35], [x + 13, 30, 45], 'pipe');
+            for (const x0 of [-31, 35]) {
+                // Soleplate, front & rear window posts (inset to z=33..47 so adjacent stands never Z-fight), arched crown and bearing chocks.
+                box(cast, [x0 - 1, 0, 32.5], [x0 + 13, 3, 47.5], 'cast', ['down']);
+                box(cast, [x0, 3, 33], [x0 + 12, 36, 37.2], 'cast', ['down', 'up']);
+                box(cast, [x0, 3, 42.8], [x0 + 12, 36, 47], 'cast', ['down', 'up']);
+                box(cast, [x0, 36, 33], [x0 + 12, 44, 47], 'cast');
+                box(cast, [x0 + 1.5, 44, 34.5], [x0 + 10.5, 47, 45.5], 'frame', ['down']);
+                // Bearing chocks seated inside the housing window around the roll necks.
+                for (const [yLo, yHi] of [[0.2, 4.8], [8.0, 12.2], [13.8, 18.0], [21.0, 28.0]])
+                    box(fr, [x0 + 1.4, yLo, 37.2], [x0 + 10.6, yHi, 42.8], 'pipe', ['north', 'south']);
+                // Hydraulic AGC screw-down cylinder and servo cap atop each housing post.
+                const cx = x0 + 6;
+                tube('agc_cyl', cx, 40, 4.0, 47, 55, 'cast', { seg: 14, cap: 'pipe' });
+                tube('agc_rod', cx, 40, 2.0, 55, 60, 'pipe', { seg: 10, cap: 'cabinet' });
             }
-            box(cast, [X(2) + 1, 34, 32], [X(7) - 1, 46, 48], 'cast');
-            box(cast, [X(2) + 3, 46, 34], [X(7) - 3, 48, 46], 'frame');
-            for (const [name, y, r] of [['stand_backup_bottom', -6.5, 7], ['stand_roll_bottom', 5, 3.5], ['stand_roll_top', 13.5, 3.5], ['stand_backup_top', 24.5, 7]])
-                within(name, [8, y, 40], () => sweep('roll', [[-12, y, 40], [28, y, 40]], r, 'roll', { seg: 16, cap: 'pipe' }));
-            tube('screw', 8, 40, 3.5, 48, 56, 'pipe', { seg: 12 });
-            box(cast, [2, 56, 34], [14, 62, 46], 'cast');
-            box(shape('base', false), [X(7), -16, 32], [X(9), 0, 48], { up: 'deck', all: 'skid' }, ['down']);
-            sweep('spindle', [[32, 9, 40], [64, 9, 40]], 3, 'pipe', { seg: 10 });
-            sweep('motor', [[64, 8, 40], [80, 8, 40]], 6.5, 'blue', { seg: 16, noTile: true, cap: 'pipe' });
-            strip(32, 48);
+            // Top structural tie-beams, tie rods and descaling header spanning between the twin housings.
+            hbeam(fr, [-19, 40, 40], [35, 40, 40], 8);
+            for (const zt of [34.8, 45.2]) sweep('tie_rod', [[-19, 41, zt], [35, 41, zt]], 1.4, 'pipe', { seg: 8 });
+            box(shape('bridge', false), [-19, 44.2, 36], [35, 45.5, 44], 'grating');
+            sweep('descale', [[-19, 20.5, 33.5], [35, 20.5, 33.5]], 1.5, 'water', { seg: 8 });
+
+            // Four-high roll stack seated right into the twin housing windows (x = -26..42).
+            for (const [name, y, r] of [
+                ['stand_backup_bottom', 1.5, 6.0],
+                ['stand_roll_bottom', 10.2, 2.5],
+                ['stand_roll_top', 15.8, 2.5],
+                ['stand_backup_top', 24.5, 6.0],
+            ]) {
+                within(name, [8, y, 40], () => {
+                    sweep('roll_body', [[-19.2, y, 40], [35.2, y, 40]], r, 'roll', { seg: 16, cap: 'pipe' });
+                    sweep('roll_neck_l', [[-26, y, 40], [-19.2, y, 40]], r * 0.52, 'pipe', { seg: 12 });
+                    sweep('roll_neck_r', [[35.2, y, 40], [42, y, 40]], r * 0.52, 'pipe', { seg: 12 });
+                });
+            }
+            box(shape('strip', false), [-12, 12.6, 32], [28, 13.3, 48], 'roll');
+
+            // Drive side (+x): twin universal drive spindles -> pinion stand gearbox -> finned DC mill motor.
+            for (const ys of [10.2, 15.8]) sweep('spindle', [[47, ys, 40], [53, ys, 40]], 1.8, 'pipe', { seg: 10 });
+            box(cast, [53, 0, 34], [63, 22, 46], 'cast', ['down']);
+            box(fr, [54, 22, 35], [62, 23.5, 45], 'cabinet', ['down']);
+            sweep('coupling', [[63, 12, 40], [66, 12, 40]], 2.4, 'pipe', { seg: 10 });
+            box(cast, [66, 0, 34.5], [78.5, 6, 45.5], 'cast', ['down']);
+            sweep('motor', [[66, 12.5, 40], [78.5, 12.5, 40]], 6.2, 'blue', { seg: 16, noTile: true, cap: 'pipe' });
+            for (let x = 67.5; x < 77.5; x += 2.0) sweep('motor_fin', [[x, 12.5, 40], [x + 0.7, 12.5, 40]], 6.9, 'blue', { seg: 16, noTile: true });
+            box(fr, [70, 18.8, 37.5], [75.5, 21.5, 42.5], 'cabinet');
         });
-        // Tail: exit table and the down-coiler between its cast-steel housing plates.
+
+        // Tail (modelled at d = 7..8): exit roller table with pinch-roll portal and heavy down-coiler.
         within('tail', null, () => {
-            box(shape('base', false), [X(0), -16, 112], [X(9), 0, 144], { up: 'deck', all: 'skid' }, ['down']);
-            table(7, 'exit_roll');
-            strip(112, 128);
-            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 128], [X(i) + 16, 16, 144], 'cabinet');
+            millBed(112, 128, true);
+            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 112], [X(i) + 16, 16, 128], 'cabinet', ['down']);
+            rollerTable(7, 'exit_roll', false);
+            // Pinch-roll portal guiding the finished strip into the coiler throat.
+            const coilerCast = shape('housing', false);
+            for (const x0 of [-27, 37]) box(coilerCast, [x0, 0, 122], [x0 + 6, 22, 127.5], 'cast', ['down']);
+            box(fr, [-27, 22, 122.5], [43, 25, 127], 'frame');
+
+            box(shape('base', false), [X(0), -16, 128], [X(9), 0, 144], { up: 'deck', all: 'skid' }, ['down']);
+            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 128], [X(i) + 16, 16, 144], 'cabinet', ['down']);
             ports(w, 'south', 8, { 1: '.E.......' }, -16);
-            for (const x of [X(2), X(6)]) {
-                box(shape('housing', false), [x + 2, 0, 129], [x + 14, 28, 143], 'cast', ['down']);
-                box(shape('housing', false), [x + 4, 28, 131], [x + 12, 32, 141], 'pipe');
+            for (const x0 of [-30, 34]) {
+                box(coilerCast, [x0, 0, 129], [x0 + 12, 30, 143], 'cast', ['down']);
+                box(fr, [x0 + 2, 30, 131], [x0 + 10, 33, 141], 'pipe', ['down']);
             }
-            sweep('mandrel', [[-16, 16, 136], [32, 16, 136]], 3, 'pipe', { seg: 10 });
-            within('coiler', [8, 16, 136], () => sweep('coil', [[-14, 16, 136], [30, 16, 136]], 13, 'coil', { seg: 24, noTile: true, cap: 'coil_end' }));
+            sweep('mandrel', [[-31, 16, 136], [47, 16, 136]], 3.2, 'pipe', { seg: 12 });
+            within('coiler', [8, 16, 136], () => sweep('coil', [[-16, 16, 136], [32, 16, 136]], 12.2, 'coil', { seg: 24, noTile: true, cap: 'coil_end' }));
+            // Pneumatic wrapper roll hold-down bridge over the coil.
+            sweep('wrapper_roll', [[-16, 29.5, 131.5], [32, 29.5, 131.5]], 2.2, 'roll', { seg: 10 });
+            for (const x of [-17, 32]) strut('wrapper_arm', [x + 0.5, 31, 136], [x + 0.5, 29.5, 131.5], 1.2);
         });
+    };
+
+    // Each movable bay is 16 pixels long. Use a matching material period so arbitrary
+    // repetitions of a bay meet at the same point in the grain.
+    const bayMaterials = {
+        deck(t) {
+            steel(t, 3, C.steel[2], C.steel[3], false);
+            for (let y = 0; y < 16; y += 8) for (let x = 0; x < 16; x += 8) {
+                for (let k = 0; k < 3; k++) {
+                    const ridge = y + ((x === y) ? 4 - k : 2 + k);
+                    t.tint(x + 2 + k, ridge, C.steel[5], 0.45);
+                    t.tint(x + 2 + k, ridge + 1, C.steel[1], 0.45);
+                }
+            }
+        },
+        cast(t) { steel(t, 47, [54, 58, 63], [77, 81, 87], true); },
+        frame(t) { steel(t, 13, C.frame[2], C.frame[3], false); },
+        roll(t) { steel(t, 45, C.steel[3], C.steel[5], false); },
+        skid(t) {
+            steel(t, 5, C.frame[2], C.frame[3], false);
+            t.rect(0, 0, 15, 0, C.frame[4]);
+            t.rect(0, 14, 15, 14, C.frame[1]);
+            t.rect(0, 15, 15, 15, C.frame[0]);
+        }
     };
 
     function build(name) {
@@ -1090,7 +1234,12 @@
         for (const key of Object.keys(TEXTURES)) {
             if (!used.has(key)) continue;
             const [w, h, draw] = TEXTURES[key];
-            const t = new Tex(w, h); draw(t);
+            const t = new Tex(w, h);
+            if (['rolling_mill', 'twin_screw_extruder', 'coke_oven_battery'].includes(name) && bayMaterials[key]) {
+                const tile = new Tex(16, 16);
+                bayMaterials[key](tile);
+                t.each((x, y) => t.px(x, y, tile.get(x, y)));
+            } else draw(t);
             const url = t.dataURL();
             fs.writeFileSync(texDir + key + '.png', Buffer.from(url.split(',')[1], 'base64'));
             tex[key] = new Texture({ name: key + '.png' }).fromDataURL(url).add(false);
