@@ -87,6 +87,14 @@
             for (const x of [3, 12]) { t.px(x, 1, STEEL[2]); t.px(x, 2, FRAME[0]); }
         }),
         vent: () => paint(t => { A.casing(t, 33); vent(t, 4, 4, 11, 11); }),
+        // Sides of the flanged and service hatches: the bare bolted casing their fronts are drawn on.
+        hatch_side: () => paint(t => A.casing(t, 46)),
+        // Top and bottom of every hatch: the same bolted casing as its front, with a plain inset cover.
+        hatch_top: () => paint(t => {
+            A.casing(t, 45);
+            t.bevel(4, 4, 11, 11, FRAME[0], STEEL[4]);
+            t.bevel(5, 5, 10, 10, STEEL[4], STEEL[1]);
+        }),
 
         controller: () => paint(t => controller(t, 34, false, plantScreen)),
         controller_formed: () => paint(t => controller(t, 34, true, plantScreen)),
@@ -136,13 +144,18 @@
         }),
     };
 
-    // ---- screw-barrel segments: flanged barrel sections that join side by side
+    // ---- screw-barrel segments: flanged barrel sections that join side by side.
+    // The barrel is shaded in a few flat steps with the casings' faint grain, not a smooth gradient,
+    // and the same shell is used on the top and bottom so every face reads as one bolted part.
+    const BARREL = [STEEL[1], STEEL[2], STEEL[3], STEEL[4], STEEL[4], STEEL[3], STEEL[2], STEEL[2], STEEL[1], FRAME[1]];
     function segmentShell(t, seed, accent) {
-        A.noise(t, 0, 0, 15, 15, FRAME[1], FRAME[3], seed);
+        A.noise(t, 0, 0, 15, 2, FRAME[1], FRAME[3], seed);
+        A.noise(t, 0, 13, 15, 15, FRAME[1], FRAME[3], seed + 100);
         t.rect(0, 0, 15, 0, FRAME[0]); t.rect(0, 1, 15, 1, FRAME[4]); t.rect(0, 2, 15, 2, FRAME[1]);
         t.rect(0, 13, 15, 13, FRAME[3]); t.rect(0, 14, 15, 14, FRAME[1]); t.rect(0, 15, 15, 15, FRAME[0]);
-        for (let y = 3; y <= 12; y++) for (let x = 0; x < 16; x++) t.px(x, y, mix(STEEL[1], STEEL[4], A.vcol(y, 3, 12) * 0.85));
-        for (const x of [2, 13]) { t.px(x, 1, STEEL[4]); t.px(x, 14, STEEL[3]); }
+        for (let y = 3; y <= 12; y++) { const c = BARREL[y - 3]; A.noise(t, 0, y, 15, y, dark(c, 0.08), light(c, 0.06), seed * 16 + y); }
+        for (let y = 3; y <= 12; y++) { t.tint(0, y, FRAME[0], 0.45); t.tint(15, y, [255, 255, 255], 0.12); }
+        for (const x of [2, 7, 12]) { t.px(x, 1, STEEL[4]); t.px(x + 1, 1, STEEL[2]); t.px(x, 14, STEEL[3]); t.px(x + 1, 14, FRAME[0]); }
         accent(t);
     }
     const SEGMENTS = {
@@ -168,6 +181,7 @@
         for (const name in PAINTS) out.push(save(PAINTS[name](), (DIR[name] || 'block/machine/plant/') + name + '.png'));
         let seed = 50;
         for (const name in SEGMENTS) { const s = seed++; out.push(save(paint(t => segmentShell(t, s, SEGMENTS[name])), 'block/' + name + '.png')); }
+        out.push(save(paint(t => segmentShell(t, 49, () => {})), 'block/structure/segment_top.png'));
         return out.length + ' textures';
     }
 

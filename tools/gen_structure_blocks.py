@@ -530,7 +530,7 @@ def ladder():
 
 def gas_hatch():
     model("gas_output_hatch", {"parent": "minecraft:block/orientable", "textures": {
-        "front": "iuce:block/gas_output_hatch", "side": "iuce:block/machine/process/box_side", "top": "iuce:block/machine/process/box_top"}})
+        "front": "iuce:block/gas_output_hatch", "side": "iuce:block/machine/plant/hatch_side", "top": "iuce:block/machine/plant/hatch_top"}})
     state("gas_output_hatch", {"formed=false": {"model": "iuce:block/gas_output_hatch"}, "formed=true": EMPTY})
 
 
@@ -538,7 +538,7 @@ def segments():
     for name in SEGMENTS:
         model(name, {"parent": "minecraft:block/cube_bottom_top", "textures": {
             "top": TEX + "segment_top",
-            "bottom": TEX + "checker_plate_side",
+            "bottom": TEX + "segment_top",
             "side": f"iuce:block/{name}"}})
         state(name, {"formed=false": {"model": f"iuce:block/{name}"}, "formed=true": EMPTY})
 

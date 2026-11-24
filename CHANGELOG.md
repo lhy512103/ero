@@ -157,6 +157,7 @@
 151. Fixed: Flickering textures on chimney tops and pipe bands of formed large machines such as the waste heat power plant and coke oven battery.
 152. Fixed: Flickering corners on the edge trim of unconnected tank shells and checker plates.
 153. Improved: Checker plates now use the same diagonal tread pattern as the formed waste heat power plant deck.
+154. Improved: Redrew the tops and sides of screw-barrel segments and hatches to match their fronts, and gave the segments less smooth shading.
 
 ### 中文
 
@@ -313,3 +314,4 @@
 151. 修复：余热电站、焦炉等大型机器成型后烟囱口和管箍处贴图闪烁的问题。
 152. 修复：容器壳体和花纹钢板未连接时边缘四角贴图闪烁的问题。
 153. 优化：花纹钢板改用与余热电站成型甲板相同的斜纹防滑花纹。
+154. 优化：重绘各类螺杆段和输入输出仓的顶面与侧面，与正面风格统一，螺杆段不再过于平滑。

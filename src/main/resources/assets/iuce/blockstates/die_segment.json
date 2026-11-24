@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "formed=false": {
       "model": "iuce:block/die_segment"
+    },
+    "formed=true": {
+      "model": "iuce:block/plant_empty"
     }
   }
 }

@@ -2,8 +2,8 @@
   "parent": "minecraft:block/cube",
   "textures": {
     "particle": "iuce:block/machine/plant/output_hatch",
-    "down": "iuce:block/machine/plant/casing",
-    "up": "iuce:block/machine/plant/casing",
+    "down": "iuce:block/machine/plant/hatch_top",
+    "up": "iuce:block/machine/plant/hatch_top",
     "north": "iuce:block/machine/plant/output_hatch",
     "south": "iuce:block/machine/plant/output_hatch",
     "west": "iuce:block/machine/plant/output_hatch",

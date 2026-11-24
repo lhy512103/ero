@@ -175,13 +175,7 @@
             }
         }),
 
-        // ---- Screw barrel top and the connected roll drum (hatches and segments live in parts.js).
-        segment_top: () => paint(t => {
-            flat(t, FRAME[2]);
-            t.bevel(0, 0, 15, 15, FRAME[4], FRAME[0]);
-            t.rect(3, 2, 12, 13, STEEL[2]); t.bevel(3, 2, 12, 13, STEEL[4], FRAME[0]);
-            t.rect(6, 5, 9, 10, FRAME[1]);
-        }),
+        // ---- Connected roll drum (hatches, screw-barrel segments and their top live in parts.js).
         plant_drum: () => paint(t => {
             cyl(t, STEEL[0], STEEL[4]);
             for (let x = 0; x < 16; x++) { const c = mix(STEEL[0], STEEL[3], A.vcol(x)); t.px(x, 5, c); t.px(x, 10, c); }

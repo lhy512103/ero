@@ -351,8 +351,8 @@ def build_hatch_models():
             "parent": "minecraft:block/cube",
             "textures": {
                 "particle": f"iuce:block/machine/plant/{tex}",
-                "down": "iuce:block/machine/plant/casing",
-                "up": "iuce:block/machine/plant/casing",
+                "down": "iuce:block/machine/plant/hatch_top",
+                "up": "iuce:block/machine/plant/hatch_top",
                 "north": f"iuce:block/machine/plant/{tex}",
                 "south": f"iuce:block/machine/plant/{tex}",
                 "west": f"iuce:block/machine/plant/{tex}",
@@ -375,7 +375,7 @@ def build_hatch_models():
             "parent": "minecraft:block/orientable",
             "textures": {
                 "particle": f"iuce:block/machine/plant/{tex}",
-                "top": "iuce:block/machine/plant/casing",
+                "top": "iuce:block/machine/plant/hatch_top",
                 "front": f"iuce:block/machine/plant/{tex}",
                 "side": "iuce:block/machine/plant/vent",
             },

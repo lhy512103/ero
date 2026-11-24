@@ -2,7 +2,7 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "front": "iuce:block/generation_hatch",
-    "side": "iuce:block/machine/process/box_side",
-    "top": "iuce:block/machine/process/box_top"
+    "side": "iuce:block/machine/plant/hatch_side",
+    "top": "iuce:block/machine/plant/hatch_top"
   }
 }
