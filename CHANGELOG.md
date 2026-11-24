@@ -155,6 +155,7 @@
 149. Improved: Redrew the polyethylene, natural rubber and tier-II logistics machines, blocks and items to match the process machine style.
 150. Fixed: Thirteen dyeable items, including PE and PVC pipes, plastic pellets, film rolls, drip tape and strands, showing as blank icons in inventories.
 151. Fixed: Flickering textures on chimney tops and pipe bands of formed large machines such as the waste heat power plant and coke oven battery.
+152. Fixed: Flickering corners on the edge trim of unconnected tank shells and checker plates.
 
 ### 中文
 
@@ -309,3 +310,4 @@
 149. 优化：重绘聚乙烯加工、天然橡胶与二级物流的机器、方块和物品贴图，与加工机器风格统一。
 150. 修复：PE 管、PVC 管、各类塑料粒料、膜卷、滴灌带和料条等 13 种可染色物品在物品栏中显示为空白的问题。
 151. 修复：余热电站、焦炉等大型机器成型后烟囱口和管箍处贴图闪烁的问题。
+152. 修复：容器壳体和花纹钢板未连接时边缘四角贴图闪烁的问题。
