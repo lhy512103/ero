@@ -1,0 +1,110 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "trim": "iuce:block/structure/checker_plate_trim",
+    "particle": "iuce:block/structure/checker_plate_trim"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        14,
+        -0.016
+      ],
+      "to": [
+        16,
+        16,
+        -0.016
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 0,
+          "texture": "#trim",
+          "cullface": "north"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14,
+        16.016
+      ],
+      "to": [
+        16,
+        16,
+        16.016
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 0,
+          "texture": "#trim",
+          "cullface": "south"
+        }
+      }
+    },
+    {
+      "from": [
+        -0.016,
+        14,
+        0
+      ],
+      "to": [
+        -0.016,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 0,
+          "texture": "#trim",
+          "cullface": "west"
+        }
+      }
+    },
+    {
+      "from": [
+        16.016,
+        14,
+        0
+      ],
+      "to": [
+        16.016,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 0,
+          "texture": "#trim",
+          "cullface": "east"
+        }
+      }
+    }
+  ]
+}

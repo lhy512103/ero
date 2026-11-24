@@ -1,25 +1,34 @@
 {
-  "variants": {
-    "axis=y,formed=false": {
-      "model": "iuce:block/graphite_electrode"
+  "multipart": [
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y"
+      },
+      "apply": {
+        "model": "iuce:block/graphite_electrode"
+      }
     },
-    "axis=y,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z"
+      },
+      "apply": {
+        "model": "iuce:block/graphite_electrode",
+        "x": 90
+      }
     },
-    "axis=z,formed=false": {
-      "model": "iuce:block/graphite_electrode",
-      "x": 90
-    },
-    "axis=z,formed=true": {
-      "model": "iuce:block/plant_empty"
-    },
-    "axis=x,formed=false": {
-      "model": "iuce:block/graphite_electrode",
-      "x": 90,
-      "y": 90
-    },
-    "axis=x,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x"
+      },
+      "apply": {
+        "model": "iuce:block/graphite_electrode",
+        "x": 90,
+        "y": 90
+      }
     }
-  }
+  ]
 }

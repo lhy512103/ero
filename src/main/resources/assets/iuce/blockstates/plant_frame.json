@@ -1,25 +1,164 @@
 {
-  "variants": {
-    "axis=y,formed=false": {
-      "model": "iuce:block/plant_frame"
+  "multipart": [
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame"
+      }
     },
-    "axis=y,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "north": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset"
+      }
     },
-    "axis=z,formed=false": {
-      "model": "iuce:block/plant_frame",
-      "x": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "south": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 180
+      }
     },
-    "axis=z,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "east": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 90
+      }
     },
-    "axis=x,formed=false": {
-      "model": "iuce:block/plant_frame",
-      "x": 90,
-      "y": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "west": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 270
+      }
     },
-    "axis=x,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "up": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "x": -90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "down": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "east": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "west": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "up": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "x": -90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "down": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "north": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "south": "true"
+      },
+      "apply": {
+        "model": "iuce:block/plant_frame_gusset",
+        "y": 180
+      }
     }
-  }
+  ]
 }

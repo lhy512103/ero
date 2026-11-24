@@ -1,25 +1,99 @@
 {
-  "variants": {
-    "axis=y,formed=false": {
-      "model": "iuce:block/plant_drum"
+  "multipart": [
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_core"
+      }
     },
-    "axis=z,formed=false": {
-      "model": "iuce:block/plant_drum",
-      "x": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_core",
+        "x": 90
+      }
     },
-    "axis=x,formed=false": {
-      "model": "iuce:block/plant_drum",
-      "x": 90,
-      "y": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_core",
+        "x": 90,
+        "y": 90
+      }
     },
-    "axis=y,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "neg": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap",
+        "x": 90
+      }
     },
-    "axis=z,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "pos": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap",
+        "x": -90
+      }
     },
-    "axis=x,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "neg": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "pos": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "neg": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "pos": "false"
+      },
+      "apply": {
+        "model": "iuce:block/plant_drum_cap",
+        "y": 90
+      }
     }
-  }
+  ]
 }

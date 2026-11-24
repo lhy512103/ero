@@ -54,25 +54,49 @@
     }
 
     const C = {
-        steel: [[44, 48, 54], [68, 72, 78], [112, 117, 123], [152, 157, 162], [184, 189, 194], [206, 210, 214]],
-        frame: [[40, 46, 54], [62, 70, 80], [86, 96, 108], [112, 122, 134], [140, 150, 162]],
-        blue: [56, 78, 106], orange: [204, 116, 40], yellow: [198, 162, 54], water: [58, 104, 168],
+        steel: [[44, 48, 54], [68, 74, 82], [108, 114, 122], [146, 152, 160], [176, 182, 190], [204, 210, 216]],
+        frame: [[30, 34, 40], [48, 54, 62], [68, 76, 86], [92, 102, 114], [122, 132, 144]],
+        blue: [54, 82, 116], orange: [204, 116, 40], yellow: [198, 162, 54], water: [56, 106, 172],
         green: [96, 210, 120], red: [214, 64, 52], dark: [22, 24, 28],
     };
 
-    // Brushed steel: soft blotches plus fine streaks along one axis.
-    function steel(t, seed, lo, hi, streakVertical) {
-        const blot = fbm(t.w, t.h, seed, [[16, 16], [8, 8], [4, 4]]);
-        const streak = streakVertical ? lattice(t.w, t.h, 1, Math.min(16, t.h), seed + 5) : lattice(t.w, t.h, Math.min(16, t.w), 1, seed + 5);
-        t.each((x, y) => t.px(x, y, mix(lo, hi, 0.15 + 0.7 * blot(x, y) + 0.25 * (streak(x, y) - 0.5))));
+    // Quantizes a colour blend into crisp discrete Minecraft pixel-art steps instead of blurry smooth gradients.
+    function qmix(lo, hi, v, steps) {
+        steps = steps || 5;
+        const q = Math.round(Math.max(0, Math.min(1, v)) * steps) / steps;
+        return [Math.round(lo[0] + (hi[0] - lo[0]) * q), Math.round(lo[1] + (hi[1] - lo[1]) * q), Math.round(lo[2] + (hi[2] - lo[2]) * q)];
     }
-    // A weld seam: raised bead with a light top edge and a dark shadow, horizontal or vertical.
-    function weldH(t, y, x0, x1) { for (let x = x0; x <= x1; x++) { t.tint(x, y - 1, [255, 255, 255], 0.18); t.px(x, y, mix(C.steel[1], C.steel[2], (x * 7 % 5) / 5)); t.tint(x, y + 1, [0, 0, 0], 0.3); } }
-    function weldV(t, x, y0, y1) { for (let y = y0; y <= y1; y++) { t.tint(x - 1, y, [255, 255, 255], 0.18); t.px(x, y, mix(C.steel[1], C.steel[2], (y * 7 % 5) / 5)); t.tint(x + 1, y, [0, 0, 0], 0.3); } }
-    function rivet(t, x, y) { t.px(x, y, C.steel[5]); t.px(x + 1, y, C.steel[2]); t.px(x, y + 1, C.steel[2]); t.px(x + 1, y + 1, C.steel[0]); }
+
+    // Minecraft-style pixel-clustered metal plate: 2x2 / 4x2 quantized patches + crisp pixel bands, zero blurry float gradients.
+    function steel(t, seed, lo, hi, streakVertical) {
+        const blot = fbm(t.w, t.h, seed, [[8, 8], [4, 4]]);
+        const r = rng(seed + 19);
+        const grid = new Float32Array((t.w >> 1) * (t.h >> 1));
+        for (let gy = 0; gy < (t.h >> 1); gy++) {
+            for (let gx = 0; gx < (t.w >> 1); gx++) {
+                grid[gy * (t.w >> 1) + gx] = 0.25 + 0.5 * blot(gx * 2, gy * 2) + (r() - 0.5) * 0.22;
+            }
+        }
+        const bandR = rng(seed + 37);
+        const bands = [];
+        const nBands = streakVertical ? t.w : t.h;
+        for (let i = 0; i < nBands; i++) bands.push(((i >> 1) % 2 ? 0.05 : -0.05) + (bandR() - 0.5) * 0.06);
+        t.each((x, y) => {
+            const v = grid[(y >> 1) * (t.w >> 1) + (x >> 1)] + bands[streakVertical ? x : y];
+            t.px(x, y, qmix(lo, hi, v, 4));
+        });
+    }
+    // A crisp pixel weld seam: 1px highlight + 1px dark groove, horizontal or vertical.
+    function weldH(t, y, x0, x1) { for (let x = x0; x <= x1; x++) { t.tint(x, y - 1, [255, 255, 255], 0.16); t.px(x, y, C.steel[1]); } }
+    function weldV(t, x, y0, y1) { for (let y = y0; y <= y1; y++) { t.tint(x - 1, y, [255, 255, 255], 0.16); t.px(x, y, C.steel[1]); } }
+    function rivet(t, x, y) { t.px(x, y, C.steel[5]); t.px(x + 1, y, C.steel[0]); }
     function grime(t, seed, c, amount, fromBottom) {
-        const n = fbm(t.w, t.h, seed, [[8, 8], [4, 4], [2, 2]]);
-        t.each((x, y) => { const g = n(x, y) * amount * (fromBottom ? 0.4 + 0.6 * y / t.h : 1); t.tint(x, y, c, Math.max(0, g - 0.1)); });
+        const n = fbm(t.w, t.h, seed, [[8, 8], [4, 4]]);
+        t.each((x, y) => {
+            const bx = x & ~1, by = y & ~1;
+            const g = Math.round(n(bx, by) * 4) / 4 * amount * (fromBottom ? 0.35 + 0.65 * by / t.h : 1);
+            if (g > 0.14) t.tint(x, y, c, Math.min(0.28, g - 0.1));
+        });
     }
     function icon(t, rows, x0, y0, c) { rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') t.px(x0 + x, y0 + y, c); else if (ch === '+') t.px(x0 + x, y0 + y, dark(c, 0.45)); })); }
 
@@ -80,19 +104,25 @@
     const ARROW_OUT = ['..#..', '.###.', '#.#.#', '..#..', '..#..'];
 
     const TEXTURES = {
-        // Checker plate for the skid top: subtle low-contrast industrial anti-slip chevron plate.
+        // Checker plate for the skid top: crisp MC pixel-art anti-slip tread lugs matching structure.js checker_plate!
         deck: [64, 64, t => {
             steel(t, 3, C.steel[2], C.steel[3], false);
             for (let y = 0; y < 64; y += 8) for (let x = 0; x < 64; x += 8) {
                 const alt = ((x >> 3) + (y >> 3)) & 1;
-                for (let k = 0; k < 3; k++) {
-                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
-                    t.px(lx, ly, mix(C.steel[3], C.steel[4], 0.48));
-                    t.px(lx, ly + 1, mix(C.steel[2], C.steel[1], 0.32));
+                if (alt === 0) {
+                    t.rect(x + 2, y + 3, x + 4, y + 3, C.steel[5]);
+                    t.rect(x + 2, y + 4, x + 4, y + 4, C.steel[1]);
+                    t.rect(x + 3, y + 6, x + 5, y + 6, C.steel[4]);
+                    t.rect(x + 3, y + 7, x + 5, y + 7, C.steel[1]);
+                } else {
+                    t.rect(x + 3, y + 2, x + 3, y + 4, C.steel[5]);
+                    t.rect(x + 4, y + 2, x + 4, y + 4, C.steel[1]);
+                    t.rect(x + 6, y + 3, x + 6, y + 5, C.steel[4]);
+                    t.rect(x + 7, y + 3, x + 7, y + 5, C.steel[1]);
                 }
             }
             weldH(t, 0, 0, 63); weldV(t, 0, 0, 63);
-            grime(t, 4, [56, 50, 44], 0.22, false);
+            grime(t, 4, [56, 50, 44], 0.2, false);
         }],
         // Skid side: a rolled channel beam with top and bottom flanges.
         skid: [64, 16, t => {
@@ -160,47 +190,62 @@
             for (let x = 2; x < 32; x += 8) t.px(x, 3, [110, 114, 120]);
         }],
         brick: [32, 32, t => {
-            const n = fbm(32, 32, 21, [[8, 8], [4, 4], [2, 2]]);
-            t.each((x, y) => {
-                const row = y >> 3, joint = y % 8 === 0 || (x + (row & 1 ? 8 : 0)) % 16 === 0;
-                t.px(x, y, joint ? [96, 84, 76] : mix([150, 118, 92], [196, 160, 124], n(x, y)));
-            });
+            const r = rng(21);
+            t.rect(0, 0, 31, 31, [78, 70, 64]);
+            const BR = [[96, 62, 42], [140, 98, 66], [176, 130, 90], [204, 160, 116]];
+            for (let row = 0; row < 8; row++) {
+                const y0 = row * 4, off = (row & 1) ? 4 : 0;
+                for (let b = -1; b < 4; b++) {
+                    const x0 = b * 8 + off, base = r() < 0.4 ? 1 : 2;
+                    for (let y = y0; y < y0 + 3; y++) for (let x = x0; x < x0 + 7; x++) {
+                        if (x < 0 || x >= 32) continue;
+                        let idx = base;
+                        if (y === y0 || x === x0) idx = Math.min(3, base + 1);
+                        else if (y === y0 + 2 || x === x0 + 6) idx = Math.max(0, base - 1);
+                        else if (r() < 0.18) idx = Math.max(0, base - 1);
+                        t.px(x, y, BR[idx]);
+                    }
+                }
+            }
         }],
         graphite: [32, 32, t => {
-            const n = fbm(32, 32, 22, [[8, 16], [4, 8], [2, 2]]);
-            t.each((x, y) => t.px(x, y, mix([34, 36, 40], [84, 86, 92], n(x, y))));
-            for (let x = 0; x < 32; x++) { t.px(x, 0, [24, 24, 28]); t.px(x, 1, [102, 104, 110]); }
+            steel(t, 22, [34, 36, 40], [84, 88, 96], true);
+            for (let x = 0; x < 32; x++) { t.px(x, 0, [22, 24, 28]); t.px(x, 1, [100, 104, 112]); }
         }],
         copper: [32, 32, t => {
-            const n = fbm(32, 32, 23, [[16, 16], [8, 8], [2, 2]]);
-            t.each((x, y) => t.px(x, y, mix(COPPER[1], COPPER[3], 0.1 + 0.8 * n(x, y))));
-            grime(t, 24, [70, 120, 100], 0.3, false);
+            steel(t, 23, COPPER[1], COPPER[3], false);
+            grime(t, 24, [70, 120, 100], 0.25, false);
         }],
         glow: [32, 32, t => {
-            const n = fbm(32, 32, 25, [[8, 8], [4, 4], [2, 2]]);
-            t.each((x, y) => { const v = n(x, y); t.px(x, y, v > 0.62 ? HOT[0] : v > 0.48 ? HOT[1] : v > 0.36 ? HOT[2] : HOT[3]); });
+            const n = fbm(32, 32, 25, [[8, 8], [4, 4]]);
+            t.each((x, y) => { const v = n(x & ~1, y & ~1); t.px(x, y, v > 0.62 ? HOT[0] : v > 0.48 ? HOT[1] : v > 0.36 ? HOT[2] : HOT[3]); });
         }],
         // Transformer tank paint and its radiator panels.
-        tank: [64, 64, t => { steel(t, 26, [92, 104, 98], [132, 146, 138], false); weldH(t, 0, 0, 63); weldV(t, 0, 0, 63); grime(t, 27, [40, 40, 36], 0.3, true); }],
-        ceramic: [32, 16, t => { const n = fbm(32, 16, 28, [[8, 8], [4, 4]]); t.each((x, y) => t.px(x, y, mix([132, 72, 44], [188, 112, 70], n(x, y) + (y < 4 ? 0.3 : 0)))); }],
-        rubber: [32, 32, t => { const n = fbm(32, 32, 29, [[16, 4], [4, 2]]); t.each((x, y) => t.px(x, y, mix([24, 24, 28], [56, 56, 62], n(x, y)))); }],
-        cavity: [16, 16, t => t.each((x, y) => t.px(x, y, mix([14, 15, 18], [34, 36, 40], y / 15)))],
+        tank: [64, 64, t => { steel(t, 26, [88, 102, 96], [134, 148, 140], false); weldH(t, 0, 0, 63); weldV(t, 0, 0, 63); grime(t, 27, [40, 40, 36], 0.25, true); }],
+        ceramic: [32, 16, t => { steel(t, 28, [126, 68, 42], [190, 114, 72], false); t.rect(0, 0, 31, 1, [212, 142, 98]); }],
+        rubber: [32, 32, t => { steel(t, 29, [24, 24, 28], [56, 58, 64], false); }],
+        cavity: [16, 16, t => t.each((x, y) => t.px(x, y, qmix([14, 15, 18], [34, 36, 40], y / 15, 4)))],
 
         // ---- Ports. Item ports are square hatches with chevrons, fluid ports round flanges with a drop;
         // blue means "goes in", orange means "comes out", and the arrows point that way.
+        // Outer 1px perimeter matches C.steel[3]/C.steel[4] seamlessly so adjacent I / @ / O port blocks join cleanly!
         item_in: [16, 16, t => {
-            t.rect(0, 0, 15, 15, C.steel[2]); t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[0]);
-            t.rect(2, 2, 13, 13, C.blue); t.rect(4, 4, 11, 11, C.dark);
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.rect(1, 2, 14, 13, C.steel[1]);
+            t.rect(2, 3, 13, 12, C.blue); t.rect(4, 4, 11, 11, C.dark);
             for (const [x, y, dx, dy] of [[7, 2, 0, 1], [7, 12, 0, -1], [2, 7, 1, 0], [12, 7, -1, 0]]) {
-                const w = dx ? [0, 1] : [0, 1];
+                const w = [0, 1];
                 for (let i = 0; i < 2; i++) { t.px(x + dx * i + (dy ? w[0] : 0), y + dy * i + (dx ? w[0] : 0), [235, 242, 250]); t.px(x + dx * i + (dy ? w[1] : 0), y + dy * i + (dx ? w[1] : 0), [235, 242, 250]); }
             }
-            icon(t, ['.####.', '#+..+#', '#....#', '#+..+#', '.####.'], 5, 5, C.steel[3]);
+            icon(t, ARROW_IN, 5, 5, [196, 226, 255]);
         }],
         item_out: [16, 16, t => {
-            t.rect(0, 0, 15, 15, C.steel[2]); t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[0]);
-            t.rect(2, 2, 13, 13, C.orange); t.rect(4, 4, 11, 11, C.dark);
-            for (const [x, y] of [[7, 0], [7, 14], [0, 7], [14, 7]]) t.rect(x, y, x + 1, y + 1, [255, 236, 200]);
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.rect(1, 2, 14, 13, C.steel[1]);
+            t.rect(2, 3, 13, 12, C.orange); t.rect(4, 4, 11, 11, C.dark);
+            for (const [x, y] of [[7, 2], [7, 12], [2, 7], [12, 7]]) t.rect(x, y, x + 1, y + 1, [255, 236, 200]);
             icon(t, ARROW_OUT, 5, 5, [255, 214, 160]);
         }],
         // Labels above the ports, so even from a distance it is clear which hatch is which.
@@ -209,52 +254,62 @@
         tag_fluid_in: [16, 8, t => { t.rect(0, 0, 15, 7, C.blue); t.rect(0, 7, 15, 7, dark(C.blue, 0.4)); icon(t, ['..#....#', '.###...#', '#####.##', '#####..#', '.###...#'], 1, 1, [240, 244, 250]); }],
         tag_fluid_out: [16, 8, t => { t.rect(0, 0, 15, 7, C.orange); t.rect(0, 7, 15, 7, dark(C.orange, 0.4)); icon(t, ['..#.#...', '.###.#..', '#####.#.', '#####.#.', '.###.#..'], 1, 1, [255, 246, 232]); }],
         flange_in: [16, 16, t => {
-            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.blue : C.dark); });
-            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r <= 7.2) t.px(x, y, r > 5.2 ? C.steel[3] : r > 3.8 ? C.blue : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.0, 7.5 + Math.sin(a) * 6.0, C.steel[5]); }
             icon(t, ['.#.', '###', '.#.'], 6, 6, [120, 170, 240]);
         }],
         flange_out: [16, 16, t => {
-            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.orange : C.dark); });
-            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r <= 7.2) t.px(x, y, r > 5.2 ? C.steel[3] : r > 3.8 ? C.orange : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.0, 7.5 + Math.sin(a) * 6.0, C.steel[5]); }
         }],
-        // Control desk: screen, lamps and push buttons on a dark bezel.
+        // Control console: shares the exact same steel bezel & top/bottom trim as item_in / item_out so I-@ -O forms one continuous console bank!
         panel: [16, 16, t => {
-            t.rect(0, 0, 15, 15, C.frame[1]); t.rect(0, 0, 15, 0, C.frame[3]);
-            t.rect(1, 1, 14, 8, C.dark); t.rect(2, 2, 13, 7, [16, 44, 32]);
-            for (let x = 2; x <= 13; x++) t.px(x, Math.round(5 - 2 * Math.sin(x * 0.9)), C.green);
-            t.rect(2, 7, 6, 7, [70, 160, 100]);
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.rect(1, 2, 14, 13, C.frame[1]);
+            t.rect(2, 3, 13, 8, C.dark); t.rect(3, 4, 12, 7, [16, 46, 34]);
+            for (let x = 3; x <= 12; x++) t.px(x, Math.round(5.5 - 1.3 * Math.sin(x * 0.95)), C.green);
             t.rect(2, 10, 3, 11, C.green); t.rect(5, 10, 6, 11, C.red); t.rect(8, 10, 9, 11, C.yellow);
-            t.rect(11, 10, 13, 13, C.steel[1]); t.rect(12, 11, 12, 12, C.steel[4]);
-            t.rect(2, 13, 9, 13, C.steel[2]);
+            t.rect(11, 10, 13, 12, C.steel[3]); t.px(12, 11, C.steel[5]);
         }],
         desk: [16, 16, t => { steel(t, 31, C.frame[2], C.frame[3], false); t.rect(0, 0, 15, 0, C.frame[4]); }],
-        // Maintenance cabinet door: tool outline, hinges, a latch and louvres; nothing like the desk.
+        // Maintenance cabinet door: shares the exact steel casing rim so L-M-R-Q ports join cleanly too.
         maint: [16, 16, t => {
-            t.rect(0, 0, 15, 15, C.steel[3]); t.rect(0, 0, 15, 0, C.steel[5]); t.rect(0, 0, 0, 15, C.steel[4]);
-            t.rect(15, 0, 15, 15, C.steel[1]); t.rect(0, 15, 15, 15, C.steel[0]);
-            t.rect(1, 2, 1, 4, C.steel[1]); t.rect(1, 11, 1, 13, C.steel[1]);
-            t.rect(13, 6, 14, 9, C.steel[1]); t.px(13, 7, C.steel[5]);
-            for (const y of [11, 13]) t.rect(4, y, 11, y, C.steel[1]);
-            icon(t, ['.#..##', '##...#', '.#..#.', '..##..', '.#..#.', '#...##', '##..#.'], 5, 2, [240, 240, 236]);
-            icon(t, ['.#..##', '##...#', '.#..#.', '..##..', '.#..#.', '#...##', '##..#.'].map(r => r.replace(/#/g, '.')), 5, 2, C.dark);
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.rect(1, 2, 14, 13, C.steel[1]);
+            t.rect(2, 3, 13, 12, C.steel[3]);
+            t.rect(2, 4, 2, 5, C.steel[0]); t.rect(2, 10, 2, 11, C.steel[0]);
+            t.rect(11, 6, 12, 9, C.steel[1]); t.px(11, 7, C.steel[5]);
+            t.rect(4, 10, 9, 10, C.steel[1]); t.rect(4, 11, 9, 11, C.steel[4]);
+            icon(t, ['.#..#.', '##..##', '.####.', '..##..', '.#..#.'], 4, 4, [242, 242, 236]);
         }],
         socket: [16, 16, t => {
-            t.rect(0, 0, 15, 15, C.frame[2]); t.rect(0, 0, 15, 0, C.frame[4]); t.rect(0, 15, 15, 15, C.frame[0]);
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
             t.rect(2, 2, 13, 13, C.dark);
             icon(t, ['...##', '..##.', '.####', '..##.', '.##..', '##...'], 5, 4, [250, 210, 70]);
             for (const [x, y] of [[1, 1], [13, 1], [1, 13], [13, 13]]) rivet(t, x, y);
         }],
-        cabinet: [32, 32, t => {
+        // Seamless steel enclosure surface: clean stepped steel plate without baked 32x32 frame borders so any cabinet box of any size tiles without cut-off L-seams!
+        cabinet: [16, 16, t => {
             steel(t, 32, C.steel[2], C.steel[4], false);
-            t.rect(0, 0, 31, 0, C.steel[4]); t.rect(0, 0, 0, 31, C.steel[4]);
-            t.rect(31, 0, 31, 31, C.steel[1]); t.rect(0, 31, 31, 31, C.steel[1]);
-            t.rect(3, 3, 28, 3, C.steel[1]); t.rect(3, 28, 28, 28, C.steel[4]);
-            t.rect(3, 3, 3, 28, C.steel[1]); t.rect(28, 3, 28, 28, C.steel[4]);
+            t.rect(0, 0, 15, 0, C.steel[4]);
+            t.rect(0, 15, 15, 15, C.steel[1]);
+        }],
+        cabinet_top: [16, 16, t => {
+            steel(t, 32, C.steel[3], C.steel[4], false);
         }],
         gauge: [8, 8, t => { t.each((x, y) => { const r = Math.hypot(x - 3.5, y - 3.5); t.px(x, y, r > 3.6 ? C.steel[1] : [236, 236, 228]); }); t.px(3, 3, C.red); t.px(4, 2, C.red); t.px(5, 1, C.red); }],
         flange_gas: [16, 16, t => {
-            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.yellow : C.dark); });
-            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[1]);
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r <= 7.2) t.px(x, y, r > 5.2 ? C.steel[3] : r > 3.8 ? C.yellow : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.0, 7.5 + Math.sin(a) * 6.0, C.steel[5]); }
         }],
         // Stainless vessel shell: bright plate, circumferential and long seams.
         vessel: [64, 64, t => {
@@ -604,18 +659,18 @@
             if (Math.abs(a - Math.PI * 1.5) < 0.4) continue;
             sweep('water_drop', fillet([[cx + c * 64, 60, cz + s * 64], [cx + c * 64, 54, cz + s * 64], [cx + c * 61, 50, cz + s * 61]], 2, 3), 1.1, 'water', { seg: 6 });
         }
-        sweep('hood', [[cx, 104, cz], [cx, 128, cz]], d => 60 - d * (24 / 24), 'hood', { seg: 64, noTile: true });
+        sweep('hood', [[cx, 104, cz], [cx, 128, cz]], d => 60 - d * (24 / 24), 'hood', { seg: 64, noTile: true, cap: false });
         sweep('roof', [[cx, 128, cz], [cx, 134, cz]], 37, 'pipe', { seg: 48, noTile: true, cap: 'roof', capEnds: ['end'] });
 
         // ---- Tap hole on the +x side: tapping spout, glowing stream and the carbide pot on a bogie.
         const tap = shape('tap', false);
         box(tap, [66, 22, 80], [72, 36, 96], 'brick');
-        box(shape('glow_tap', false), [72, 26, 84], [72.5, 32, 92], 'glow');
+        box(shape('glow_tap', false), [72, 26, 84], [72.5, 32, 92], 'glow', ['west']);
         const launder = shape('tap', false);
         box(launder, [72, 24, 82], [86, 26, 94], 'brick');
         box(launder, [72, 26, 82], [86, 30, 83], 'brick'); box(launder, [72, 26, 93], [86, 30, 94], 'brick');
         box(shape('glow_stream', false), [72, 26.5, 83], [86, 27.2, 93], 'glow', ['down', 'north', 'south']);
-        box(shape('glow_stream', false), [84, 18, 86], [86, 26.5, 90], 'glow', ['up']);
+        box(shape('glow_stream', false), [83.6, 18, 86], [85.6, 24, 90], 'glow', ['up']);
         band('pot', 85, 88, 8, 10, 16, 18.5, 'pipe', 24);
         tube('pot', 85, 88, 10.5, 16, 17, 'frame', { seg: 24 });
         annulus('glow_pot', 85, 88, 0, 8, 18, true, 'glow', 24);
@@ -641,7 +696,7 @@
         const electrodes = [0, 1, 2].map(i => { const a = -Math.PI / 2 + i * Math.PI * 2 / 3; return [cx + Math.cos(a) * 20, cz + Math.sin(a) * 20]; });
         electrodes.forEach(([ex, ez], i) => {
             tube('electrode', ex, ez, 8, 120, 262, 'graphite', { seg: 16, cap: 'graphite', capEnds: ['end'] });
-            band('glow_seal', ex, ez, 8, 11, 133, 134.5, 'glow', 16);
+            band('glow_seal', ex, ez, 8, 11, 134.1, 135.5, 'glow', 16);
             band('clamp', ex, ez, 8, 11, 150, 164, 'copper', 16);
             band('clamp', ex, ez, 8, 12, 166, 169, 'pipe', 16);
             band('slip', ex, ez, 8, 12, 222, 226, 'pipe', 16);
@@ -685,7 +740,7 @@
 
         // ---- Charging bins for lime and coke on the upper deck, feeding the roof through bent chutes.
         for (const [bx, bz] of [[-40, 62], [56, 62]]) {
-            sweep('bin', [[bx, 212, bz], [bx, 228, bz]], d => 4 + d * (10 / 16), 'pipe', { seg: 16, noTile: true });
+            sweep('bin', [[bx, 212, bz], [bx, 228, bz]], d => 4 + d * (10 / 16), 'pipe', { seg: 16, noTile: true, cap: false });
             tube('bin', bx, bz, 14, 228, 248, 'cabinet', { seg: 16, noTile: true, cap: 'roof', capEnds: ['end'] });
             band('bin', bx, bz, 13.5, 15, 246, 248, 'pipe', 16);
             const toward = bx < cx ? 1 : -1;
@@ -755,19 +810,26 @@
     const cellX = (w, i) => (i - (w >> 1)) * 16;
     const PORT_FACE = { I: 'item_in', O: 'item_out', L: 'flange_in', R: 'flange_out', Q: 'flange_gas', M: 'maint', '@': 'panel', S: 'socket', H: 'socket', E: 'socket', J: 'socket' };
     const NOZZLE = { L: 'water', R: 'pipe', Q: 'gas' };
-    // Hatch boxes on one face of row d; rows maps a layer to its row text, as in the layout.
-    function ports(w, side, d, rows, baseY) {
-        const dir = side === 'north' ? -1 : 1;
-        for (const layer in rows) [...rows[layer]].forEach((ch, i) => {
-            const face = PORT_FACE[ch];
-            if (!face) return;
-            const x0 = cellX(w, i), y0 = layer * 16 + (baseY || 0), z0 = d * 16, zf = side === 'north' ? z0 : z0 + 16;
-            box(shape('port', false), [x0, y0, z0], [x0 + 16, y0 + 16, z0 + 16], { [side]: face, all: 'cabinet' }, null, { [side]: true });
-            if (!NOZZLE[ch]) return;
-            sweep('nozzle', [[x0 + 8, y0 + 8, zf], [x0 + 8, y0 + 8, zf + dir * 4]], 3.5, NOZZLE[ch], { seg: 12, noTile: true });
-            sweep('nozzle', [[x0 + 8, y0 + 8, zf + dir * 4], [x0 + 8, y0 + 8, zf + dir * 6]], 5.5, 'pipe', { seg: 12, noTile: true, cap: face, capEnds: ['end'] });
-        });
-    }
+        // Hatch boxes on one face of row d; rows maps a layer to its row text, as in the layout.
+        // Internal vertical faces between adjacent ports in the same row are skipped so they merge without Z-fighting!
+        function ports(w, side, d, rows, baseY) {
+            const dir = side === 'north' ? -1 : 1;
+            for (const layer in rows) {
+                const line = [...rows[layer]];
+                line.forEach((ch, i) => {
+                    const face = PORT_FACE[ch];
+                    if (!face) return;
+                    const x0 = cellX(w, i), y0 = layer * 16 + (baseY || 0), z0 = d * 16, zf = side === 'north' ? z0 : z0 + 16;
+                    const skip = ['down'];
+                    if (i > 0 && PORT_FACE[line[i - 1]]) skip.push('west');
+                    if (i + 1 < line.length && PORT_FACE[line[i + 1]]) skip.push('east');
+                    box(shape('port', false), [x0, y0, z0], [x0 + 16, y0 + 16, z0 + 16], { [side]: face, up: 'cabinet_top', all: 'cabinet' }, skip, { [side]: true });
+                    if (!NOZZLE[ch]) return;
+                    sweep('nozzle', [[x0 + 8, y0 + 8, zf], [x0 + 8, y0 + 8, zf + dir * 4]], 3.5, NOZZLE[ch], { seg: 12, noTile: true });
+                    sweep('nozzle', [[x0 + 8, y0 + 8, zf + dir * 4], [x0 + 8, y0 + 8, zf + dir * 6]], 5.5, 'pipe', { seg: 12, noTile: true, cap: face, capEnds: ['end'] });
+                });
+            }
+        }
     // Checker-plate skid over cells [i0, i1) x [d0, d1).
     const skid = (w, i0, i1, d0, d1, y0, y1) => box(shape('base', false), [cellX(w, i0), y0 || 0, d0 * 16], [cellX(w, i1), y1 || 16, d1 * 16], { up: 'deck', all: 'skid' }, ['down']);
     // Square tapered hopper with an open top, lined inside.
@@ -963,20 +1025,26 @@
         const deck = shape('deck', false);
         for (const [a, b] of [[[-64, 176], [-16, 192]], [[-64, 208], [-16, 224]], [[-64, 192], [-48, 208]], [[-32, 192], [-16, 208]]]) box(deck, [a[0], 80, a[1]], [b[0], 81, b[1]], 'grating');
         for (const [x, z] of [[-62, 178], [-18, 178], [-62, 222], [-18, 222]]) strut('bracket', [-40 + Math.sign(x + 40) * 6, 56, 200 + Math.sign(z - 200) * 6], [x, 79, z], 1.2);
-        rail([[-64, 81, 176], [-64, 98, 176], [-16, 98, 176], [-16, 98, 224], [-64, 98, 224], [-64, 98, 176]]);
-        for (const [x, z] of [[-16, 176], [-16, 224], [-64, 224], [-40, 176], [-40, 224], [-16, 200], [-64, 200]]) rail([[x, 81, z], [x, 98, z]]);
+        rail([[-64, 81, 176], [-64, 98, 176], [-16, 98, 176], [-16, 98, 224], [-64, 98, 224], [-64, 98, 177]]);
+        for (const [x, z] of [[-16, 176], [-16, 224], [-64, 224], [-40, 176], [-40, 224], [-16, 200], [-64, 200]]) rail([[x, 81, z], [x, 97, z]], 0.75);
         ladder(X(0), 175, 16, 80);
         drum('reflux', [-56, 24, 226], [-56, 24, 254], 7, 'vessel');
         for (const z of [230, 250]) box(fr, [-62, 16, z - 2], [-50, 19, z + 2], 'frame', ['down']);
         sweep('overhead', fillet([[-40, 141, 200], [-40, 142, 200], [-58, 142, 200], [-58, 142, 240], [-58, 31, 240]], 5, 5), 2.5, 'insul', { seg: 10 });
-        // Dehydration reactor, fired heater with peep holes and its stack, transfer line between them.
+        // Dehydration reactor, cabin-style fired heater with buckstays, convection breeching, peep holes and stack.
         vessel('reactor', 56, 200, 7, 16, 92, 'vessel', 4);
         const heater = shape('heater', false);
-        box(heater, [32, 16, 224], [80, 64, 256], 'hood');
-        for (const z of [232, 244]) box(shape('glow_heater', false), [80, 26, z], [80.5, 32, z + 6], 'glow');
-        tube('stack', 56, 248, 5, 64, 144, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
-        band('stack', 56, 248, 5, 6.5, 100, 103, 'frame', 16);
-        sweep('transfer', fillet([[44, 64, 232], [44, 104, 232], [56, 104, 232], [56, 104, 207]], 5, 5), 2.5, 'insul', { seg: 10 });
+        box(heater, [34, 16, 225], [78, 54, 255], 'hood', ['down']);
+        box(heater, [40, 54, 228], [72, 66, 252], 'insul', ['down']);
+        for (const x of [33, 77]) for (const z of [224, 240, 254]) box(fr, [x, 16, z], [x + 2, 55, z + 2], 'frame', ['down']);
+        box(fr, [32.6, 36, 223.6], [79.4, 38.5, 256.4], 'frame');
+        for (const z of [231, 243]) {
+            box(fr, [78, 25, z - 1], [79.5, 33, z + 7], 'cast', ['west']);
+            box(shape('glow_heater', false), [79.5, 26.5, z + 0.5], [80.2, 31.5, z + 5.5], 'glow', ['west']);
+        }
+        tube('stack', 56, 240, 5, 66, 144, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        band('stack', 56, 240, 5, 6.5, 100, 103, 'frame', 16);
+        sweep('transfer', fillet([[46, 66, 234], [46, 104, 234], [56, 104, 234], [56, 104, 207]], 5, 5), 2.5, 'insul', { seg: 10 });
     };
 
     BUILD.waste_heat_power_plant = function () {
@@ -985,13 +1053,18 @@
         skid(w, 0, 9, 1, 16); skid(w, 0, 3, 0, 1); skid(w, 6, 9, 0, 1); skid(w, 0, 4, 16, 17); skid(w, 5, 9, 16, 17);
         ports(w, 'north', 0, { 0: '...I@O...', 1: '...LMR...' });
         ports(w, 'south', 16, { 0: '....J....' });
-        // Boiler: plate casing with buckstay bands, steam drum on saddles along the roof.
+        // Boiler: plate casing with horizontal & vertical buckstay ribs, steam drum on saddles with downcomers.
         const blr = shape('boiler', false);
         box(blr, [X(2), 16, 32], [X(7), 112, 128], { all: 'shell', up: 'deck' }, ['down']);
-        for (const y of [44, 76]) box(fr, [X(2) - 2, y, 30], [X(7) + 2, y + 4, 130], 'frame');
-        drum('drum', [X(2) + 2, 120, 88], [X(7) - 2, 120, 88], 7, 'vessel');
-        for (const x of [-24, 40]) box(fr, [x - 4, 112, 82], [x + 4, 114, 94], 'frame', ['down']);
-        for (const x of [-8, 24]) tube('valve', x, 88, 1.6, 126, 133, 'pipe', { seg: 8, cap: 'pipe', capEnds: ['end'] });
+        for (const y of [44, 76]) box(fr, [X(2) - 1.5, y, 30.5], [X(7) + 1.5, y + 3.5, 129.5], 'frame');
+        for (const z of [34, 64, 94, 124]) for (const [x0, x1] of [[X(2) - 2, X(2)], [X(7), X(7) + 2]])
+            box(fr, [x0, 16, z], [x1, 112, z + 2.5], 'frame', ['down']);
+        drum('drum', [X(2) + 2, 121, 88], [X(7) - 2, 121, 88], 7, 'vessel');
+        for (const x of [-24, 40]) {
+            box(fr, [x - 4, 112, 82], [x + 4, 115, 94], 'frame', ['down']);
+            tube('downcomer', x, 76, 2.0, 112, 120, 'insul', { seg: 8 });
+        }
+        for (const x of [-8, 24]) tube('valve', x, 88, 1.6, 127, 134, 'pipe', { seg: 8, cap: 'pipe', capEnds: ['end'] });
         // Stair up the +x side to the landing behind the boiler.
         const stair = shape('stair', false);
         for (let k = 0; k < 6; k++) {
@@ -1003,23 +1076,24 @@
         for (const x of [56, 72]) hbeam(fr, [x, 16, 136], [x, 112, 136], 10);
         rail([[X(7), 114, 144], [X(7), 130, 144], [X(9), 130, 144], [X(9), 130, 128]]);
         // Flue duct from the back of the boiler into the brick stack.
-        box(shape('flue', false), [X(4), 80, 128], [X(5), 96, 144], 'insul');
-        tube('stack', 8, 152, 8, 16, 150, 'brick', { seg: 16 });
+        box(shape('flue', false), [X(4), 80, 128], [X(5), 96, 144], 'insul', ['north']);
+        tube('stack', 8, 152, 8, 16, 150, 'brick', { seg: 16, cap: 'cavity', capEnds: ['end'] });
         band('stack', 8, 152, 8, 9.5, 146, 150, 'pipe', 16);
         // Feedwater up the front of the boiler into the drum; steam line over its support into the turbine.
-        sweep('feed', fillet([[-8, 24, 16], [-8, 24, 24], [-8, 120, 24], [-8, 120, 81]], 6, 6), 2.5, 'water', { seg: 10 });
-        sweep('steam', fillet([[40, 120, 95], [40, 120, 184], [40, 70, 184], [30, 62, 186]], 8, 6), 3, 'insul', { seg: 12 });
+        sweep('feed', fillet([[-8, 24, 16], [-8, 24, 24], [-8, 121, 24], [-8, 121, 81]], 6, 6), 2.5, 'water', { seg: 10 });
+        sweep('steam', fillet([[40, 121, 95], [40, 121, 184], [40, 70, 184], [30, 62, 186]], 8, 6), 3, 'insul', { seg: 12 });
         hbeam(fr, [40, 16, 152], [40, 114, 152], 10);
-        // Turbine table: columns, deck and condenser below; turbine, coupling and generator on top.
+        // Turbine table: columns, deck and condenser below; multi-stage steam turbine, coupling and finned generator on top.
         for (const z of [184, 216, 248]) for (const x of [-8, 56]) hbeam(fr, [x, 16, z], [x, 32, z], 10);
         box(shape('table', false), [X(3), 32, 176], [X(8), 48, 256], { up: 'deck', all: 'skid' });
         drum('condenser', [24, 24, 194], [24, 24, 222], 7, 'vessel');
-        box(fr, [2, 48, 176], [46, 52, 208], 'frame', ['down']);
+        box(fr, [4, 48, 177], [44, 52, 207], 'cast', ['down']);
         sweep('turbine', [[24, 58, 178], [24, 58, 206]], d => 6 + d * 0.12, 'blue', { seg: 20, noTile: true, cap: 'pipe' });
-        for (const z of [184, 196]) sweep('turbine', [[24, 58, z], [24, 58, z + 2]], 9.5, 'pipe', { seg: 20, noTile: true });
-        sweep('shaft', [[24, 58, 206], [24, 58, 226]], 2, 'pipe', { seg: 8 });
-        box(shape('generator', false), [6, 48, 226], [42, 66, 254], 'blue');
-        for (let z = 229; z < 252; z += 4) box(shape('generator', false), [5, 50, z], [43, 64, z + 1.5], 'frame');
+        for (const z of [184, 196]) sweep('turbine', [[24, 58, z], [24, 58, z + 2]], 9.6, 'pipe', { seg: 20, noTile: true });
+        sweep('shaft', [[24, 58, 206], [24, 58, 226]], 2.2, 'pipe', { seg: 10 });
+        box(fr, [6, 48, 225], [42, 52, 255], 'cast', ['down']);
+        sweep('generator', [[24, 58, 226], [24, 58, 254]], 9.2, 'blue', { seg: 20, noTile: true, cap: 'cast' });
+        box(shape('generator', false), [14, 66.5, 231], [34, 71, 249], 'cabinet');
         for (const x of [4, 12]) sweep('cable', fillet([[x + 8, 52, 254], [x + 8, 52, 262], [x + 8, 16, 262]], 4, 4), 1.8, 'rubber', { seg: 8 });
     };
 
@@ -1035,33 +1109,42 @@
             hbeam(fr, [-32, 56, z], [48, 56, z], 12);
         }
         for (const [z0, z1] of [[14, 34], [46, 66]]) for (const x of [-24, 40]) hbeam(fr, [x, 56, z0], [x, 56, z1], 12);
-        // Roll crusher: heavy cast-steel housing with stiffening ribs, two counter-rotating rolls, hopper on the front cross beam.
+        // Roll crusher: heavy cast-steel housing with stiffening ribs, two counter-rotating rolls, thick-walled feed hopper.
         const housing = shape('crusher', false);
-        box(housing, [X(1), 16, 0], [X(4), 32, 32], 'cast');
-        box(housing, [X(1), 32, 0], [X(4), 48, 16], 'cast');
-        for (const x of [X(1), X(4) - 3]) box(housing, [x, 32, 16], [x + 3, 48, 32], 'cast');
-        for (const x of [X(1) + 4, X(4) - 6]) box(fr, [x, 16, -0.5], [x + 2, 48, 0.5], 'frame');
-        box(housing, [X(1) + 12, 20, -1], [X(4) - 12, 36, 0], 'cabinet');
+        box(housing, [X(1), 16, 0.5], [X(4), 32, 32], 'cast', ['down']);
+        box(housing, [X(1), 32, 0.5], [X(4), 48, 16], 'cast', ['down']);
+        for (const x of [X(1), X(4) - 3]) box(housing, [x, 32, 16], [x + 3, 48, 32], 'cast', ['down']);
+        for (const x of [X(1) + 4, X(4) - 6]) box(fr, [x, 16, -0.5], [x + 2, 48, 0.5], 'frame', ['south']);
+        box(housing, [X(1) + 12, 20, -1], [X(4) - 12, 36, 0.5], 'cabinet', ['south']);
         within('roller_front', [8, 42, 20], () => sweep('roll', [[-13, 42, 20], [29, 42, 20]], 3.8, 'roll', { seg: 12, cap: 'pipe' }));
         within('roller_back', [8, 42, 28], () => sweep('roll', [[-13, 42, 28], [29, 42, 28]], 3.8, 'roll', { seg: 12, cap: 'pipe' }));
         hopper('hopper', 8, 24, [22, 8], [12, 4], 48, 64, 'vessel');
-        box(shape('hopper', false), [X(1), 64, 0], [X(4), 80, 32], 'vessel', ['up']);
-        box(shape('hopper', false), [X(1) + 1, 79, 1], [X(4) - 1, 79.5, 31], 'cavity');
-        // Washing trommel on its drive housing, spray header resting on the cross beams.
-        box(shape('drive', false), [X(1), 16, 32], [X(4), 32, 48], 'cabinet');
-        within('washing_drum', [8, 32, 64], () => {
-            sweep('trommel', [[8, 32, 48], [8, 32, 80]], 15, 'screen', { seg: 20, cap: 'pipe' });
-            for (const z of [49, 63, 77]) sweep('trommel', [[8, 32, z], [8, 32, z + 2.5]], 15.8, 'pipe', { seg: 20, noTile: true });
+        const hp = shape('hopper', false);
+        for (const [a, b] of [[[X(1), 0], [X(4), 2]], [[X(1), 30], [X(4), 32]], [[X(1), 2], [X(1) + 2, 30]], [[X(4) - 2, 2], [X(4), 30]]])
+            box(hp, [a[0], 64, a[1]], [b[0], 80, b[1]], 'vessel');
+        box(hp, [X(1) + 2, 64, 2], [X(4) - 2, 73, 30], { up: 'cavity', all: 'vessel' });
+        // Washing trommel on its drive cradle, spray header resting on the cross beams.
+        box(shape('drive', false), [X(1) + 2, 16, 32], [X(4) - 2, 28, 48], 'cabinet', ['down']);
+        within('washing_drum', [8, 34, 64], () => {
+            sweep('trommel', [[8, 34, 48], [8, 34, 80]], 14.5, 'screen', { seg: 20, cap: 'pipe' });
+            for (const z of [49.5, 63, 76.5]) sweep('trommel', [[8, 34, z], [8, 34, z + 2.5]], 15.6, 'pipe', { seg: 20, noTile: true });
         });
         sweep('spray', [[8, 72, 34], [8, 72, 80]], 3, 'water', { seg: 10, cap: 'pipe' });
         for (const z of [40, 72]) box(fr, [5, 62, z - 3], [11, 69, z + 3], 'frame');
         for (const z of [52, 64]) tube('spray', 8, z, 1, 50, 69, 'water', { seg: 6 });
-        // Roasting kiln with a glowing sight port and its stack.
+        // Cylindrical rotary roasting kiln on riding tyres + brick-lined firing hood with glowing sight port and exhaust stack.
         const kiln = shape('kiln', false);
-        box(kiln, [X(1), 16, 80], [X(4), 64, 112], 'hood');
-        for (const y of [28, 50]) box(fr, [X(1) - 1, y, 79], [X(4) + 1, y + 3, 113], 'frame');
-        box(shape('glow_kiln', false), [X(4), 34, 88], [X(4) + 0.5, 44, 104], 'glow');
-        tube('stack', 8, 104, 5, 64, 96, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        for (const z of [83, 94]) {
+            box(fr, [-14, 16, z - 2], [30, 23, z + 2], 'cast', ['down']);
+            sweep('kiln_tyre', [[8, 36, z - 1.5], [8, 36, z + 1.5]], 16.2, 'pipe', { seg: 24, noTile: true });
+        }
+        sweep('kiln_shell', [[8, 36, 80.2], [8, 36, 100]], 14.8, 'hood', { seg: 24, noTile: true, cap: 'cast' });
+        box(kiln, [X(1) + 2, 16, 99], [X(4) - 2, 60, 111.5], 'brick', ['down']);
+        box(fr, [X(1) + 1, 58, 98.5], [X(4) - 1, 61, 112], 'frame');
+        box(fr, [X(4) - 2, 31, 102], [X(4) - 0.5, 43, 109], 'cast', ['west']);
+        box(shape('glow_kiln', false), [X(4) - 0.5, 33, 103.5], [X(4) + 0.2, 41, 107.5], 'glow', ['west']);
+        tube('stack', 8, 105, 5.2, 61, 98, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        band('stack', 8, 105, 5.0, 6.5, 80, 83, 'frame', 16);
     };
 
     BUILD.rolling_mill = function () {
@@ -1099,13 +1182,31 @@
             }
         };
 
-        // Head (d = 0..1): entry foundation, ports, control cabinets and entry guide table.
+        // Helper for a clean framed corner electrical cabinet spanning [x0..x1, 0..16, z0..z1] with a unified top bevel rim (no split L-seams!).
+        const cornerCabinet = (x0, z0, x1, z1) => {
+            const cab = shape('cabinet', false);
+            box(cab, [x0, 0, z0], [x1, 15, z1], { up: 'cabinet_top', all: 'cabinet' }, ['down']);
+            // Unified 1px raised steel bezel cap around all 4 edges of the 1x2 corner cabinet!
+            box(cab, [x0, 15, z0], [x1, 16, z0 + 2], 'frame', ['down']);
+            box(cab, [x0, 15, z1 - 2], [x1, 16, z1], 'frame', ['down']);
+            box(cab, [x0, 15, z0 + 2], [x0 + 2, 16, z1 - 2], 'frame', ['down']);
+            box(cab, [x1 - 2, 15, z0 + 2], [x1, 16, z1 - 2], 'frame', ['down']);
+            box(cab, [x0 + 2, 15, z0 + 2], [x1 - 2, 15.8, z1 - 2], { up: 'cabinet_top', all: 'cabinet' }, ['down']);
+        };
+
+        // Head (d = 0..1): entry foundation, continuous front console bank (C-I-@-O-C), unified 2-block corner cabinets and entry guide table.
         box(shape('base', false), [X(0), -16, 0], [X(9), 0, 16], { up: 'deck', all: 'skid' }, ['down']);
-        for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 0], [X(i) + 16, 16, 16], 'cabinet', ['down']);
-        for (const i of [2, 6]) box(shape('housing', false), [X(i) + 1, 0, 1], [X(i) + 15, 16, 15], 'cast', ['down']);
-        ports(w, 'north', 0, { 1: '...I@O...' }, -16);
         millBed(16, 32, true);
-        for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 16], [X(i) + 16, 16, 32], 'cabinet', ['down']);
+        for (const i of [0, 8]) cornerCabinet(X(i), 0, X(i) + 16, 32);
+        // Continuous front console bank across i=2..6 (x = X(2)..X(7), z = 0..16) with a single unbroken top canopy!
+        const frontBank = shape('port', false);
+        box(frontBank, [X(2), 0, 0], [X(3), 15.5, 16], { up: 'cabinet_top', all: 'cabinet' }, ['down', 'east']);
+        box(frontBank, [X(6), 0, 0], [X(7), 15.5, 16], { up: 'cabinet_top', all: 'cabinet' }, ['down', 'west']);
+        for (const [i, face] of [[3, 'item_in'], [4, 'panel'], [5, 'item_out']]) {
+            box(frontBank, [X(i), 0, 0], [X(i) + 16, 15.5, 16], { north: face, up: 'cabinet_top', all: 'cabinet' }, ['down', 'west', 'east'], { north: true });
+        }
+        // Single continuous steel console coping across all 5 front blocks (X(2)..X(7)) so there are zero seam breaks!
+        box(frontBank, [X(2) - 0.5, 15.5, -0.5], [X(7) + 0.5, 16.5, 16.2], { up: 'cabinet_top', all: 'frame' }, ['down']);
         rollerTable(1, 'entry_roll', false);
 
         // Bay (modelled at d = 2): continuous pit, roller table, operator walkway and drive-side headers.
@@ -1170,10 +1271,9 @@
             box(fr, [70, 18.8, 37.5], [75.5, 21.5, 42.5], 'cabinet');
         });
 
-        // Tail (modelled at d = 7..8): exit roller table with pinch-roll portal and heavy down-coiler.
+        // Tail (modelled at d = 7..8): exit roller table with pinch-roll portal, unified 2-block rear corner cabinets and heavy down-coiler.
         within('tail', null, () => {
             millBed(112, 128, true);
-            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 112], [X(i) + 16, 16, 128], 'cabinet', ['down']);
             rollerTable(7, 'exit_roll', false);
             // Pinch-roll portal guiding the finished strip into the coiler throat.
             const coilerCast = shape('housing', false);
@@ -1181,7 +1281,7 @@
             box(fr, [-27, 22, 122.5], [43, 25, 127], 'frame');
 
             box(shape('base', false), [X(0), -16, 128], [X(9), 0, 144], { up: 'deck', all: 'skid' }, ['down']);
-            for (const i of [0, 8]) box(shape('cabinet', false), [X(i), 0, 128], [X(i) + 16, 16, 144], 'cabinet', ['down']);
+            for (const i of [0, 8]) cornerCabinet(X(i), 112, X(i) + 16, 144);
             ports(w, 'south', 8, { 1: '.E.......' }, -16);
             for (const x0 of [-30, 34]) {
                 box(coilerCast, [x0, 0, 129], [x0 + 12, 30, 143], 'cast', ['down']);
@@ -1201,19 +1301,29 @@
         deck(t) {
             steel(t, 3, C.steel[2], C.steel[3], false);
             for (let y = 0; y < 16; y += 8) for (let x = 0; x < 16; x += 8) {
-                for (let k = 0; k < 3; k++) {
-                    const ridge = y + ((x === y) ? 4 - k : 2 + k);
-                    t.tint(x + 2 + k, ridge, C.steel[5], 0.45);
-                    t.tint(x + 2 + k, ridge + 1, C.steel[1], 0.45);
+                const alt = ((x >> 3) + (y >> 3)) & 1;
+                if (alt === 0) {
+                    t.rect(x + 2, y + 3, x + 4, y + 3, C.steel[5]);
+                    t.rect(x + 2, y + 4, x + 4, y + 4, C.steel[1]);
+                    t.rect(x + 3, y + 6, x + 5, y + 6, C.steel[4]);
+                    t.rect(x + 3, y + 7, x + 5, y + 7, C.steel[1]);
+                } else {
+                    t.rect(x + 3, y + 2, x + 3, y + 4, C.steel[5]);
+                    t.rect(x + 4, y + 2, x + 4, y + 4, C.steel[1]);
+                    t.rect(x + 6, y + 3, x + 6, y + 5, C.steel[4]);
+                    t.rect(x + 7, y + 3, x + 7, y + 5, C.steel[1]);
                 }
             }
         },
-        cast(t) { steel(t, 47, [54, 58, 63], [77, 81, 87], true); },
+        cast(t) { steel(t, 47, [50, 56, 64], [82, 88, 98], true); },
         frame(t) { steel(t, 13, C.frame[2], C.frame[3], false); },
         roll(t) { steel(t, 45, C.steel[3], C.steel[5], false); },
         skid(t) {
             steel(t, 5, C.frame[2], C.frame[3], false);
             t.rect(0, 0, 15, 0, C.frame[4]);
+            t.rect(0, 1, 15, 1, C.frame[3]);
+            t.rect(0, 2, 15, 2, C.frame[0]);
+            t.rect(0, 13, 15, 13, C.frame[3]);
             t.rect(0, 14, 15, 14, C.frame[1]);
             t.rect(0, 15, 15, 15, C.frame[0]);
         }

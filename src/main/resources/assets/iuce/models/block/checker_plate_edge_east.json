@@ -1,0 +1,85 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "trim": "iuce:block/structure/checker_plate_trim",
+    "particle": "iuce:block/structure/checker_plate_trim"
+  },
+  "elements": [
+    {
+      "from": [
+        14,
+        0,
+        -0.016
+      ],
+      "to": [
+        16,
+        16,
+        -0.016
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 270,
+          "texture": "#trim",
+          "cullface": "north"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        16.016
+      ],
+      "to": [
+        16,
+        16,
+        16.016
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 90,
+          "texture": "#trim",
+          "cullface": "south"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        16.016,
+        0
+      ],
+      "to": [
+        16,
+        16.016,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "rotation": 90,
+          "texture": "#trim",
+          "cullface": "up"
+        }
+      }
+    }
+  ]
+}

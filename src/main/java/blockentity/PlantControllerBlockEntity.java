@@ -112,6 +112,18 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
     public boolean isStarved() { return starved; }
     public void markStructureDirty() { structureDirty = true; }
 
+    /** Changes target length while immediately restoring visibility of all parts of the previous length. */
+    public void resize(int nextLength) {
+        if (level == null || level.isClientSide()) return;
+        BlockState state = getBlockState();
+        setFormedParts(state, false);
+        formed = false;
+        scan = null;
+        scanParts.clear();
+        level.setBlock(worldPosition, state.setValue(PlantControllerBlock.FORMED, false).setValue(PlantControllerBlock.LENGTH, nextLength), Block.UPDATE_ALL);
+        structureDirty = true;
+    }
+
     public boolean isMill() { return getBlockState().is(ModBlocks.MILL_CONTROLLER.get()); }
 
     /** Swaps the mold of a rolling mill and returns the previous one (possibly empty). */
@@ -269,14 +281,17 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
             level.setBlock(pos, cell.part().sample(facing), Block.UPDATE_ALL);
             placed++;
         }
-        // Update casing edge trims after all parts and hatches are in place
+        // Update connected edges/joints after all parts and hatches are in place
         for (PlantStructure.Cell cell : cells) {
-            if (!cell.part().canFillWithCasing()) continue;
             BlockPos pos = cell.pos();
-            if (level.isLoaded(pos) && level.getBlockState(pos).is(ModBlocks.PLANT_CASING.get())) {
-                BlockState joined = ModBlocks.PLANT_CASING.get().joinedState(level, pos);
-                if (!joined.equals(level.getBlockState(pos))) level.setBlock(pos, joined, Block.UPDATE_ALL);
-            }
+            if (!level.isLoaded(pos)) continue;
+            BlockState cur = level.getBlockState(pos);
+            BlockState joined = cur;
+            if (cur.is(ModBlocks.PLANT_CASING.get())) joined = ModBlocks.PLANT_CASING.get().joinedState(level, pos);
+            else if (cur.getBlock() instanceof block.ConnectedStructureBlock csb) joined = csb.joinedState(level, pos);
+            else if (cur.getBlock() instanceof PlantDrumBlock drum) joined = drum.joinedState(cur, level, pos);
+            else if (cur.getBlock() instanceof PlantFrameBlock frame) joined = frame.joinedState(cur, level, pos);
+            if (!joined.equals(cur)) level.setBlock(pos, joined, Block.UPDATE_ALL);
         }
         structureDirty = true;
         if (level instanceof ServerLevel) {

@@ -1,25 +1,855 @@
 {
-  "variants": {
-    "axis=y,formed=false": {
-      "model": "iuce:block/process_pipe"
+  "multipart": [
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "down": "false",
+        "up": "false",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe"
+      }
     },
-    "axis=y,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "down": "false",
+        "up": "false",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe",
+        "x": 90
+      }
     },
-    "axis=z,formed=false": {
-      "model": "iuce:block/process_pipe",
-      "x": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "down": "false",
+        "up": "false",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe",
+        "x": 90,
+        "y": 90
+      }
     },
-    "axis=z,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false",
+        "OR": [
+          {
+            "up": "true"
+          },
+          {
+            "down": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_straight"
+      }
     },
-    "axis=x,formed=false": {
-      "model": "iuce:block/process_pipe",
-      "x": 90,
-      "y": 90
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false",
+        "up": "false",
+        "down": "true"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap",
+        "x": -90
+      }
     },
-    "axis=x,formed=true": {
-      "model": "iuce:block/plant_empty"
+    {
+      "when": {
+        "formed": "false",
+        "axis": "y",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "false",
+        "up": "true",
+        "down": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "up": "false",
+        "down": "false",
+        "west": "false",
+        "east": "false",
+        "OR": [
+          {
+            "north": "true"
+          },
+          {
+            "south": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_straight",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "up": "false",
+        "down": "false",
+        "west": "false",
+        "east": "false",
+        "north": "false",
+        "south": "true"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "z",
+        "up": "false",
+        "down": "false",
+        "west": "false",
+        "east": "false",
+        "north": "true",
+        "south": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "up": "false",
+        "down": "false",
+        "north": "false",
+        "south": "false",
+        "OR": [
+          {
+            "west": "true"
+          },
+          {
+            "east": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_straight",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "up": "false",
+        "down": "false",
+        "north": "false",
+        "south": "false",
+        "west": "false",
+        "east": "true"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "axis": "x",
+        "up": "false",
+        "down": "false",
+        "north": "false",
+        "south": "false",
+        "west": "true",
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_cap",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_hub"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_hub"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_hub"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "north": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "east": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "south": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "west": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "up": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": -90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "y",
+            "down": "true"
+          },
+          {
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "north": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "east": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "south": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "west": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "up": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": -90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "z",
+            "down": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "north": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "east": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "south": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "west": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "up": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": -90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "formed": "false",
+            "axis": "x",
+            "down": "true"
+          },
+          {
+            "OR": [
+              {
+                "down": "true"
+              },
+              {
+                "up": "true"
+              },
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "iuce:block/process_pipe_arm",
+        "x": 90
+      }
     }
-  }
+  ]
 }

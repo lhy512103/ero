@@ -179,10 +179,15 @@ public final class GuideStructure {
         }
         List<Cell> cells = new ArrayList<>();
         for (var entry : placed.entrySet()) {
+            BlockPos pos = entry.getKey();
             BlockState part = entry.getValue();
-            if (part.getBlock() instanceof PlantCasingBlock) part = joined(part, entry.getKey(), placed);
+            if (part.getBlock() instanceof PlantCasingBlock) part = joined(part, pos, placed);
+            else if (part.getBlock() instanceof block.ConnectedStructureBlock csb) part = csb.joinedInLayout(part, pos, placed);
+            else if (part.getBlock() instanceof block.PlantDrumBlock drum) part = drum.joinedInLayout(part, pos, placed);
+            else if (part.getBlock() instanceof block.PlantFrameBlock frame) part = frame.joinedInLayout(part, pos, placed);
+            else if (part.getBlock() instanceof block.SteelHandrailBlock) part = joinedHandrail(part, pos, placed);
             Block block = part.getBlock();
-            cells.add(new Cell(entry.getKey(), new ItemStack(block), BuiltInRegistries.BLOCK.getKey(block).toString(), part));
+            cells.add(new Cell(pos, new ItemStack(block), BuiltInRegistries.BLOCK.getKey(block).toString(), part));
         }
         return new GuideStructure(List.copyOf(cells), bounds.getXSpan(), bounds.getYSpan(), bounds.getZSpan(),
             BuiltInRegistries.BLOCK.getKey(controller).getPath(), offset, PlantControllerBlockEntity.targetLength(state));
@@ -195,5 +200,14 @@ public final class GuideStructure {
             casing = casing.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction), neighbour != null && PlantCasingBlock.joins(neighbour));
         }
         return casing;
+    }
+
+    private static BlockState joinedHandrail(BlockState rail, BlockPos pos, Map<BlockPos, BlockState> placed) {
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockState nb = placed.get(pos.relative(direction));
+            boolean connect = nb != null && (nb.getBlock() instanceof block.SteelHandrailBlock || nb.getBlock() instanceof block.PlantFrameBlock);
+            rail = rail.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction), connect);
+        }
+        return rail;
     }
 }

@@ -152,7 +152,8 @@ public class ModBlocks {
     public static final DeferredBlock<RotatedPillarBlock> PLANT_DRUM = BLOCKS.registerBlock("plant_drum",
         PlantDrumBlock::new, () -> machineProperties().get().noOcclusion());
     // Structural building blocks; machines are built from them and they hide once a machine forms.
-    public static final DeferredBlock<StructureBlock> CHECKER_PLATE = BLOCKS.registerBlock("checker_plate", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<ConnectedStructureBlock> CHECKER_PLATE = BLOCKS.registerBlock("checker_plate",
+        p -> new ConnectedStructureBlock(p, s -> s.is(ModBlocks.CHECKER_PLATE.get()) || s.is(ModBlocks.STEEL_STAIRS.get())), metalBlockProperties());
     public static final DeferredBlock<StructureBlock> STEEL_GRATING = BLOCKS.registerBlock("steel_grating",
         p -> new StructureBlock(p, Block.box(0, 0, 0, 16, 2, 16)), () -> metalBlockProperties().get().noOcclusion());
     public static final DeferredBlock<SteelStairsBlock> STEEL_STAIRS = BLOCKS.registerBlock("steel_stairs",
@@ -162,12 +163,13 @@ public class ModBlocks {
     public static final DeferredBlock<SteelLadderBlock> STEEL_LADDER = BLOCKS.registerBlock("steel_ladder",
         SteelLadderBlock::new, () -> metalBlockProperties().get().noOcclusion());
     public static final DeferredBlock<ProcessPipeBlock> PROCESS_PIPE = BLOCKS.registerBlock("process_pipe",
-        ProcessPipeBlock::new, () -> machineProperties().get().noOcclusion());
+        p -> new ProcessPipeBlock(p, true), () -> machineProperties().get().noOcclusion());
     public static final DeferredBlock<StructureBlock> FURNACE_SHELL = BLOCKS.registerBlock("furnace_shell", StructureBlock::new, metalBlockProperties());
     public static final DeferredBlock<StructureBlock> REFRACTORY_BRICKS = BLOCKS.registerBlock("refractory_bricks", StructureBlock::new, metalBlockProperties());
     public static final DeferredBlock<ProcessPipeBlock> GRAPHITE_ELECTRODE = BLOCKS.registerBlock("graphite_electrode",
-        ProcessPipeBlock::new, () -> machineProperties().get().noOcclusion());
-    public static final DeferredBlock<StructureBlock> TANK_SHELL = BLOCKS.registerBlock("tank_shell", StructureBlock::new, machineProperties());
+        p -> new ProcessPipeBlock(p, false), () -> machineProperties().get().noOcclusion());
+    public static final DeferredBlock<ConnectedStructureBlock> TANK_SHELL = BLOCKS.registerBlock("tank_shell",
+        p -> new ConnectedStructureBlock(p, s -> s.is(ModBlocks.TANK_SHELL.get())), machineProperties());
     public static final DeferredBlock<PlantControllerBlock> PLANT_CONTROLLER = BLOCKS.registerBlock("plant_controller",
         PlantControllerBlock::new, machineProperties());
     public static final DeferredBlock<PlantControllerBlock> TWIN_SCREW_EXTRUDER = BLOCKS.registerBlock("twin_screw_extruder", PlantControllerBlock::new, machineProperties());
@@ -175,12 +177,12 @@ public class ModBlocks {
     public static final DeferredBlock<PlantControllerBlock> CARBIDE_FURNACE_PLANT = BLOCKS.registerBlock("carbide_furnace_plant", PlantControllerBlock::new, machineProperties());
     public static final DeferredBlock<PlantControllerBlock> COKE_OVEN_BATTERY = BLOCKS.registerBlock("coke_oven_battery", PlantControllerBlock::new, machineProperties());
     public static final DeferredBlock<PlantControllerBlock> WASTE_HEAT_POWER_PLANT = BLOCKS.registerBlock("waste_heat_power_plant", PlantControllerBlock::new, machineProperties());
-    public static final DeferredBlock<Block> MAIN_FEED_SEGMENT = BLOCKS.registerSimpleBlock("main_feed_segment", metalBlockProperties());
-    public static final DeferredBlock<Block> MELTING_SEGMENT = BLOCKS.registerSimpleBlock("melting_segment", metalBlockProperties());
-    public static final DeferredBlock<Block> SIDE_FEED_SEGMENT = BLOCKS.registerSimpleBlock("side_feed_segment", metalBlockProperties());
-    public static final DeferredBlock<Block> MIXING_SEGMENT = BLOCKS.registerSimpleBlock("mixing_segment", metalBlockProperties());
-    public static final DeferredBlock<Block> VENTING_SEGMENT = BLOCKS.registerSimpleBlock("venting_segment", metalBlockProperties());
-    public static final DeferredBlock<Block> DIE_SEGMENT = BLOCKS.registerSimpleBlock("die_segment", metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> MAIN_FEED_SEGMENT = BLOCKS.registerBlock("main_feed_segment", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> MELTING_SEGMENT = BLOCKS.registerBlock("melting_segment", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> SIDE_FEED_SEGMENT = BLOCKS.registerBlock("side_feed_segment", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> MIXING_SEGMENT = BLOCKS.registerBlock("mixing_segment", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> VENTING_SEGMENT = BLOCKS.registerBlock("venting_segment", StructureBlock::new, metalBlockProperties());
+    public static final DeferredBlock<StructureBlock> DIE_SEGMENT = BLOCKS.registerBlock("die_segment", StructureBlock::new, metalBlockProperties());
     public static final DeferredBlock<PlantTankBlock> FLUID_INPUT_HATCH = BLOCKS.registerBlock("fluid_input_hatch", PlantTankBlock::new, machineProperties());
     public static final DeferredBlock<PlantTankBlock> FLUID_OUTPUT_HATCH = BLOCKS.registerBlock("fluid_output_hatch", PlantTankBlock::new, machineProperties());
     public static final DeferredBlock<PlantTankBlock> GAS_OUTPUT_HATCH = BLOCKS.registerBlock("gas_output_hatch", PlantTankBlock::new, machineProperties());

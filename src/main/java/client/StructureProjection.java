@@ -19,6 +19,7 @@ import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Building aid for large machines: while the crosshair is on a controller whose structure is not
@@ -45,6 +46,13 @@ public final class StructureProjection {
         var modelSet = minecraft.getModelManager().getBlockStateModelSet();
         RandomSource random = RandomSource.create(42L);
 
+        Map<BlockPos, BlockState> expectedMap = new java.util.HashMap<>();
+        for (PlantStructure.Cell cell : PlantStructure.cells(pos, facing, state)) {
+            BlockState there = level.isLoaded(cell.pos()) ? level.getBlockState(cell.pos()) : null;
+            expectedMap.put(cell.pos(), there != null && cell.part().accepts(there, facing) ? there : cell.part().sample(facing));
+        }
+        expectedMap.put(pos, state);
+
         List<Entry> entries = new ArrayList<>();
         for (PlantStructure.Cell cell : PlantStructure.cells(pos, facing, state)) {
             if (!level.isLoaded(cell.pos())) continue;
@@ -53,6 +61,9 @@ public final class StructureProjection {
             boolean wrong = !there.canBeReplaced();
             boolean casing = cell.part().canFillWithCasing();
             BlockState expected = cell.part().sample(facing);
+            if (expected.getBlock() instanceof block.ConnectedStructureBlock csb) expected = csb.joinedInLayout(expected, cell.pos(), expectedMap);
+            else if (expected.getBlock() instanceof block.PlantDrumBlock drum) expected = drum.joinedInLayout(expected, cell.pos(), expectedMap);
+            else if (expected.getBlock() instanceof block.PlantFrameBlock frame) expected = frame.joinedInLayout(expected, cell.pos(), expectedMap);
             List<BlockStateModelPart> parts = List.of();
             VoxelShape shape = Shapes.block();
             if (!wrong) {
