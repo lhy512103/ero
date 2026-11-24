@@ -160,6 +160,7 @@
 154. Improved: Redrew the tops and sides of screw-barrel segments and hatches to match their fronts, and gave the segments less smooth shading.
 155. Improved: Process machine screens are redrawn as bolted steel panels with side tabs for processing, moulds, upgrades, recipe preview, power and machine info.
 156. Added: Extruders, cooling tanks, vulcanizers, smokehouses, film winders and haul-off cutters show their own animated progress pictures.
+157. Improved: Process machine screens return to the light vanilla look, and the single screw extruder shows a picture of itself with the melt advancing through its barrel.
 
 ### 中文
 
@@ -319,3 +320,4 @@
 154. 优化：重绘各类螺杆段和输入输出仓的顶面与侧面，与正面风格统一，螺杆段不再过于平滑。
 155. 优化：加工机器界面重绘为带螺栓的钢面板，侧边标签页可切换加工、模具、升级、配方预览、能耗和机器介绍。
 156. 新增：挤出机、冷却水槽、硫化机、熏烟房、收卷机和牵引切割机显示各自的动态加工进度。
+157. 优化：加工机器界面恢复原版浅色风格，单螺杆挤出机显示自身示意图，熔体沿料筒推进表示进度。

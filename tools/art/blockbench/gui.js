@@ -468,6 +468,70 @@
         saw: () => [sawBg(), sawFill(), ...[0, 1, 2, 3].map(sawAnim)],
     };
 
+    // ---- machine schematics, in the vanilla panel colours (C6C6C6 panel, white light, 555555 shade, 373737 dark).
+    // The background covers panel rows 16..75 and is drawn under the slot frames, which the screen draws itself.
+    const VD = [55, 55, 55], VS = [85, 85, 85], VL = [255, 255, 255], PELLET = [228, 226, 212];
+
+    // Single screw extruder: hopper slot over the feed throat, heated barrel with a cut-away window,
+    // die slot in a housing at the barrel end, core wire guided down into the die, product after it.
+    function extruderBack() {
+        const O = 16, g = new G(176, 60);
+        const P = (x, y, c) => g.px(x, y - O, c);
+        const R = (x0, y0, x1, y1, c) => g.rect(x0, y0 - O, x1, y1 - O, c);
+        for (let y = 38; y <= 47; y++) {
+            const t = (y - 38) / 9, l = Math.round(31 + 5 * t), r = Math.round(48 - 5 * t);
+            P(l, y, VD); P(r, y, VD);
+            for (let x = l + 1; x < r; x++) P(x, y, x < l + 3 ? [176, 176, 176] : x > r - 3 ? [118, 118, 118] : [44, 44, 44]);
+        }
+        P(39, 41, PELLET); P(41, 44, PELLET); P(38, 46, PELLET);
+        const BAR = [VD, [236, 236, 236], [216, 216, 216], [206, 206, 206], [194, 194, 194], [186, 186, 186], [178, 178, 178], [172, 172, 172],
+            [164, 164, 164], [156, 156, 156], [148, 148, 148], [138, 138, 138], [124, 124, 124], [104, 104, 104], VS, VD];
+        for (let i = 0; i < 16; i++) R(20, 48 + i, 120, 48 + i, BAR[i]);
+        R(36, 48, 43, 49, [44, 44, 44]);
+        R(17, 45, 21, 66, [128, 128, 128]); g.bevel(17, 45 - O, 21, 66 - O, [190, 190, 190], VD);
+        P(19, 47, VL); P(19, 64, VL);
+        g.bevel(51, 50 - O, 116, 61 - O, VS, [234, 234, 234]);
+        R(52, 51, 115, 60, [30, 30, 30]);
+        for (const x0 of [60, 80, 100]) {
+            for (const [y, c] of [[47, COPPER[0]], [48, COPPER[3]], [49, COPPER[2]], [62, COPPER[1]], [63, COPPER[1]], [64, COPPER[0]]]) R(x0, y, x0 + 3, y, c);
+            R(x0 + 3, 47, x0 + 3, 49, COPPER[0]); R(x0 + 3, 62, x0 + 3, 64, COPPER[0]);
+        }
+        R(119, 44, 141, 66, [140, 144, 150]);
+        g.bevel(119, 44 - O, 141, 66 - O, VD, VD);
+        g.bevel(120, 45 - O, 140, 65 - O, [206, 210, 214], [92, 96, 102]);
+        P(140, 45, VL); P(140, 65, VS);
+        R(142, 53, 148, 53, VD); R(142, 54, 148, 56, [156, 156, 156]); R(142, 57, 148, 57, VS);
+        R(127, 38, 132, 43, [180, 180, 180]); R(127, 38, 127, 43, VS); R(132, 38, 132, 43, VD);
+        R(129, 38, 129, 43, COPPER[2]); R(130, 38, 130, 43, COPPER[1]);
+        return g;
+    }
+    // Window overlay, 64 x 10 per row: row 0 the melt (pellets turning into hot melt), then six frames of the turning screw.
+    function extruderMelt() {
+        const g = new G(64, 10), r = rng(41);
+        for (let y = 0; y < 10; y++) for (let x = 0; x < 64; x++) {
+            if (x < 10) { if (r() < 0.4) g.px(x, y, PELLET); continue; }
+            const c = mix(mix([150, 72, 40], HOT[2], Math.min(1, (x - 10) / 34)), HOT[1], Math.max(0, (x - 44) / 20));
+            g.px(x, y, y < 2 ? light(c, 0.15) : y > 7 ? dark(c, 0.2) : c);
+        }
+        return g;
+    }
+    function extruderScrew(f) {
+        const g = new G(64, 10);
+        for (let y = 0; y < 10; y++) for (let x = 0; x < 64; x++) {
+            const k = (((x - f + Math.floor(y / 2)) % 6) + 6) % 6;
+            if (k === 0) g.px(x, y, [214, 214, 214]); else if (k === 1) g.px(x, y, [130, 130, 130]);
+        }
+        g.rect(0, 4, 63, 4, [200, 200, 200]); g.rect(0, 5, 63, 5, [120, 120, 120]);
+        return g;
+    }
+
+    function paintSchematics() {
+        return [
+            save(extruderBack(), 'gui/process/schematic/single_screw_extruder.png'),
+            save(sheet([extruderMelt(), ...[0, 1, 2, 3, 4, 5].map(extruderScrew)]), 'gui/process/schematic/single_screw_extruder_progress.png'),
+        ].join(', ');
+    }
+
     function paintAll() {
         const out = [];
         for (const name in PARTS) { const [g, meta] = PARTS[name](); out.push(save(g, 'gui/' + name + '.png', meta)); }
@@ -475,6 +539,6 @@
         return out.length + ' textures';
     }
 
-    window.IUCEGui = { G, PARTS, PROGRESS, paintAll };
+    window.IUCEGui = { G, PARTS, PROGRESS, paintAll, paintSchematics };
     return 'gui loaded';
 })();

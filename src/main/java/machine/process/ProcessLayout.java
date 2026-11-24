@@ -7,8 +7,9 @@ import java.util.List;
  * Where everything sits on a process machine's panel, worked out from its {@link ProcessMachineDef}
  * so the menu (slot positions) and the screen (drawing) always agree.
  * <p>
- * The process page runs left to right in the order of the work: energy gauge, input tanks, input
- * slots, the progress picture, output slots and output tanks. Catalyst and card slots sit under the
+ * A machine with a {@link ProcessSchematic} takes its positions from that picture. Otherwise the
+ * process page runs left to right in the order of the work: energy gauge, input tanks, input slots,
+ * the progress picture, output slots and output tanks, with catalyst and card slots under the
  * progress picture. Upgrade slots live on their own page, in a row across the page area. The panel
  * grows wider than the usual 176 pixels only when a machine needs it. Slot coordinates are item
  * positions (the 18-pixel frame starts one pixel up and left).
@@ -35,50 +36,68 @@ public final class ProcessLayout {
     public final List<Pos> inputs = new ArrayList<>();
     public final List<Pos> outputs = new ArrayList<>();
     public final List<Pos> upgrades = new ArrayList<>();
-    /** Top-left of the progress picture, {@link #progressW} by {@link #PROGRESS_H}. */
+    /** Top-left of the progress picture, {@link #progressW} by {@link #progressH}. */
     public final Pos arrow;
-    public final int progressW;
+    public final int progressW, progressH;
     public final Pos catalyst;                               // null without a catalyst slot
     public final Pos card;                                   // null without a card slot
     public final int inventoryX;
+    /** The machine's own picture, or null for the generic row. */
+    public final ProcessSchematic schematic;
 
     public ProcessLayout(ProcessMachineDef def) {
-        this.progressW = def.progress().width();
-        int content = ENERGY_W + 6
-            + def.fluidsIn().size() * (TANK_W + 4) + 2
-            + gridWidth(def.itemsIn()) + 6
-            + progressW + 6
-            + gridWidth(def.itemsOut()) + 2
-            + def.fluidsOut().size() * (TANK_W + 4);
-        this.width = Math.max(176, content + 16);
-        this.inventoryX = (width - 176) / 2 + 8;
-
-        int x = 8 + (width - 16 - content) / 2;
-        this.energyX = x;
-        x += ENERGY_W + 6;
-        for (int i = 0; i < def.fluidsIn().size(); i++) {
-            tanks.add(new Pos(x, TANK_Y));
-            x += TANK_W + 4;
-        }
-        x += 2;
-        x = grid(inputs, def.itemsIn(), x) + 6;
-        int centerY = (CONTENT_TOP + CONTENT_BOTTOM) / 2;
-        int lift = def.catalystSlot() || def.cardSlot() ? 9 : 0;   // make room for the slots below
-        this.arrow = new Pos(x, centerY - PROGRESS_H / 2 - lift);
-        int below = arrow.y() + PROGRESS_H + 4;
-        int middle = x + progressW / 2;
-        if (def.catalystSlot() && def.cardSlot()) {
-            catalyst = new Pos(middle - 18, below);
-            card = new Pos(middle + 1, below);
+        this.schematic = ProcessSchematic.of(def);
+        if (schematic != null) {
+            this.width = ProcessSchematic.WIDTH;
+            this.inventoryX = 8;
+            this.energyX = schematic.energyX();
+            tanks.addAll(schematic.tanks());
+            inputs.addAll(schematic.inputs());
+            outputs.addAll(schematic.outputs());
+            this.arrow = schematic.window();
+            this.progressW = schematic.windowW();
+            this.progressH = schematic.windowH();
+            this.catalyst = schematic.catalyst();
+            this.card = schematic.card();
         } else {
-            catalyst = def.catalystSlot() ? new Pos(middle - 8, below) : null;
-            card = def.cardSlot() ? new Pos(middle - 8, below) : null;
-        }
-        x += progressW + 6;
-        x = grid(outputs, def.itemsOut(), x) + 2;
-        for (int i = 0; i < def.fluidsOut().size(); i++) {
-            tanks.add(new Pos(x, TANK_Y));
-            x += TANK_W + 4;
+            this.progressW = def.progress().width();
+            this.progressH = PROGRESS_H;
+            int content = ENERGY_W + 6
+                + def.fluidsIn().size() * (TANK_W + 4) + 2
+                + gridWidth(def.itemsIn()) + 6
+                + progressW + 6
+                + gridWidth(def.itemsOut()) + 2
+                + def.fluidsOut().size() * (TANK_W + 4);
+            this.width = Math.max(176, content + 16);
+            this.inventoryX = (width - 176) / 2 + 8;
+
+            int x = 8 + (width - 16 - content) / 2;
+            this.energyX = x;
+            x += ENERGY_W + 6;
+            for (int i = 0; i < def.fluidsIn().size(); i++) {
+                tanks.add(new Pos(x, TANK_Y));
+                x += TANK_W + 4;
+            }
+            x += 2;
+            x = grid(inputs, def.itemsIn(), x) + 6;
+            int centerY = (CONTENT_TOP + CONTENT_BOTTOM) / 2;
+            int lift = def.catalystSlot() || def.cardSlot() ? 9 : 0;   // make room for the slots below
+            this.arrow = new Pos(x, centerY - PROGRESS_H / 2 - lift);
+            int below = arrow.y() + PROGRESS_H + 4;
+            int middle = x + progressW / 2;
+            if (def.catalystSlot() && def.cardSlot()) {
+                catalyst = new Pos(middle - 18, below);
+                card = new Pos(middle + 1, below);
+            } else {
+                catalyst = def.catalystSlot() ? new Pos(middle - 8, below) : null;
+                card = def.cardSlot() ? new Pos(middle - 8, below) : null;
+            }
+            x += progressW + 6;
+            x = grid(outputs, def.itemsOut(), x) + 2;
+            for (int i = 0; i < def.fluidsOut().size(); i++) {
+                tanks.add(new Pos(x, TANK_Y));
+                x += TANK_W + 4;
+            }
         }
         int upgradeX = (width - def.upgrades() * 22) / 2 + 3;
         for (int i = 0; i < def.upgrades(); i++) upgrades.add(new Pos(upgradeX + i * 22, UPGRADE_Y));

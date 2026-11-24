@@ -5,6 +5,7 @@ import machine.process.ProcessLayout;
 import machine.process.ProcessMachineBlockEntity;
 import machine.process.ProcessMachineMenu;
 import machine.process.ProcessMachineMenu.Page;
+import machine.process.ProcessSchematic;
 import machine.process.ProgressStyle;
 import machine.utility.Utility;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -35,24 +36,30 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * The screen of every process machine: a bolted steel panel with GregTech-style tabs down its left
- * side. The process page lays the slots, tanks and the machine's own progress picture out in the
- * order of the work; the other pages pick a mould or die, hold the upgrades, preview the machine's
- * recipes, show its power and utility use, and explain what it does. Every part is a texture
- * painted by {@code tools/art/blockbench/gui.js}; positions come from {@link ProcessLayout}, so a
- * new machine needs no GUI work.
+ * The screen of every process machine, in the light grey of the vanilla containers, with tabs down
+ * its left side. A machine with a {@link ProcessSchematic} shows a picture of itself on the process
+ * page, the way the brewing stand does, with its slots where the work goes in and out and the
+ * progress drawn inside the machine; the others lay their slots, tanks and progress picture out in
+ * the order of the work. The other pages pick a mould or die, hold the upgrades, preview the
+ * machine's recipes, show its power and utility use, and explain what it does. Positions come from
+ * {@link ProcessLayout}.
  */
 public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachineMenu> {
-    private static final Identifier PANEL = sprite("panel"), TAB = sprite("tab"), TAB_ON = sprite("tab_on");
-    private static final Identifier BUTTON = sprite("button"), BUTTON_ON = sprite("button_on"), SCREEN = sprite("screen");
-    private static final Identifier SLOT = texture("slot"), TANK_IN = texture("tank_in"), TANK_OUT = texture("tank_out");
-    private static final Identifier TANK_GLASS = texture("tank_glass"), ENERGY_BAR = texture("energy_bar"), ENERGY_FILL = texture("energy_fill");
     private static final Identifier GHOST_CATALYST = texture("ghost_catalyst"), GHOST_CARD = texture("ghost_card"), GHOST_UPGRADE = texture("ghost_upgrade");
 
-    private static final int TEXT = 0xFF3A3F46, SCREEN_TEXT = 0xFFB8E8C4, SCREEN_DIM = 0xFF6F9A80, SCREEN_HEAD = 0xFFE8D27A;
+    // vanilla container colours
+    private static final int PANEL = 0xFFC6C6C6, LIGHT = 0xFFFFFFFF, SHADE = 0xFF555555, EDGE = 0xFF000000;
+    private static final int SLOT = 0xFF8B8B8B, SLOT_DARK = 0xFF373737;
+    private static final int TAB_OFF = 0xFFA9A9A9, TAB_OFF_LIGHT = 0xFFDADADA, TAB_OFF_SHADE = 0xFF6A6A6A;
+    // small dark displays: gauges, tanks and the status line
+    private static final int SCREEN = 0xFF1E2328, SCREEN_EDGE = 0xFF0E1114;
     private static final int GREEN = 0xFF7DFF9A, AMBER = 0xFFFFD080, RED = 0xFFFF9A8A, DIM = 0xFF9FD0B0;
+    private static final int ENERGY = 0xFFE8C440, ENERGY_TOP = 0xFFFFF0A0;
+    // light text pages
+    private static final int PAPER = 0xFFE4E4E4, TEXT = 0xFF404040, TEXT_DIM = 0xFF7A7A7A, HEAD = 0xFF1F4E8C, WARN = 0xFFB02020, CHANCE = 0xFF9A6A00;
+
     /** Top and bottom of the area the pages other than the process page draw in. */
-    private static final int PAGE_TOP = ProcessLayout.PAGE_TOP, PAGE_BOTTOM = ProcessLayout.INVENTORY_LABEL_Y - 1;
+    private static final int PAGE_TOP = ProcessLayout.PAGE_TOP, PAGE_BOTTOM = ProcessLayout.INVENTORY_LABEL_Y - 2;
     private static final int TAB_W = 22, TAB_H = 22, TAB_STEP = 24, TAB_Y = 6;
     private static final int RECIPE_ROW = 22;
 
@@ -80,7 +87,6 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         if (client.gui.component.MachineInfoPanel.hasInfo(menu.def().id())) pages.add(Page.INFO);
     }
 
-    private static Identifier sprite(String name) { return Identifier.fromNamespaceAndPath("iuce", "process/" + name); }
     private static Identifier texture(String name) { return Identifier.fromNamespaceAndPath("iuce", "textures/gui/process/" + name + ".png"); }
 
     @Override
@@ -121,12 +127,16 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         hits.clear();
         for (int i = 0; i < pages.size(); i++) if (pages.get(i) != page()) tab(g, i, false);
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, PANEL, leftPos, topPos, imageWidth, imageHeight);
+        panel(g);
         tab(g, pages.indexOf(page()), true);
+        if (page() == Page.PROCESS && layout.schematic != null) {
+            g.blit(RenderPipelines.GUI_TEXTURED, schematicTexture(""), leftPos, topPos + ProcessSchematic.TOP, 0, 0,
+                ProcessSchematic.WIDTH, ProcessSchematic.HEIGHT, ProcessSchematic.WIDTH, ProcessSchematic.HEIGHT);
+        }
         for (Slot slot : menu.slots) if (slot.isActive()) slotFrame(g, slot);
         switch (page()) {
             case PROCESS -> processPage(g);
-            case MOLD -> moldPage(g, mouseX, mouseY);
+            case MOLD -> moldPage(g);
             case UPGRADES -> upgradePage(g);
             case RECIPES -> recipePage(g);
             case ENERGY -> textPage(g, energyLines());
@@ -135,10 +145,39 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         super.extractContents(g, mouseX, mouseY, partialTick);
     }
 
+    private Identifier schematicTexture(String suffix) {
+        return Identifier.fromNamespaceAndPath("iuce", "textures/gui/process/schematic/" + layout.schematic.id() + suffix + ".png");
+    }
+
+    private void panel(GuiGraphicsExtractor g) {
+        raised(g, leftPos, topPos, imageWidth, imageHeight, PANEL, LIGHT, SHADE);
+    }
+
+    /** A raised block in the vanilla bevel: black rounded edge, light top and left, shade bottom and right. */
+    private static void raised(GuiGraphicsExtractor g, int x, int y, int w, int h, int face, int light, int shade) {
+        g.fill(x + 1, y, x + w - 1, y + h, EDGE);
+        g.fill(x, y + 1, x + w, y + h - 1, EDGE);
+        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, face);
+        g.fill(x + 1, y + 1, x + w - 2, y + 3, light);
+        g.fill(x + 1, y + 1, x + 3, y + h - 2, light);
+        g.fill(x + 3, y + h - 3, x + w - 1, y + h - 1, shade);
+        g.fill(x + w - 3, y + 3, x + w - 1, y + h - 1, shade);
+    }
+
     private void tab(GuiGraphicsExtractor g, int index, boolean active) {
         Page page = pages.get(index);
         int x = leftPos - TAB_W + 1, y = topPos + TAB_Y + index * TAB_STEP;
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, active ? TAB_ON : TAB, x, y, active ? TAB_W + 3 : TAB_W, TAB_H);
+        if (active) {
+            // joins the panel: no edge on the right, and it covers the panel's own left edge and bevel
+            g.fill(x + 1, y, leftPos + 3, y + TAB_H, EDGE);
+            g.fill(x, y + 1, leftPos + 3, y + TAB_H - 1, EDGE);
+            g.fill(x + 1, y + 1, leftPos + 3, y + TAB_H - 1, PANEL);
+            g.fill(x + 1, y + 1, leftPos + 1, y + 3, LIGHT);
+            g.fill(x + 1, y + 1, x + 3, y + TAB_H - 2, LIGHT);
+            g.fill(x + 3, y + TAB_H - 3, leftPos + 1, y + TAB_H - 1, SHADE);
+        } else {
+            raised(g, x, y, TAB_W, TAB_H, TAB_OFF, TAB_OFF_LIGHT, TAB_OFF_SHADE);
+        }
         String icon = switch (page) {
             case PROCESS -> "process";
             case MOLD -> "mold";
@@ -147,20 +186,32 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
             case ENERGY -> "energy";
             case INFO -> "info";
         };
-        g.blit(RenderPipelines.GUI_TEXTURED, texture("icon_" + icon), x + 4, y + 3, 0, 0, 16, 16, 16, 16, active ? -1 : 0xFFB8B8B8);
+        g.blit(RenderPipelines.GUI_TEXTURED, texture("icon_" + icon), x + 4, y + 3, 0, 0, 16, 16, 16, 16, active ? -1 : 0xFFC8C8C8);
         hits.add(new Hit(x, y, TAB_W, TAB_H, ItemStack.EMPTY, List.of(Component.translatable("gui.iuce.process.tab." + icon))));
     }
 
     private void slotFrame(GuiGraphicsExtractor g, Slot slot) {
         int x = leftPos + slot.x - 1, y = topPos + slot.y - 1;
-        g.blit(RenderPipelines.GUI_TEXTURED, SLOT, x, y, 0, 0, 18, 18, 18, 18);
+        g.fill(x, y, x + 18, y + 18, SLOT);
+        g.fill(x, y, x + 17, y + 1, SLOT_DARK);
+        g.fill(x, y, x + 1, y + 17, SLOT_DARK);
+        g.fill(x + 1, y + 17, x + 18, y + 18, LIGHT);
+        g.fill(x + 17, y + 1, x + 18, y + 18, LIGHT);
         if (slot.hasItem() || slot.index >= menu.slots.size() - 36) return;
         Identifier ghost = null;
         int index = slot.getContainerSlot();
         if (index == menu.def().catalystIndex()) ghost = GHOST_CATALYST;
         else if (index == menu.def().cardIndex()) ghost = GHOST_CARD;
         else if (index >= menu.def().upgradeStart()) ghost = GHOST_UPGRADE;
-        if (ghost != null) g.blit(RenderPipelines.GUI_TEXTURED, ghost, x + 1, y + 1, 0, 0, 16, 16, 16, 16);
+        if (ghost != null) g.blit(RenderPipelines.GUI_TEXTURED, ghost, x + 1, y + 1, 0, 0, 16, 16, 16, 16, 0x90FFFFFF);
+    }
+
+    /** A recessed rectangle with the panel's bevel around it. */
+    private static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
+        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, SLOT_DARK);
+        g.fill(x, y + h, x + w + 1, y + h + 1, LIGHT);
+        g.fill(x + w, y, x + w + 1, y + h + 1, LIGHT);
+        g.fill(x, y, x + w, y + h, fill);
     }
 
     // ---- process page
@@ -168,17 +219,21 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     private void processPage(GuiGraphicsExtractor g) {
         energy(g);
         for (int i = 0; i < layout.tanks.size(); i++) tank(g, i);
-        progress(g);
+        if (layout.schematic != null) schematicProgress(g);
+        else progress(g);
         status(g);
     }
 
     private void energy(GuiGraphicsExtractor g) {
-        int x = leftPos + layout.energyX, y = topPos + ProcessLayout.TANK_Y, h = ProcessLayout.TANK_H;
-        g.blit(RenderPipelines.GUI_TEXTURED, ENERGY_BAR, x - 1, y - 1, 0, 0, 9, 54, 9, 54);
+        int x = leftPos + layout.energyX, y = topPos + ProcessLayout.TANK_Y, w = ProcessLayout.ENERGY_W, h = ProcessLayout.TANK_H;
+        inset(g, x, y, w, h, SCREEN);
         long max = menu.maxEnergy();
         int filled = max > 0 ? (int) Math.clamp(menu.energy() * h / max, 0, h) : 0;
-        if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, ENERGY_FILL, x, y + h - filled, 0, h - filled, ProcessLayout.ENERGY_W, filled, 7, 52);
-        hits.add(new Hit(x, y, ProcessLayout.ENERGY_W, h, ItemStack.EMPTY,
+        if (filled > 0) {
+            g.fill(x, y + h - filled, x + w, y + h, ENERGY);
+            g.fill(x, y + h - filled, x + w, y + h - filled + 1, ENERGY_TOP);
+        }
+        hits.add(new Hit(x, y, w, h, ItemStack.EMPTY,
             List.of(Component.translatable("gui.iuce.process.energy", menu.energy(), menu.maxEnergy()))));
     }
 
@@ -186,7 +241,7 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         var pos = layout.tanks.get(index);
         int x = leftPos + pos.x(), y = topPos + pos.y(), w = ProcessLayout.TANK_W, h = ProcessLayout.TANK_H;
         boolean input = index < menu.def().fluidsIn().size();
-        g.blit(RenderPipelines.GUI_TEXTURED, input ? TANK_IN : TANK_OUT, x - 1, y - 1, 0, 0, 18, 54, 18, 54);
+        inset(g, x, y, w, h, SCREEN);
         int capacity = menu.tankCapacity(index), amount = menu.tankAmount(index);
         int filled = capacity > 0 ? (int) Math.clamp((long) amount * h / capacity, amount > 0 ? 1 : 0, h) : 0;
         Fluid fluid = menu.tankFluid(index);
@@ -195,7 +250,9 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
             g.fill(x, y + h - filled, x + w, y + h, color);
             g.fill(x, y + h - filled, x + w, y + h - filled + 1, lighter(color));
         }
-        g.blit(RenderPipelines.GUI_TEXTURED, TANK_GLASS, x, y, 0, 0, w, h, 16, 52);
+        // scale marks on the left edge; output tanks get an amber cap so the direction is readable
+        for (int mark = 1; mark < 4; mark++) g.fill(x, y + h * mark / 4, x + (mark == 2 ? 6 : 3), y + h * mark / 4 + 1, SCREEN_EDGE);
+        if (!input) g.fill(x, y - 1, x + w, y, 0xFFB07A20);
         List<Component> lines = new ArrayList<>();
         lines.add(fluid == Fluids.EMPTY
             ? Component.translatable(input ? "gui.iuce.process.input_tank" : "gui.iuce.process.output_tank")
@@ -204,15 +261,40 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         hits.add(new Hit(x, y, w, h, ItemStack.EMPTY, lines));
     }
 
+    private float part() {
+        int max = menu.maxProgress();
+        return max > 0 ? Math.clamp((float) menu.progress() / max, 0f, 1f) : 0f;
+    }
+
+    private boolean running() { return menu.progress() > 0 && menu.reason().isEmpty(); }
+
+    private void progressHit(int x, int y, int w, int h) {
+        if (menu.maxProgress() > 0) hits.add(new Hit(x, y, w, h, ItemStack.EMPTY,
+            List.of(Component.translatable("gui.iuce.process.progress", menu.progress(), menu.maxProgress()))));
+    }
+
+    /** The work inside the machine's picture: the filling row, then the looping overlay on top. */
+    private void schematicProgress(GuiGraphicsExtractor g) {
+        ProcessSchematic s = layout.schematic;
+        Identifier sheet = schematicTexture("_progress");
+        int x = leftPos + layout.arrow.x(), y = topPos + layout.arrow.y(), w = s.windowW(), h = s.windowH();
+        int texH = h * (1 + s.frames());
+        int filled = Math.round(part() * w);
+        if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, 0, filled, h, w, texH);
+        int frame = running() ? (int) (System.currentTimeMillis() / 120 % Math.max(1, s.frames())) : 0;
+        int tint = menu.reason().isEmpty() ? -1 : 0xFFE09090;
+        if (s.frames() > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, (1 + frame) * h, w, h, w, texH, tint);
+        progressHit(x, y, w, h);
+    }
+
     /** Draws the machine's progress picture; see {@link ProgressStyle} for the sheet layout. */
     private void progress(GuiGraphicsExtractor g) {
         ProgressStyle style = menu.def().progress();
         Identifier sheet = Identifier.fromNamespaceAndPath("iuce", "textures/gui/process/progress/" + style.id() + ".png");
         int x = leftPos + layout.arrow.x(), y = topPos + layout.arrow.y(), w = style.width(), h = style.height();
         int texH = h * style.rows();
-        int max = menu.maxProgress(), done = menu.progress();
-        float part = max > 0 ? Math.clamp((float) done / max, 0f, 1f) : 0f;
-        boolean running = done > 0 && menu.reason().isEmpty();
+        float part = part();
+        boolean running = running();
         int tint = menu.reason().isEmpty() ? -1 : 0xFFE0A0A0;
         int frame = (int) (System.currentTimeMillis() / 120 % Math.max(1, style.frames()));
         switch (style.mode()) {
@@ -233,14 +315,13 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
                 if (running && style.frames() > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, (2 + frame) * h, w, h, w, texH);
             }
         }
-        if (max > 0) hits.add(new Hit(x, y, w, h, ItemStack.EMPTY,
-            List.of(Component.translatable("gui.iuce.process.progress", done, max))));
+        progressHit(x, y, w, h);
     }
 
     private void status(GuiGraphicsExtractor g) {
-        // ends above the inventory label at INVENTORY_LABEL_Y
-        int x = leftPos + 7, y = topPos + ProcessLayout.STATUS_Y - 2, w = imageWidth - 14;
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, SCREEN, x, y, w, 11);
+        // the bevel ends one row above the inventory label at INVENTORY_LABEL_Y
+        int x = leftPos + 8, y = topPos + ProcessLayout.INVENTORY_LABEL_Y - 12, w = imageWidth - 16, h = 10;
+        inset(g, x, y, w, h, SCREEN);
         Component text;
         int color;
         String reason = menu.reason();
@@ -257,21 +338,21 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
             text = Component.translatable("gui.iuce.process.idle");
             color = DIM;
         }
-        g.text(font, font.plainSubstrByWidth(text.getString(), w - 6), x + 3, y + 2, color, false);
-        hits.add(new Hit(x, y, w, 11, ItemStack.EMPTY, List.of(text)));
+        g.text(font, font.plainSubstrByWidth(text.getString(), w - 4), x + 2, y + 1, color, false);
+        hits.add(new Hit(x, y, w, h, ItemStack.EMPTY, List.of(text)));
     }
 
     // ---- mould / die page
 
     private int moldColumns() { return Math.max(1, (imageWidth - 16) / 22); }
 
-    private void moldPage(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+    private void moldPage(GuiGraphicsExtractor g) {
         int cols = moldColumns();
         int x0 = leftPos + (imageWidth - cols * 22 + 2) / 2;
         for (int i = 0; i < molds.size(); i++) {
             int x = x0 + (i % cols) * 22, y = topPos + PAGE_TOP + 2 + (i / cols) * 22;
-            boolean selected = i == menu.mold();
-            g.blitSprite(RenderPipelines.GUI_TEXTURED, selected ? BUTTON_ON : BUTTON, x, y, 20, 20);
+            if (i == menu.mold()) inset(g, x + 1, y + 1, 18, 18, SLOT);
+            else raised(g, x, y, 20, 20, PANEL, LIGHT, SHADE);
             ItemStack stack = moldStack(i);
             g.item(stack, x + 2, y + 2);
             hits.add(new Hit(x, y, 20, 20, stack, null));
@@ -307,19 +388,19 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     private int visibleRecipes() { return (PAGE_BOTTOM - PAGE_TOP - 4) / RECIPE_ROW; }
 
     private void recipePage(GuiGraphicsExtractor g) {
-        int x = leftPos + 7, y = topPos + PAGE_TOP, w = imageWidth - 14, h = PAGE_BOTTOM - PAGE_TOP;
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, SCREEN, x, y, w, h);
+        int x = leftPos + 8, y = topPos + PAGE_TOP, w = imageWidth - 16, h = PAGE_BOTTOM - PAGE_TOP;
+        inset(g, x, y, w, h, PAPER);
         if (recipes.isEmpty()) {
-            g.text(font, Component.translatable("gui.iuce.process.recipes.empty"), x + 5, y + 5, SCREEN_DIM, false);
+            g.text(font, Component.translatable("gui.iuce.process.recipes.empty"), x + 4, y + 4, TEXT_DIM, false);
             return;
         }
         recipeScroll = Math.clamp(recipeScroll, 0, Math.max(0, recipes.size() - visibleRecipes()));
         long tick = System.currentTimeMillis() / 1000;
         for (int row = 0; row < visibleRecipes() && recipeScroll + row < recipes.size(); row++) {
             ProcessRecipe recipe = recipes.get(recipeScroll + row).value();
-            int ry = y + 3 + row * RECIPE_ROW, cx = x + 4;
-            int room = (w - 8 - 14) / 18;
-            List<Runnable> right = new ArrayList<>();
+            int ry = y + 3 + row * RECIPE_ROW, cx = x + 3;
+            if (row > 0) g.fill(x + 2, ry - 3, x + w - 2, ry - 2, 0xFFC8C8C8);
+            int room = (w - 6 - 14) / 18;
             int used = 0;
             for (ProcessRecipe.ItemInput input : recipe.items()) {
                 if (used++ >= room - 2) break;
@@ -333,12 +414,12 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
                 if (!fluids.isEmpty()) fluidIcon(g, fluids.get((int) (tick % fluids.size())).value(), input.amount(), cx, ry);
                 cx += 18;
             }
-            g.text(font, "→", cx + 2, ry + 5, SCREEN_TEXT, false);
+            g.text(font, "→", cx + 2, ry + 5, TEXT, false);
             cx += 14;
             for (ProcessRecipe.Output output : recipe.results()) {
                 if (used++ >= room) break;
                 itemIcon(g, output.create(), cx, ry);
-                if (output.chance() < 1f) g.text(font, Math.round(output.chance() * 100) + "%", cx, ry - 1, SCREEN_HEAD, false);
+                if (output.chance() < 1f) g.text(font, Math.round(output.chance() * 100) + "%", cx, ry - 1, CHANCE, false);
                 cx += 18;
             }
             for (ProcessRecipe.FluidOutput output : recipe.fluidResults()) {
@@ -346,11 +427,11 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
                 fluidIcon(g, output.fluid(), output.amount(), cx, ry);
                 cx += 18;
             }
-            hits.add(new Hit(x + 2, ry - 1, w - 4, RECIPE_ROW - 2, ItemStack.EMPTY, recipeLines(recipe)));
+            hits.add(new Hit(x + 1, ry - 1, w - 2, RECIPE_ROW - 2, ItemStack.EMPTY, recipeLines(recipe)));
         }
         if (recipes.size() > visibleRecipes()) {
             String page = (recipeScroll + 1) + "-" + Math.min(recipes.size(), recipeScroll + visibleRecipes()) + " / " + recipes.size();
-            g.text(font, page, x + w - 4 - font.width(page), y + h - 11, SCREEN_DIM, false);
+            g.text(font, page, x + w - 3 - font.width(page), y + h - 10, TEXT_DIM, false);
         }
     }
 
@@ -370,7 +451,7 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
 
     private void fluidIcon(GuiGraphicsExtractor g, Fluid fluid, int amount, int x, int y) {
         int color = fluidColor(fluid);
-        g.fill(x + 2, y + 2, x + 14, y + 15, 0xFF101418);
+        g.fill(x + 2, y + 2, x + 14, y + 15, SLOT_DARK);
         g.fill(x + 3, y + 5, x + 13, y + 14, color);
         g.fill(x + 3, y + 5, x + 13, y + 6, lighter(color));
         String text = amount >= 1000 ? (amount / 1000) + "B" : String.valueOf(amount);
@@ -384,7 +465,7 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     private List<Component> energyLines() {
         var def = menu.def();
         List<Component> lines = new ArrayList<>();
-        lines.add(Component.translatable("gui.iuce.process.power.title").withColor(SCREEN_HEAD));
+        lines.add(Component.translatable("gui.iuce.process.power.title").withColor(HEAD));
         lines.add(Component.translatable("gui.iuce.process.power.voltage", def.voltage().getName(), def.voltage().getMaxVoltage()));
         lines.add(Component.translatable("gui.iuce.process.power.stored", menu.energy(), menu.maxEnergy()));
         lines.add(menu.energyPerTick() > 0
@@ -399,13 +480,13 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
             utilities.addAll(holder.value().utilities());
         }
         if (highest > 0) lines.add(Component.translatable("gui.iuce.process.power.range", lowest, highest));
-        lines.add(Component.translatable("gui.iuce.process.utility.title").withColor(SCREEN_HEAD));
+        lines.add(Component.translatable("gui.iuce.process.utility.title").withColor(HEAD));
         lines.add(utilities.isEmpty()
             ? Component.translatable("gui.iuce.process.utility.none")
             : Component.translatable("gui.iuce.process.utility.uses", utilityNames(utilities)));
         Utility shortUtility = menu.shortUtility();
         if (shortUtility != null) lines.add(Component.translatable("gui.iuce.utility.shortage",
-            Component.translatable(shortUtility.nameKey()), menu.needShares(), menu.haveShares()).withColor(RED));
+            Component.translatable(shortUtility.nameKey()), menu.needShares(), menu.haveShares()).withColor(WARN));
         return lines;
     }
 
@@ -421,26 +502,26 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     private List<Component> infoLines() {
         String id = menu.def().id();
         List<Component> lines = new ArrayList<>();
-        lines.add(Component.translatable("info.iuce." + id + ".title").withColor(SCREEN_HEAD));
+        lines.add(Component.translatable("info.iuce." + id + ".title").withColor(HEAD));
         for (int n = 1; I18n.exists("info.iuce." + id + "." + n); n++) lines.add(Component.translatable("info.iuce." + id + "." + n));
         return lines;
     }
 
-    /** Wrapped text on the dark display; scrolls with the mouse wheel when it does not fit. */
+    /** Wrapped dark text on a light recessed page; scrolls with the mouse wheel when it does not fit. */
     private void textPage(GuiGraphicsExtractor g, List<Component> lines) {
-        int x = leftPos + 7, y = topPos + PAGE_TOP, w = imageWidth - 14, h = PAGE_BOTTOM - PAGE_TOP;
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, SCREEN, x, y, w, h);
+        int x = leftPos + 8, y = topPos + PAGE_TOP, w = imageWidth - 16, h = PAGE_BOTTOM - PAGE_TOP;
+        inset(g, x, y, w, h, PAPER);
         List<FormattedCharSequence> wrapped = new ArrayList<>();
         for (Component line : lines) wrapped.addAll(font.split(line, w - 10));
-        int fits = (h - 8) / 10;
+        int fits = (h - 6) / 10;
         textScroll = Math.clamp(textScroll, 0, Math.max(0, wrapped.size() - fits));
         for (int i = 0; i < fits && textScroll + i < wrapped.size(); i++) {
-            g.text(font, wrapped.get(textScroll + i), x + 5, y + 5 + i * 10, SCREEN_TEXT, false);
+            g.text(font, wrapped.get(textScroll + i), x + 4, y + 4 + i * 10, TEXT, false);
         }
         if (wrapped.size() > fits) {
-            int track = h - 6, knob = Math.max(6, track * fits / wrapped.size());
-            int top = y + 3 + (track - knob) * textScroll / Math.max(1, wrapped.size() - fits);
-            g.fill(x + w - 4, top, x + w - 2, top + knob, SCREEN_DIM);
+            int track = h - 4, knob = Math.max(6, track * fits / wrapped.size());
+            int top = y + 2 + (track - knob) * textScroll / Math.max(1, wrapped.size() - fits);
+            g.fill(x + w - 4, top, x + w - 2, top + knob, SLOT);
         }
     }
 
@@ -454,9 +535,7 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
                 int x = leftPos - TAB_W + 1, y = topPos + TAB_Y + i * TAB_STEP;
                 if (mx >= x && mx < x + TAB_W && my >= y && my < y + TAB_H) {
                     if (pages.get(i) != page()) {
-                        menu.setPage(pages.get(i));
-                        recipeScroll = 0;
-                        textScroll = 0;
+                        selectPage(pages.get(i));
                         click();
                     }
                     return true;

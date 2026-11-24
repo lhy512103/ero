@@ -311,7 +311,7 @@ public class EroJeiPlugin implements IModPlugin {
                     if (screen.page() != machine.process.ProcessMachineMenu.Page.PROCESS) return List.of();
                     var arrow = menu.layout().arrow;
                     return List.of(mezz.jei.api.gui.handlers.IGuiClickableArea.createBasic(arrow.x(), arrow.y(),
-                        menu.layout().progressW, machine.process.ProcessLayout.PROGRESS_H, type));
+                        menu.layout().progressW, menu.layout().progressH, type));
                 }
 
                 @Override
