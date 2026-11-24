@@ -1,34 +1,27 @@
 // Structural building blocks: H-beams, checker plate, grating, handrail, ladder, process pipe,
-// refractory, furnace and vessel shells, screw segments, plant casing/drum, and gas output hatch.
-// Clean style: flat fills, shading only on bevels, seams and bolts; no per-pixel noise.
+// refractory, furnace and vessel shells, the screw barrel top and the plant roll drum.
+// Same look as the process machines: steel greys with a faint grain, shading on bevels, seams and bolts.
 // Run inside Blockbench (risky_eval) after core.js:
 //   eval(fs.readFileSync('D:/Code/java/IUCE/tools/art/blockbench/structure.js', 'utf8')); IUCEStructure.paintAll()
 (function () {
     const A = window.IUCEArt;
     const { paint, save, mix, light, dark, STEEL, FRAME, COPPER, HOT } = A;
-    // Structural paint: the blue-grey primer common on plant steelwork.
-    const PAINT = [[38, 48, 58], [58, 72, 86], [80, 98, 114], [108, 128, 144], [150, 168, 180]];
+    // Structural steel shares the process machines' greys so the plant reads as one set.
+    const PAINT = [FRAME[0], FRAME[2], STEEL[1], STEEL[2], STEEL[3]];
     const YELLOW = [[96, 70, 14], [168, 124, 22], [222, 176, 40], [244, 210, 96]];
-    const GALV = [[70, 76, 80], [118, 124, 128], [160, 166, 168], [204, 208, 208]];
+    const GALV = [STEEL[1], STEEL[2], STEEL[3], STEEL[4]];
     const BRICK = [[118, 84, 56], [150, 110, 76], [176, 138, 96], [204, 172, 128]];
     const MORTAR = [150, 144, 134];
-    const VESSEL = [[140, 146, 150], [170, 176, 178], [188, 192, 194], [208, 212, 212], [226, 228, 228]];
+    const VESSEL = [STEEL[1], STEEL[2], mix(STEEL[2], STEEL[3], 0.5), STEEL[3], STEEL[4]];
     const CERAMIC = [[118, 64, 40], [164, 94, 58], [198, 124, 82]];
 
-    const flat = (t, c) => t.rect(0, 0, 15, 15, c);
+    let grainSeed = 900;
+    // A plate of colour c with the faint grain of the machine casings.
+    const flat = (t, c) => A.noise(t, 0, 0, 15, 15, dark(c, 0.12), light(c, 0.1), grainSeed++);
     // A 2x2 bolt head lit from the top left.
     function boltP(t, x, y, pal) { t.px(x, y, pal[4]); t.px(x + 1, y, pal[2]); t.px(x, y + 1, pal[2]); t.px(x + 1, y + 1, pal[0]); }
     // Smooth round shading across x, for barrels and bars running vertically.
     function cyl(t, lo, hi, k) { for (let x = 0; x < 16; x++) { const c = mix(lo, hi, A.vcol(x) * (k || 0.9)); for (let y = 0; y < 16; y++) t.px(x, y, c); } }
-
-    function segmentShell(t, accent) {
-        flat(t, FRAME[2]);
-        t.rect(0, 0, 15, 0, FRAME[4]); t.rect(0, 1, 15, 1, FRAME[3]); t.rect(0, 2, 15, 2, FRAME[0]);
-        t.rect(0, 13, 15, 13, FRAME[3]); t.rect(0, 14, 15, 14, FRAME[1]); t.rect(0, 15, 15, 15, FRAME[0]);
-        for (let y = 3; y <= 12; y++) for (let x = 0; x < 16; x++) t.px(x, y, mix(STEEL[1], STEEL[4], A.vcol(y, 3, 12) * 0.9));
-        for (const x of [2, 13]) { t.px(x, 1, STEEL[4]); t.px(x, 14, STEEL[3]); }
-        if (accent) accent(t);
-    }
 
     const PAINTS = {
         // ---- H-beam: painted flange face (model samples x = 2..14), web, edge, saw-cut end and joint gusset.
@@ -176,47 +169,12 @@
             }
         }),
 
-        // ---- Gas output hatch and screw barrel segments.
-        gas_output_hatch: () => paint(t => {
-            A.casing(t, 61);
-            A.roundWindow(t, 7.5, 7.5, 5, (x, y, d) => d < 2.6 ? [14, 16, 18] : d < 3.6 ? YELLOW[2] : STEEL[2]);
-            A.gauge(t, 12, 12, 0.6);
-        }),
+        // ---- Screw barrel top and the connected roll drum (hatches and segments live in parts.js).
         segment_top: () => paint(t => {
             flat(t, FRAME[2]);
             t.bevel(0, 0, 15, 15, FRAME[4], FRAME[0]);
             t.rect(3, 2, 12, 13, STEEL[2]); t.bevel(3, 2, 12, 13, STEEL[4], FRAME[0]);
             t.rect(6, 5, 9, 10, FRAME[1]);
-        }),
-        main_feed_segment: () => paint(t => segmentShell(t, g => {
-            g.rect(4, 3, 11, 7, STEEL[3]); g.bevel(4, 3, 11, 7, STEEL[4], FRAME[0]); g.rect(6, 4, 9, 6, [22, 26, 30]);
-        })),
-        melting_segment: () => paint(t => segmentShell(t, g => {
-            for (const x0 of [2, 9]) { g.rect(x0, 4, x0 + 4, 11, CERAMIC[1]); g.rect(x0, 4, x0 + 4, 4, CERAMIC[2]); g.rect(x0, 11, x0 + 4, 11, CERAMIC[0]); }
-        })),
-        side_feed_segment: () => paint(t => segmentShell(t, g => {
-            A.roundWindow(g, 7.5, 7.5, 3.8, (x, y, d) => d < 2.0 ? [20, 24, 28] : STEEL[3]);
-        })),
-        mixing_segment: () => paint(t => segmentShell(t, g => {
-            for (const x of [3, 7, 11]) { g.rect(x, 4, x, 11, STEEL[4]); g.rect(x + 1, 4, x + 1, 11, FRAME[0]); }
-        })),
-        venting_segment: () => paint(t => segmentShell(t, g => {
-            g.rect(5, 3, 10, 6, FRAME[3]); g.bevel(5, 3, 10, 6, STEEL[4], FRAME[0]); g.rect(6, 4, 9, 5, [20, 24, 28]);
-            A.gauge(g, 12, 9, 0.5);
-        })),
-        die_segment: () => paint(t => segmentShell(t, g => {
-            g.rect(3, 4, 12, 11, FRAME[1]); g.bevel(3, 4, 12, 11, STEEL[3], FRAME[0]);
-            for (const x of [5, 7, 9, 11]) { g.px(x, 7, HOT[2]); g.px(x, 8, HOT[3]); }
-        })),
-
-        // ---- Plant casing and the connected roll drum.
-        plant_casing: () => paint(t => {
-            flat(t, STEEL[2]);
-            t.rect(0, 7, 15, 7, STEEL[1]); t.rect(0, 8, 15, 8, STEEL[3]);
-        }),
-        plant_trim: () => paint(t => {
-            t.rect(0, 0, 15, 0, FRAME[0]); t.rect(0, 1, 15, 1, STEEL[4]); t.rect(0, 2, 15, 2, STEEL[1]);
-            for (const x of [3, 12]) t.px(x, 1, STEEL[2]);
         }),
         plant_drum: () => paint(t => {
             cyl(t, STEEL[0], STEEL[4]);
@@ -241,15 +199,6 @@
     };
 
     const PATH_MAP = {
-        gas_output_hatch: 'block/gas_output_hatch.png',
-        main_feed_segment: 'block/main_feed_segment.png',
-        melting_segment: 'block/melting_segment.png',
-        side_feed_segment: 'block/side_feed_segment.png',
-        mixing_segment: 'block/mixing_segment.png',
-        venting_segment: 'block/venting_segment.png',
-        die_segment: 'block/die_segment.png',
-        plant_casing: 'block/machine/plant/casing.png',
-        plant_trim: 'block/machine/plant/trim.png',
         plant_drum: 'block/machine/plant/drum.png',
         plant_drum_collar: 'block/machine/plant/drum_collar.png',
         plant_bearing: 'block/machine/plant/bearing.png',

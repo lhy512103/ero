@@ -151,6 +151,7 @@
 145. Improved: Redrew structural blocks and formed multiblock materials with clean flat steel surfaces instead of noisy pixel grain, and unified the Rolling Mill's front console, item hatches and corner cabinets.
 146. Fixed: Process pipes showing the missing texture.
 147. Fixed: Multiblock parts turning invisible like air after the structure was resized or changed.
+148. Improved: Redrew structural blocks, controllers, hatches and screw-barrel segments to match the steel look of the process machines.
 
 ### 中文
 
@@ -301,3 +302,4 @@
 145. 优化：结构方块与多方块成型材质改为干净的平整钢面，去掉杂乱噪点，并统一轧制联合机前排控制台、物料仓与四角机柜的外观。
 146. 修复：工艺管道显示为缺失贴图的问题。
 147. 修复：多方块改变长度或结构后，原有零件被隐藏、看起来像空气方块的问题。
+148. 优化：重绘结构方块、多方块控制器、各类仓口与螺杆段贴图，与注塑机等加工机器的钢制风格统一。
