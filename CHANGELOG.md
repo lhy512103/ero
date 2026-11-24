@@ -153,6 +153,7 @@
 147. Fixed: Multiblock parts turning invisible like air after the structure was resized or changed.
 148. Improved: Redrew structural blocks, controllers, hatches and screw-barrel segments to match the steel look of the process machines.
 149. Improved: Redrew the polyethylene, natural rubber and tier-II logistics machines, blocks and items to match the process machine style.
+150. Fixed: Thirteen dyeable items, including PE and PVC pipes, plastic pellets, film rolls, drip tape and strands, showing as blank icons in inventories.
 
 ### 中文
 
@@ -305,3 +306,4 @@
 147. 修复：多方块改变长度或结构后，原有零件被隐藏、看起来像空气方块的问题。
 148. 优化：重绘结构方块、多方块控制器、各类仓口与螺杆段贴图，与注塑机等加工机器的钢制风格统一。
 149. 优化：重绘聚乙烯加工、天然橡胶与二级物流的机器、方块和物品贴图，与加工机器风格统一。
+150. 修复：PE 管、PVC 管、各类塑料粒料、膜卷、滴灌带和料条等 13 种可染色物品在物品栏中显示为空白的问题。
