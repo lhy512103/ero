@@ -148,7 +148,8 @@
 142. Improved: Redesigned the Twin-Screw Extruder layout and formed model, and replaced oversized bright-blue housings on the Rolling Mill and Ore Processing Plant with cast-steel frames.
 143. Improved: Extendable rolling mills, extruders and coke ovens now carry their steel grain and mechanical fittings across repeated sections.
 144. Improved: Checker plates, tank shells and coaxial rollers join seamlessly, while perpendicular H-beams and process pipes connect with bolted gussets and flanged elbows.
-145. Improved: Redrew structural blocks and formed multiblock materials in a crisp Minecraft pixel-art style, and unified the Rolling Mill's front console and corner cabinets.
+145. Improved: Redrew structural blocks and formed multiblock materials with clean flat steel surfaces instead of noisy pixel grain, and unified the Rolling Mill's front console, item hatches and corner cabinets.
+146. Fixed: Process pipes showing the missing texture.
 
 ### 中文
 
@@ -296,4 +297,5 @@
 142. 优化：重做双螺杆挤出机的成型前后结构与模型，并将轧机、矿石处理厂等处的亮蓝色大柱子和箱体改为铸钢机架。
 143. 优化：轧制联合机、双螺杆挤出机和焦炉组加长后，钢板纹理连续，机架、管路和炉门细节随各段延伸。
 144. 优化：花纹钢板、容器壳体与同轴工业滚筒支持连接纹理，垂直相交的 H 型钢与工艺管道会生成螺栓节点板和法兰弯头三通。
-145. 优化：按原版像素质感重绘结构方块与多方块材质贴图，并统一轧制联合机前排控制台、物料仓与四角机柜的收边纹理。
+145. 优化：结构方块与多方块成型材质改为干净的平整钢面，去掉杂乱噪点，并统一轧制联合机前排控制台、物料仓与四角机柜的外观。
+146. 修复：工艺管道显示为缺失贴图的问题。

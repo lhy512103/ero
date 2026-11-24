@@ -50,18 +50,24 @@
     },
     {
       "when": {
-        "formed": "false",
-        "axis": "y",
-        "north": "false",
-        "south": "false",
-        "west": "false",
-        "east": "false",
-        "OR": [
+        "AND": [
           {
-            "up": "true"
+            "formed": "false",
+            "axis": "y",
+            "north": "false",
+            "south": "false",
+            "west": "false",
+            "east": "false"
           },
           {
-            "down": "true"
+            "OR": [
+              {
+                "up": "true"
+              },
+              {
+                "down": "true"
+              }
+            ]
           }
         ]
       },
@@ -103,18 +109,24 @@
     },
     {
       "when": {
-        "formed": "false",
-        "axis": "z",
-        "up": "false",
-        "down": "false",
-        "west": "false",
-        "east": "false",
-        "OR": [
+        "AND": [
           {
-            "north": "true"
+            "formed": "false",
+            "axis": "z",
+            "up": "false",
+            "down": "false",
+            "west": "false",
+            "east": "false"
           },
           {
-            "south": "true"
+            "OR": [
+              {
+                "north": "true"
+              },
+              {
+                "south": "true"
+              }
+            ]
           }
         ]
       },
@@ -156,18 +168,24 @@
     },
     {
       "when": {
-        "formed": "false",
-        "axis": "x",
-        "up": "false",
-        "down": "false",
-        "north": "false",
-        "south": "false",
-        "OR": [
+        "AND": [
           {
-            "west": "true"
+            "formed": "false",
+            "axis": "x",
+            "up": "false",
+            "down": "false",
+            "north": "false",
+            "south": "false"
           },
           {
-            "east": "true"
+            "OR": [
+              {
+                "west": "true"
+              },
+              {
+                "east": "true"
+              }
+            ]
           }
         ]
       },

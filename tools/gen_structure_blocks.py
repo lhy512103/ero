@@ -297,7 +297,9 @@ def h_beam():
 
 
 def process_pipe(name="process_pipe", flanged=True):
-    tex = {"particle": TEX + name, "side": TEX + name, "end": TEX + name + "_end", "hub": TEX + name + "_hub"}
+    tex = {"particle": TEX + name, "side": TEX + name, "end": TEX + name + "_end"}
+    if flanged:
+        tex["hub"] = TEX + name + "_hub"
     straight = [
         {"from": [3.5, 0, 4.5], "to": [12.5, 16, 11.5], "faces": {
             "north": {"uv": [3.5, 0, 12.5, 16], "texture": "#side"},
@@ -396,8 +398,8 @@ def process_pipe(name="process_pipe", flanged=True):
         {"when": {"formed": "false", "axis": "z", **no_conn}, "apply": {"model": f"iuce:block/{name}", "x": 90}},
         {"when": {"formed": "false", "axis": "x", **no_conn}, "apply": {"model": f"iuce:block/{name}", "x": 90, "y": 90}},
         # 2. Pure coaxial straight pipe (connected only along its own axis): seamless barrel + flanges only on open ends
-        {"when": {"formed": "false", "axis": "y", "north": "false", "south": "false", "west": "false", "east": "false",
-                  "OR": [{"up": "true"}, {"down": "true"}]},
+        {"when": {"AND": [{"formed": "false", "axis": "y", "north": "false", "south": "false", "west": "false", "east": "false"},
+                  {"OR": [{"up": "true"}, {"down": "true"}]}]},
          "apply": {"model": f"iuce:block/{name}_straight"}},
         {"when": {"formed": "false", "axis": "y", "north": "false", "south": "false", "west": "false", "east": "false",
                   "up": "false", "down": "true"},
@@ -406,8 +408,8 @@ def process_pipe(name="process_pipe", flanged=True):
                   "up": "true", "down": "false"},
          "apply": {"model": f"iuce:block/{name}_cap", **dir_rots["down"]}},
 
-        {"when": {"formed": "false", "axis": "z", "up": "false", "down": "false", "west": "false", "east": "false",
-                  "OR": [{"north": "true"}, {"south": "true"}]},
+        {"when": {"AND": [{"formed": "false", "axis": "z", "up": "false", "down": "false", "west": "false", "east": "false"},
+                  {"OR": [{"north": "true"}, {"south": "true"}]}]},
          "apply": {"model": f"iuce:block/{name}_straight", "x": 90}},
         {"when": {"formed": "false", "axis": "z", "up": "false", "down": "false", "west": "false", "east": "false",
                   "north": "false", "south": "true"},
@@ -416,8 +418,8 @@ def process_pipe(name="process_pipe", flanged=True):
                   "north": "true", "south": "false"},
          "apply": {"model": f"iuce:block/{name}_cap", **dir_rots["south"]}},
 
-        {"when": {"formed": "false", "axis": "x", "up": "false", "down": "false", "north": "false", "south": "false",
-                  "OR": [{"west": "true"}, {"east": "true"}]},
+        {"when": {"AND": [{"formed": "false", "axis": "x", "up": "false", "down": "false", "north": "false", "south": "false"},
+                  {"OR": [{"west": "true"}, {"east": "true"}]}]},
          "apply": {"model": f"iuce:block/{name}_straight", "x": 90, "y": 90}},
         {"when": {"formed": "false", "axis": "x", "up": "false", "down": "false", "north": "false", "south": "false",
                   "west": "false", "east": "true"},
