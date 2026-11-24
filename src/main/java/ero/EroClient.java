@@ -43,7 +43,8 @@ public class EroClient {
         client.guide.Guide.init(container.getEventBus());
         if (System.getProperty("iuce.guideShots") != null) {
             try {
-                Class.forName("regression.GuideShots").getMethod("register").invoke(null);
+                String tool = "machines".equals(System.getProperty("iuce.guideShots")) ? "regression.MachineShots" : "regression.GuideShots";
+                Class.forName(tool).getMethod("register").invoke(null);
             } catch (ReflectiveOperationException error) {
                 throw new IllegalStateException("Guide screenshot tool needs -PregressionTests", error);
             }

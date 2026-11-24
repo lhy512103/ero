@@ -12,7 +12,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.MenuProvider;import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -56,11 +57,26 @@ public class ProcessMachineBlockEntity extends PoweredMachineBlockEntity impleme
     }
     private int mold;
     public int mold() { return mold; }
-    public void nextMold() {
-        mold = (mold + 1) % (def.id().equals("single_screw_extruder") ? 2 : MOLDS.size());
+    /** Item ids of the moulds or dies a machine can be set to, in selection order; empty for most machines. */
+    public static List<String> moldItems(String machine) {
+        if (machine.equals("single_screw_extruder")) return List.of("pe_pipe", "drip_tape");
+        if (machine.equals("cnc_machining_center")) {
+            List<String> tools = new ArrayList<>();
+            for (int i = 0; i < MOLDS.size(); i++) tools.add(toolItem(i));
+            return tools;
+        }
+        return List.of();
+    }
+    public void setMold(int selection) {
+        if (selection < 0 || selection >= moldItems(def.id()).size() || selection == mold) return;
+        mold = selection;
         current = null;
         progress = 0;
         setChanged();
+    }
+    /** EU/t of the recipe running now with the overclockers applied; 0 while idle. */
+    public long currentEnergyPerTick() {
+        return current == null || progress <= 0 ? 0 : overclockedEnergy(current.value().energyPerTick());
     }
 
     private final ProcessMachineDef def;

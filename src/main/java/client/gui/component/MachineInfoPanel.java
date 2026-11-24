@@ -71,12 +71,8 @@ public final class MachineInfoPanel {
         Map.entry(IndustrialWorkbenchScreen.class, new Info("industrial_workbench"))
     );
 
-    /** The info entry of a screen; process machines use their machine id when the language file has one. */
+    /** The info entry of a screen; process machines show theirs on their own info tab instead. */
     private static Info info(Screen screen) {
-        if (screen instanceof client.gui.ProcessMachineScreen process) {
-            String id = process.getMenu().def().id();
-            return hasInfo(id) ? new Info(id) : null;
-        }
         return INFOS.get(screen.getClass());
     }
 

@@ -27,10 +27,12 @@ import java.util.List;
  * @param upgrades     upgrade slots
  * @param baseTime     ticks shown before any recipe is chosen
  * @param model        block model shape, see {@code tools/gen_content.py}
+ * @param progress     how the screen shows progress, see {@link ProgressStyle}
  */
 public record ProcessMachineDef(String id, EUVoltage voltage, long buffer, int itemsIn, int itemsOut,
                                 List<Integer> fluidsIn, List<Integer> fluidsOut,
-                                boolean catalystSlot, boolean cardSlot, int upgrades, int baseTime, String model) {
+                                boolean catalystSlot, boolean cardSlot, int upgrades, int baseTime, String model,
+                                ProgressStyle progress) {
 
     private static final Codec<EUVoltage> VOLTAGE = Codec.STRING.xmap(EUVoltage::valueOf, EUVoltage::name);
 
@@ -46,7 +48,8 @@ public record ProcessMachineDef(String id, EUVoltage voltage, long buffer, int i
         Codec.BOOL.optionalFieldOf("card_slot", false).forGetter(ProcessMachineDef::cardSlot),
         Codec.intRange(0, 4).optionalFieldOf("upgrades", 4).forGetter(ProcessMachineDef::upgrades),
         Codec.intRange(1, 100_000).optionalFieldOf("base_time", 200).forGetter(ProcessMachineDef::baseTime),
-        Codec.STRING.optionalFieldOf("model", "box").forGetter(ProcessMachineDef::model)
+        Codec.STRING.optionalFieldOf("model", "box").forGetter(ProcessMachineDef::model),
+        ProgressStyle.CODEC.optionalFieldOf("progress", ProgressStyle.ARROW).forGetter(ProcessMachineDef::progress)
     ).apply(i, ProcessMachineDef::new));
 
     public int outputStart() { return itemsIn; }

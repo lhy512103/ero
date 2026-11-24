@@ -308,9 +308,15 @@ public class EroJeiPlugin implements IModPlugin {
                     var menu = screen.getMenu();
                     var type = processTypes().get(menu.def().id());
                     if (type == null) return List.of();
+                    if (screen.page() != machine.process.ProcessMachineMenu.Page.PROCESS) return List.of();
                     var arrow = menu.layout().arrow;
                     return List.of(mezz.jei.api.gui.handlers.IGuiClickableArea.createBasic(arrow.x(), arrow.y(),
-                        machine.process.ProcessLayout.ARROW_W, machine.process.ProcessLayout.ARROW_H, type));
+                        menu.layout().progressW, machine.process.ProcessLayout.PROGRESS_H, type));
+                }
+
+                @Override
+                public List<net.minecraft.client.renderer.Rect2i> getGuiExtraAreas(client.gui.ProcessMachineScreen screen) {
+                    return screen.tabAreas();
                 }
             });
 

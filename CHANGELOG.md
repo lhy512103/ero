@@ -158,6 +158,8 @@
 152. Fixed: Flickering corners on the edge trim of unconnected tank shells and checker plates.
 153. Improved: Checker plates now use the same diagonal tread pattern as the formed waste heat power plant deck.
 154. Improved: Redrew the tops and sides of screw-barrel segments and hatches to match their fronts, and gave the segments less smooth shading.
+155. Improved: Process machine screens are redrawn as bolted steel panels with side tabs for processing, moulds, upgrades, recipe preview, power and machine info.
+156. Added: Extruders, cooling tanks, vulcanizers, smokehouses, film winders and haul-off cutters show their own animated progress pictures.
 
 ### 中文
 
@@ -315,3 +317,5 @@
 152. 修复：容器壳体和花纹钢板未连接时边缘四角贴图闪烁的问题。
 153. 优化：花纹钢板改用与余热电站成型甲板相同的斜纹防滑花纹。
 154. 优化：重绘各类螺杆段和输入输出仓的顶面与侧面，与正面风格统一，螺杆段不再过于平滑。
+155. 优化：加工机器界面重绘为带螺栓的钢面板，侧边标签页可切换加工、模具、升级、配方预览、能耗和机器介绍。
+156. 新增：挤出机、冷却水槽、硫化机、熏烟房、收卷机和牵引切割机显示各自的动态加工进度。

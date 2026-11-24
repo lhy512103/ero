@@ -12,17 +12,22 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import java.util.List;
 
 /**
  * The menu of every process machine. Slots follow {@link ProcessLayout}; energy, progress, the idle
- * reason and every tank's contents are synced as container data.
+ * reason, the current draw and every tank's contents are synced as container data.
+ * <p>
+ * The screen shows one {@link Page} at a time. The machine's working slots only take part on the
+ * process page and the upgrade slots only on the upgrade page; the server ignores pages entirely.
+ * </p>
  */
 public class ProcessMachineMenu extends AbstractContainerMenu {
-    /** energy low/high, capacity low/high, progress, max progress, reason, short utility, have, need. */
-    private static final int FIXED_DATA = 11;
+    /** energy low/high, capacity low/high, progress, max progress, reason, short utility, have, need, mold, EU/t. */
+    private static final int FIXED_DATA = 12;
     private static final int SHORT_UTILITY = 7, HAVE_SHARES = 8, NEED_SHARES = 9;
 
     private final ProcessMachineBlockEntity blockEntity;
@@ -30,6 +35,11 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
     private final ProcessLayout layout;
     private final int machineSlots;
     private final int[] data;
+
+    /** The side tabs of the screen, in the order they are drawn. */
+    public enum Page { PROCESS, MOLD, UPGRADES, RECIPES, ENERGY, INFO }
+
+    private Page page = Page.PROCESS;
 
     public ProcessMachineMenu(int containerId, Inventory playerInv, ProcessMachineBlockEntity blockEntity) {
         super(ProcessMachines.MENU.get(), containerId);
@@ -40,17 +50,19 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
 
         for (int i = 0; i < def.itemsIn(); i++) {
             var pos = layout.inputs.get(i);
-            addSlot(new ResourceHandlerSlot(handler, handler::set, i, pos.x(), pos.y()));
+            addSlot(processSlot(handler, i, pos));
         }
         for (int i = 0; i < def.itemsOut(); i++) {
             var pos = layout.outputs.get(i);
-            addSlot(new ResourceHandlerSlot(handler, handler::set, def.outputStart() + i, pos.x(), pos.y()));
+            addSlot(processSlot(handler, def.outputStart() + i, pos));
         }
-        if (layout.catalyst != null) addSlot(new ResourceHandlerSlot(handler, handler::set, def.catalystIndex(), layout.catalyst.x(), layout.catalyst.y()));
-        if (layout.card != null) addSlot(new ResourceHandlerSlot(handler, handler::set, def.cardIndex(), layout.card.x(), layout.card.y()));
+        if (layout.catalyst != null) addSlot(processSlot(handler, def.catalystIndex(), layout.catalyst));
+        if (layout.card != null) addSlot(processSlot(handler, def.cardIndex(), layout.card));
         for (int i = 0; i < def.upgrades(); i++) {
             var pos = layout.upgrades.get(i);
-            addSlot(new UpgradeSlot(handler, handler::set, def.upgradeStart() + i, pos.x(), pos.y()));
+            addSlot(new UpgradeSlot(handler, handler::set, def.upgradeStart() + i, pos.x(), pos.y()) {
+                @Override public boolean isActive() { return page == Page.UPGRADES; }
+            });
         }
         this.machineSlots = slots.size();
 
@@ -79,6 +91,7 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
                         yield short_ == null ? 0 : short_.ordinal() + 1;
                     }
                     case 10 -> blockEntity.mold();
+                    case 11 -> (int) Math.min(Integer.MAX_VALUE, blockEntity.currentEnergyPerTick());
                     case HAVE_SHARES -> blockEntity.freeShares();
                     case NEED_SHARES -> blockEntity.neededShares();
                     default -> {
@@ -101,12 +114,25 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
         });
     }
 
+    private ResourceHandlerSlot processSlot(ItemStacksResourceHandler handler, int index, ProcessLayout.Pos pos) {
+        return new ResourceHandlerSlot(handler, handler::set, index, pos.x(), pos.y()) {
+            @Override public boolean isActive() { return page == Page.PROCESS; }
+        };
+    }
+
     public ProcessMachineBlockEntity blockEntity() { return blockEntity; }
     public ProcessMachineDef def() { return def; }
+    public Page page() { return page; }
+    /** Client only: which page the screen shows, so the slots of the other pages stay out of the way. */
+    public void setPage(Page page) { this.page = page; }
     public int mold() { return data[10]; }
+    /** EU/t of the recipe running now, overclocking included; 0 while idle. */
+    public int energyPerTick() { return data[11]; }
+
+    /** Button {@code n} selects mould or die {@code n} of {@link ProcessMachineBlockEntity#moldItems}. */
     @Override public boolean clickMenuButton(Player player, int action) {
-        if (action != 0 || !stillValid(player) || !(def.id().equals("cnc_machining_center") || def.id().equals("single_screw_extruder"))) return false;
-        blockEntity.nextMold();
+        if (!stillValid(player) || action < 0 || action >= ProcessMachineBlockEntity.moldItems(def.id()).size()) return false;
+        blockEntity.setMold(action);
         return true;
     }
     public ProcessLayout layout() { return layout; }
@@ -133,7 +159,8 @@ public class ProcessMachineMenu extends AbstractContainerMenu {
     public int haveShares() { return data[HAVE_SHARES]; }
     public int needShares() { return data[NEED_SHARES]; }
 
-    public Fluid tankFluid(int tank) {        int id = data[FIXED_DATA + tank * 2];
+    public Fluid tankFluid(int tank) {
+        int id = data[FIXED_DATA + tank * 2];
         return id < 0 ? Fluids.EMPTY : BuiltInRegistries.FLUID.byId(id);
     }
 

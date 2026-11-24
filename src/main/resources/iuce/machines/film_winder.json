@@ -9,5 +9,6 @@
   "items_in": 1,
   "items_out": 1,
   "fluids_in": [],
-  "fluids_out": []
+  "fluids_out": [],
+  "progress": "winder"
 }
