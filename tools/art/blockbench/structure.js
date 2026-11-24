@@ -55,11 +55,17 @@
         }),
 
         // ---- Checker plate: seamless tread field; the border lives in the trim overlay and item texture.
+        // Same tread as the formed waste heat plant deck (plants.js "deck"): one 3-px diagonal rib per
+        // 8x8 cell, alternating direction, lit edge above and shadow below. Period 16, so it tiles.
         checker_plate: () => paint(t => {
-            flat(t, STEEL[2]);
-            for (let y = 0; y < 16; y += 4) for (let x = 0; x < 16; x += 4) {
-                if (((x + y) >> 2) & 1) { t.px(x + 1, y + 2, STEEL[4]); t.px(x + 2, y + 1, STEEL[4]); t.px(x + 2, y + 2, STEEL[1]); t.px(x + 3, y + 1, STEEL[1]); }
-                else { t.px(x + 1, y + 1, STEEL[4]); t.px(x + 2, y + 2, STEEL[4]); t.px(x + 2, y + 1, STEEL[1]); t.px(x + 3, y + 2, STEEL[1]); }
+            flat(t, [132, 137, 142]);
+            const rib = mix([152, 157, 162], [184, 189, 194], 0.48), shadow = mix([112, 117, 123], [68, 72, 78], 0.32);
+            for (let y = 0; y < 16; y += 8) for (let x = 0; x < 16; x += 8) {
+                const alt = ((x >> 3) + (y >> 3)) & 1;
+                for (let k = 0; k < 3; k++) {
+                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
+                    t.px(lx, ly, rib); t.px(lx, ly + 1, shadow);
+                }
             }
         }),
         checker_plate_item: () => paint(t => {

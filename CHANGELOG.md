@@ -156,6 +156,7 @@
 150. Fixed: Thirteen dyeable items, including PE and PVC pipes, plastic pellets, film rolls, drip tape and strands, showing as blank icons in inventories.
 151. Fixed: Flickering textures on chimney tops and pipe bands of formed large machines such as the waste heat power plant and coke oven battery.
 152. Fixed: Flickering corners on the edge trim of unconnected tank shells and checker plates.
+153. Improved: Checker plates now use the same diagonal tread pattern as the formed waste heat power plant deck.
 
 ### 中文
 
@@ -311,3 +312,4 @@
 150. 修复：PE 管、PVC 管、各类塑料粒料、膜卷、滴灌带和料条等 13 种可染色物品在物品栏中显示为空白的问题。
 151. 修复：余热电站、焦炉等大型机器成型后烟囱口和管箍处贴图闪烁的问题。
 152. 修复：容器壳体和花纹钢板未连接时边缘四角贴图闪烁的问题。
+153. 优化：花纹钢板改用与余热电站成型甲板相同的斜纹防滑花纹。
