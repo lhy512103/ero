@@ -507,7 +507,8 @@
     }
     // A solid ring band around a cylinder: outer wall plus top and bottom annuli.
     function band(name, x, z, rIn, rOut, y0, y1, tex, seg) {
-        tube(name, x, z, rOut, y0, y1, tex, { seg: seg || 48 });
+        // The annuli close the band; a full end cap here would lie on the same plane as them.
+        tube(name, x, z, rOut, y0, y1, tex, { seg: seg || 48, cap: false });
         annulus(name, x, z, rIn, rOut, y1, true, tex, seg || 48);
         annulus(name, x, z, rIn, rOut, y0, false, tex, seg || 48);
     }
