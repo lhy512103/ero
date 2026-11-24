@@ -255,16 +255,36 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         if (level == null || level.isClientSide()) return;
         boolean hide = value && PlantStructure.formedModel(controllerState) != null;
         Direction facing = controllerState.getValue(PlantControllerBlock.FACING);
+        java.util.Set<BlockPos> own = new java.util.HashSet<>();
         for (PlantStructure.Cell cell : PlantStructure.cells(worldPosition, facing, controllerState)) {
-            BlockPos pos = cell.pos();
-            if (!level.isLoaded(pos)) continue;
-            BlockState s = level.getBlockState(pos);
-            // every part block names its hide flag "formed"
-            if (s.getBlock().getStateDefinition().getProperty("formed") instanceof net.minecraft.world.level.block.state.properties.BooleanProperty prop
-                && s.getValue(prop) != hide) {
-                level.setBlock(pos, s.setValue(prop, hide), Block.UPDATE_ALL);
-            }
+            own.add(cell.pos());
+            setHidden(cell.pos(), hide);
         }
+        // Parts left over from a longer (or differently laid out) structure must not stay hidden:
+        // sweep the largest box this controller can occupy and show anything that is no longer ours.
+        BoundingBox box = PlantStructure.bounds(worldPosition, facing, controllerState);
+        for (BlockPos pos : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
+            if (own.contains(pos) || pos.equals(worldPosition)) continue;
+            if (MultiblockManager.hiddenByOther(level, worldPosition, pos)) continue;
+            setHidden(pos.immutable(), false);
+        }
+    }
+
+    private void setHidden(BlockPos pos, boolean hide) {
+        if (!level.isLoaded(pos)) return;
+        BlockState s = level.getBlockState(pos);
+        // every part block names its hide flag "formed"
+        if (s.getBlock().getStateDefinition().getProperty("formed") instanceof net.minecraft.world.level.block.state.properties.BooleanProperty prop
+            && !(s.getBlock() instanceof PlantControllerBlock) && s.getValue(prop) != hide) {
+            level.setBlock(pos, s.setValue(prop, hide), Block.UPDATE_ALL);
+        }
+    }
+
+    /** Whether this controller, while formed with an assembled model, keeps the block at {@code pos} hidden. */
+    public boolean hides(BlockPos pos) {
+        BlockState state = getBlockState();
+        if (!formed || PlantStructure.formedModel(state) == null) return false;
+        return layout().stream().anyMatch(cell -> cell.pos().equals(pos));
     }
 
     /** Creative-mode one-click placement: places every missing part (casings, girders, drums, hatches) and forms immediately. */
