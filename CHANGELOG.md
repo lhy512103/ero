@@ -161,6 +161,7 @@
 155. Improved: Process machine screens are redrawn as bolted steel panels with side tabs for processing, moulds, upgrades, recipe preview, power and machine info.
 156. Added: Extruders, cooling tanks, vulcanizers, smokehouses, film winders and haul-off cutters show their own animated progress pictures.
 157. Improved: Process machine screens return to the light vanilla look, and the single screw extruder shows a picture of itself with the melt advancing through its barrel.
+158. Improved: Cooling tanks, vulcanizers, smokehouses, film winders, haul-off cutters and CNC machining centres show pictures of themselves, with the work animated inside the machine.
 
 ### 中文
 
@@ -321,3 +322,4 @@
 155. 优化：加工机器界面重绘为带螺栓的钢面板，侧边标签页可切换加工、模具、升级、配方预览、能耗和机器介绍。
 156. 新增：挤出机、冷却水槽、硫化机、熏烟房、收卷机和牵引切割机显示各自的动态加工进度。
 157. 优化：加工机器界面恢复原版浅色风格，单螺杆挤出机显示自身示意图，熔体沿料筒推进表示进度。
+158. 优化：冷却水槽、硫化机、熏烟房、收卷机、牵引切割机和数控加工中心显示自身示意图，加工过程在机器内部动态呈现。

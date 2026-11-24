@@ -278,12 +278,26 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
         ProcessSchematic s = layout.schematic;
         Identifier sheet = schematicTexture("_progress");
         int x = leftPos + layout.arrow.x(), y = topPos + layout.arrow.y(), w = s.windowW(), h = s.windowH();
-        int texH = h * (1 + s.frames());
-        int filled = Math.round(part() * w);
-        if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, 0, filled, h, w, texH);
-        int frame = running() ? (int) (System.currentTimeMillis() / 120 % Math.max(1, s.frames())) : 0;
+        int texH = h * s.rows();
         int tint = menu.reason().isEmpty() ? -1 : 0xFFE09090;
-        if (s.frames() > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, (1 + frame) * h, w, h, w, texH, tint);
+        switch (s.mode()) {
+            case PHASE -> {
+                int row = Math.min(s.frames() - 1, (int) (part() * s.frames()));
+                g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, row * h, w, h, w, texH, tint);
+            }
+            case RIGHT -> {
+                int filled = Math.round(part() * w);
+                if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, 0, filled, h, w, texH);
+            }
+            case UP -> {
+                int filled = Math.round(part() * h);
+                if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y + h - filled, 0, h - filled, w, filled, w, texH);
+            }
+        }
+        if (s.mode() != ProgressStyle.Mode.PHASE && s.frames() > 0 && (running() || s.idleOverlay())) {
+            int frame = running() ? (int) (System.currentTimeMillis() / 120 % s.frames()) : 0;
+            g.blit(RenderPipelines.GUI_TEXTURED, sheet, x, y, 0, (1 + frame) * h, w, h, w, texH, tint);
+        }
         progressHit(x, y, w, h);
     }
 

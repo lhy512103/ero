@@ -525,10 +525,260 @@
         return g;
     }
 
+    // ---- the other one-in, one-out machines. The helpers draw in panel coordinates (y from 16).
+    const METAL = [170, 173, 178], METAL_L = [218, 220, 224], METAL_D = [104, 108, 114], HOLE = [36, 36, 38];
+    const FILM = [200, 226, 240], FILM_D = [140, 176, 200];
+
+    function panelCanvas() {
+        const O = 16, g = new G(176, 60);
+        const R = (x0, y0, x1, y1, c) => g.rect(x0, y0 - O, x1, y1 - O, c);
+        const P = (x, y, c, a) => g.px(x, y - O, c, a);
+        const body = (x0, y0, x1, y1, face, lit, shade) => {
+            R(x0, y0, x1, y1, face || METAL);
+            g.bevel(x0, y0 - O, x1, y1 - O, VD, VD);
+            if (x1 - x0 > 2 && y1 - y0 > 2) g.bevel(x0 + 1, y0 + 1 - O, x1 - 1, y1 - 1 - O, lit || METAL_L, shade || METAL_D);
+        };
+        // a short roller conveyor from a slot into the machine
+        const chute = (x0, x1, yc) => {
+            R(x0, yc - 2, x1, yc - 2, VD); R(x0, yc + 2, x1, yc + 2, VD);
+            for (let x = x0; x <= x1; x++) {
+                P(x, yc - 1, [204, 204, 204]); P(x, yc, [160, 160, 160]); P(x, yc + 1, (x - x0) % 3 === 0 ? VS : [132, 132, 132]);
+            }
+        };
+        return { g, R, P, body, chute };
+    }
+    function discAt(g, cx, cy, r, f) {
+        for (let y = Math.floor(cy - r) - 1; y <= cy + r + 1; y++) for (let x = Math.floor(cx - r) - 1; x <= cx + r + 1; x++) {
+            const d = Math.hypot(x - cx, y - cy);
+            if (d <= r) g.px(x, y, f(d, Math.atan2(y - cy, x - cx), x, y));
+        }
+    }
+    function seg(g, x0, y0, x1, y1, c) {
+        const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+        for (let i = 0; i <= n; i++) g.px(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, c);
+    }
+    const rowsOf = (n, draw) => [...Array(n).keys()].map(i => draw(i));
+    // lit from the top left; a dark spoke shows it turning
+    const roller = (g, cx, cy, r, spin) => discAt(g, cx, cy, r, (d, a) => d < 1.2 || d > r - 0.7 ? VD
+        : Math.abs(Math.sin(a - spin)) < 0.25 ? METAL_D : mix(METAL_L, METAL_D, (1 - Math.cos(a + 2.4)) / 2));
+
+    // Cooling tank: a water trough under a spray bar; the product crosses it and goes from glowing to grey.
+    function coolingBack() {
+        const { g, R, P, body } = panelCanvas();
+        const SPRAY = [150, 200, 240];
+        body(125, 17, 129, 33);
+        body(48, 33, 129, 36);
+        for (let x = 54; x <= 120; x += 11) {
+            R(x, 37, x + 1, 38, VD);
+            P(x - 1, 40, SPRAY); P(x + 2, 41, SPRAY); P(x, 42, SPRAY); P(x + 1, 43, SPRAY);
+        }
+        body(43, 44, 134, 61);
+        for (let y = 45; y <= 58; y++) R(44, y, 131, y, y === 45 ? [150, 196, 236] : mix([70, 130, 196], [40, 88, 150], (y - 46) / 12));
+        R(43, 50, 43, 53, HOLE); R(132, 50, 134, 53, HOLE);
+        body(50, 62, 54, 69); body(121, 62, 125, 69);
+        R(86, 62, 89, 64, VS);
+        return g;
+    }
+    function coolingProduct() {
+        const g = new G(88, 10);
+        for (let x = 0; x < 88; x++) {
+            const t = Math.min(1, x / 70), c = t < 0.5 ? mix(HOT[1], HOT[3], t * 2) : mix(HOT[3], [120, 122, 128], (t - 0.5) * 2);
+            g.px(x, 3, light(c, 0.3)); g.px(x, 4, c); g.px(x, 5, c); g.px(x, 6, dark(c, 0.3));
+        }
+        return g;
+    }
+    function coolingBubbles(f) {
+        const g = new G(88, 10), r = rng(57);
+        for (let i = 0; i < 16; i++) {
+            const x = Math.floor(r() * 88), y = [0, 1, 8, 9][Math.floor(r() * 4)];
+            g.px((x + f * 2) % 88, y, [176, 214, 246]);
+            if (r() < 0.4) g.px((x + f * 2 + 1) % 88, y, [120, 170, 220]);
+        }
+        return g;
+    }
+
+    // Vulcanizer: a press frame; the heated platen comes down on the mould slot, steams, and lifts.
+    function vulcBack() {
+        const { g, R, P, body, chute } = panelCanvas();
+        body(46, 17, 129, 23);
+        for (const x of [50, 124, 87]) { P(x, 20, VL); P(x + 1, 20, VS); }
+        body(49, 24, 55, 61); body(120, 24, 126, 61);
+        body(46, 61, 129, 67);
+        body(58, 56, 77, 60, COPPER[1], COPPER[3], COPPER[0]); body(98, 56, 117, 60, COPPER[1], COPPER[3], COPPER[0]);
+        body(56, 68, 119, 71, [232, 232, 232], VL, [176, 176, 176]);
+        R(86, 68, 89, 71, [176, 48, 40]);
+        chute(43, 48, 48); chute(127, 134, 48);
+        return g;
+    }
+    function vulcPhase(k) {
+        const g = new G(56, 19), py = [0, 4, 8, 13, 13, 13, 13, 6][k];
+        for (let y = 0; y < py; y++) { g.px(26, y, METAL_L); g.px(27, y, METAL); g.px(28, y, METAL); g.px(29, y, METAL_D); }
+        g.rect(2, py, 53, py + 5, METAL); g.bevel(2, py, 53, py + 5, VD, VD); g.bevel(3, py + 1, 52, py + 4, METAL_L, METAL_D);
+        g.rect(4, py + 3, 51, py + 3, COPPER[2]);
+        if (k >= 4 && k <= 6) {
+            const r = rng(70 + k);
+            for (let i = 0; i < 12; i++) {
+                const x = i % 2 ? 53 + Math.floor(r() * 3) : Math.floor(r() * 3);
+                g.px(x, 8 + Math.floor(r() * 10), [244, 244, 244], 210);
+            }
+        }
+        return g;
+    }
+
+    // Smokehouse: sheets hang on a rail in a wooden house over a log fire; smoke fills it from below.
+    function smokeBack() {
+        const { g, R, P, chute } = panelCanvas();
+        const WOOD = [156, 110, 70], WOOD_D = [112, 76, 46], SHEET = [226, 210, 166], RAIL = [156, 156, 156];
+        for (let y = 17; y <= 30; y++) {
+            const half = Math.round((y - 17) * 36 / 13);
+            R(86 - half, y, 86 + half, y, (y - 17) % 3 === 2 ? WOOD_D : WOOD);
+            P(86 - half, y, VD); P(86 + half, y, VD);
+        }
+        R(102, 16, 107, 24, [150, 72, 56]); g.bevel(102, 0, 107, 8, [196, 110, 90], VD);
+        R(52, 31, 119, 70, WOOD);
+        for (let x = 52; x <= 119; x += 5) R(x, 31, x, 70, WOOD_D);
+        g.bevel(52, 15, 119, 54, VD, VD);
+        R(56, 31, 115, 68, [64, 56, 48]);
+        R(43, 33, 115, 33, RAIL); R(43, 34, 55, 34, VS);
+        for (const x0 of [59, 70, 81, 92, 103]) {
+            R(x0, 35, x0 + 7, 52, SHEET); g.bevel(x0, 19, x0 + 7, 36, light(SHEET, 0.4), dark(SHEET, 0.25));
+            P(x0 + 3, 34, VD); P(x0 + 4, 34, VD);
+        }
+        R(56, 61, 115, 61, VD);
+        for (const x of [62, 76, 90, 104]) {
+            R(x, 63, x + 9, 66, [110, 72, 40]); R(x, 63, x + 9, 63, [150, 104, 62]);
+            P(x + 9, 64, [196, 160, 110]); P(x + 9, 65, [196, 160, 110]);
+        }
+        const r = rng(83);
+        for (let i = 0; i < 18; i++) P(57 + Math.floor(r() * 58), 67 + Math.floor(r() * 2), r() < 0.5 ? [232, 120, 40] : [150, 52, 24]);
+        R(52, 58, 55, 66, HOLE); chute(43, 51, 60);
+        R(116, 44, 119, 52, HOLE); chute(120, 134, 48);
+        return g;
+    }
+    function smokeFill() {
+        const g = new G(60, 38), r = rng(91);
+        for (let y = 0; y < 38; y++) for (let x = 0; x < 60; x++) {
+            const t = y / 37;
+            g.px(x, y, mix([168, 162, 154], [104, 98, 92], t), 70 + 100 * t + 30 * r());
+        }
+        return g;
+    }
+    function smokeFire(f) {
+        const g = new G(60, 38), r = rng(95 + f);
+        [11, 25, 39, 53].forEach((cx, i) => {
+            const h = 4 + ((f + i) % 3), lean = (f + i) % 2 ? 1 : -1;
+            for (let dy = 0; dy <= h; dy++) {
+                const half = Math.max(0, Math.round((h - dy) / 2.2));
+                for (let dx = -half; dx <= half; dx++) g.px(cx + dx + (dy > 2 ? lean : 0), 32 - dy, dy < 2 ? HOT[2] : dy < h - 1 ? HOT[1] : HOT[0]);
+            }
+        });
+        for (let i = 0; i < 6; i++) g.px(Math.floor(r() * 60), 4 + Math.floor(r() * 22), [200, 196, 190], 150);
+        return g;
+    }
+
+    // Film winder: the film runs through the nip rollers and over a guide onto a roll that grows.
+    function winderBack() {
+        const { g, R, body } = panelCanvas();
+        body(45, 27, 59, 56);
+        roller(g, 52, 20, 4, 0.5); roller(g, 52, 30, 4, 2);
+        R(43, 41, 69, 41, FILM);
+        body(105, 44, 111, 65);
+        body(92, 65, 124, 70);
+        return g;
+    }
+    function winderPhase(k) {
+        const g = new G(60, 48), r = 4 + 2 * k, cx = 38, cy = 26;
+        g.rect(0, 23, 5, 23, FILM);
+        roller(g, 8, 23, 3, k * 0.9);
+        seg(g, 8, 20, cx, cy - r, FILM);
+        discAt(g, cx, cy, r, (d, a) => {
+            if (d < 3) return d < 1.2 ? VD : Math.abs(Math.sin(a - k * 0.9)) < 0.35 ? METAL_L : [96, 98, 104];
+            if (d > r - 0.8) return FILM_D;
+            const c = Math.floor(d) % 2 ? FILM : mix(FILM, FILM_D, 0.5);
+            return a < -0.6 && a > -2.6 && d > r - 2.5 ? light(c, 0.4) : c;
+        });
+        return g;
+    }
+
+    // Haul-off cutter: two caterpillar tracks pull the pipe through, a swinging saw cuts it.
+    function hauloffBack() {
+        const { g, R, body } = panelCanvas();
+        const RUBBER = [92, 94, 98], RUBBER_L = [150, 152, 156], RUBBER_D = [60, 62, 66];
+        body(66, 17, 73, 36); body(66, 61, 73, 69);
+        body(50, 36, 90, 44, RUBBER, RUBBER_L, RUBBER_D); body(50, 53, 90, 61, RUBBER, RUBBER_L, RUBBER_D);
+        body(46, 65, 129, 70);
+        body(43, 43, 47, 54); R(44, 46, 46, 51, HOLE);
+        body(130, 43, 134, 54); R(130, 46, 133, 51, HOLE);
+        body(113, 17, 127, 25);
+        for (let i = -1; i <= 1; i++) seg(g, 119 + i, 9, 110 + i, 23, i < 0 ? METAL_L : i > 0 ? METAL_D : METAL);
+        discAt(g, 110, 23, 11, (d, a) => d > 9.5 && a < -0.3 && a > -2.85 ? (d > 10.5 ? VD : [236, 200, 60]) : undefined);
+        return g;
+    }
+    function hauloffPipe() {
+        const g = new G(84, 34), PIPE = [[60, 64, 72], [128, 136, 148], [104, 112, 124], [88, 94, 106], [72, 78, 88], [44, 48, 54]];
+        for (let x = 0; x < 84; x++) PIPE.forEach((c, i) => g.px(x, 16 + i, c));
+        return g;
+    }
+    function hauloffMove(f) {
+        const g = new G(84, 34), DARK = [40, 40, 42], LIT = [130, 132, 136];
+        for (let x = 5; x <= 43; x++) {
+            const inner = (((x - f) % 4) + 4) % 4 < 2, outer = (((x + f) % 4) + 4) % 4 < 2;
+            g.px(x, 13, inner ? DARK : LIT); g.px(x, 24, inner ? DARK : LIT);
+            g.px(x, 7, outer ? DARK : LIT); g.px(x, 30, outer ? DARK : LIT);
+        }
+        discAt(g, 64, 9, 8.5, (d, a) => {
+            if (d < 2) return VD;
+            if (d < 6.5) return d > 3.5 && d < 4.5 ? METAL_D : mix(METAL_L, METAL, (1 - Math.cos(a + 2.4)) / 2);
+            const t = ((((a / (2 * Math.PI)) * 12 + f / 4) % 1) + 1) % 1;
+            return t < 0.55 ? [236, 236, 240] : undefined;
+        });
+        return g;
+    }
+
+    // CNC machining centre: the spindle travels along the beam and mills a pocket into the stock in the vise.
+    function cncBack() {
+        const { g, R, body, chute } = panelCanvas();
+        body(45, 17, 130, 22); R(48, 20, 127, 20, VD);
+        body(45, 23, 50, 69); body(125, 23, 130, 69);
+        body(45, 65, 130, 70);
+        R(127, 28, 128, 30, [80, 200, 120]);
+        chute(43, 44, 48); chute(131, 134, 48);
+        return g;
+    }
+    function cncPhase(k) {
+        const g = new G(72, 42), STOCK = [156, 162, 172];
+        const sx = [10, 26, 30, 34, 38, 42, 46, 46][k], tip = k === 0 || k === 7 ? 20 : 34, end = tip - 6;
+        g.rect(4, 38, 67, 41, METAL); g.bevel(4, 38, 67, 41, METAL_L, METAL_D);
+        for (const x0 of [16, 50]) { g.rect(x0, 29, x0 + 5, 37, [70, 96, 150]); g.bevel(x0, 29, x0 + 5, 37, [130, 160, 210], [40, 56, 96]); }
+        g.rect(22, 31, 49, 37, STOCK); g.rect(22, 31, 49, 31, light(STOCK, 0.4)); g.rect(22, 37, 49, 37, dark(STOCK, 0.3));
+        if (k > 0) { g.rect(25, 31, sx, 33, [62, 66, 74]); g.rect(25, 34, sx, 34, [96, 100, 108]); }
+        g.rect(sx - 6, 0, sx + 6, 5, METAL); g.bevel(sx - 6, 0, sx + 6, 5, VD, VD); g.bevel(sx - 5, 1, sx + 5, 4, METAL_L, METAL_D);
+        g.rect(sx - 3, 6, sx + 3, end, METAL); g.bevel(sx - 3, 6, sx + 3, end, METAL_L, VD);
+        g.rect(sx - 1, end + 1, sx, tip, [232, 232, 236]);
+        if (k > 0 && k < 7) {
+            const r = rng(110 + k);
+            for (let i = 0; i < 6; i++) g.px(sx - 5 + Math.floor(r() * 11), 27 + Math.floor(r() * 4), [226, 200, 140]);
+        }
+        return g;
+    }
+
     function paintSchematics() {
+        const S = 'gui/process/schematic/';
         return [
-            save(extruderBack(), 'gui/process/schematic/single_screw_extruder.png'),
-            save(sheet([extruderMelt(), ...[0, 1, 2, 3, 4, 5].map(extruderScrew)]), 'gui/process/schematic/single_screw_extruder_progress.png'),
+            save(extruderBack(), S + 'single_screw_extruder.png'),
+            save(sheet([extruderMelt(), ...rowsOf(6, extruderScrew)]), S + 'single_screw_extruder_progress.png'),
+            save(coolingBack(), S + 'cooling_tank.png'),
+            save(sheet([coolingProduct(), ...rowsOf(4, coolingBubbles)]), S + 'cooling_tank_progress.png'),
+            save(vulcBack(), S + 'vulcanizer.png'),
+            save(sheet(rowsOf(8, vulcPhase)), S + 'vulcanizer_progress.png'),
+            save(smokeBack(), S + 'smokehouse.png'),
+            save(sheet([smokeFill(), ...rowsOf(4, smokeFire)]), S + 'smokehouse_progress.png'),
+            save(winderBack(), S + 'film_winder.png'),
+            save(sheet(rowsOf(8, winderPhase)), S + 'film_winder_progress.png'),
+            save(hauloffBack(), S + 'haul_off_cutter.png'),
+            save(sheet([hauloffPipe(), ...rowsOf(4, hauloffMove)]), S + 'haul_off_cutter_progress.png'),
+            save(cncBack(), S + 'cnc_machining_center.png'),
+            save(sheet(rowsOf(8, cncPhase)), S + 'cnc_machining_center_progress.png'),
         ].join(', ');
     }
 
