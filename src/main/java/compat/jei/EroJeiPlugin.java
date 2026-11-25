@@ -102,16 +102,23 @@ public class EroJeiPlugin implements IModPlugin {
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         for(String plant:PlantRecipeCategory.PLANTS)registration.addRecipeCategories(new PlantRecipeCategory(registration.getJeiHelpers(),plant));
+        // the pages are sized to the recipes they show, so they are read here as well
+        net.minecraft.world.item.crafting.RecipeMap recipeMap = client.guide.Guide.recipes();
+        Collection<RecipeHolder<MachineRecipe>> machineRecipes = recipeMap == null ? List.of() : recipeMap.byType(ModRecipes.MACHINE_TYPE.get());
+        Collection<RecipeHolder<recipe.ProcessRecipe>> processRecipes = recipeMap == null ? List.of() : recipeMap.byType(ModRecipes.PROCESS_TYPE.get());
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
+            List<RecipeHolder<MachineRecipe>> own = machineRecipes.stream().filter(h -> h.value().matchesMachine(entry.getKey())).toList();
             registration.addRecipeCategories(
-                new MachineRecipeCategory(registration.getJeiHelpers(), mt.recipeType, entry.getKey(), mt.displayName, mt.iconBlock.get())
+                new MachineRecipeCategory(registration.getJeiHelpers(), mt.recipeType, entry.getKey(), mt.displayName, mt.iconBlock.get(), own)
             );
         }
 
         for (var entry : machine.process.ProcessMachines.all()) {
+            String id = entry.def().id();
+            List<RecipeHolder<recipe.ProcessRecipe>> own = processRecipes.stream().filter(h -> id.equals(h.value().machine())).toList();
             registration.addRecipeCategories(new ProcessRecipeCategory(registration.getJeiHelpers(),
-                processTypes().get(entry.def().id()), entry.def(), entry.block().get().getName(), entry.block().get()));
+                processTypes().get(id), entry.def(), entry.block().get().getName(), entry.block().get(), own));
         }
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
@@ -217,6 +224,7 @@ public class EroJeiPlugin implements IModPlugin {
         List<String> pages = new java.util.ArrayList<>();
         for (String key : MACHINE_TYPES.keySet()) pages.add("machine_" + key);
         for (String key : processTypes().keySet()) pages.add("process_" + key);
+        for (String key : PlantRecipeCategory.PLANTS) pages.add("plant_" + key);
         return pages;
     }
 
@@ -225,6 +233,7 @@ public class EroJeiPlugin implements IModPlugin {
         if (jeiRuntime == null) return false;
         IRecipeType<?> type = page.startsWith("machine_")
             ? java.util.Optional.ofNullable(MACHINE_TYPES.get(page.substring(8))).map(MachineTypeEntry::recipeType).orElse(null)
+            : page.startsWith("plant_") ? PlantRecipeCategory.TYPES.get(page.substring(6))
             : processTypes().get(page.substring(8));
         if (type == null) return false;
         jeiRuntime.getRecipesGui().showTypes(List.of(type));
@@ -281,6 +290,14 @@ public class EroJeiPlugin implements IModPlugin {
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addCraftingStation(mt.recipeType, mt.iconBlock.get());
+        }
+
+        // 矿石处理厂依次跑打粉、洗矿、电炉的配方，轧钢厂跑金属成型机的配方：挂在这些机器的页面上
+        for (String step : new String[]{"macerator", "ore_washer", "electric_furnace"}) {
+            registration.addCraftingStation(MACHINE_TYPES.get(step).recipeType, ModBlocks.PLANT_CONTROLLER.get());
+        }
+        for (String step : machine.metal_former.MetalFormerBlockEntity.MODE_RECIPE_TYPES) {
+            registration.addCraftingStation(MACHINE_TYPES.get(step).recipeType, ModBlocks.MILL_CONTROLLER.get());
         }
 
         // 金属成型机的每组配方还要对应的模具

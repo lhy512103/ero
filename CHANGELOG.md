@@ -175,6 +175,7 @@
 169. Improved: The generator, energy storage, ore washer, electrolyzer and planter screens show a picture of the machine with their fuel, charge, water and crop shown inside it.
 170. Improved: The industrial workbench, crate, factory hub and multiblock controller and hatch screens use the same new style, with the workbench showing a picture of itself.
 171. Improved: Machine recipe pages in JEI show the machine's picture with the slots and tanks in place and the run animated inside it.
+172. Improved: JEI machine and multiblock recipe pages use the machine screens' light panel, fit their contents, mark input, output and catalyst slots by colour, and show energy and time as tooltips on the gauge and progress window; the ore processing plant and rolling mill are listed on the matching single-block machine pages.
 
 ### 中文
 
@@ -349,3 +350,4 @@
 169. 优化：发电机、储电箱、洗矿机、电解机和种植机界面显示自身示意图，燃料、电量、水量和作物生长画在机器内部。
 170. 优化：工业工作台、板条箱、工厂中枢与多方块控制器、仓口界面改用同样的新风格，工作台显示自身示意图。
 171. 优化：JEI 中的机器配方页显示机器示意图，槽位与储罐摆在原处，加工过程在机器内部动态呈现。
+172. 优化：JEI 机器与多方块配方页改用机器界面的浅色面板并贴合内容，输入、输出与催化剂槽位以颜色区分，耗电与耗时改为电量条和进度窗口的提示；矿石处理厂和轧钢厂并入对应单方块机器的配方页。

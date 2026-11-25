@@ -114,6 +114,11 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
         g.fill(x + w - 3, y + 3, x + w - 1, y + h - 1, shade);
     }
 
+    /** The screens' raised light panel at screen position x, y; the JEI pages use it as their background. */
+    public static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h) {
+        raised(g, x, y, w, h, PANEL, LIGHT, SHADE);
+    }
+
     /** A recessed rectangle with the panel's bevel around it. */
     public static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
         g.fill(x - 1, y - 1, x + w + 1, y + h + 1, SLOT_DARK);
