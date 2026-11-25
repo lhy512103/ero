@@ -174,6 +174,7 @@
 168. Improved: The macerator, compressor, extractor, metal former, electric furnace and induction furnace screens show a picture of the machine with its work animated inside it.
 169. Improved: The generator, energy storage, ore washer, electrolyzer and planter screens show a picture of the machine with their fuel, charge, water and crop shown inside it.
 170. Improved: The industrial workbench, crate, factory hub and multiblock controller and hatch screens use the same new style, with the workbench showing a picture of itself.
+171. Improved: Machine recipe pages in JEI show the machine's picture with the slots and tanks in place and the run animated inside it.
 
 ### 中文
 
@@ -347,3 +348,4 @@
 168. 优化：打粉机、压缩机、提取机、金属成型机、电炉和感应炉界面显示自身示意图，加工过程在机器内部动态呈现。
 169. 优化：发电机、储电箱、洗矿机、电解机和种植机界面显示自身示意图，燃料、电量、水量和作物生长画在机器内部。
 170. 优化：工业工作台、板条箱、工厂中枢与多方块控制器、仓口界面改用同样的新风格，工作台显示自身示意图。
+171. 优化：JEI 中的机器配方页显示机器示意图，槽位与储罐摆在原处，加工过程在机器内部动态呈现。

@@ -105,13 +105,13 @@ public class EroJeiPlugin implements IModPlugin {
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addRecipeCategories(
-                new MachineRecipeCategory(registration.getJeiHelpers(), mt.recipeType, mt.displayName, mt.iconBlock.get())
+                new MachineRecipeCategory(registration.getJeiHelpers(), mt.recipeType, entry.getKey(), mt.displayName, mt.iconBlock.get())
             );
         }
 
         for (var entry : machine.process.ProcessMachines.all()) {
             registration.addRecipeCategories(new ProcessRecipeCategory(registration.getJeiHelpers(),
-                processTypes().get(entry.def().id()), entry.block().get().getName(), entry.block().get()));
+                processTypes().get(entry.def().id()), entry.def(), entry.block().get().getName(), entry.block().get()));
         }
 
         // 合成分类放在最后注册，addRecipeCategories 每次调用会覆盖之前的结果
@@ -209,6 +209,25 @@ public class EroJeiPlugin implements IModPlugin {
             uses ? mezz.jei.api.recipe.RecipeIngredientRole.INPUT : mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT,
             mezz.jei.api.constants.VanillaTypes.ITEM_STACK, stack);
         jeiRuntime.getRecipesGui().show(focus);
+        return true;
+    }
+
+    /** Ids of the older and process machine pages, in order (for the screenshot tool). */
+    public static List<String> machinePages() {
+        List<String> pages = new java.util.ArrayList<>();
+        for (String key : MACHINE_TYPES.keySet()) pages.add("machine_" + key);
+        for (String key : processTypes().keySet()) pages.add("process_" + key);
+        return pages;
+    }
+
+    /** Opens the JEI page {@code page} of {@link #machinePages()}; false before JEI is ready. */
+    public static boolean showMachinePage(String page) {
+        if (jeiRuntime == null) return false;
+        IRecipeType<?> type = page.startsWith("machine_")
+            ? java.util.Optional.ofNullable(MACHINE_TYPES.get(page.substring(8))).map(MachineTypeEntry::recipeType).orElse(null)
+            : processTypes().get(page.substring(8));
+        if (type == null) return false;
+        jeiRuntime.getRecipesGui().showTypes(List.of(type));
         return true;
     }
 
@@ -373,7 +392,7 @@ public class EroJeiPlugin implements IModPlugin {
 
         // 工业工作台 — 箭头 (90, 32, 22x15)
         registration.addRecipeClickArea(IndustrialWorkbenchScreen.class,
-            90, 32, 22, 15,
+            IndustrialWorkbenchScreen.WINDOW.x(), IndustrialWorkbenchScreen.WINDOW.y(), IndustrialWorkbenchScreen.WINDOW.w(), IndustrialWorkbenchScreen.WINDOW.h(),
             CRAFTING_RECIPE_TYPE.get(), mezz.jei.api.constants.RecipeTypes.CRAFTING);
     }
 

@@ -33,9 +33,9 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     public static final int TOP = 16;
     static final int PANEL = 0xFFC6C6C6, LIGHT = 0xFFFFFFFF, SHADE = 0xFF555555, EDGE = 0xFF000000;
     static final int SLOT = 0xFF8B8B8B, SLOT_DARK = 0xFF373737;
-    static final int SCREEN = 0xFF1E2328, SCREEN_EDGE = 0xFF0E1114;
+    public static final int SCREEN = 0xFF1E2328, SCREEN_EDGE = 0xFF0E1114;
     static final int ENERGY = 0xFFE8C440, ENERGY_TOP = 0xFFFFF0A0;
-    static final int LABEL = 0xFF404040;
+    public static final int LABEL = 0xFF404040;
 
     /** Where the run is shown, in panel coordinates, and how its sheet is laid out. */
     public record Window(int x, int y, int w, int h, Mode mode, int frames, boolean idleOverlay) {
@@ -115,14 +115,14 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     }
 
     /** A recessed rectangle with the panel's bevel around it. */
-    protected static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
+    public static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
         g.fill(x - 1, y - 1, x + w + 1, y + h + 1, SLOT_DARK);
         g.fill(x, y + h, x + w + 1, y + h + 1, LIGHT);
         g.fill(x + w, y, x + w + 1, y + h + 1, LIGHT);
         g.fill(x, y, x + w, y + h, fill);
     }
 
-    protected static void slotFrame(GuiGraphicsExtractor g, int x, int y) {
+    public static void slotFrame(GuiGraphicsExtractor g, int x, int y) {
         g.fill(x, y, x + 18, y + 18, SLOT);
         g.fill(x, y, x + 17, y + 1, SLOT_DARK);
         g.fill(x, y, x + 1, y + 17, SLOT_DARK);
@@ -157,15 +157,30 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
 
     /** A vertical energy gauge at panel position x, y, filling from the bottom. */
     protected void energy(GuiGraphicsExtractor g, int x, int y, int w, int h, long energy, long max) {
-        int sx = leftPos + x, sy = topPos + y;
+        energyGauge(g, leftPos + x, topPos + y, w, h, max > 0 ? (float) energy / max : 0f);
+        hit(x, y, w, h, List.of(Component.translatable("gui.iuce.process.energy", energy, max)));
+    }
+
+    /** The vertical energy gauge at screen position sx, sy, {@code part} full; the JEI pages draw it too. */
+    public static void energyGauge(GuiGraphicsExtractor g, int sx, int sy, int w, int h, float part) {
         inset(g, sx, sy, w, h, SCREEN);
-        int filled = max > 0 ? (int) Math.clamp(energy * h / max, 0, h) : 0;
+        int filled = Math.round(Math.clamp(part, 0f, 1f) * h);
         if (filled > 0) {
             g.fill(sx, sy + h - filled, sx + w, sy + h, ENERGY);
             g.fill(sx, sy + h - filled, sx + w, sy + h - filled + 1, ENERGY_TOP);
         }
         for (int mark = 1; mark < 4; mark++) g.fill(sx, sy + h * mark / 4, sx + 2, sy + h * mark / 4 + 1, SCREEN_EDGE);
-        hit(x, y, w, h, List.of(Component.translatable("gui.iuce.process.energy", energy, max)));
+    }
+
+    /** An empty tank gauge at screen position sx, sy: the dark glass and its marks, the fluid goes on top. */
+    public static void tankFrame(GuiGraphicsExtractor g, int sx, int sy, int w, int h, boolean input) {
+        inset(g, sx, sy, w, h, SCREEN);
+        if (!input) g.fill(sx, sy - 1, sx + w, sy, 0xFFB07A20);
+    }
+
+    /** The tank's level marks, drawn over the fluid. */
+    public static void tankMarks(GuiGraphicsExtractor g, int sx, int sy, int w, int h) {
+        for (int mark = 1; mark < 4; mark++) g.fill(sx, sy + h * mark / 4, sx + Math.min(w, mark == 2 ? 6 : 3), sy + h * mark / 4 + 1, SCREEN_EDGE);
     }
 
     /** A horizontal energy gauge at panel position x, y, filling from the left. */
@@ -218,11 +233,22 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
      * {@code running} loops the overlay, {@code blocked} tints it red.
      */
     protected void run(GuiGraphicsExtractor g, String sheet, Window window, int progress, int max, boolean running, boolean blocked) {
+        float part = max > 0 ? Math.clamp((float) progress / max, 0f, 1f) : 0f;
+        int frame = window.frames() > 0 && (running || window.idleOverlay())
+            ? running ? (int) (System.currentTimeMillis() / 120 % window.frames()) : 0 : -1;
+        sheet(g, sheet, window, leftPos + window.x(), topPos + window.y(), part, frame, blocked);
+    }
+
+    /**
+     * Draws the sheet {@code sheet} for {@code window} at screen position x, y with {@code part} of the
+     * run done; {@code frame} is the overlay row to loop on top (-1: none), {@code blocked} tints it red.
+     * The JEI pages animate the same sheets.
+     */
+    public static void sheet(GuiGraphicsExtractor g, String sheet, Window window, int x, int y, float part, int frame, boolean blocked) {
         Identifier id = texture(sheet);
-        int x = leftPos + window.x(), y = topPos + window.y(), w = window.w(), h = window.h();
+        int w = window.w(), h = window.h();
         int texH = h * window.rows();
         int tint = blocked ? 0xFFE09090 : -1;
-        float part = max > 0 ? Math.clamp((float) progress / max, 0f, 1f) : 0f;
         switch (window.mode()) {
             case PHASE -> {
                 int row = Math.min(window.frames() - 1, (int) (part * window.frames()));
@@ -237,8 +263,7 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
                 if (filled > 0) g.blit(RenderPipelines.GUI_TEXTURED, id, x, y + h - filled, 0, h - filled, w, filled, w, texH);
             }
         }
-        if (window.mode() != Mode.PHASE && window.frames() > 0 && (running || window.idleOverlay())) {
-            int frame = running ? (int) (System.currentTimeMillis() / 120 % window.frames()) : 0;
+        if (window.mode() != Mode.PHASE && frame >= 0 && frame < window.frames()) {
             g.blit(RenderPipelines.GUI_TEXTURED, id, x, y, 0, (1 + frame) * h, w, h, w, texH, tint);
         }
     }

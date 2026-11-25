@@ -20,7 +20,8 @@ import java.util.Locale;
  * Development tool: places a few process machines next to the player, opens each one and saves a
  * screenshot of every tab to {@code screenshots/machine_<id>_<tab>.png}, then quits. Run with
  * {@code gradlew runClient -PsmokeTest -PregressionTests -PguideShots=machines -PguideWorld=<save>}; with
- * {@code -PguideShots=machines:old} only the older machines.
+ * {@code -PguideShots=machines:old} only the older machines; with {@code -PguideShots=machines:jei} the JEI page of
+ * every machine instead, saved as {@code screenshots/jei_<page>.png}.
  */
 public final class MachineShots {
     private MachineShots() {}
@@ -46,6 +47,10 @@ public final class MachineShots {
     private static final boolean OLD_ONLY = "machines:old".equals(System.getProperty("iuce.guideShots"));
     private static int ticks, settle = -1, step = OLD_ONLY ? MACHINES.size() * PER_MACHINE - 1 : -1;
     private static BlockPos placed;
+    /** {@code -PguideShots=machines:jei} opens the JEI recipe page of every machine instead. */
+    private static final boolean JEI_ONLY = "machines:jei".equals(System.getProperty("iuce.guideShots"));
+    private static final int PER_JEI_PAGE = 40;
+    private static List<String> jeiPages;
 
     public static void register() {
         NeoForge.EVENT_BUS.addListener(MachineShots::tick);
@@ -63,6 +68,10 @@ public final class MachineShots {
         if (settle < 0) settle = ticks + 100;
         if (ticks < settle) return;
         step++;
+        if (JEI_ONLY) {
+            jei(minecraft);
+            return;
+        }
         int machine = step / PER_MACHINE, phase = step % PER_MACHINE;
         if (machine >= MACHINES.size() + OLD.size()) {
             minecraft.stop();
@@ -167,5 +176,34 @@ public final class MachineShots {
             if (player == null || placed == null) return;
             if (player.level().getBlockEntity(placed) instanceof ProcessMachineBlockEntity machine) player.openMenu(machine, placed);
         });
+    }
+
+    /**
+     * Opens each machine's JEI page in turn and saves {@code jei_<page>.png}. The plugin is called by
+     * reflection so this tool does not need JEI on its own classpath.
+     */
+    @SuppressWarnings("unchecked")
+    private static void jei(Minecraft minecraft) {
+        try {
+            Class<?> plugin = Class.forName("compat.jei.EroJeiPlugin");
+            if (jeiPages == null) jeiPages = (List<String>) plugin.getMethod("machinePages").invoke(null);
+            int index = Math.max(0, step) / PER_JEI_PAGE, phase = Math.max(0, step) % PER_JEI_PAGE;
+            if (index >= jeiPages.size()) {
+                minecraft.stop();
+                return;
+            }
+            String page = jeiPages.get(index);
+            if (phase == 0 && !(boolean) plugin.getMethod("showMachinePage", String.class).invoke(null, page)) {
+                System.out.println("[MachineShots] JEI not ready for " + page);
+            }
+            if (phase == PER_JEI_PAGE - 4) {
+                String name = "jei_" + page + ".png";
+                Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+                System.out.println("[MachineShots] " + name);
+            }
+        } catch (ReflectiveOperationException error) {
+            System.out.println("[MachineShots] JEI unavailable: " + error);
+            minecraft.stop();
+        }
     }
 }
