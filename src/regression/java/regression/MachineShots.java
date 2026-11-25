@@ -38,7 +38,8 @@ public final class MachineShots {
         "rubber_mixer");
     /** The older machines, opened from their own block; one screenshot each, as they have no tabs. */
     private static final List<String> OLD = List.of("macerator", "compressor", "extractor", "metal_former",
-        "electric_furnace", "induction_furnace", "generator", "batbox", "ore_washer", "electrolyzer", "planter");
+        "electric_furnace", "induction_furnace", "generator", "batbox", "ore_washer", "electrolyzer", "planter",
+        "industrial_workbench", "crate", "factory_hub");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     /** {@code -PguideShots=machines:old} skips the process machines and shoots only the older ones. */

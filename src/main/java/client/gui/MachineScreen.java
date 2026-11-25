@@ -55,7 +55,8 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     protected boolean titleLabel = true;
 
     /**
-     * @param picture    the picture's name under {@code textures/gui/machine/schematic/}
+     * @param picture    the picture's name under {@code textures/gui/machine/schematic/}, or null for a
+     *                   plain panel (the display screens draw everything in code)
      * @param inventoryY the row of the player inventory's first slot
      */
     protected MachineScreen(M menu, Inventory inventory, Component title, int width, int height, String picture, int inventoryY) {
@@ -82,8 +83,10 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         hits.clear();
         raised(g, leftPos, topPos, imageWidth, imageHeight, PANEL, LIGHT, SHADE);
-        int h = pictureHeight(inventoryY);
-        g.blit(RenderPipelines.GUI_TEXTURED, texture(picture), leftPos, topPos + TOP, 0, 0, imageWidth, h, imageWidth, h);
+        if (picture != null) {
+            int h = pictureHeight(inventoryY);
+            g.blit(RenderPipelines.GUI_TEXTURED, texture(picture), leftPos, topPos + TOP, 0, 0, imageWidth, h, imageWidth, h);
+        }
         for (Slot slot : menu.slots) if (slot.isActive()) slotFrame(g, slot);
         machine(g, mouseX, mouseY);
         super.extractContents(g, mouseX, mouseY, partialTick);
@@ -112,14 +115,14 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     }
 
     /** A recessed rectangle with the panel's bevel around it. */
-    static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
+    protected static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
         g.fill(x - 1, y - 1, x + w + 1, y + h + 1, SLOT_DARK);
         g.fill(x, y + h, x + w + 1, y + h + 1, LIGHT);
         g.fill(x + w, y, x + w + 1, y + h + 1, LIGHT);
         g.fill(x, y, x + w, y + h, fill);
     }
 
-    static void slotFrame(GuiGraphicsExtractor g, int x, int y) {
+    protected static void slotFrame(GuiGraphicsExtractor g, int x, int y) {
         g.fill(x, y, x + 18, y + 18, SLOT);
         g.fill(x, y, x + 17, y + 1, SLOT_DARK);
         g.fill(x, y, x + 1, y + 17, SLOT_DARK);
@@ -129,6 +132,22 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
 
     private void slotFrame(GuiGraphicsExtractor g, Slot slot) {
         slotFrame(g, leftPos + slot.x - 1, topPos + slot.y - 1);
+    }
+
+    /** The dark display the text panels write on, at panel position x, y. */
+    protected void display(GuiGraphicsExtractor g, int x, int y, int w, int h) {
+        inset(g, leftPos + x, topPos + y, w, h, SCREEN);
+    }
+
+    /** A square status lamp at panel position x, y, lit in {@code color}. */
+    protected void lamp(GuiGraphicsExtractor g, int x, int y, int size, int color) {
+        inset(g, leftPos + x, topPos + y, size, size, color);
+        g.fill(leftPos + x + 1, topPos + y + 1, leftPos + x + 3, topPos + y + 2, lighter(lighter(color)));
+    }
+
+    /** Text at panel position x, y. */
+    protected void text(GuiGraphicsExtractor g, Component text, int x, int y, int color) {
+        g.text(font, text, leftPos + x, topPos + y, color, false);
     }
 
     /** A tooltip over the panel area x, y, w, h. */

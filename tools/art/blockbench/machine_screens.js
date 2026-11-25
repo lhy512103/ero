@@ -8,7 +8,7 @@
 (function () {
     const A = window.IUCEArt, Gui = window.IUCEGui, G = Gui.G;
     const { rng, mix, light, dark, HOT, COPPER } = A;
-    const { save, sheet, rowsOf, panelCanvas, cutaway, pipes, roller, discAt, VD, VS, METAL_L, METAL_D, HOLE } = Gui.parts;
+    const { save, sheet, rowsOf, panelCanvas, cutaway, pipes, roller, discAt, VD, VS, METAL, METAL_L, METAL_D, HOLE } = Gui.parts;
     const S = 'gui/machine/schematic/';
     const DUST = [150, 146, 140], LATEX = [232, 228, 210], LEAF = [96, 120, 60], BRICK = [150, 120, 100];
 
@@ -312,8 +312,55 @@
         return g;
     }
 
+    // Industrial workbench: the crafting grid on a steel tray, the arrow window towards the product held in its
+    // bracket, the upgrade rack on the right, the battery wired up into the energy gauge and on into the tray,
+    // a shelf rail between the two storage rows. The picture is 92 rows (inventory at 119); window 90..111 x 32..46.
+    function tallCanvas(h) {
+        const O = 16, g = new G(176, h);
+        const R = (x0, y0, x1, y1, col) => g.rect(x0, y0 - O, x1, y1 - O, col);
+        const body = (x0, y0, x1, y1, face, lit, shade) => {
+            R(x0, y0, x1, y1, face || METAL);
+            g.bevel(x0, y0 - O, x1, y1 - O, VD, VD);
+            if (x1 - x0 > 2 && y1 - y0 > 2) g.bevel(x0 + 1, y0 + 1 - O, x1 - 1, y1 - 1 - O, lit || METAL_L, shade || METAL_D);
+        };
+        return { g, R, body };
+    }
+    // the 22 x 15 arrow: a shaft on rows 5..9, the head narrowing from col 13
+    function arrowShape(g, col, top) {
+        for (let x = 0; x < 22; x++) {
+            let y0, y1;
+            if (x < 13) { y0 = 5; y1 = 9; } else { const half = Math.max(0, 7 - Math.round((x - 13) * 7 / 8)); y0 = 7 - half; y1 = 7 + half; }
+            for (let y = y0; y <= y1; y++) g.px(x, y, y === y0 ? top : col);
+        }
+    }
+    function workbenchBack() {
+        const c = tallCanvas(92), { R, body } = c;
+        body(25, 16, 88, 72);
+        for (const y of [30, 49]) R(28, y, 85, y, METAL_D);
+        for (const x of [46, 65]) R(x, 17, x, 71, METAL_D);
+        const hole = new G(22, 15);
+        hole.rect(0, 0, 21, 14, HOLE);
+        arrowShape(hole, [70, 74, 80], [90, 94, 100]);
+        cutaway(c, 90, 32, 111, 46, hole);
+        body(118, 26, 145, 53);
+        body(147, 16, 172, 76);
+        for (const y of [22, 40, 59]) R(149, y, 170, y, METAL_D);
+        // battery up into the gauge, the gauge into the tray
+        R(13, 55, 13, 57, VD); R(14, 55, 14, 57, COPPER[2]); R(15, 55, 15, 57, COPPER[0]); R(16, 55, 16, 57, VD);
+        wire(c, 21, 24, 36);
+        R(6, 97, 169, 97, VD);
+        return c.g;
+    }
+    function workbenchArrow() {
+        const g = new G(22, 15);
+        arrowShape(g, [232, 196, 64], [255, 240, 160]);
+        return g;
+    }
+
     function paintAll() {
         return [
+            save(workbenchBack(), S + 'industrial_workbench.png'),
+            save(sheet([workbenchArrow()]), S + 'industrial_workbench_progress.png'),
             save(generatorBack(), S + 'generator.png'),
             save(sheet([genFuel(), ...rowsOf(4, f => flameRows(14, 14, f))]), S + 'generator_progress.png'),
             save(sheet([new G(18, 20), ...rowsOf(4, genRotor)]), S + 'generator_rotor.png'),
