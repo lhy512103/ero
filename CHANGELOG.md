@@ -163,6 +163,7 @@
 157. Improved: Process machine screens return to the light vanilla look, and the single screw extruder shows a picture of itself with the melt advancing through its barrel.
 158. Improved: Cooling tanks, vulcanizers, smokehouses, film winders, haul-off cutters and CNC machining centres show pictures of themselves, with the work animated inside the machine.
 159. Improved: Polymerization reactors, distillation columns, lime kilns and fermenters show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
+160. Fixed: Assembled multiblocks no longer cast shadows or block light from their hidden parts.
 
 ### 中文
 
@@ -325,3 +326,4 @@
 157. 优化：加工机器界面恢复原版浅色风格，单螺杆挤出机显示自身示意图，熔体沿料筒推进表示进度。
 158. 优化：冷却水槽、硫化机、熏烟房、收卷机、牵引切割机和数控加工中心显示自身示意图，加工过程在机器内部动态呈现。
 159. 优化：聚合釜、精馏塔、石灰窑和发酵罐显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
+160. 修复：多方块成型后，被隐藏的部件不再投下阴影或遮挡光照。

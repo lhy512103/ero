@@ -33,4 +33,19 @@ public class EnergyHatchBlock extends MachineBlock {
     public RenderShape getRenderShape(BlockState state) {
         return state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
+
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(FORMED) ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(FORMED) || super.propagatesSkylightDown(state);
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return state.getValue(FORMED) ? 1.0F : super.getShadeBrightness(state, level, pos);
+    }
 }

@@ -58,6 +58,22 @@ public class PlantControllerBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null
+            ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return (state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null) || super.propagatesSkylightDown(state);
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null ? 1.0F : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, FORMED, LENGTH, LEGACY); }
 
     @Override

@@ -141,20 +141,44 @@ public final class GuideShots {
                         BlockPos floor = origin.offset(x, -2, z);
                         level.getChunkAt(floor);
                         level.setBlockAndUpdate(floor, Blocks.SMOOTH_STONE.defaultBlockState());
+                        level.setBlockAndUpdate(origin.offset(x, -1, z), Blocks.SMOOTH_STONE.defaultBlockState());
+                        for (int y = 0; y <= 22; y++) {
+                            BlockPos air = origin.offset(x, y, z);
+                            if (!level.getBlockState(air).isAir()) level.setBlockAndUpdate(air, Blocks.AIR.defaultBlockState());
+                        }
                     }
                 }
                 var state = shot.controller().get().defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
                 if (shot.length() > 0) state = state.setValue(PlantControllerBlock.LENGTH, shot.length());
-                level.setBlockAndUpdate(origin, state);
                 for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
                     var part = cell.part().sample(Direction.NORTH);
                     if (part.is(ModBlocks.PLANT_CASING.get())) part = ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos());
                     level.setBlockAndUpdate(cell.pos(), part);
                 }
+                for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
+                    if (cell.part().canFillWithCasing() && level.getBlockState(cell.pos()).is(ModBlocks.PLANT_CASING.get())) {
+                        level.setBlockAndUpdate(cell.pos(), ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos()));
+                    }
+                }
                 server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set day");
                 player.setGameMode(GameType.SPECTATOR);
                 player.teleportTo(level, origin.getX() + shot.camX(), height + shot.camY(), origin.getZ() + shot.camZ(), Set.of(),
                     shot.yaw(), shot.pitch(), true);
+            });
+        } else if (step == 40) {
+            Screenshot.grab(minecraft.gameDirectory, "unformed_" + shot.file(), minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (step == 45) {
+            var playerPos = industrialOrigin;
+            server.execute(() -> {
+                var level = server.overworld();
+                int height = Math.min(level.getMaxY() - 32, Math.max(playerPos.getY() + 28, 120));
+                var origin = new BlockPos(playerPos.getX() + shot.dx(), height, playerPos.getZ() + 8);
+                var state = shot.controller().get().defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+                if (shot.length() > 0) state = state.setValue(PlantControllerBlock.LENGTH, shot.length());
+                level.setBlockAndUpdate(origin, state);
+                if (level.getBlockEntity(origin) instanceof blockentity.PlantControllerBlockEntity controller) {
+                    controller.assembleCreative();
+                }
             });
         } else if (step == 124) {
             Screenshot.grab(minecraft.gameDirectory, shot.file(), minecraft.getMainRenderTarget(), 1, message -> { });

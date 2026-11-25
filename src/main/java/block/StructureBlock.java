@@ -31,5 +31,20 @@ public class StructureBlock extends Block {
     protected RenderShape getRenderShape(BlockState state) { return state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL; }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return shape; }
+    protected VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(FORMED) ? Shapes.empty() : (shape != null ? shape : Shapes.block());
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return state.getValue(FORMED) || super.propagatesSkylightDown(state);
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.getValue(FORMED) ? 1.0F : super.getShadeBrightness(state, level, pos);
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return shape != null ? shape : Shapes.block(); }
 }
