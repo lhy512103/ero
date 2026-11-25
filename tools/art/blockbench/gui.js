@@ -1172,6 +1172,67 @@
         return g;
     }
 
+    // ---- the mixer series: machines that take only items. The feeds stand left of a mixing chamber
+    // (one column, or two once there are more than two), each row on a conveyor into it; the products
+    // leave on conveyors to the right, the mould sits under the feed. Inside the chamber the charge
+    // builds up while rotors, a knife rotor, warm air or the injection ram work it.
+    // ProcessSchematic.mixer works out the same positions from the same counts.
+    const MIXERS = [
+        { id: 'compounding_extruder', in: 3, out: 1, cat: false, kind: 'rotor', top: [222, 210, 180], bottom: [170, 150, 110] },
+        { id: 'dehumidifying_dryer', in: 1, out: 1, cat: false, kind: 'air', top: [240, 236, 222], bottom: [206, 198, 176] },
+        { id: 'high_speed_mixer', in: 4, out: 1, cat: false, kind: 'blade', top: [236, 236, 228], bottom: [196, 196, 186] },
+        { id: 'injection_molder', in: 1, out: 2, cat: true, kind: 'ram', top: [250, 180, 90], bottom: [210, 110, 50] },
+        { id: 'plastic_granulator', in: 1, out: 1, cat: false, kind: 'blade', top: [210, 220, 230], bottom: [150, 166, 182] },
+        { id: 'rubber_mixer', in: 3, out: 1, cat: false, kind: 'rotor', top: [96, 92, 88], bottom: [52, 50, 48] },
+    ];
+    const mixerIns = s => {
+        const xs = s.in > 2 ? [22, 42] : [32], ys = s.in === 1 ? [32] : [22, 42], at = [];
+        for (let i = 0; i < s.in; i++) at.push([xs[i % xs.length], ys[Math.floor(i / xs.length)]]);
+        return at;
+    };
+    function mixerBack(s) {
+        const c = panelCanvas(), { R, body, chute } = c;
+        body(64, 20, 111, 56);
+        body(64, 57, 68, 74); body(107, 57, 111, 74);
+        cutaway(c, 68, 24, 107, 51, [30, 30, 32]);
+        if (s.kind === 'rotor' || s.kind === 'blade') { body(80, 17, 95, 19); R(87, 16, 88, 16, VD); }
+        if (s.kind === 'air') for (let x = 70; x <= 104; x += 5) R(x, 53, x + 2, 55, VD);
+        if (s.kind === 'ram') { body(57, 30, 63, 46); R(58, 37, 62, 38, VD); }
+        const rows = new Map();
+        for (const [x, y] of mixerIns(s)) rows.set(y, Math.max(rows.get(y) || 0, x));
+        for (const [y, x] of rows) chute(x + 17, s.kind === 'ram' ? 56 : 63, y + 8);
+        const outYs = s.out > 1 ? [24, 44] : [40];
+        for (let i = 0; i < s.out; i++) chute(112, 134, outYs[i] + 8);
+        if (s.cat) { R(49, 62, 63, 62, VD); R(49, 63, 63, 63, METAL_D); }
+        return c.g;
+    }
+    function mixerFill(s) {
+        const g = new G(40, 28), r = rng(s.top[0] * 7 + s.bottom[2]);
+        for (let y = 0; y < 28; y++) for (let x = 0; x < 40; x++) {
+            const col = mix(s.top, s.bottom, y / 27);
+            g.px(x, y, y === 0 ? light(s.top, 0.4) : r() < 0.08 ? dark(col, 0.08) : col);
+        }
+        return g;
+    }
+    function mixerMove(s, f) {
+        const g = new G(40, 28);
+        if (s.kind === 'rotor') { roller(g, 11, 14, 8, f * 0.8); roller(g, 28, 14, 8, -f * 0.8); }
+        else if (s.kind === 'blade') roller(g, 20, 14, 10, f * 1.2);
+        else if (s.kind === 'air') {
+            [4, 11, 18, 25, 32, 37].forEach((bx, i) => {
+                for (let j = 0; j < 2; j++) {
+                    const y = 27 - ((f * 3 + j * 11 + i * 5) % 22);
+                    if (y >= 4) g.px(bx, y, [255, 240, 210], 200);
+                }
+            });
+        } else {
+            const x = 1 + f * 2;
+            g.rect(0, 12, x - 1, 15, METAL_D);
+            g.rect(x, 0, x + 2, 27, METAL_L);
+        }
+        return g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -1212,6 +1273,10 @@
             ...VESSELS.flatMap(s => [
                 save(vesselBack(s), S + s.id + '.png'),
                 save(sheet([vesselFill(s), ...rowsOf(4, fermBubbles)]), S + s.id + '_progress.png'),
+            ]),
+            ...MIXERS.flatMap(s => [
+                save(mixerBack(s), S + s.id + '.png'),
+                save(sheet([mixerFill(s), ...rowsOf(4, f => mixerMove(s, f))]), S + s.id + '_progress.png'),
             ]),
         ].join(', ');
     }

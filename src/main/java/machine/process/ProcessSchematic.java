@@ -106,6 +106,22 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
             List.copyOf(tanks), new Pos(58, 40), 52, 27, Mode.UP, 4, false);
     }
 
+    /**
+     * The mixer series: machines that take only items (gui.js mixerBack paints them from the same
+     * counts). The feeds stand left of the mixing chamber, in one column or two once there are more than
+     * two, the mould under the feed; the products leave to the right.
+     */
+    private static ProcessSchematic mixer(String id, int in, int out, boolean catalyst) {
+        int[] xs = in > 2 ? new int[] {22, 42} : new int[] {32};
+        int[] ys = in == 1 ? new int[] {32} : new int[] {22, 42};
+        int[] outYs = out > 1 ? new int[] {24, 44} : new int[] {40};
+        List<Pos> inputs = new ArrayList<>(), outputs = new ArrayList<>();
+        for (int i = 0; i < in; i++) inputs.add(new Pos(xs[i % xs.length], ys[i / xs.length]));
+        for (int i = 0; i < out; i++) outputs.add(new Pos(136, outYs[i]));
+        return new ProcessSchematic(id, 8, List.copyOf(inputs), List.copyOf(outputs), catalyst ? new Pos(32, 55) : null, null,
+            List.of(), new Pos(68, 24), 40, 28, Mode.UP, 4, false);
+    }
+
     private static final Map<String, ProcessSchematic> ALL = index(List.of(
         // pellets drop through the hopper into the barrel, the core wire comes down into the die, the product leaves on the right
         new ProcessSchematic("single_screw_extruder", 8,
@@ -178,7 +194,14 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         vessel("wet_mill", 1, 1, 1, 1, false),
         vessel("gas_compressor", 0, 0, 1, 1, false),
         vessel("strand_pelletizer", 1, 1, 1, 0, false),
-        vessel("sheeting_press", 1, 1, 0, 1, false)));
+        vessel("sheeting_press", 1, 1, 0, 1, false),
+        // the mixer series, machines that take only items (see mixer below)
+        mixer("compounding_extruder", 3, 1, false),
+        mixer("dehumidifying_dryer", 1, 1, false),
+        mixer("high_speed_mixer", 4, 1, false),
+        mixer("injection_molder", 1, 2, true),
+        mixer("plastic_granulator", 1, 1, false),
+        mixer("rubber_mixer", 3, 1, false)));
 
     private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
         Map<String, ProcessSchematic> map = new HashMap<>();

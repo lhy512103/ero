@@ -32,7 +32,9 @@ public final class MachineShots {
         "carbide_furnace", "coking_oven", "hcl_furnace", "dryer",
         "brine_dissolver", "brine_purifier", "coagulation_tank", "liquefaction_tank", "saccharification_tank",
         "water_treatment", "centrifuge", "filter_press", "membrane_cell", "wet_mill", "gas_compressor",
-        "strand_pelletizer", "sheeting_press");
+        "strand_pelletizer", "sheeting_press",
+        "compounding_extruder", "dehumidifying_dryer", "high_speed_mixer", "injection_molder", "plastic_granulator",
+        "rubber_mixer");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     private static int ticks, settle = -1, step = -1;
