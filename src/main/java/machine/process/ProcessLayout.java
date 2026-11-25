@@ -29,10 +29,12 @@ public final class ProcessLayout {
     public static final int UPGRADE_Y = 30;
 
     public record Pos(int x, int y) {}
+    /** A tank gauge: top-left corner and size. */
+    public record Box(int x, int y, int w, int h) {}
 
     public final int width;
     public final int energyX;
-    public final List<Pos> tanks = new ArrayList<>();      // input tanks first, then output tanks
+    public final List<Box> tanks = new ArrayList<>();      // input tanks first, then output tanks
     public final List<Pos> inputs = new ArrayList<>();
     public final List<Pos> outputs = new ArrayList<>();
     public final List<Pos> upgrades = new ArrayList<>();
@@ -75,7 +77,7 @@ public final class ProcessLayout {
             this.energyX = x;
             x += ENERGY_W + 6;
             for (int i = 0; i < def.fluidsIn().size(); i++) {
-                tanks.add(new Pos(x, TANK_Y));
+                tanks.add(new Box(x, TANK_Y, TANK_W, TANK_H));
                 x += TANK_W + 4;
             }
             x += 2;
@@ -95,7 +97,7 @@ public final class ProcessLayout {
             x += progressW + 6;
             x = grid(outputs, def.itemsOut(), x) + 2;
             for (int i = 0; i < def.fluidsOut().size(); i++) {
-                tanks.add(new Pos(x, TANK_Y));
+                tanks.add(new Box(x, TANK_Y, TANK_W, TANK_H));
                 x += TANK_W + 4;
             }
         }

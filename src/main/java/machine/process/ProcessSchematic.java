@@ -1,8 +1,10 @@
 package machine.process;
 
+import machine.process.ProcessLayout.Box;
 import machine.process.ProcessLayout.Pos;
 import machine.process.ProgressStyle.Mode;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +12,8 @@ import java.util.Map;
  * A machine whose process page is a picture of the machine itself, the way the vanilla brewing stand
  * or furnace is drawn, instead of the generic left-to-right row. The picture
  * {@code textures/gui/process/schematic/<id>.png} is {@link #WIDTH} x {@link #HEIGHT} and covers the
- * panel from row {@link #TOP}; the slots sit where the picture leaves room for them.
+ * panel from row {@link #TOP}; the slots and tank gauges sit where the picture leaves room for them,
+ * the tanks inside the vessels the picture draws around them.
  * <p>
  * The progress shows in {@link #window()}, {@link #windowW()} x {@link #windowH()}, from the sheet
  * {@code <id>_progress.png}, in rows of the window's size:
@@ -24,7 +27,7 @@ import java.util.Map;
  * Positions are item positions, as in {@link ProcessLayout}.
  */
 public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Pos> outputs, Pos catalyst, Pos card,
-                               List<Pos> tanks, Pos window, int windowW, int windowH, Mode mode, int frames,
+                               List<Box> tanks, Pos window, int windowW, int windowH, Mode mode, int frames,
                                boolean idleOverlay) {
     public static final int TOP = 16, WIDTH = 176, HEIGHT = 60;
 
@@ -35,24 +38,49 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         return new ProcessSchematic(id, 8, List.of(IN), List.of(OUT), catalyst, null, List.of(), window, w, h, mode, frames, idle);
     }
 
-    private static final Map<String, ProcessSchematic> ALL = Map.of(
+    private static final Map<String, ProcessSchematic> ALL = index(List.of(
         // pellets drop through the hopper into the barrel, the core wire comes down into the die, the product leaves on the right
-        "single_screw_extruder", new ProcessSchematic("single_screw_extruder", 8,
+        new ProcessSchematic("single_screw_extruder", 8,
             List.of(new Pos(32, 20), new Pos(122, 20)), List.of(new Pos(150, 47)), new Pos(122, 47), null,
             List.of(), new Pos(52, 51), 64, 10, Mode.RIGHT, 6, true),
         // the hot product runs through a sprayed water trough and comes out cold
-        "cooling_tank", line("cooling_tank", null, new Pos(44, 47), 88, 10, Mode.RIGHT, 4, false),
+        line("cooling_tank", null, new Pos(44, 47), 88, 10, Mode.RIGHT, 4, false),
         // the platen comes down on the mould between the press columns, steam heats it, then it lifts
-        "vulcanizer", line("vulcanizer", new Pos(80, 44), new Pos(60, 24), 56, 19, Mode.PHASE, 8, false),
+        line("vulcanizer", new Pos(80, 44), new Pos(60, 24), 56, 19, Mode.PHASE, 8, false),
         // sheets hang in the chamber over a log fire; the smoke fills it from below and cures them
-        "smokehouse", new ProcessSchematic("smokehouse", 8, List.of(new Pos(26, 26), new Pos(26, 52)), List.of(OUT),
+        new ProcessSchematic("smokehouse", 8, List.of(new Pos(26, 26), new Pos(26, 52)), List.of(OUT),
             null, null, List.of(), new Pos(56, 31), 60, 38, Mode.UP, 4, false),
         // the film runs through the nip rollers and over a guide onto the roll, which grows
-        "film_winder", line("film_winder", null, new Pos(70, 18), 60, 48, Mode.PHASE, 8, false),
+        line("film_winder", null, new Pos(70, 18), 60, 48, Mode.PHASE, 8, false),
         // the tracks pull the pipe through, the saw cuts it into lengths
-        "haul_off_cutter", line("haul_off_cutter", null, new Pos(46, 30), 84, 34, Mode.RIGHT, 4, true),
+        line("haul_off_cutter", null, new Pos(46, 30), 84, 34, Mode.RIGHT, 4, true),
         // the spindle travels along the rail and cuts the pocket into the stock in the vise
-        "cnc_machining_center", line("cnc_machining_center", null, new Pos(52, 23), 72, 42, Mode.PHASE, 8, false));
+        line("cnc_machining_center", null, new Pos(52, 23), 72, 42, Mode.PHASE, 8, false),
+        // feed drums on the left, monomers and catalyst charged from the left, the card reader drives the
+        // agitator motor; the slurry fills the stirred vessel and drains to the right, the gases to the right drums
+        new ProcessSchematic("polymerization_reactor", 8, List.of(new Pos(50, 17), new Pos(50, 37)), List.of(new Pos(114, 57)),
+            new Pos(50, 57), new Pos(114, 17),
+            List.of(new Box(19, 24, 12, 46), new Box(34, 24, 12, 46), new Box(136, 24, 12, 46), new Box(151, 24, 12, 46)),
+            new Pos(74, 34), 32, 33, Mode.UP, 4, true),
+        // the feed enters the trayed column halfway up; vapour rises from the reboiler, the condenser sends the
+        // tops over to the outer drum, the bottoms go across to the inner one, the heavy residue drains at the foot
+        new ProcessSchematic("distillation_column", 8, List.of(), List.of(new Pos(44, 55)), null, null,
+            List.of(new Box(21, 24, 14, 46), new Box(152, 24, 12, 46), new Box(137, 24, 12, 46)),
+            new Pos(70, 22), 20, 47, Mode.UP, 4, false),
+        // the belt carries the stone up into the shaft; it burns to lime from the bottom up, the gas goes to the drum
+        new ProcessSchematic("lime_kiln", 8, List.of(new Pos(26, 20)), List.of(new Pos(118, 52)), null, null,
+            List.of(new Box(148, 24, 14, 46)), new Pos(74, 26), 24, 41, Mode.UP, 4, false),
+        // feed and culture ports on the lid, liquid drums either side; the broth clouds over and foams as it ferments
+        new ProcessSchematic("fermenter", 8, List.of(new Pos(56, 17), new Pos(94, 17)), List.of(new Pos(116, 52)),
+            new Pos(75, 17), null,
+            List.of(new Box(19, 24, 12, 46), new Box(34, 24, 12, 46), new Box(137, 24, 12, 46), new Box(152, 24, 12, 46)),
+            new Pos(58, 40), 52, 27, Mode.UP, 4, false)));
+
+    private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
+        Map<String, ProcessSchematic> map = new HashMap<>();
+        for (ProcessSchematic s : all) map.put(s.id(), s);
+        return Map.copyOf(map);
+    }
 
     /** Rows in the progress sheet. */
     public int rows() { return mode == Mode.PHASE ? frames : 1 + frames; }

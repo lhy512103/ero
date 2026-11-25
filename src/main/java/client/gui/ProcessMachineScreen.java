@@ -238,8 +238,8 @@ public class ProcessMachineScreen extends AbstractContainerScreen<ProcessMachine
     }
 
     private void tank(GuiGraphicsExtractor g, int index) {
-        var pos = layout.tanks.get(index);
-        int x = leftPos + pos.x(), y = topPos + pos.y(), w = ProcessLayout.TANK_W, h = ProcessLayout.TANK_H;
+        var box = layout.tanks.get(index);
+        int x = leftPos + box.x(), y = topPos + box.y(), w = box.w(), h = box.h();
         boolean input = index < menu.def().fluidsIn().size();
         inset(g, x, y, w, h, SCREEN);
         int capacity = menu.tankCapacity(index), amount = menu.tankAmount(index);

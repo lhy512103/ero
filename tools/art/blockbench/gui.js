@@ -762,6 +762,207 @@
         return g;
     }
 
+    // ---- machines with tanks. The screen draws the tank gauges; the picture puts drums in a rack around
+    // them and runs pipes from the drums and slots to the vessel.
+    const PIPE_L = [196, 198, 202], WATER_L = [90, 140, 200];
+    function pipes(R) {
+        const h = (x0, x1, y) => { R(x0, y - 1, x1, y - 1, VD); R(x0, y, x1, y, PIPE_L); R(x0, y + 1, x1, y + 1, METAL_D); R(x0, y + 2, x1, y + 2, VD); };
+        const v = (x, y0, y1) => { R(x - 1, y0, x - 1, y1, VD); R(x, y0, x, y1, PIPE_L); R(x + 1, y0, x + 1, y1, METAL_D); R(x + 2, y0, x + 2, y1, VD); };
+        return { h, v };
+    }
+    function drums(c, x0, x1) {
+        c.body(x0, 20, x1, 73);
+        c.R(x0 + 2, 74, x0 + 4, 74, VD); c.R(x1 - 4, 74, x1 - 2, 74, VD);
+        for (let x = x0 + 3; x <= x1 - 3; x += 5) { c.P(x, 21, VS); c.P(x, 72, VS); }
+    }
+    // a cut-away window into a vessel, filled with a colour or a picture
+    function cutaway(c, x0, y0, x1, y1, fill) {
+        const EDGE_L = [234, 234, 234];
+        c.R(x0 - 1, y0 - 1, x1 + 1, y0 - 1, VS); c.R(x0 - 1, y0 - 1, x0 - 1, y1 + 1, VS);
+        c.R(x0 - 1, y1 + 1, x1 + 1, y1 + 1, EDGE_L); c.R(x1 + 1, y0 - 1, x1 + 1, y1 + 1, EDGE_L);
+        if (fill instanceof G) c.g.draw(fill, x0, y0 - 16); else c.R(x0, y0, x1, y1, fill);
+    }
+
+    // Polymerization reactor: monomer drums on the left, the slurry and off-gas drums on the right; the
+    // card reader drives the agitator motor on the lid, the slurry fills the jacketed vessel.
+    function polyBack() {
+        const c = panelCanvas(), { R, P, body } = c, { h, v } = pipes(R);
+        drums(c, 17, 47); drums(c, 134, 164);
+        body(70, 31, 109, 70);
+        for (const y of [40, 50, 60]) { R(71, y, 72, y, WATER_L); R(107, y, 108, y, WATER_L); }
+        cutaway(c, 74, 34, 105, 66, [30, 30, 30]);
+        body(73, 71, 77, 74); body(102, 71, 106, 74);
+        body(81, 17, 98, 27, [92, 122, 170], [146, 174, 220], [52, 72, 112]);
+        for (let x = 84; x <= 95; x += 2) R(x, 19, x, 25, [70, 96, 140]);
+        body(87, 28, 92, 30);
+        h(67, 77, 24); v(76, 27, 30);
+        h(67, 69, 44); h(67, 69, 64);
+        R(48, 34, 69, 34, PIPE_L); R(48, 35, 69, 35, METAL_D);
+        h(110, 133, 44); h(110, 112, 64);
+        R(99, 23, 112, 23, VD); R(99, 24, 112, 24, [70, 70, 72]); R(99, 25, 112, 25, VD);
+        return c.g;
+    }
+    function polySlurry() {
+        const g = new G(32, 33), r = rng(131);
+        for (let y = 0; y < 33; y++) for (let x = 0; x < 32; x++) {
+            const col = mix([236, 234, 224], [186, 182, 170], y / 32);
+            g.px(x, y, y === 0 ? VL : r() < 0.08 ? dark(col, 0.08) : col);
+        }
+        return g;
+    }
+    function polyStir(f) {
+        const g = new G(32, 33), half = [11, 7, 2, 7][f], lit = f % 2 ? METAL_D : METAL_L, shade = f % 2 ? METAL_L : METAL_D;
+        for (let y = 0; y <= 28; y++) { g.px(15, y, METAL_L); g.px(16, y, METAL_D); }
+        for (const by of [12, 25]) {
+            g.rect(15 - half, by, 16 + half, by, lit); g.rect(15 - half, by + 1, 16 + half, by + 1, shade);
+            g.rect(14, by - 1, 17, by + 2, VD); g.rect(15, by, 16, by + 1, METAL);
+        }
+        return g;
+    }
+
+    // Distillation column: the feed drum on the left, a trayed column with the condenser at its head and
+    // the reboiler at its foot; the tops go over to the outer drum, the bottoms to the inner one, the
+    // residue drains to the slot at the foot.
+    function distBack() {
+        const c = panelCanvas(), { R, P, body } = c, { h, v } = pipes(R);
+        drums(c, 18, 37); drums(c, 134, 165);
+        body(66, 18, 93, 72);
+        cutaway(c, 70, 22, 89, 68, [26, 28, 32]);
+        for (let k = 0; k < 5; k++) {
+            const ty = 28 + k * 8, xa = k % 2 ? 74 : 70, xb = k % 2 ? 89 : 85;
+            R(xa, ty, xb, ty, METAL_L); R(xa, ty + 1, xb, ty + 1, METAL_D);
+        }
+        R(70, 73, 89, 74, VS);
+        h(38, 65, 40);
+        h(61, 65, 62);
+        h(94, 99, 21);
+        body(100, 17, 128, 27);
+        for (let x = 103; x <= 125; x += 3) R(x, 19, x, 25, [120, 160, 200]);
+        R(129, 17, 158, 17, PIPE_L); R(129, 18, 158, 18, METAL_D); R(157, 19, 158, 19, METAL_D);
+        h(94, 97, 64);
+        body(98, 57, 124, 70);
+        for (let x = 101; x <= 121; x += 4) { R(x, 60, x, 67, COPPER[2]); R(x + 1, 60, x + 1, 67, COPPER[0]); }
+        h(125, 133, 64);
+        v(110, 71, 74); P(110, 72, [190, 50, 40]); P(111, 72, [190, 50, 40]);
+        return c.g;
+    }
+    function distVapour() {
+        const g = new G(20, 47), r = rng(141);
+        for (let y = 0; y < 47; y++) for (let x = 0; x < 20; x++) g.px(x, y, mix([250, 238, 206], [236, 196, 132], y / 46), 100 + 50 * r());
+        return g;
+    }
+    function distBubble(f) {
+        const g = new G(20, 47), LIQ = [214, 176, 92], FOAM = [250, 240, 214];
+        for (let k = 0; k < 5; k++) {
+            const ty = 6 + k * 8, xa = k % 2 ? 4 : 0, xb = k % 2 ? 19 : 15;
+            g.rect(xa, ty - 1, xb, ty - 1, LIQ, 220);
+            for (let x = xa; x <= xb; x++) {
+                const s = (x * 5 + k * 3 + f * 2) % 7;
+                if (s === 0) g.px(x, ty - 2, FOAM, 230);
+                if (s === 3) g.px(x, ty - 3, FOAM, 170);
+            }
+            const dx = k % 2 ? 2 : 17, dy = ty + 1 + ((f * 2 + k) % 6);
+            g.px(dx, dy, LIQ, 220);
+        }
+        return g;
+    }
+
+    // Lime kiln: the belt carries the stone up into the hopper on a brick shaft; burners fire it from the
+    // side, it turns to lime from the bottom up and drops to the slot, the gas goes off to the drum.
+    function stones(base) {
+        const g = new G(24, 41);
+        for (let y = 0; y < 41; y++) for (let x = 0; x < 24; x++) {
+            const row = Math.floor(y / 5), off = row % 2 ? 3 : 0, col = Math.floor((x + off) / 6);
+            const gap = y % 5 === 4 || (x + off) % 6 === 5;
+            const t = ((row * 7 + col * 13) % 5) / 4;
+            const s = gap ? dark(base, 0.5) : mix(light(base, 0.1), dark(base, 0.16), t);
+            g.px(x, y, y % 5 === 0 && !gap ? light(s, 0.2) : s);
+        }
+        return g;
+    }
+    function kilnBack() {
+        const c = panelCanvas(), { g, R, P, body, chute } = c, { h } = pipes(R);
+        const BRICK = [168, 84, 60], BRICK_D = [122, 58, 42], MORTAR = [196, 180, 160];
+        for (let y = 22; y <= 70; y++) for (let x = 70; x <= 101; x++) {
+            const row = Math.floor((y - 22) / 3), off = row % 2 ? 2 : 0;
+            const mortar = (y - 22) % 3 === 2 || (x - 70 + off) % 5 === 4;
+            P(x, y, mortar ? MORTAR : (x + row) % 3 ? BRICK : BRICK_D);
+        }
+        R(70, 22, 101, 22, VD); R(70, 70, 101, 70, VD); R(70, 22, 70, 70, VD); R(101, 22, 101, 70, VD);
+        cutaway(c, 74, 26, 97, 66, stones([132, 128, 122]));
+        body(66, 71, 105, 74);
+        for (let y = 17; y <= 21; y++) {
+            const l = 77 + (y - 17), r = 94 - (y - 17);
+            R(l, y, r, y, y === 17 ? VD : [64, 62, 60]); P(l, y, VD); P(r, y, VD);
+        }
+        P(83, 19, [150, 146, 140]); P(87, 20, [150, 146, 140]); P(90, 19, [150, 146, 140]);
+        for (let t = -1; t <= 1; t++) seg(g, 40, 41 + t - 16, 76, 19 + t - 16, t === 0 ? [72, 72, 74] : VD);
+        for (let i = 1; i < 6; i++) { const x = 40 + i * 6; P(x, Math.round(41 - 22 * (x - 40) / 36) - 2, [150, 146, 140]); }
+        roller(g, 40, 41 - 16, 2, 0); roller(g, 76, 19 - 16, 2, 0);
+        R(56, 33, 56, 74, METAL_L); R(57, 33, 57, 74, METAL_D);
+        const STEEL_G = [150, 150, 150], STEEL_GL = [204, 204, 204], STEEL_GD = [100, 100, 100];
+        body(63, 42, 69, 47, STEEL_G, STEEL_GL, STEEL_GD); body(63, 52, 69, 57, STEEL_G, STEEL_GL, STEEL_GD);
+        R(66, 48, 66, 51, VD); P(65, 44, [200, 50, 40]); P(65, 54, [200, 50, 40]);
+        h(102, 145, 24);
+        chute(102, 116, 60);
+        drums(c, 146, 163);
+        return g;
+    }
+    function kilnFlame(f) {
+        const g = new G(24, 41);
+        [3, 9, 15, 21].forEach((cx, i) => {
+            const ht = 5 + ((f + i) % 3) * 2, lean = (f + i) % 2 ? 1 : -1;
+            for (let dy = 0; dy <= ht; dy++) {
+                const half = Math.max(0, Math.round((ht - dy) / 2.5));
+                for (let dx = -half; dx <= half; dx++) g.px(cx + dx + (dy > 2 ? lean : 0), 27 - dy, dy < 2 ? HOT[2] : dy < ht - 1 ? HOT[1] : HOT[0], 220);
+            }
+        });
+        return g;
+    }
+
+    // Fermenter: feed and culture go in through ports on the lid, the liquid drums sit either side of the
+    // jacketed tank; the sugar solution clouds over from the bottom up and foams at the top.
+    function fermBase() {
+        const g = new G(52, 27);
+        for (let y = 0; y < 27; y++) for (let x = 0; x < 52; x++) {
+            if (y < 5) g.px(x, y, [44, 44, 48]);
+            else g.px(x, y, y === 5 ? [236, 196, 110] : mix([214, 164, 72], [166, 114, 42], (y - 6) / 20));
+        }
+        return g;
+    }
+    function fermBroth() {
+        const g = new G(52, 27), r = rng(151);
+        for (let y = 3; y < 27; y++) for (let x = 0; x < 52; x++) {
+            if (y < 7) g.px(x, y, r() < 0.25 ? [214, 204, 180] : [244, 238, 220]);
+            else g.px(x, y, r() < 0.1 ? [200, 176, 126] : mix([224, 202, 152], [186, 160, 110], (y - 7) / 19));
+        }
+        return g;
+    }
+    function fermBubbles(f) {
+        const g = new G(52, 27);
+        [5, 12, 20, 27, 33, 41, 47].forEach((bx, i) => {
+            for (let j = 0; j < 2; j++) {
+                const y = 26 - ((f * 3 + j * 11 + i * 5) % 21);
+                if (y < 6) continue;
+                g.px(bx, y, [252, 244, 226], 220);
+                if ((i + j) % 2) g.px(bx + 1, y, [252, 244, 226], 140);
+            }
+        });
+        return g;
+    }
+    function fermBack() {
+        const c = panelCanvas(), { R, body } = c, { h } = pipes(R);
+        drums(c, 17, 47); drums(c, 135, 165);
+        body(54, 35, 113, 70);
+        for (const y of [46, 54, 62]) { R(55, y, 56, y, WATER_L); R(111, y, 112, y, WATER_L); }
+        cutaway(c, 58, 40, 109, 66, fermBase());
+        for (const cx of [63, 82, 101]) R(cx, 34, cx + 1, 34, METAL_L);
+        body(58, 71, 62, 74); body(105, 71, 109, 74);
+        h(48, 53, 60);
+        h(114, 134, 44); h(114, 114, 64);
+        return c.g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -779,6 +980,14 @@
             save(sheet([hauloffPipe(), ...rowsOf(4, hauloffMove)]), S + 'haul_off_cutter_progress.png'),
             save(cncBack(), S + 'cnc_machining_center.png'),
             save(sheet(rowsOf(8, cncPhase)), S + 'cnc_machining_center_progress.png'),
+            save(polyBack(), S + 'polymerization_reactor.png'),
+            save(sheet([polySlurry(), ...rowsOf(4, polyStir)]), S + 'polymerization_reactor_progress.png'),
+            save(distBack(), S + 'distillation_column.png'),
+            save(sheet([distVapour(), ...rowsOf(4, distBubble)]), S + 'distillation_column_progress.png'),
+            save(kilnBack(), S + 'lime_kiln.png'),
+            save(sheet([stones([238, 236, 228]), ...rowsOf(4, kilnFlame)]), S + 'lime_kiln_progress.png'),
+            save(fermBack(), S + 'fermenter.png'),
+            save(sheet([fermBroth(), ...rowsOf(4, fermBubbles)]), S + 'fermenter_progress.png'),
         ].join(', ');
     }
 

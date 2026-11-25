@@ -25,7 +25,8 @@ public final class MachineShots {
     private MachineShots() {}
 
     private static final List<String> MACHINES = List.of("single_screw_extruder", "cooling_tank", "vulcanizer",
-        "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor");
+        "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor",
+        "distillation_column", "lime_kiln", "fermenter");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     private static int ticks, settle = -1, step = -1;
@@ -93,6 +94,19 @@ public final class MachineShots {
                     var item = input.ingredient().items().findFirst();
                     if (item.isEmpty()) continue;
                     handler.set(slot++, ItemResource.of(item.get().value()), Math.min(64, input.count() * 8));
+                }
+                // input tanks get the recipe's fluids, output tanks some of its products, so the gauges show
+                var tanks = machine.getTanks();
+                int in = machine.getInputTankCount();
+                for (int i = 0; i < recipe.fluids().size() && i < in; i++) {
+                    var tank = tanks.get(i);
+                    recipe.fluids().get(i).ingredient().fluids().forEach(fluid -> {
+                        if (tank.isEmpty()) tank.fill(fluid.value(), tank.getCapacity() * 3 / 4);
+                    });
+                }
+                for (int i = 0; i < recipe.fluidResults().size() && in + i < tanks.size(); i++) {
+                    var tank = tanks.get(in + i);
+                    tank.fill(recipe.fluidResults().get(i).fluid(), tank.getCapacity() / (3 + i));
                 }
             }
         });
