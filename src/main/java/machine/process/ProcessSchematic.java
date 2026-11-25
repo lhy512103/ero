@@ -71,6 +71,24 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
             List.copyOf(tanks), new Pos(70, 22), 20, 47, Mode.UP, 4, false);
     }
 
+    /**
+     * The kiln series: the lime kiln's brick shaft for any count of slots and drums (gui.js
+     * kilnSeriesBack paints it from the same counts). Fuel drums on the left, the charge slots beside
+     * them with the catalyst below, the products to the right of the shaft and the gas drums beyond.
+     */
+    private static ProcessSchematic kiln(String id, int in, int out, int fluidsIn, int fluidsOut, boolean catalyst) {
+        int x = fluidsIn > 0 ? 22 + 15 * fluidsIn : 26;
+        int[] inYs = {20, 38}, outYs = {52, 32};
+        List<Pos> inputs = new ArrayList<>(), outputs = new ArrayList<>();
+        for (int i = 0; i < in; i++) inputs.add(new Pos(x, inYs[i]));
+        for (int i = 0; i < out; i++) outputs.add(new Pos(114, outYs[i]));
+        List<Box> tanks = new ArrayList<>();
+        for (int i = 0; i < fluidsIn; i++) tanks.add(new Box(19 + 15 * i, 24, 12, 46));
+        for (int i = 0; i < fluidsOut; i++) tanks.add(new Box(151 - 15 * (fluidsOut - 1 - i), 24, 12, 46));
+        return new ProcessSchematic(id, 8, List.copyOf(inputs), List.copyOf(outputs), catalyst ? new Pos(x, 57) : null, null,
+            List.copyOf(tanks), new Pos(74, 26), 24, 41, Mode.UP, 4, false);
+    }
+
     private static final Map<String, ProcessSchematic> ALL = index(List.of(
         // pellets drop through the hopper into the barrel, the core wire comes down into the die, the product leaves on the right
         new ProcessSchematic("single_screw_extruder", 8,
@@ -124,7 +142,12 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         column("flash_tank", 0, 1, 2),
         column("evaporator", 1, 1, 2),
         column("crystallizer", 1, 1, 1),
-        column("vent_stack", 0, 1, 0)));
+        column("vent_stack", 0, 1, 0),
+        // the kiln series, laid out like the lime kiln (see kiln below)
+        kiln("carbide_furnace", 2, 2, 0, 1, true),
+        kiln("coking_oven", 1, 1, 0, 2, false),
+        kiln("hcl_furnace", 0, 0, 2, 1, false),
+        kiln("dryer", 1, 1, 1, 1, false)));
 
     private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
         Map<String, ProcessSchematic> map = new HashMap<>();

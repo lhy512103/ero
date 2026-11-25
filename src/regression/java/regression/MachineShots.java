@@ -28,7 +28,8 @@ public final class MachineShots {
         "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor",
         "distillation_column", "lime_kiln", "fermenter", "additive_reactor", "catalyst_prep_tank", "dehydration_reactor",
         "depolymerization_reactor", "oligomerization_reactor", "vcm_converter", "neutralizer", "acetylene_generator",
-        "solvent_recovery_tower", "tar_distiller", "scrubber", "flash_tank", "evaporator", "crystallizer", "vent_stack");
+        "solvent_recovery_tower", "tar_distiller", "scrubber", "flash_tank", "evaporator", "crystallizer", "vent_stack",
+        "carbide_furnace", "coking_oven", "hcl_furnace", "dryer");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     private static int ticks, settle = -1, step = -1;

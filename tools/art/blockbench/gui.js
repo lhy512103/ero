@@ -1076,6 +1076,57 @@
         return g;
     }
 
+    // ---- the kiln series: the lime kiln's brick shaft for any count of slots and drums. Fuel drums sit
+    // on the left and feed the burners, the belt carries the charge from the input slots up into the
+    // hopper, the product drops out to the slots on the right and the gas goes off to the right drums.
+    // ProcessSchematic.kiln works out the same positions from the same counts.
+    const KILNS = [
+        { id: 'carbide_furnace', in: 2, out: 2, fIn: 0, fOut: 1, cat: true, raw: [150, 146, 140], done: [80, 80, 88] },
+        { id: 'coking_oven', in: 1, out: 1, fIn: 0, fOut: 2, cat: false, raw: [56, 52, 50], done: [112, 112, 116] },
+        { id: 'hcl_furnace', in: 0, out: 0, fIn: 2, fOut: 1, cat: false, gas: true },
+        { id: 'dryer', in: 1, out: 1, fIn: 1, fOut: 1, cat: false, raw: [190, 166, 120], done: [236, 226, 200] },
+    ];
+    const kilnInputX = s => s.fIn ? 22 + 15 * s.fIn : 26;
+    function kilnGas() {
+        const g = new G(24, 41), r = rng(171);
+        for (let y = 0; y < 41; y++) for (let x = 0; x < 24; x++) g.px(x, y, mix([250, 244, 200], [226, 190, 120], y / 40), 90 + 60 * r());
+        return g;
+    }
+    function kilnSeriesBack(s) {
+        const c = panelCanvas(), { g, R, P, body, chute } = c, { h } = pipes(R);
+        const BRICK = [168, 84, 60], BRICK_D = [122, 58, 42], MORTAR = [196, 180, 160];
+        for (let y = 22; y <= 70; y++) for (let x = 70; x <= 101; x++) {
+            const row = Math.floor((y - 22) / 3), off = row % 2 ? 2 : 0;
+            const mortar = (y - 22) % 3 === 2 || (x - 70 + off) % 5 === 4;
+            P(x, y, mortar ? MORTAR : (x + row) % 3 ? BRICK : BRICK_D);
+        }
+        R(70, 22, 101, 22, VD); R(70, 70, 101, 70, VD); R(70, 22, 70, 70, VD); R(101, 22, 101, 70, VD);
+        cutaway(c, 74, 26, 97, 66, s.gas ? [30, 30, 32] : stones(s.raw));
+        body(66, 71, 105, 74);
+        if (s.in) {
+            for (let y = 17; y <= 21; y++) {
+                const l = 77 + (y - 17), r = 94 - (y - 17);
+                R(l, y, r, y, y === 17 ? VD : [64, 62, 60]); P(l, y, VD); P(r, y, VD);
+            }
+            const x0 = kilnInputX(s) + 18;
+            for (let t = -1; t <= 1; t++) seg(g, x0, 39 + t - 16, 76, 19 + t - 16, t === 0 ? [72, 72, 74] : VD);
+            roller(g, x0, 39 - 16, 2, 0); roller(g, 76, 19 - 16, 2, 0);
+        } else {
+            body(78, 17, 93, 21);
+        }
+        const STEEL_G = [150, 150, 150], STEEL_GL = [204, 204, 204], STEEL_GD = [100, 100, 100];
+        body(63, 42, 69, 47, STEEL_G, STEEL_GL, STEEL_GD); body(63, 52, 69, 57, STEEL_G, STEEL_GL, STEEL_GD);
+        R(66, 48, 66, 51, VD); P(65, 44, [200, 50, 40]); P(65, 54, [200, 50, 40]);
+        if (s.fIn) { drums(c, 17, 17 + 15 * s.fIn); h(18 + 15 * s.fIn, 62, 49); }
+        else { R(58, 33, 58, 74, METAL_L); R(59, 33, 59, 74, METAL_D); }
+        // the electrode comes in from the catalyst slot under the shaft
+        if (s.cat) { h(44, 69, 65); body(60, 62, 64, 68); }
+        if (s.out) chute(102, 112, 60);
+        if (s.out > 1) chute(102, 112, 40);
+        if (s.fOut) { const inner = 149 - 15 * (s.fOut - 1); h(102, inner - 1, 24); drums(c, inner, 164); }
+        return g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -1108,6 +1159,10 @@
             ...COLUMNS.flatMap(s => [
                 save(columnBack(s), S + s.id + '.png'),
                 save(sheet([columnFill(s), ...rowsOf(4, distBubble)]), S + s.id + '_progress.png'),
+            ]),
+            ...KILNS.flatMap(s => [
+                save(kilnSeriesBack(s), S + s.id + '.png'),
+                save(sheet([s.gas ? kilnGas() : stones(s.done), ...rowsOf(4, kilnFlame)]), S + s.id + '_progress.png'),
             ]),
         ].join(', ');
     }
