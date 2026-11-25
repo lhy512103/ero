@@ -1288,6 +1288,11 @@
         return out.length + ' textures';
     }
 
-    window.IUCEGui = { G, PARTS, PROGRESS, paintAll, paintSchematics };
+    window.IUCEGui = {
+        G, PARTS, PROGRESS, paintAll, paintSchematics,
+        // for machine_screens.js, which paints the older machines' screens with the same parts
+        parts: { save, sheet, rowsOf, panelCanvas, cutaway, drums, pipes, discAt, seg, roller,
+            VD, VS, VL, METAL, METAL_L, METAL_D, HOLE, PELLET },
+    };
     return 'gui loaded';
 })();

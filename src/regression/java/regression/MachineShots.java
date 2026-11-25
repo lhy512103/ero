@@ -19,7 +19,8 @@ import java.util.Locale;
 /**
  * Development tool: places a few process machines next to the player, opens each one and saves a
  * screenshot of every tab to {@code screenshots/machine_<id>_<tab>.png}, then quits. Run with
- * {@code gradlew runClient -PsmokeTest -PregressionTests -PguideShots=machines -PguideWorld=<save>}.
+ * {@code gradlew runClient -PsmokeTest -PregressionTests -PguideShots=machines -PguideWorld=<save>}; with
+ * {@code -PguideShots=machines:old} only the older machines.
  */
 public final class MachineShots {
     private MachineShots() {}
@@ -35,9 +36,14 @@ public final class MachineShots {
         "strand_pelletizer", "sheeting_press",
         "compounding_extruder", "dehumidifying_dryer", "high_speed_mixer", "injection_molder", "plastic_granulator",
         "rubber_mixer");
+    /** The older machines, opened from their own block; one screenshot each, as they have no tabs. */
+    private static final List<String> OLD = List.of("macerator", "compressor", "extractor", "metal_former",
+        "electric_furnace", "induction_furnace");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
-    private static int ticks, settle = -1, step = -1;
+    /** {@code -PguideShots=machines:old} skips the process machines and shoots only the older ones. */
+    private static final boolean OLD_ONLY = "machines:old".equals(System.getProperty("iuce.guideShots"));
+    private static int ticks, settle = -1, step = OLD_ONLY ? MACHINES.size() * PER_MACHINE - 1 : -1;
     private static BlockPos placed;
 
     public static void register() {
@@ -57,8 +63,12 @@ public final class MachineShots {
         if (ticks < settle) return;
         step++;
         int machine = step / PER_MACHINE, phase = step % PER_MACHINE;
-        if (machine >= MACHINES.size()) {
+        if (machine >= MACHINES.size() + OLD.size()) {
             minecraft.stop();
+            return;
+        }
+        if (machine >= MACHINES.size()) {
+            old(minecraft, server, OLD.get(machine - MACHINES.size()), machine, phase);
             return;
         }
         String id = MACHINES.get(machine);
@@ -119,6 +129,34 @@ public final class MachineShots {
                 }
             }
         });
+    }
+
+    /** Places an older machine, charges it, opens it and saves {@code machine_<id>.png}. */
+    private static void old(Minecraft minecraft, net.minecraft.server.MinecraftServer server, String id, int index, int phase) {
+        var uuid = minecraft.player.getUUID();
+        if (phase == 0) server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("iuce", id));
+            if (player == null) return;
+            BlockPos pos = player.blockPosition().offset(index % 8 - 4, 4, 0);
+            placed = pos;
+            player.level().setBlockAndUpdate(pos, block.defaultBlockState());
+            var entity = player.level().getBlockEntity(pos);
+            if (entity instanceof blockentity.EnergyDisplay provider && provider.getEnergyStorage() instanceof energy.EUEnergyStorageImpl storage) {
+                storage.setEnergy(storage.getMaxEnergyStored() * 3 / 4);
+            }
+        });
+        if (phase == OPEN) server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            if (player != null && placed != null && player.level().getBlockEntity(placed) instanceof net.minecraft.world.MenuProvider provider) {
+                player.openMenu(provider, placed);
+            }
+        });
+        if (phase == FIRST_PAGE + PER_PAGE - 2 && minecraft.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>) {
+            String name = "machine_" + id + ".png";
+            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+            System.out.println("[MachineShots] " + name);
+        }
     }
 
     private static void open(Minecraft minecraft, net.minecraft.server.MinecraftServer server) {

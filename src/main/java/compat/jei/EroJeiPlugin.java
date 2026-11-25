@@ -320,22 +320,22 @@ public class EroJeiPlugin implements IModPlugin {
                 }
             });
 
-        // 打粉机 — 进度箭头 (79, 36, 16x22)
+        // 打粉机 — 机器示意图里的进度窗口
         registration.addRecipeClickArea(MaceratorScreen.class,
-            79, 36, 16, 22,
+            MaceratorScreen.WINDOW.x(), MaceratorScreen.WINDOW.y(), MaceratorScreen.WINDOW.w(), MaceratorScreen.WINDOW.h(),
             MACHINE_TYPES.get("macerator").recipeType);
 
-        // 电炉 — 进度箭头 (79, 36, 16x22)
+        // 电炉 — 机器示意图里的进度窗口
         registration.addRecipeClickArea(ElectricFurnaceScreen.class,
-            79, 36, 16, 22,
+            ElectricFurnaceScreen.WINDOW.x(), ElectricFurnaceScreen.WINDOW.y(), ElectricFurnaceScreen.WINDOW.w(), ElectricFurnaceScreen.WINDOW.h(),
             MACHINE_TYPES.get("electric_furnace").recipeType,
             mezz.jei.api.constants.RecipeTypes.SMELTING,
             mezz.jei.api.constants.RecipeTypes.BLASTING,
             mezz.jei.api.constants.RecipeTypes.SMOKING);
 
-        // 合金炉 — 进度箭头 (80, 36, 16x22)
+        // 合金炉 — 机器示意图里的进度窗口
         registration.addRecipeClickArea(InductionFurnaceScreen.class,
-            80, 36, 16, 22,
+            InductionFurnaceScreen.WINDOW.x(), InductionFurnaceScreen.WINDOW.y(), InductionFurnaceScreen.WINDOW.w(), InductionFurnaceScreen.WINDOW.h(),
             MACHINE_TYPES.get("alloy_furnace").recipeType);
 
         // 种植机 — 能量进度条 (63, 35, 13x20)
@@ -343,21 +343,22 @@ public class EroJeiPlugin implements IModPlugin {
             63, 35, 13, 20,
             MACHINE_TYPES.get("planter").recipeType);
 
-        // 压缩机 — 进度箭头 (79, 36, 16x22)
+        // 压缩机 — 机器示意图里的进度窗口
         registration.addRecipeClickArea(CompressorScreen.class,
-            79, 36, 16, 22,
+            CompressorScreen.WINDOW.x(), CompressorScreen.WINDOW.y(), CompressorScreen.WINDOW.w(), CompressorScreen.WINDOW.h(),
             MACHINE_TYPES.get("compressor").recipeType);
 
-        // 金属成型机 — 进度箭头 (79, 36, 16x22)，三种模式的配方一起显示
+        // 金属成型机 — 机器示意图里的进度窗口，三种模式的配方一起显示
         registration.addRecipeClickArea(machine.metal_former.screen.MetalFormerScreen.class,
-            79, 36, 16, 22,
+            machine.metal_former.screen.MetalFormerScreen.WINDOW.x(), machine.metal_former.screen.MetalFormerScreen.WINDOW.y(),
+            machine.metal_former.screen.MetalFormerScreen.WINDOW.w(), machine.metal_former.screen.MetalFormerScreen.WINDOW.h(),
             MACHINE_TYPES.get("metal_former_rolling").recipeType,
             MACHINE_TYPES.get("metal_former_cutting").recipeType,
             MACHINE_TYPES.get("metal_former_extruding").recipeType);
 
-        // 提取机 — 进度箭头 (79, 36, 16x22)
+        // 提取机 — 机器示意图里的进度窗口
         registration.addRecipeClickArea(ExtractorScreen.class,
-            79, 36, 16, 22,
+            ExtractorScreen.WINDOW.x(), ExtractorScreen.WINDOW.y(), ExtractorScreen.WINDOW.w(), ExtractorScreen.WINDOW.h(),
             MACHINE_TYPES.get("extractor").recipeType);
 
         // 电解机 — 进度箭头 (80, 38, 52x17)
