@@ -89,6 +89,23 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
             List.copyOf(tanks), new Pos(74, 26), 24, 41, Mode.UP, 4, false);
     }
 
+    /**
+     * The tank series: the fermenter's jacketed tank for any count of slots and drums (gui.js
+     * vesselBack paints it from the same counts). Item feeds on the lid with the catalyst between them,
+     * liquid drums either side, the solid product at the lower right.
+     */
+    private static ProcessSchematic vessel(String id, int in, int out, int fluidsIn, int fluidsOut, boolean catalyst) {
+        int[] xs = {56, 94};
+        List<Pos> inputs = new ArrayList<>(), outputs = new ArrayList<>();
+        for (int i = 0; i < in; i++) inputs.add(new Pos(xs[i], 17));
+        for (int i = 0; i < out; i++) outputs.add(new Pos(116, 52));
+        List<Box> tanks = new ArrayList<>();
+        for (int i = 0; i < fluidsIn; i++) tanks.add(new Box(19 + 15 * i, 24, 12, 46));
+        for (int i = 0; i < fluidsOut; i++) tanks.add(new Box(151 - 15 * (fluidsOut - 1 - i), 24, 12, 46));
+        return new ProcessSchematic(id, 8, List.copyOf(inputs), List.copyOf(outputs), catalyst ? new Pos(75, 17) : null, null,
+            List.copyOf(tanks), new Pos(58, 40), 52, 27, Mode.UP, 4, false);
+    }
+
     private static final Map<String, ProcessSchematic> ALL = index(List.of(
         // pellets drop through the hopper into the barrel, the core wire comes down into the die, the product leaves on the right
         new ProcessSchematic("single_screw_extruder", 8,
@@ -147,7 +164,21 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         kiln("carbide_furnace", 2, 2, 0, 1, true),
         kiln("coking_oven", 1, 1, 0, 2, false),
         kiln("hcl_furnace", 0, 0, 2, 1, false),
-        kiln("dryer", 1, 1, 1, 1, false)));
+        kiln("dryer", 1, 1, 1, 1, false),
+        // the tank series, laid out like the fermenter (see vessel below)
+        vessel("brine_dissolver", 1, 0, 1, 1, false),
+        vessel("brine_purifier", 1, 0, 1, 1, false),
+        vessel("coagulation_tank", 1, 1, 1, 1, false),
+        vessel("liquefaction_tank", 1, 0, 1, 1, false),
+        vessel("saccharification_tank", 0, 0, 1, 1, true),
+        vessel("water_treatment", 0, 0, 1, 1, false),
+        vessel("centrifuge", 0, 1, 1, 1, false),
+        vessel("filter_press", 0, 1, 1, 1, false),
+        vessel("membrane_cell", 0, 0, 1, 3, false),
+        vessel("wet_mill", 1, 1, 1, 1, false),
+        vessel("gas_compressor", 0, 0, 1, 1, false),
+        vessel("strand_pelletizer", 1, 1, 1, 0, false),
+        vessel("sheeting_press", 1, 1, 0, 1, false)));
 
     private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
         Map<String, ProcessSchematic> map = new HashMap<>();

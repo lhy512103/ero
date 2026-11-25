@@ -169,6 +169,7 @@
 163. Improved: Additive reactors, catalyst prep tanks, dehydration, depolymerization and oligomerization reactors, VCM converters, neutralizers and acetylene generators show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
 164. Improved: Solvent recovery towers, tar distillers, scrubbers, flash tanks, evaporators, crystallizers and vent stacks show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
 165. Improved: Carbide furnaces, coking ovens, HCl synthesis furnaces and dryers show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
+166. Improved: Brine dissolvers, brine purifiers, coagulation tanks, liquefaction tanks, saccharification tanks, water treatment units, centrifuges, filter presses, membrane cells, wet mills, gas compressors, strand pelletizers and sheeting presses show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
 
 ### 中文
 
@@ -337,3 +338,4 @@
 163. 优化：助剂反应釜、催化剂配制罐、脱水反应器、解聚釜、低聚釜、氯乙烯转化器、中和槽和乙炔发生器显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
 164. 优化：溶剂回收塔、焦油蒸馏釜、洗涤塔、闪蒸罐、浓缩器、结晶器和放空火炬显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
 165. 优化：电石炉、炼焦炉、氯化氢合成炉和干燥器显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
+166. 优化：化盐槽、精制槽、凝固槽、液化罐、糖化罐、水处理器、离心机、压滤机、离子膜电解槽、湿磨机、气体压缩机、水浴切粒机和压片机显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。

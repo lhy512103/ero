@@ -1127,6 +1127,51 @@
         return g;
     }
 
+    // ---- the tank series: the fermenter's jacketed tank for any count of slots and drums. Item feeds go
+    // in through ports on the lid (the catalyst in the middle), the liquid drums sit either side, the
+    // solid product leaves at the lower right. The charge fills the tank from the bottom up.
+    // ProcessSchematic.vessel works out the same positions from the same counts.
+    const VESSELS = [
+        { id: 'brine_dissolver', in: 1, out: 0, fIn: 1, fOut: 1, cat: false, top: [230, 238, 244], bottom: [180, 200, 216] },
+        { id: 'brine_purifier', in: 1, out: 0, fIn: 1, fOut: 1, cat: false, top: [236, 244, 250], bottom: [196, 216, 232] },
+        { id: 'coagulation_tank', in: 1, out: 1, fIn: 1, fOut: 1, cat: false, top: [246, 242, 228], bottom: [214, 204, 176] },
+        { id: 'liquefaction_tank', in: 1, out: 0, fIn: 1, fOut: 1, cat: false, top: [236, 222, 180], bottom: [196, 172, 120] },
+        { id: 'saccharification_tank', in: 0, out: 0, fIn: 1, fOut: 1, cat: true, top: [240, 214, 150], bottom: [206, 160, 80] },
+        { id: 'water_treatment', in: 0, out: 0, fIn: 1, fOut: 1, cat: false, top: [150, 196, 236], bottom: [80, 130, 200] },
+        { id: 'centrifuge', in: 0, out: 1, fIn: 1, fOut: 1, cat: false, top: [232, 226, 210], bottom: [180, 170, 146] },
+        { id: 'filter_press', in: 0, out: 1, fIn: 1, fOut: 1, cat: false, top: [210, 200, 180], bottom: [150, 138, 116] },
+        { id: 'membrane_cell', in: 0, out: 0, fIn: 1, fOut: 3, cat: false, top: [226, 240, 220], bottom: [170, 200, 160] },
+        { id: 'wet_mill', in: 1, out: 1, fIn: 1, fOut: 1, cat: false, top: [240, 236, 220], bottom: [206, 196, 168] },
+        { id: 'gas_compressor', in: 0, out: 0, fIn: 1, fOut: 1, cat: false, top: [236, 236, 236], bottom: [196, 200, 206] },
+        { id: 'strand_pelletizer', in: 1, out: 1, fIn: 1, fOut: 0, cat: false, top: [150, 196, 236], bottom: [90, 140, 200] },
+        { id: 'sheeting_press', in: 1, out: 1, fIn: 0, fOut: 1, cat: false, top: [236, 230, 214], bottom: [196, 186, 160] },
+    ];
+    function vesselBack(s) {
+        const c = panelCanvas(), { R, body } = c, { h } = pipes(R);
+        if (s.fIn) drums(c, 17, 17 + 15 * s.fIn);
+        const inner = 149 - 15 * (s.fOut - 1);
+        if (s.fOut) drums(c, inner, 164);
+        body(54, 35, 113, 70);
+        for (const y of [46, 54, 62]) { R(55, y, 56, y, WATER_L); R(111, y, 112, y, WATER_L); }
+        cutaway(c, 58, 40, 109, 66, [30, 30, 32]);
+        const ports = [63, 101].slice(0, s.in);
+        if (s.cat) ports.push(82);
+        for (const cx of ports) { R(cx - 1, 33, cx + 2, 34, METAL_L); R(cx, 31, cx + 1, 32, METAL_D); }
+        body(58, 71, 62, 74); body(105, 71, 109, 74);
+        if (s.fIn) h(18 + 15 * s.fIn, 53, 60);
+        if (s.fOut) h(114, inner - 1, 44);
+        if (s.out) h(114, 114, 64);
+        return c.g;
+    }
+    function vesselFill(s) {
+        const g = new G(52, 27), r = rng(s.top[2] * 3 + s.bottom[1]);
+        for (let y = 0; y < 27; y++) for (let x = 0; x < 52; x++) {
+            const col = mix(s.top, s.bottom, y / 26);
+            g.px(x, y, y === 0 ? light(s.top, 0.4) : r() < 0.08 ? dark(col, 0.08) : col);
+        }
+        return g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -1163,6 +1208,10 @@
             ...KILNS.flatMap(s => [
                 save(kilnSeriesBack(s), S + s.id + '.png'),
                 save(sheet([s.gas ? kilnGas() : stones(s.done), ...rowsOf(4, kilnFlame)]), S + s.id + '_progress.png'),
+            ]),
+            ...VESSELS.flatMap(s => [
+                save(vesselBack(s), S + s.id + '.png'),
+                save(sheet([vesselFill(s), ...rowsOf(4, fermBubbles)]), S + s.id + '_progress.png'),
             ]),
         ].join(', ');
     }
