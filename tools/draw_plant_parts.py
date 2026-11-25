@@ -296,45 +296,48 @@ def build_controller_models():
         ("mill_controller", "mill_controller"),
         ("mill_controller_formed", "mill_controller_formed"),
     ]:
-        # Recessed screen front with vent sides and dark steel top/bottom
+        # Recessed screen front with vent sides; the top, back and bottom are framed like the front
+        # (painted by tools/art/blockbench/controllers.js), not the bare structure plate
         model = {
             "parent": "minecraft:block/block",
             "textures": {
-                "particle": "iuce:block/machine/plant/casing",
-                "casing": "iuce:block/machine/plant/casing",
+                "particle": "iuce:block/machine/plant/controller_top",
                 "vent": "iuce:block/machine/plant/vent",
                 "front": f"iuce:block/machine/plant/{tex}",
+                "top": "iuce:block/machine/plant/controller_top",
+                "back": "iuce:block/machine/plant/controller_back",
+                "bottom": "iuce:block/machine/plant/controller_bottom",
             },
             "elements": [
                 # Main casing body (recessed 0.5px on north front for screen depth)
                 {"from": [0, 0, 0.5], "to": [16, 16, 16], "faces": {
                     "north": {"uv": [0, 0, 16, 16], "texture": "#front"},
-                    "south": {"uv": [0, 0, 16, 16], "texture": "#casing", "cullface": "south"},
+                    "south": {"uv": [0, 0, 16, 16], "texture": "#back", "cullface": "south"},
                     "west": {"uv": [0, 0, 16, 16], "texture": "#vent", "cullface": "west"},
                     "east": {"uv": [0, 0, 16, 16], "texture": "#vent", "cullface": "east"},
-                    "up": {"uv": [0, 0, 16, 16], "texture": "#casing", "cullface": "up"},
-                    "down": {"uv": [0, 0, 16, 16], "texture": "#casing", "cullface": "down"},
+                    "up": {"uv": [0, 0, 16, 16], "texture": "#top", "cullface": "up"},
+                    "down": {"uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "down"},
                 }},
                 # Front outer bezel frame (top, bottom, left, right strips)
                 {"from": [0, 14, 0], "to": [16, 16, 0.5], "faces": {
                     "north": {"uv": [0, 0, 16, 2], "texture": "#front", "cullface": "north"},
-                    "up": {"uv": [0, 0, 16, 1], "texture": "#casing", "cullface": "up"},
-                    "down": {"uv": [0, 0, 16, 1], "texture": "#casing"},
+                    "up": {"uv": [0, 0, 16, 1], "texture": "#top", "cullface": "up"},
+                    "down": {"uv": [0, 0, 16, 1], "texture": "#bottom"},
                 }},
                 {"from": [0, 0, 0], "to": [16, 2, 0.5], "faces": {
                     "north": {"uv": [0, 14, 16, 16], "texture": "#front", "cullface": "north"},
-                    "up": {"uv": [0, 0, 16, 1], "texture": "#casing"},
-                    "down": {"uv": [0, 0, 16, 1], "texture": "#casing", "cullface": "down"},
+                    "up": {"uv": [0, 0, 16, 1], "texture": "#top"},
+                    "down": {"uv": [0, 0, 16, 1], "texture": "#bottom", "cullface": "down"},
                 }},
                 {"from": [0, 2, 0], "to": [2, 14, 0.5], "faces": {
                     "north": {"uv": [0, 2, 2, 14], "texture": "#front", "cullface": "north"},
-                    "east": {"uv": [0, 2, 1, 14], "texture": "#casing"},
-                    "west": {"uv": [0, 2, 1, 14], "texture": "#casing", "cullface": "west"},
+                    "east": {"uv": [0, 2, 1, 14], "texture": "#vent"},
+                    "west": {"uv": [0, 2, 1, 14], "texture": "#vent", "cullface": "west"},
                 }},
                 {"from": [14, 2, 0], "to": [16, 14, 0.5], "faces": {
                     "north": {"uv": [14, 2, 16, 14], "texture": "#front", "cullface": "north"},
-                    "west": {"uv": [15, 2, 16, 14], "texture": "#casing"},
-                    "east": {"uv": [15, 2, 16, 14], "texture": "#casing", "cullface": "east"},
+                    "west": {"uv": [15, 2, 16, 14], "texture": "#vent"},
+                    "east": {"uv": [15, 2, 16, 14], "texture": "#vent", "cullface": "east"},
                 }},
             ],
         }

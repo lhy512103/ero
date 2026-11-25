@@ -61,7 +61,7 @@ public class ProcessRecipeCategory extends AbstractRecipeCategory<RecipeHolder<P
     /** The content's frame (in panel coordinates) and the text written under it. */
     private record Size(Frame content, int lines, int textWidth) {
         Frame page() {
-            int w = Math.max(content.w(), textWidth + 2 * JeiPage.PAD);
+            int w = Math.max(Math.max(content.w(), textWidth + 2 * JeiPage.PAD), JeiPage.MIN_WIDTH);
             return new Frame(content.ox() - (w - content.w()) / 2, content.oy(), w, content.h() + lines * LINE);
         }
     }

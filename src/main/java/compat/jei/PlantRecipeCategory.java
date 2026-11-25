@@ -49,7 +49,7 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
 
     /** Where a batch's parts go on the page (item positions), and the page's size. */
     private record Layout(int rows, int[][] inputs, int[][] outputs, int[][] tools, int[][] segments,
-                          int arrowX, int arrowY, int outX, int width, int height) {
+                          int arrowX, int arrowY, int outX, int gaugeX, int width, int height) {
         int gaugeH() { return rows * 18 - 2; }
     }
 
@@ -125,7 +125,11 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
             bottom = bottom + 4 + 2 + 16;
             right = Math.max(right, inX + segments * 18 - 2);
         }
-        return new Layout(rows, inputs, outputs, toolAt, segmentAt, arrowX, arrowY, outX, right + 2 + PAD, bottom + 2 + PAD);
+        // a page narrower than JeiPage.MIN_WIDTH is widened, with its parts moved to the middle
+        int width = right + 2 + PAD, dx = Math.max(0, (JeiPage.MIN_WIDTH - width) / 2);
+        for (int[][] parts : new int[][][]{inputs, outputs, toolAt, segmentAt}) for (int[] p : parts) p[0] += dx;
+        return new Layout(rows, inputs, outputs, toolAt, segmentAt, arrowX + dx, arrowY, outX + dx, PAD + 1 + dx,
+            Math.max(width, JeiPage.MIN_WIDTH), bottom + 2 + PAD);
     }
 
     /** The stacks a reference stands for: an item id, or every item of a {@code #tag}. */
@@ -206,7 +210,7 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
         long period = Math.clamp(batch.time() * 50L, 1500L, 6000L), now = System.currentTimeMillis();
         float part = (now % period) / (float) period;
         JeiPage.panel(g, getWidth(), getHeight());
-        MachineScreen.energyGauge(g, PAD + 1, TOP, GAUGE_W, page.gaugeH(), power(batch) ? 1f : 1f - part * 0.75f);
+        MachineScreen.energyGauge(g, page.gaugeX, TOP, GAUGE_W, page.gaugeH(), power(batch) ? 1f : 1f - part * 0.75f);
         if (power(batch)) MachineScreen.energyGauge(g, page.outX - 1, TOP, GAUGE_W, page.gaugeH(), part);
         ProgressStyle arrow = ProgressStyle.ARROW;
         ProcessRecipeCategory.window(g, ARROW, page.arrowX, page.arrowY, arrow.width(), arrow.height(), arrow.mode(), arrow.frames(),
@@ -217,7 +221,7 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
     @Override
     public void getTooltip(ITooltipBuilder tooltip, PlantBatch batch, IRecipeSlotsView slots, double mouseX, double mouseY) {
         int h = page.gaugeH() + 2;
-        if (JeiPage.over(mouseX, mouseY, PAD, TOP - 1, GAUGE_W + 2, h)) {
+        if (JeiPage.over(mouseX, mouseY, page.gaugeX - 1, TOP - 1, GAUGE_W + 2, h)) {
             if (power(batch)) tooltip.add(Component.translatable("jei.iuce.plant.fuel").withStyle(ChatFormatting.GRAY));
             else JeiPage.energy(tooltip, batch.energy(), Math.max(1, batch.energy() / Math.max(1, batch.time())));
         } else if (power(batch) && JeiPage.over(mouseX, mouseY, page.outX - 2, TOP - 1, GAUGE_W + 2, h)) {

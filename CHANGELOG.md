@@ -176,6 +176,8 @@
 170. Improved: The industrial workbench, crate, factory hub and multiblock controller and hatch screens use the same new style, with the workbench showing a picture of itself.
 171. Improved: Machine recipe pages in JEI show the machine's picture with the slots and tanks in place and the run animated inside it.
 172. Improved: JEI machine and multiblock recipe pages use the machine screens' light panel, fit their contents, mark input, output and catalyst slots by colour, and show energy and time as tooltips on the gauge and progress window; the ore processing plant and rolling mill are listed on the matching single-block machine pages.
+173. Improved: The waste heat power plant, twin screw extruder, bio-ethylene plant, carbide furnace plant and coke oven battery have redrawn fronts that match the other machines, and the plant and mill controllers have framed tops and backs.
+174. Fixed: The formed rolling mill, twin screw extruder and coke oven battery use the ore processing plant's tread floor, and JEI recipe pages with a single recipe are centred instead of left-aligned.
 
 ### 中文
 
@@ -351,3 +353,5 @@
 170. 优化：工业工作台、板条箱、工厂中枢与多方块控制器、仓口界面改用同样的新风格，工作台显示自身示意图。
 171. 优化：JEI 中的机器配方页显示机器示意图，槽位与储罐摆在原处，加工过程在机器内部动态呈现。
 172. 优化：JEI 机器与多方块配方页改用机器界面的浅色面板并贴合内容，输入、输出与催化剂槽位以颜色区分，耗电与耗时改为电量条和进度窗口的提示；矿石处理厂和轧钢厂并入对应单方块机器的配方页。
+173. 优化：重绘余热电站、联合双螺杆挤出机、生物乙烯装置、电石联合炉和炼焦炉组的正面贴图使其与其他机器一致，选矿联合厂与轧制联合机控制器的顶部和背面改为带边框的样式。
+174. 修复：轧制联合机、联合双螺杆挤出机和炼焦炉组成型后的地基改用选矿联合厂的花纹钢板，只有一个配方的 JEI 配方页改为居中而非靠左。

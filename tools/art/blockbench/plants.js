@@ -1246,22 +1246,19 @@
     // Each movable bay is 16 pixels long. Use a matching material period so arbitrary
     // repetitions of a bay meet at the same point in the grain.
     const bayMaterials = {
+        // The ore plant's chevron tread (TEXTURES.deck) on a 16-pixel period: the same 8-pixel cells,
+        // the same low-contrast ridges and grime, so a stretched floor reads like the ore plant's.
         deck(t) {
             steel(t, 3, C.steel[2], C.steel[3], false);
             for (let y = 0; y < 16; y += 8) for (let x = 0; x < 16; x += 8) {
                 const alt = ((x >> 3) + (y >> 3)) & 1;
-                if (alt === 0) {
-                    t.rect(x + 2, y + 3, x + 4, y + 3, C.steel[5]);
-                    t.rect(x + 2, y + 4, x + 4, y + 4, C.steel[1]);
-                    t.rect(x + 3, y + 6, x + 5, y + 6, C.steel[4]);
-                    t.rect(x + 3, y + 7, x + 5, y + 7, C.steel[1]);
-                } else {
-                    t.rect(x + 3, y + 2, x + 3, y + 4, C.steel[5]);
-                    t.rect(x + 4, y + 2, x + 4, y + 4, C.steel[1]);
-                    t.rect(x + 6, y + 3, x + 6, y + 5, C.steel[4]);
-                    t.rect(x + 7, y + 3, x + 7, y + 5, C.steel[1]);
+                for (let k = 0; k < 3; k++) {
+                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
+                    t.px(lx, ly, mix(C.steel[3], C.steel[4], 0.48));
+                    t.px(lx, ly + 1, mix(C.steel[2], C.steel[1], 0.32));
                 }
             }
+            grime(t, 4, [56, 50, 44], 0.22, false);
         },
         cast(t) { steel(t, 47, [50, 56, 64], [82, 88, 98], true); },
         frame(t) { steel(t, 13, C.frame[2], C.frame[3], false); },
@@ -1274,6 +1271,9 @@
             t.rect(0, 13, 15, 13, C.frame[3]);
             t.rect(0, 14, 15, 14, C.frame[1]);
             t.rect(0, 15, 15, 15, C.frame[0]);
+            // the ore plant's channel beam: a rivet per bay and the same grime
+            rivet(t, 3, 7);
+            grime(t, 6, [46, 42, 38], 0.35, true);
         }
     };
 

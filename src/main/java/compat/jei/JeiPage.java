@@ -29,6 +29,13 @@ import java.util.Map;
  */
 final class JeiPage {
     static final int PAD = 4;
+    /**
+     * The narrowest a page may be. JEI puts as many pages side by side as fit its recipe area
+     * (198 - 12 pixels wide by default, less the scroll bar), up to two columns; a narrower page is
+     * put in the left column, so a category with one recipe sat against the left edge. From this
+     * width on only one column fits and JEI centres the page.
+     */
+    static final int MIN_WIDTH = 96;
 
     enum Role {
         INPUT(0xFF3F9F4F, 0xFF7F9A83),
@@ -80,8 +87,10 @@ final class JeiPage {
         }
 
         Frame frame() {
-            if (x0 > x1) return new Frame(0, 0, 2 * PAD, 2 * PAD);
-            return new Frame(x0 - PAD, y0 - PAD, x1 - x0 + 2 * PAD, y1 - y0 + 2 * PAD);
+            if (x0 > x1) return new Frame(0, 0, MIN_WIDTH, 2 * PAD);
+            int w = x1 - x0 + 2 * PAD, wide = Math.max(w, MIN_WIDTH);
+            // a narrow page is widened on both sides, so its parts stay in the middle
+            return new Frame(x0 - PAD - (wide - w) / 2, y0 - PAD, wide, y1 - y0 + 2 * PAD);
         }
     }
 
