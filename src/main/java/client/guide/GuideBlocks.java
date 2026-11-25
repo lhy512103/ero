@@ -289,7 +289,7 @@ final class GuideBlocks {
         @Override public String searchText() { return title + ' ' + subtitle.plain(); }
     }
 
-    /** {@code {image: gui/machine/macerator.png, u, v, w, h | caption}} - texture path is relative to textures/. */
+    /** {@code {image: gui/machine/schematic/macerator.png, u, v, w, h | caption}} - texture path is relative to textures/. */
     static final class Image implements Block {
         private final Identifier texture;
         private final RichText caption;

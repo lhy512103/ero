@@ -53,7 +53,7 @@ items: iuce:macerator       # 逗号分隔；这些物品按 G 时跳到本页
 | `{flow: a -> @机器 -> b*2}` | 流程图；`@` 表示机器，`a + b` 表示多个输入，`*n` 表示数量 |
 | `{items: a, b*4}` | 一排物品格 |
 | `{cards: 页面id, 页面id}` | 页面入口卡片 |
-| `{image: gui/machine/macerator.png, u, v, 宽, 高 \| 说明}` | 贴图，路径相对 `textures/`；省略裁剪参数则显示整张 |
+| `{image: gui/machine/schematic/macerator.png, u, v, 宽, 高 \| 说明}` | 贴图，路径相对 `textures/`；省略裁剪参数则显示整张 |
 | `{structure: 名字 \| 说明}` | 多方块结构的 3D 视图，可拖动旋转，带分层查看和材料清单；大型机器还能切换到成型后的样子 |
 | `{hero: 标题 \| 副标题}` | 首页横幅 |
 

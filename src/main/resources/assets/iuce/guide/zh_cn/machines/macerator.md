@@ -11,7 +11,7 @@ items: iuce:macerator
 - 电压：LV
 - 矿石出 2 份粗粉，深层矿石出 3 份。
 
-{image: gui/machine/macerator.png, 0, 0, 176, 84 | 上方放原料，下方出产物，右侧四格放升级}
+{image: gui/machine/schematic/macerator.png | 界面中的打粉机：左侧电量条，上方放原料，下方出产物，右侧四格放升级}
 
 ## 合成
 
