@@ -56,6 +56,21 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
             List.copyOf(tanks), new Pos(74, 34), 32, 33, Mode.UP, 4, stir);
     }
 
+    /**
+     * The column series: the distillation column's picture for any count of drums (gui.js columnBack
+     * paints it from the same counts). Feed drums left of the column, product drums right of it, the
+     * solid products in the slots beside the column.
+     */
+    private static ProcessSchematic column(String id, int out, int fluidsIn, int fluidsOut) {
+        List<Pos> outputs = new ArrayList<>();
+        for (int i = 0; i < out; i++) outputs.add(new Pos(98 + 19 * i, 37));
+        List<Box> tanks = new ArrayList<>();
+        for (int i = 0; i < fluidsIn; i++) tanks.add(new Box(19 + 15 * i, 24, 12, 46));
+        for (int i = 0; i < fluidsOut; i++) tanks.add(new Box(151 - 15 * (fluidsOut - 1 - i), 24, 12, 46));
+        return new ProcessSchematic(id, 8, List.of(), List.copyOf(outputs), null, null,
+            List.copyOf(tanks), new Pos(70, 22), 20, 47, Mode.UP, 4, false);
+    }
+
     private static final Map<String, ProcessSchematic> ALL = index(List.of(
         // pellets drop through the hopper into the barrel, the core wire comes down into the die, the product leaves on the right
         new ProcessSchematic("single_screw_extruder", 8,
@@ -101,7 +116,15 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         reactor("oligomerization_reactor", 0, 0, 1, 2, false, true),
         reactor("vcm_converter", 0, 1, 2, 1, true, false),
         reactor("neutralizer", 0, 0, 2, 1, false, true),
-        reactor("acetylene_generator", 1, 0, 1, 2, false, false)));
+        reactor("acetylene_generator", 1, 0, 1, 2, false, false),
+        // the column series, laid out like the distillation column (see column below)
+        column("solvent_recovery_tower", 1, 1, 1),
+        column("tar_distiller", 2, 1, 1),
+        column("scrubber", 1, 2, 2),
+        column("flash_tank", 0, 1, 2),
+        column("evaporator", 1, 1, 2),
+        column("crystallizer", 1, 1, 1),
+        column("vent_stack", 0, 1, 0)));
 
     private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
         Map<String, ProcessSchematic> map = new HashMap<>();

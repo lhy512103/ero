@@ -1026,6 +1026,56 @@
         return g;
     }
 
+    // ---- the column series: the distillation column's picture for any count of drums. The feed drums
+    // sit left of the trayed column and the product drums right of it; the condenser at the head sends
+    // the tops to the outer drum, the reboiler at the foot the bottoms to the inner one, and any solid
+    // product leaves through the slots beside the column. ProcessSchematic.column works out the same
+    // positions from the same counts.
+    const COLUMNS = [
+        { id: 'solvent_recovery_tower', out: 1, fIn: 1, fOut: 1, top: [236, 240, 244], bottom: [196, 208, 220] },
+        { id: 'tar_distiller', out: 2, fIn: 1, fOut: 1, top: [120, 104, 86], bottom: [70, 58, 46] },
+        { id: 'scrubber', out: 1, fIn: 2, fOut: 2, top: [214, 232, 240], bottom: [160, 196, 214] },
+        { id: 'flash_tank', out: 0, fIn: 1, fOut: 2, top: [248, 240, 214], bottom: [220, 196, 140] },
+        { id: 'evaporator', out: 1, fIn: 1, fOut: 2, top: [244, 246, 248], bottom: [200, 214, 228] },
+        { id: 'crystallizer', out: 1, fIn: 1, fOut: 1, top: [236, 244, 250], bottom: [186, 212, 232] },
+        { id: 'vent_stack', out: 0, fIn: 1, fOut: 0, top: [222, 222, 222], bottom: [170, 170, 170] },
+    ];
+    function columnBack(s) {
+        const c = panelCanvas(), { R, P, body } = c, { h, v } = pipes(R);
+        if (s.fIn) drums(c, 17, 17 + 15 * s.fIn);
+        const inner = 149 - 15 * (s.fOut - 1);
+        if (s.fOut) drums(c, inner, 164);
+        body(66, 18, 93, 72);
+        cutaway(c, 70, 22, 89, 68, [26, 28, 32]);
+        for (let k = 0; k < 5; k++) {
+            const ty = 28 + k * 8, xa = k % 2 ? 74 : 70, xb = k % 2 ? 89 : 85;
+            R(xa, ty, xb, ty, METAL_L); R(xa, ty + 1, xb, ty + 1, METAL_D);
+        }
+        R(70, 73, 89, 74, VS);
+        if (s.fIn) h(18 + 15 * s.fIn, 65, 40);
+        if (s.fOut) {
+            h(94, 99, 21);
+            body(100, 17, 128, 27);
+            for (let x = 103; x <= 125; x += 3) R(x, 19, x, 25, [120, 160, 200]);
+            R(129, 17, 158, 17, PIPE_L); R(129, 18, 158, 18, METAL_D); R(157, 19, 158, 19, METAL_D);
+            h(94, 97, 64);
+            body(98, 57, 124, 70);
+            for (let x = 101; x <= 121; x += 4) { R(x, 60, x, 67, COPPER[2]); R(x + 1, 60, x + 1, 67, COPPER[0]); }
+            if (s.fOut > 1) h(125, inner - 1, 64);
+        } else {
+            // a plain stack: the gas leaves at the top
+            for (let y = 14; y <= 17; y++) { P(76, y, VD); P(83, y, VD); }
+            R(77, 16, 82, 17, METAL);
+        }
+        if (s.out) h(94, 96, 44);
+        return c.g;
+    }
+    function columnFill(s) {
+        const g = new G(20, 47), r = rng(s.top[1] * 5 + s.bottom[0]);
+        for (let y = 0; y < 47; y++) for (let x = 0; x < 20; x++) g.px(x, y, mix(s.top, s.bottom, y / 46), 100 + 50 * r());
+        return g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -1054,6 +1104,10 @@
             ...REACTORS.flatMap(s => [
                 save(reactorBack(s), S + s.id + '.png'),
                 save(sheet([reactorFill(s), ...rowsOf(4, s.stir ? polyStir : reactorBubbles)]), S + s.id + '_progress.png'),
+            ]),
+            ...COLUMNS.flatMap(s => [
+                save(columnBack(s), S + s.id + '.png'),
+                save(sheet([columnFill(s), ...rowsOf(4, distBubble)]), S + s.id + '_progress.png'),
             ]),
         ].join(', ');
     }

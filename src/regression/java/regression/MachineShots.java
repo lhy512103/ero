@@ -27,7 +27,8 @@ public final class MachineShots {
     private static final List<String> MACHINES = List.of("single_screw_extruder", "cooling_tank", "vulcanizer",
         "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor",
         "distillation_column", "lime_kiln", "fermenter", "additive_reactor", "catalyst_prep_tank", "dehydration_reactor",
-        "depolymerization_reactor", "oligomerization_reactor", "vcm_converter", "neutralizer", "acetylene_generator");
+        "depolymerization_reactor", "oligomerization_reactor", "vcm_converter", "neutralizer", "acetylene_generator",
+        "solvent_recovery_tower", "tar_distiller", "scrubber", "flash_tank", "evaporator", "crystallizer", "vent_stack");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     private static int ticks, settle = -1, step = -1;
