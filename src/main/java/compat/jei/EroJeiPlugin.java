@@ -338,9 +338,9 @@ public class EroJeiPlugin implements IModPlugin {
             InductionFurnaceScreen.WINDOW.x(), InductionFurnaceScreen.WINDOW.y(), InductionFurnaceScreen.WINDOW.w(), InductionFurnaceScreen.WINDOW.h(),
             MACHINE_TYPES.get("alloy_furnace").recipeType);
 
-        // 种植机 — 能量进度条 (63, 35, 13x20)
+        // 种植机 — 培育室里的生长进度
         registration.addRecipeClickArea(PlanterScreen.class,
-            63, 35, 13, 20,
+            PlanterScreen.WINDOW.x(), PlanterScreen.WINDOW.y(), PlanterScreen.WINDOW.w(), PlanterScreen.WINDOW.h(),
             MACHINE_TYPES.get("planter").recipeType);
 
         // 压缩机 — 机器示意图里的进度窗口
@@ -361,14 +361,14 @@ public class EroJeiPlugin implements IModPlugin {
             ExtractorScreen.WINDOW.x(), ExtractorScreen.WINDOW.y(), ExtractorScreen.WINDOW.w(), ExtractorScreen.WINDOW.h(),
             MACHINE_TYPES.get("extractor").recipeType);
 
-        // 电解机 — 进度箭头 (80, 38, 52x17)
+        // 电解机 — 电解槽里的进度窗口
         registration.addRecipeClickArea(ElectrolyzerScreen.class,
-            80, 38, 52, 17,
+            ElectrolyzerScreen.WINDOW.x(), ElectrolyzerScreen.WINDOW.y(), ElectrolyzerScreen.WINDOW.w(), ElectrolyzerScreen.WINDOW.h(),
             MACHINE_TYPES.get("electrolyzer").recipeType);
 
-        // 洗矿机 — 进度条 (74, 39, 16x17)
+        // 洗矿机 — 洗矿滚筒里的进度窗口
         registration.addRecipeClickArea(OreWasherScreen.class,
-            74, 39, 16, 17,
+            OreWasherScreen.WINDOW.x(), OreWasherScreen.WINDOW.y(), OreWasherScreen.WINDOW.w(), OreWasherScreen.WINDOW.h(),
             MACHINE_TYPES.get("ore_washer").recipeType);
 
         // 工业工作台 — 箭头 (90, 32, 22x15)

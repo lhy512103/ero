@@ -172,6 +172,7 @@
 166. Improved: Brine dissolvers, brine purifiers, coagulation tanks, liquefaction tanks, saccharification tanks, water treatment units, centrifuges, filter presses, membrane cells, wet mills, gas compressors, strand pelletizers and sheeting presses show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
 167. Improved: Compounding extruders, dehumidifying dryers, high speed mixers, injection molders, plastic granulators and rubber mixers show pictures of themselves, with the work animated inside the machine.
 168. Improved: The macerator, compressor, extractor, metal former, electric furnace and induction furnace screens show a picture of the machine with its work animated inside it.
+169. Improved: The generator, energy storage, ore washer, electrolyzer and planter screens show a picture of the machine with their fuel, charge, water and crop shown inside it.
 
 ### 中文
 
@@ -343,3 +344,4 @@
 166. 优化：化盐槽、精制槽、凝固槽、液化罐、糖化罐、水处理器、离心机、压滤机、离子膜电解槽、湿磨机、气体压缩机、水浴切粒机和压片机显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
 167. 优化：双螺杆挤出机、除湿干燥机、高混机、注塑机、塑料粉碎机和密炼机显示自身示意图，加工过程在机器内部动态呈现。
 168. 优化：打粉机、压缩机、提取机、金属成型机、电炉和感应炉界面显示自身示意图，加工过程在机器内部动态呈现。
+169. 优化：发电机、储电箱、洗矿机、电解机和种植机界面显示自身示意图，燃料、电量、水量和作物生长画在机器内部。

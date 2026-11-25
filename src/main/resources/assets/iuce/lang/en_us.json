@@ -517,6 +517,7 @@
   "gui.iuce.process.input_tank": "Input tank (empty)",
   "gui.iuce.process.output_tank": "Output tank (empty)",
   "gui.iuce.process.progress": "Progress: %s / %s ticks",
+  "gui.iuce.generator.burn": "Burning: %s / %s s",
   "gui.iuce.process.tab.process": "Process",
   "gui.iuce.process.tab.mold": "Mould / Tool",
   "gui.iuce.process.tab.upgrades": "Upgrades",

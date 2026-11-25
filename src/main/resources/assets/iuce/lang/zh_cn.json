@@ -517,6 +517,7 @@
   "gui.iuce.process.input_tank": "输入储罐（空）",
   "gui.iuce.process.output_tank": "产物储罐（空）",
   "gui.iuce.process.progress": "进度：%s / %s 刻",
+  "gui.iuce.generator.burn": "燃烧：%s / %s 秒",
   "gui.iuce.process.tab.process": "加工",
   "gui.iuce.process.tab.mold": "模具 / 刀具",
   "gui.iuce.process.tab.upgrades": "升级",

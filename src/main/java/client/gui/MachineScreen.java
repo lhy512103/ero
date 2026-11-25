@@ -51,6 +51,8 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
     private final List<Hit> hits = new ArrayList<>();
     /** False where machine slots sit on the inventory label's row. */
     protected boolean inventoryLabel = true;
+    /** False where machine slots sit on the title's row. */
+    protected boolean titleLabel = true;
 
     /**
      * @param picture    the picture's name under {@code textures/gui/machine/schematic/}
@@ -92,7 +94,7 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        g.text(font, title, titleLabelX, titleLabelY, LABEL, false);
+        if (titleLabel) g.text(font, title, titleLabelX, titleLabelY, LABEL, false);
         if (inventoryLabel) g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, LABEL, false);
     }
 
@@ -162,6 +164,11 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
 
     /** A tank gauge at panel position x, y; output tanks get an amber cap, as on the process machines. */
     protected void tank(GuiGraphicsExtractor g, int x, int y, int w, int h, Fluid fluid, int amount, int capacity, boolean input) {
+        tank(g, x, y, w, h, fluid, fluid == Fluids.EMPTY ? null : fluid.getFluidType().getDescription(), amount, capacity, input);
+    }
+
+    /** As above, with the tooltip naming the fluid {@code name} (null: the tank's own name). */
+    protected void tank(GuiGraphicsExtractor g, int x, int y, int w, int h, Fluid fluid, Component name, int amount, int capacity, boolean input) {
         int sx = leftPos + x, sy = topPos + y;
         inset(g, sx, sy, w, h, SCREEN);
         int filled = capacity > 0 ? (int) Math.clamp((long) amount * h / capacity, amount > 0 ? 1 : 0, h) : 0;
@@ -173,9 +180,9 @@ public abstract class MachineScreen<M extends AbstractContainerMenu> extends Abs
         for (int mark = 1; mark < 4; mark++) g.fill(sx, sy + h * mark / 4, sx + (mark == 2 ? 6 : 3), sy + h * mark / 4 + 1, SCREEN_EDGE);
         if (!input) g.fill(sx, sy - 1, sx + w, sy, 0xFFB07A20);
         List<Component> lines = new ArrayList<>();
-        lines.add(fluid == Fluids.EMPTY
+        lines.add(name == null || amount <= 0
             ? Component.translatable(input ? "gui.iuce.process.input_tank" : "gui.iuce.process.output_tank")
-            : fluid.getFluidType().getDescription());
+            : name);
         lines.add(Component.literal(amount + " / " + capacity + " mB"));
         hit(x, y, w, h, lines);
     }

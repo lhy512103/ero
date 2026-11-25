@@ -8,7 +8,7 @@
 (function () {
     const A = window.IUCEArt, Gui = window.IUCEGui, G = Gui.G;
     const { rng, mix, light, dark, HOT, COPPER } = A;
-    const { save, sheet, rowsOf, panelCanvas, cutaway, roller, VD, VS, METAL_L, METAL_D, HOLE } = Gui.parts;
+    const { save, sheet, rowsOf, panelCanvas, cutaway, pipes, roller, discAt, VD, VS, METAL_L, METAL_D, HOLE } = Gui.parts;
     const S = 'gui/machine/schematic/';
     const DUST = [150, 146, 140], LATEX = [232, 228, 210], LEAF = [96, 120, 60], BRICK = [150, 120, 100];
 
@@ -165,8 +165,166 @@
         return g;
     }
 
+    // ---- generator, energy store, ore washer, electrolyzer, planter
+    const WATER = [56, 116, 180], SOIL = [110, 80, 50], GREEN = [76, 150, 60], GREEN_D = [44, 100, 40];
+    const GLASS_BG = [182, 206, 198], LAMP = [255, 236, 150];
+    // a copper wire along row y
+    const wire = (c, x0, x1, y) => { c.R(x0, y - 1, x1, y - 1, VD); c.R(x0, y, x1, y, COPPER[2]); c.R(x0, y + 1, x1, y + 1, COPPER[0]); };
+    // the pictures are 60 rows for an inventory at 87; the generator's, at 84, is 57
+    function cropTo(g, h) { const o = new G(g.w, h); o.draw(g, 0, 0); return o; }
+    function flameRows(w, h, f) {
+        const g = new G(w, h);
+        for (let x = 1; x < w - 1; x++) {
+            const t = 0.55 + 0.45 * Math.sin(x * 1.3 + f * 1.7) * Math.sin(x * 0.7 - f);
+            const top = Math.round((h - 3) * (1 - t));
+            for (let y = h - 3; y >= top; y--) {
+                const k = (h - 3 - y) / Math.max(1, h - 3 - top);
+                g.px(x, y, k < 0.35 ? HOT[1] : k < 0.75 ? HOT[2] : HOT[3]);
+            }
+        }
+        return g;
+    }
+
+    // Generator: the firebox between the fuel slots, the shaft to the dynamo, the wire to the charge slot and the store.
+    function generatorBack() {
+        const c = panelCanvas(), { R, body } = c;
+        body(41, 34, 66, 53);
+        cutaway(c, 47, 37, 60, 50, HOLE);
+        body(67, 41, 72, 47);
+        for (let x = 76; x <= 92; x += 4) R(x, 28, x + 1, 30, METAL_D);
+        body(73, 31, 96, 56);
+        cutaway(c, 76, 34, 93, 53, HOLE);
+        wire(c, 97, 101, 45); wire(c, 121, 130, 45);
+        return cropTo(c.g, 57);
+    }
+    function genFuel() {
+        const g = new G(14, 14), r = rng(71);
+        for (let y = 0; y < 14; y++) for (let x = 0; x < 14; x++) {
+            const c = mix(HOT[4], HOT[2], y / 13);
+            g.px(x, y, r() < 0.2 ? dark(c, 0.3) : c);
+        }
+        return g;
+    }
+    function genRotor(f) {
+        const g = new G(18, 20), step = Math.PI / 4;
+        discAt(g, 8.5, 9.5, 8, (d, a) => d > 7.3 ? VD : d < 1.5 ? METAL_L
+            : (((Math.floor((a + f * Math.PI / 8) / step)) % 2) + 2) % 2 ? COPPER[2] : COPPER[1]);
+        return g;
+    }
+
+    // Energy store: a cabinet of cells with the gauge across its front, the charge slots wired into it.
+    function storageBack() {
+        const c = panelCanvas(), { R, body } = c;
+        body(60, 20, 156, 62);
+        for (let x = 64; x <= 145; x += 9) {
+            body(x, 23, x + 7, 31, [120, 124, 130]); R(x + 3, 22, x + 4, 22, VD);
+            body(x, 51, x + 7, 59, [120, 124, 130]);
+        }
+        wire(c, 53, 59, 27); wire(c, 53, 59, 49);
+        R(6, 62, 81, 62, VD); R(6, 63, 81, 63, METAL_D);
+        return c.g;
+    }
+
+    // Ore washer: the washing drum between the feed and product slots, the water piped in from the tank.
+    function washerBack() {
+        const c = panelCanvas(), { R, body } = c, { h } = pipes(R);
+        h(78, 125, 21);
+        body(69, 24, 96, 71);
+        cutaway(c, 73, 28, 92, 67, HOLE);
+        for (const y of [30, 47, 64]) { R(70, y, 71, y, VD); R(94, y, 95, y, VD); }
+        return c.g;
+    }
+    function washFill() {
+        const g = new G(20, 40);
+        for (let y = 0; y < 40; y++) for (let x = 0; x < 20; x++) g.px(x, y, y === 0 ? light(WATER, 0.4) : mix(light(WATER, 0.1), dark(WATER, 0.3), y / 39));
+        return g;
+    }
+    function washTumble(f) {
+        const g = new G(20, 40);
+        for (let i = 0; i < 8; i++) {
+            const a = f * Math.PI / 8 + i * Math.PI / 4, x = Math.round(10 + 6 * Math.cos(a)), y = Math.round(26 + 9 * Math.sin(a));
+            g.rect(x - 1, y - 1, x, y, DUST);
+        }
+        for (let i = 0; i < 3; i++) g.px(4 + i * 6, 39 - ((f * 5 + i * 11) % 36), [200, 225, 245], 200);
+        return g;
+    }
+
+    // Electrolyzer: the cell under the filler, the electrodes over the three product slots, the water tank piped in.
+    function electroBack() {
+        const c = panelCanvas(), { R, body } = c;
+        R(36, 44, 39, 44, VD); R(36, 45, 39, 45, METAL_L); R(36, 46, 39, 46, METAL_D); R(36, 47, 39, 47, VD);
+        body(40, 38, 135, 54);
+        cutaway(c, 44, 40, 131, 52, HOLE);
+        for (const x of [55, 87, 119]) R(x - 1, 53, x + 1, 54, COPPER[1]);
+        return c.g;
+    }
+    function electroFill() {
+        const g = new G(88, 13);
+        for (let y = 0; y < 13; y++) for (let x = 0; x < 88; x++) g.px(x, y, y === 0 ? light(WATER, 0.4) : mix(light(WATER, 0.1), dark(WATER, 0.3), y / 12));
+        return g;
+    }
+    function electroBubbles(f) {
+        const g = new G(88, 13);
+        for (const cx of [11, 43, 75]) {
+            g.rect(cx - 1, 9, cx + 1, 12, COPPER[2]);
+            for (let j = 0; j < 3; j++) {
+                const y = 8 - ((f * 2 + j * 3) % 9);
+                if (y >= 0) g.px(cx + (j % 2 ? 2 : -2), y, [230, 240, 255], 220);
+            }
+        }
+        return g;
+    }
+
+    // Planter: the glass chamber between the seed and the soil under its grow lamp; the sky lamp on the left.
+    function planterBack() {
+        const c = panelCanvas(), { R, body, chute } = c;
+        body(56, 27, 85, 63);
+        cutaway(c, 60, 31, 81, 59, GLASS_BG);
+        R(60, 31, 81, 31, LAMP);
+        chute(86, 96, 46);
+        body(21, 50, 34, 63);
+        cutaway(c, 23, 52, 32, 61, HOLE);
+        return c.g;
+    }
+    function planterPhase(k) {
+        const g = new G(22, 29);
+        g.rect(0, 0, 21, 28, GLASS_BG);
+        g.rect(0, 0, 21, 0, LAMP);
+        grains(g, 0, 24, 21, 28, SOIL, 61, 0.15);
+        const h = Math.round(2 + k * 2.6), top = 23 - h;
+        g.rect(10, top, 11, 23, GREEN_D);
+        for (let i = 1; i <= Math.min(k, 6); i++) {
+            const y = 23 - Math.round(i * h / 7), side = i % 2 ? -1 : 1, len = 2 + Math.min(3, Math.floor(k / 2));
+            for (let j = 1; j <= len; j++) g.px(side > 0 ? 11 + j : 10 - j, y - Math.floor(j / 2), GREEN);
+        }
+        if (k >= 6) g.rect(9, top - 2, 12, top, k === 7 ? [230, 190, 60] : [200, 210, 120]);
+        return g;
+    }
+    function skyPhase(k) {
+        const NIGHT = [24, 32, 60], g = new G(10, 10);
+        g.rect(0, 0, 9, 9, k ? [120, 180, 230] : NIGHT);
+        if (k) discAt(g, 4.5, 4.5, 3, () => [255, 220, 90]);
+        else {
+            discAt(g, 4.5, 4.5, 3, () => [230, 230, 210]);
+            discAt(g, 6, 3.5, 2.6, () => NIGHT);
+            for (const [x, y] of [[1, 1], [8, 7], [2, 8]]) g.px(x, y, [220, 220, 255]);
+        }
+        return g;
+    }
+
     function paintAll() {
         return [
+            save(generatorBack(), S + 'generator.png'),
+            save(sheet([genFuel(), ...rowsOf(4, f => flameRows(14, 14, f))]), S + 'generator_progress.png'),
+            save(sheet([new G(18, 20), ...rowsOf(4, genRotor)]), S + 'generator_rotor.png'),
+            save(storageBack(), S + 'storage.png'),
+            save(washerBack(), S + 'ore_washer.png'),
+            save(sheet([washFill(), ...rowsOf(4, washTumble)]), S + 'ore_washer_progress.png'),
+            save(electroBack(), S + 'electrolyzer.png'),
+            save(sheet([electroFill(), ...rowsOf(4, electroBubbles)]), S + 'electrolyzer_progress.png'),
+            save(planterBack(), S + 'planter.png'),
+            save(sheet(rowsOf(8, planterPhase)), S + 'planter_progress.png'),
+            save(sheet(rowsOf(2, skyPhase)), S + 'planter_sky.png'),
             save(maceratorBack(), S + 'macerator.png'),
             save(sheet([macFill(), ...rowsOf(4, macRolls)]), S + 'macerator_progress.png'),
             save(compressorBack(), S + 'compressor.png'),
