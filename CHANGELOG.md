@@ -165,6 +165,7 @@
 159. Improved: Polymerization reactors, distillation columns, lime kilns and fermenters show pictures of themselves, with their tanks drawn into the machine and the work animated inside it.
 160. Fixed: Assembled multiblocks no longer cast shadows or block light from their hidden parts.
 161. Improved: Steel grating gets an edge frame and steel ladders get proper side rails and rungs.
+162. Improved: The ore processing plant roasts in a rotary drum on a cradle under a refractory brick hood, and the bio ethylene plant column platform gets a checker plate deck with a gap in the handrail for the ladder.
 
 ### 中文
 
@@ -329,3 +330,4 @@
 159. 优化：聚合釜、精馏塔、石灰窑和发酵罐显示自身示意图，储罐画在机器上，加工过程在机器内部动态呈现。
 160. 修复：多方块成型后，被隐藏的部件不再投下阴影或遮挡光照。
 161. 优化：钢格栅加上边框，钢爬梯改为带侧梁和踏棍的立体模型。
+162. 优化：选矿联合厂的焙烧窑改为托架上的回转筒和耐火砖炉罩，生物乙烯装置的精馏塔平台铺上花纹钢板，护栏留出爬梯口。

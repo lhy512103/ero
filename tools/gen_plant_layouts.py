@@ -153,8 +153,10 @@ def ore():
     g.fill(1, 3, 2, 2, 1, 1, "C")
     g.fill(1, 3, 3, 4, 1, 2, "Y")
     g.fill(2, 2, 2, 4, 4, 4, "q")
-    # Roasting kiln with its stack.
-    g.fill(1, 3, 5, 6, 1, 3, "u")
+    # Rotary roasting kiln on trunnion cradle + brick firing hood with exhaust stack.
+    g.fill(1, 3, 5, 5, 1, 1, "C")
+    g.fill(1, 3, 5, 5, 2, 2, "Y")
+    g.fill(1, 3, 6, 6, 1, 3, "k")
     g.fill(2, 2, 6, 6, 4, 5, "p")
     return {"base_y": 0, "layouts": {"7": g.layers()}}
 
@@ -284,13 +286,15 @@ def bio_ethylene_plant():
     g.fill(3, 5, 2, 14, 6, 6, "q")
     # Gas line from the rack down to the gas hatch.
     g.fill(6, 6, 1, 1, 1, 6, "p")
-    # Ethanol column with a ring platform half way, ladder up to it, and its reflux drum.
+    # Ethanol column with a grating ring platform half way, handrail, ladder up to it, and its reflux drum.
     g.fill(1, 1, 12, 12, 1, 8, "t")
     for i in range(0, 3):
         for d in range(11, 14):
             if (i, d) != (1, 12):
+                g.set(i, d, 4, "c")
                 g.set(i, d, 5, "f")
-    g.fill(0, 0, 10, 10, 1, 5, "m")
+    g.set(0, 11, 5, ".")
+    g.fill(0, 0, 10, 10, 1, 4, "m")
     g.fill(0, 0, 14, 15, 1, 1, "t")
     # Dehydration reactor, its fired heater and the heater stack.
     g.fill(7, 7, 12, 12, 1, 5, "t")
