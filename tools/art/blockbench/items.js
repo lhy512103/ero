@@ -555,6 +555,6 @@
         return out.length;
     }
 
-    window.IUCEItems = { ICONS, all, outline, pile, lump };
+    window.IUCEItems = { ICONS, all, outline, pile, lump, tone, poly, line, pellet, pelletHeap, flake, bottle, can, sack, mold, rectIn, ring };
     return 'items loaded';
 })();
