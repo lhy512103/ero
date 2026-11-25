@@ -963,6 +963,69 @@
         return c.g;
     }
 
+    // ---- the reactor series: the polymerization reactor's picture for any count of slots and drums.
+    // Input drums sit left of the jacketed vessel and output drums right of it; the item slots stand in a
+    // column either side (inputs and then the catalyst from the top, outputs from the bottom). Stirred
+    // machines carry the agitator motor on the lid, gas-phase ones a dome, with bubbles rising through
+    // the charge. ProcessSchematic.reactor works out the same positions from the same counts.
+    const REACTORS = [
+        { id: 'additive_reactor', in: 3, out: 1, fIn: 2, fOut: 0, cat: false, stir: true, top: [232, 226, 206], bottom: [196, 186, 160] },
+        { id: 'catalyst_prep_tank', in: 2, out: 1, fIn: 2, fOut: 0, cat: false, stir: true, top: [150, 170, 190], bottom: [96, 112, 132] },
+        { id: 'dehydration_reactor', in: 0, out: 1, fIn: 1, fOut: 2, cat: true, stir: false, top: [236, 214, 160], bottom: [196, 160, 96] },
+        { id: 'depolymerization_reactor', in: 0, out: 1, fIn: 1, fOut: 1, cat: true, stir: true, top: [196, 150, 96], bottom: [132, 92, 52] },
+        { id: 'oligomerization_reactor', in: 0, out: 0, fIn: 1, fOut: 2, cat: false, stir: true, top: [244, 236, 196], bottom: [208, 196, 140] },
+        { id: 'vcm_converter', in: 0, out: 1, fIn: 2, fOut: 1, cat: true, stir: false, top: [200, 226, 196], bottom: [140, 176, 136] },
+        { id: 'neutralizer', in: 0, out: 0, fIn: 2, fOut: 1, cat: false, stir: true, top: [220, 232, 240], bottom: [170, 190, 206] },
+        { id: 'acetylene_generator', in: 1, out: 0, fIn: 1, fOut: 2, cat: false, stir: false, top: [208, 208, 204], bottom: [150, 150, 146] },
+    ];
+    const REACTOR_YS = [17, 37, 57];
+    function reactorBack(s) {
+        const c = panelCanvas(), { R, body } = c, { h, v } = pipes(R);
+        if (s.fIn) drums(c, 17, 17 + 15 * s.fIn);
+        if (s.fOut) drums(c, 149 - 15 * (s.fOut - 1), 164);
+        body(70, 31, 109, 70);
+        for (const y of [40, 50, 60]) { R(71, y, 72, y, WATER_L); R(107, y, 108, y, WATER_L); }
+        cutaway(c, 74, 34, 105, 66, [30, 30, 30]);
+        body(73, 71, 77, 74); body(102, 71, 106, 74);
+        if (s.stir) {
+            body(81, 17, 98, 27, [92, 122, 170], [146, 174, 220], [52, 72, 112]);
+            for (let x = 84; x <= 95; x += 2) R(x, 19, x, 25, [70, 96, 140]);
+            body(87, 28, 92, 30);
+        } else {
+            body(82, 23, 97, 30);
+            for (let x = 85; x <= 94; x += 3) R(x, 25, x, 28, METAL_D);
+            v(89, 17, 22);
+        }
+        const left = s.in + (s.cat ? 1 : 0);
+        for (let i = 0; i < left; i++) {
+            const y = REACTOR_YS[i];
+            if (y === 17) { h(67, 77, 24); v(76, 27, 30); } else h(67, 69, y + 7);
+        }
+        if (s.fIn) { R(18 + 15 * s.fIn, 34, 69, 34, PIPE_L); R(18 + 15 * s.fIn, 35, 69, 35, METAL_D); }
+        if (s.fOut) h(110, 148 - 15 * (s.fOut - 1), 44);
+        for (let i = 0; i < s.out; i++) h(110, 112, REACTOR_YS[2 - i] + 7);
+        return c.g;
+    }
+    function reactorFill(s) {
+        const g = new G(32, 33), r = rng(s.top[0] * 7 + s.bottom[2]);
+        for (let y = 0; y < 33; y++) for (let x = 0; x < 32; x++) {
+            const col = mix(s.top, s.bottom, y / 32);
+            g.px(x, y, y === 0 ? light(s.top, 0.4) : r() < 0.08 ? dark(col, 0.08) : col);
+        }
+        return g;
+    }
+    function reactorBubbles(f) {
+        const g = new G(32, 33), FOAM = [250, 250, 246];
+        [3, 8, 13, 18, 23, 28].forEach((bx, i) => {
+            for (let j = 0; j < 2; j++) {
+                const y = 31 - ((f * 4 + i * 5 + j * 16) % 32);
+                g.px(bx, y, FOAM, 210);
+                if ((i + j) % 2) g.px(bx + 1, y - 1, FOAM, 130);
+            }
+        });
+        return g;
+    }
+
     function paintSchematics() {
         const S = 'gui/process/schematic/';
         return [
@@ -988,6 +1051,10 @@
             save(sheet([stones([238, 236, 228]), ...rowsOf(4, kilnFlame)]), S + 'lime_kiln_progress.png'),
             save(fermBack(), S + 'fermenter.png'),
             save(sheet([fermBroth(), ...rowsOf(4, fermBubbles)]), S + 'fermenter_progress.png'),
+            ...REACTORS.flatMap(s => [
+                save(reactorBack(s), S + s.id + '.png'),
+                save(sheet([reactorFill(s), ...rowsOf(4, s.stir ? polyStir : reactorBubbles)]), S + s.id + '_progress.png'),
+            ]),
         ].join(', ');
     }
 

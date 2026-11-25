@@ -4,6 +4,7 @@ import machine.process.ProcessLayout.Box;
 import machine.process.ProcessLayout.Pos;
 import machine.process.ProgressStyle.Mode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,23 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
     /** One input on the left, one output on the right, the machine in between. */
     private static ProcessSchematic line(String id, Pos catalyst, Pos window, int w, int h, Mode mode, int frames, boolean idle) {
         return new ProcessSchematic(id, 8, List.of(IN), List.of(OUT), catalyst, null, List.of(), window, w, h, mode, frames, idle);
+    }
+
+    /**
+     * The reactor series: the polymerization reactor's picture for any count of slots and drums
+     * (gui.js reactorBack paints it from the same counts). Input drums left of the vessel, output drums
+     * right of it; item inputs and then the catalyst down the left column, outputs up the right one.
+     */
+    private static ProcessSchematic reactor(String id, int in, int out, int fluidsIn, int fluidsOut, boolean catalyst, boolean stir) {
+        int[] ys = {17, 37, 57};
+        List<Pos> inputs = new ArrayList<>(), outputs = new ArrayList<>();
+        for (int i = 0; i < in; i++) inputs.add(new Pos(50, ys[i]));
+        for (int i = 0; i < out; i++) outputs.add(new Pos(114, ys[2 - i]));
+        List<Box> tanks = new ArrayList<>();
+        for (int i = 0; i < fluidsIn; i++) tanks.add(new Box(19 + 15 * i, 24, 12, 46));
+        for (int i = 0; i < fluidsOut; i++) tanks.add(new Box(151 - 15 * (fluidsOut - 1 - i), 24, 12, 46));
+        return new ProcessSchematic(id, 8, List.copyOf(inputs), List.copyOf(outputs), catalyst ? new Pos(50, ys[in]) : null, null,
+            List.copyOf(tanks), new Pos(74, 34), 32, 33, Mode.UP, 4, stir);
     }
 
     private static final Map<String, ProcessSchematic> ALL = index(List.of(
@@ -74,7 +92,16 @@ public record ProcessSchematic(String id, int energyX, List<Pos> inputs, List<Po
         new ProcessSchematic("fermenter", 8, List.of(new Pos(56, 17), new Pos(94, 17)), List.of(new Pos(116, 52)),
             new Pos(75, 17), null,
             List.of(new Box(19, 24, 12, 46), new Box(34, 24, 12, 46), new Box(137, 24, 12, 46), new Box(152, 24, 12, 46)),
-            new Pos(58, 40), 52, 27, Mode.UP, 4, false)));
+            new Pos(58, 40), 52, 27, Mode.UP, 4, false),
+        // the reactor series, laid out like the polymerization reactor (see reactor below)
+        reactor("additive_reactor", 3, 1, 2, 0, false, true),
+        reactor("catalyst_prep_tank", 2, 1, 2, 0, false, true),
+        reactor("dehydration_reactor", 0, 1, 1, 2, true, false),
+        reactor("depolymerization_reactor", 0, 1, 1, 1, true, true),
+        reactor("oligomerization_reactor", 0, 0, 1, 2, false, true),
+        reactor("vcm_converter", 0, 1, 2, 1, true, false),
+        reactor("neutralizer", 0, 0, 2, 1, false, true),
+        reactor("acetylene_generator", 1, 0, 1, 2, false, false)));
 
     private static Map<String, ProcessSchematic> index(List<ProcessSchematic> all) {
         Map<String, ProcessSchematic> map = new HashMap<>();

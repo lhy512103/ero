@@ -26,7 +26,8 @@ public final class MachineShots {
 
     private static final List<String> MACHINES = List.of("single_screw_extruder", "cooling_tank", "vulcanizer",
         "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor",
-        "distillation_column", "lime_kiln", "fermenter");
+        "distillation_column", "lime_kiln", "fermenter", "additive_reactor", "catalyst_prep_tank", "dehydration_reactor",
+        "depolymerization_reactor", "oligomerization_reactor", "vcm_converter", "neutralizer", "acetylene_generator");
     private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
 
     private static int ticks, settle = -1, step = -1;
@@ -77,7 +78,8 @@ public final class MachineShots {
             var entry = ProcessMachines.get(id);
             if (player == null || entry == null) return;
             var level = player.level();
-            BlockPos pos = player.blockPosition().offset(index - 4, 4, 0);
+            // within reach of the player, or the menu closes again at once
+            BlockPos pos = player.blockPosition().offset(index % 8 - 4, 4, 0);
             placed = pos;
             level.setBlockAndUpdate(pos, entry.block().get().defaultBlockState());
             if (!(level.getBlockEntity(pos) instanceof ProcessMachineBlockEntity machine)) return;
