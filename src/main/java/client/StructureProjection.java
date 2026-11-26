@@ -53,21 +53,40 @@ public final class StructureProjection {
         List<Entry> entries = new ArrayList<>();
         Set<BlockPos> done = new HashSet<>();
         BlockState looked = event.getBlockState();
-        if (looked.getBlock() instanceof PlantControllerBlock) {
+        // pinned controllers are drawn every frame by onRenderLevel; here only the one being looked at
+        if (looked.getBlock() instanceof PlantControllerBlock && !PINNED.contains(event.getBlockPos())) {
             done.add(event.getBlockPos());
             collect(level, event.getBlockPos(), looked, entries);
         }
-        PINNED.removeIf(pos -> level.isLoaded(pos) && !(level.getBlockState(pos).getBlock() instanceof PlantControllerBlock));
-        for (BlockPos pos : PINNED) {
-            if (!done.add(pos) || !level.isLoaded(pos)) continue;
-            collect(level, pos, level.getBlockState(pos), entries);
-        }
         if (entries.isEmpty()) return;
-        Minecraft minecraft = Minecraft.getInstance();
-
         event.addCustomRenderer((renderState, buffer, poseStack, translucentPass, levelState) -> {
             if (!translucentPass) return false;
-            Vec3 camera = levelState.cameraRenderState.pos;
+            draw(entries, buffer, poseStack, levelState.cameraRenderState.pos);
+            return false;
+        });
+    }
+
+    /** Pinned previews stay visible wherever the crosshair is. */
+    public static void onRenderLevel(net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterTranslucentBlocks event) {
+        if (PINNED.isEmpty()) return;
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientLevel level = minecraft.level;
+        if (level == null) return;
+        PINNED.removeIf(pos -> level.isLoaded(pos) && !(level.getBlockState(pos).getBlock() instanceof PlantControllerBlock));
+        List<Entry> entries = new ArrayList<>();
+        for (BlockPos pos : PINNED) if (level.isLoaded(pos)) collect(level, pos, level.getBlockState(pos), entries);
+        if (entries.isEmpty()) return;
+        var buffer = minecraft.renderBuffers().bufferSource();
+        com.mojang.blaze3d.vertex.PoseStack poseStack = event.getPoseStack();
+        poseStack.pushPose();
+        draw(entries, buffer, poseStack, event.getLevelRenderState().cameraRenderState.pos);
+        buffer.endBatch(RenderTypes.lines());
+        poseStack.popPose();
+    }
+
+    private static void draw(List<Entry> entries, net.minecraft.client.renderer.MultiBufferSource.BufferSource buffer,
+                             com.mojang.blaze3d.vertex.PoseStack poseStack, Vec3 camera) {
+            Minecraft minecraft = Minecraft.getInstance();
 
             VertexConsumer ghost = buffer.getBuffer(RenderTypes.translucentMovingBlock());
             QuadInstance instance = new QuadInstance();
@@ -100,8 +119,6 @@ public final class StructureProjection {
                     entry.lineColor(), width
                 );
             }
-            return false;
-        });
     }
 
     /** Adds the ghosts of one unfinished controller's structure. */

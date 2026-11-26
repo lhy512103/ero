@@ -62,6 +62,7 @@ public class EroClient {
         NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
         // 准星对着未成型的大机器控制器时，标出还缺的方块
         NeoForge.EVENT_BUS.addListener(client.StructureProjection::onOutline);
+        NeoForge.EVENT_BUS.addListener(client.StructureProjection::onRenderLevel);
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
