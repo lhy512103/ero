@@ -179,6 +179,8 @@
 173. Improved: The waste heat power plant, twin screw extruder, bio-ethylene plant, carbide furnace plant and coke oven battery have redrawn fronts that match the other machines, and the plant and mill controllers have framed tops and backs.
 174. Fixed: The formed rolling mill, twin screw extruder and coke oven battery use the ore processing plant's tread floor, and JEI recipe pages with a single recipe are centred instead of left-aligned.
 175. Fixed: The macerator guide page shows the current machine picture instead of the old screen texture.
+176. Added: A JEI structure tab for large machines that animates the build layer by layer, previews the formed machine, and lists every block needed.
+177. Added: Structure manuals, so encoding a structure page in an AE2 pattern terminal gives a fake-crafting pattern for a whole machine.
 
 ### 中文
 
@@ -357,3 +359,5 @@
 173. 优化：重绘余热电站、联合双螺杆挤出机、生物乙烯装置、电石联合炉和炼焦炉组的正面贴图使其与其他机器一致，选矿联合厂与轧制联合机控制器的顶部和背面改为带边框的样式。
 174. 修复：轧制联合机、联合双螺杆挤出机和炼焦炉组成型后的地基改用选矿联合厂的花纹钢板，只有一个配方的 JEI 配方页改为居中而非靠左。
 175. 修复：指南中的打粉机页面改为显示当前的机器示意图，不再使用旧界面贴图。
+176. 新增：JEI 大型机器结构标签页，逐层动画演示搭建过程、预览成型效果并列出所需全部方块。
+177. 新增：结构手册，在 AE2 样板编码终端中编码结构页即可得到整台机器的假合成样板。

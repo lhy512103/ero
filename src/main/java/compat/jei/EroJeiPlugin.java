@@ -102,6 +102,7 @@ public class EroJeiPlugin implements IModPlugin {
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         for(String plant:PlantRecipeCategory.PLANTS)registration.addRecipeCategories(new PlantRecipeCategory(registration.getJeiHelpers(),plant));
+        registration.addRecipeCategories(new StructureCategory(registration.getJeiHelpers()));
         // the pages are sized to the recipes they show, so they are read here as well
         net.minecraft.world.item.crafting.RecipeMap recipeMap = client.guide.Guide.recipes();
         Collection<RecipeHolder<MachineRecipe>> machineRecipes = recipeMap == null ? List.of() : recipeMap.byType(ModRecipes.MACHINE_TYPE.get());
@@ -131,6 +132,7 @@ public class EroJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         for(String plant:PlantRecipeCategory.PLANTS)registration.addRecipes(PlantRecipeCategory.TYPES.get(plant),PlantRecipeCategory.recipes(plant));
+        registration.addRecipes(StructureCategory.TYPE, StructureCategory.pages());
         // MC 26.1 客户端的 level.recipeAccess() 返回 ClientRecipeContainer（不是 RecipeManager），
         // 因此需要从集成服务器获取 RecipeManager
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
@@ -287,6 +289,8 @@ public class EroJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for(String plant:PlantRecipeCategory.PLANTS) registration.addCraftingStation(PlantRecipeCategory.TYPES.get(plant),PlantRecipeCategory.icon("iuce:"+plant));
+        for (var page : StructureCategory.pages()) registration.addCraftingStation(StructureCategory.TYPE, item.StructureManualItem.controller(page.name()));
+        registration.addCraftingStation(StructureCategory.TYPE, item.ModItems.BLUEPRINT_TERMINAL.get());
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addCraftingStation(mt.recipeType, mt.iconBlock.get());

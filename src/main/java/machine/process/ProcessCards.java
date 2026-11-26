@@ -16,6 +16,11 @@ public final class ProcessCards {
     public static final Supplier<DataComponentType<CardRequirement>> TYPE = REGISTER.register("process_card",
         () -> DataComponentType.<CardRequirement>builder().persistent(ProcessRecipeSerializer.CARD).build());
 
+    /** Which large machine a structure manual describes. */
+    public static final Supplier<DataComponentType<String>> STRUCTURE = REGISTER.register("structure_manual",
+        () -> DataComponentType.<String>builder().persistent(com.mojang.serialization.Codec.STRING)
+            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8).build());
+
     public static boolean matches(ItemStack stack, CardRequirement required) {
         var card = stack.get(TYPE.get());
         return stack.is(ModItems.PROCESS_CARD.get()) && card != null && card.family().equals(required.family())

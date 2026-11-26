@@ -254,6 +254,7 @@ public class ModItems {
 
     // 工具 (Tools)
     public static final DeferredItem<GuideItem> GUIDE = registerItem("guide", GuideItem::new);
+    public static final DeferredItem<StructureManualItem> STRUCTURE_MANUAL = registerItem("structure_manual", StructureManualItem::new);
     public static final DeferredItem<CutterItem> CUTTER = registerItem("cutter", CutterItem::new);
     public static final DeferredItem<ForgeHammerItem> FORGE_HAMMER = registerItem("forge_hammer", ForgeHammerItem::new);
     public static final DeferredItem<TreetapItem> TREETAP = registerItem("treetap", TreetapItem::new);
