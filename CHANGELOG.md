@@ -196,6 +196,10 @@
 187. Removed: The blueprint terminal; its bill of materials and length switching now live in the controller panel.
 188. Added: JEI and the guide book show adjustable machines at every buildable length, with matching 3D views and material lists.
 189. Fixed: A pinned world preview now stays visible all the time instead of only while looking at a structure block.
+190. Changed: The multiblock material store is now a grid of real slots that supports Shift-click, with each slot tinted by placement status and a detailed tooltip.
+191. Changed: The multiblock controller screen now uses side tabs like the small machines instead of a separate side panel.
+192. Changed: The parallel count is hidden on machines without parallel processing.
+193. Added: The multiblock status tab shows a placement bar, a run-history line chart for the last minute and a stored-energy pie chart.
 
 ### 中文
 
@@ -389,3 +393,7 @@
 187. 移除：图纸终端，其材料清单和长度切换功能已并入控制器界面。
 188. 新增：JEI 与指南可查看可伸缩机器在各个长度下的 3D 结构和材料清单。
 189. 修复：开启世界预览后会一直显示，而不是只在准星指向结构方块时才显示。
+190. 优化：多方块材料仓改为真实物品格，支持 Shift 快速移动，格子底色显示放置状态，悬停可看详情。
+191. 优化：多方块控制器界面改用与小机器相同的侧边标签页，不再额外拼接侧面板。
+192. 优化：没有并行的机器不再显示并行数。
+193. 新增：多方块状态页显示结构放置进度条、最近一分钟运行折线图和储能饼图。

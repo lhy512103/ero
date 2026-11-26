@@ -830,5 +830,13 @@
   "message.iuce.plant.batch_stalled": "Check feed, service tools and output capacity",
   "message.iuce.plant.processing": "Processing integrated batch",
   "message.iuce.plant.too_many_hatches": "At most four energy hatches",
-  "block.iuce.steel_ladder": "Steel Ladder"
+  "block.iuce.steel_ladder": "Steel Ladder",
+  "gui.iuce.multiblock.tab.machine": "Machine",
+  "gui.iuce.multiblock.placement": "Structure placed",
+  "gui.iuce.multiblock.history": "Run history (last minute)",
+  "gui.iuce.multiblock.uptime": "Running %s%% of the last minute",
+  "gui.iuce.multiblock.store_wrong": "%s wrong blocks in the way",
+  "gui.iuce.multiblock.store_done": "All placed",
+  "gui.iuce.multiblock.store_missing": "Missing %s",
+  "gui.iuce.multiblock.store_ready": "Enough in the store to finish"
 }
