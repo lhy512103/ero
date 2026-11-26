@@ -181,6 +181,7 @@
 175. Fixed: The macerator guide page shows the current machine picture instead of the old screen texture.
 176. Added: A JEI structure tab for large machines that animates the build layer by layer, previews the formed machine, and lists every block needed.
 177. Added: Structure manuals, so encoding a structure page in an AE2 pattern terminal gives a fake-crafting pattern for a whole machine.
+178. Improved: The JEI structure tab shows one large view with a layer selector, a formed toggle, scroll zoom, drag rotation, and click-to-highlight block names.
 
 ### 中文
 
@@ -361,3 +362,4 @@
 175. 修复：指南中的打粉机页面改为显示当前的机器示意图，不再使用旧界面贴图。
 176. 新增：JEI 大型机器结构标签页，逐层动画演示搭建过程、预览成型效果并列出所需全部方块。
 177. 新增：结构手册，在 AE2 样板编码终端中编码结构页即可得到整台机器的假合成样板。
+178. 优化：JEI 结构页改为单个大预览，可逐层选择查看、切换成型后效果、滚轮缩放、拖动旋转，并可点击方块高亮显示其名称。

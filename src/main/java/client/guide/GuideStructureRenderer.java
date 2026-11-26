@@ -82,6 +82,14 @@ public final class GuideStructureRenderer extends PictureInPictureRenderer<Guide
             }
             poseStack.popPose();
         }
+        if (state.highlight() != null) {
+            var p = state.highlight();
+            var box = net.minecraft.world.phys.shapes.Shapes.block();
+            bufferSource.endBatch();
+            net.minecraft.client.renderer.ShapeRenderer.renderShape(poseStack,
+                bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.lines()), box,
+                p.getX(), p.getY(), p.getZ(), 0xFFFFD84A, 2.5F);
+        }
     }
 
     /** A culled face is covered by a solid neighbour that is itself shown. */
