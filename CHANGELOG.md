@@ -186,6 +186,8 @@
 
 180. Fixed: JEI structure previews select the visible block under the cursor and show a subtle depth-aware outline.
 
+181. Improved: Selected blocks in JEI structure previews have thicker animated rainbow outlines.
+
 ### 中文
 
 1. 新增：金属成型机，支持辊压板材、切割导线和挤压金属棍。
@@ -368,3 +370,4 @@
 178. 优化：JEI 结构页改为单个大预览，可逐层选择查看、切换成型后效果、滚轮缩放、拖动旋转，并可点击方块高亮显示其名称。
 179. 优化：JEI 结构页点选方块改为精确命中光标下的方块，可上下拖动翻转视角，选中方块的彩色流光边框可穿透其他方块显示，按钮改用重绘的钢板贴图。
 180. 修复：JEI 结构预览准确选取光标下可见的方块，并以简洁的深度遮挡边框高亮。
+181. 优化：JEI 结构预览中选中方块的边框加粗并呈现动态彩色效果。

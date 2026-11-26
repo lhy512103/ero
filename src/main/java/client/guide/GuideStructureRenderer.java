@@ -86,9 +86,18 @@ public final class GuideStructureRenderer extends PictureInPictureRenderer<Guide
             var p = state.highlight();
             var box = net.minecraft.world.phys.shapes.Shapes.box(-0.002, -0.002, -0.002, 1.002, 1.002, 1.002);
             bufferSource.endBatch();
-            net.minecraft.client.renderer.ShapeRenderer.renderShape(poseStack,
-                bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.lines()), box,
-                p.getX(), p.getY(), p.getZ(), 0xFFFFD84A, 1.5F);
+            var lines = bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.lines());
+            var pose = poseStack.last();
+            float hue = (System.currentTimeMillis() % 3000L) / 3000F;
+            box.forAllEdges((x1, y1, z1, x2, y2, z2) -> {
+                var normal = new org.joml.Vector3f((float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1)).normalize();
+                int color1 = 0xFF000000 | java.awt.Color.HSBtoRGB((hue + (float) (x1 + y1 + z1) / 3F) % 1F, 0.8F, 1F);
+                int color2 = 0xFF000000 | java.awt.Color.HSBtoRGB((hue + (float) (x2 + y2 + z2) / 3F) % 1F, 0.8F, 1F);
+                lines.addVertex(pose, (float) (p.getX() + x1), (float) (p.getY() + y1), (float) (p.getZ() + z1))
+                    .setColor(color1).setNormal(pose, normal).setLineWidth(3F);
+                lines.addVertex(pose, (float) (p.getX() + x2), (float) (p.getY() + y2), (float) (p.getZ() + z2))
+                    .setColor(color2).setNormal(pose, normal).setLineWidth(3F);
+            });
         }
     }
 
