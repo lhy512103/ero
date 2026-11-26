@@ -290,7 +290,7 @@ public class EroJeiPlugin implements IModPlugin {
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for(String plant:PlantRecipeCategory.PLANTS) registration.addCraftingStation(PlantRecipeCategory.TYPES.get(plant),PlantRecipeCategory.icon("iuce:"+plant));
         for (var page : StructureCategory.pages()) registration.addCraftingStation(StructureCategory.TYPE, item.StructureManualItem.controller(page.name()));
-        registration.addCraftingStation(StructureCategory.TYPE, item.ModItems.BLUEPRINT_TERMINAL.get());
+        registration.addCraftingStation(StructureCategory.TYPE, block.ModBlocks.PLANT_CONTROLLER.get());
         for (Map.Entry<String, MachineTypeEntry> entry : MACHINE_TYPES.entrySet()) {
             MachineTypeEntry mt = entry.getValue();
             registration.addCraftingStation(mt.recipeType, mt.iconBlock.get());

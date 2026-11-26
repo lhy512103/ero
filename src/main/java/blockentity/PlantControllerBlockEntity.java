@@ -510,28 +510,6 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         if (next != current) resize(next);
     }
 
-    /** Bill of materials for the blueprint terminal: size, what the shell needs and what is already there. */
-    public Component summary() {
-        int target = targetLength(getBlockState());
-        int fitted = 0, wrong = 0;
-        Map<Block, Integer> needed = new java.util.LinkedHashMap<>();
-        for (PlantStructure.Cell cell : layout()) {
-            if (!level.isLoaded(cell.pos())) continue;
-            BlockState state = level.getBlockState(cell.pos());
-            if (cell.part().accepts(state, facing())) fitted++;
-            else {
-                needed.merge(cell.part().sample(facing()).getBlock(), 1, Integer::sum);
-                if (!state.canBeReplaced()) wrong++;
-            }
-        }
-        MutableComponent text = Component.translatable("message.iuce.blueprint.title", getBlockState().getBlock().getName(), target, layout().size());
-        text.append("\n").append(Component.translatable("message.iuce.blueprint.parts", fitted, wrong));
-        needed.forEach((block, count) -> text.append("\n").append(Component.translatable("message.iuce.blueprint.needed", block.getName(), count)));
-        double stretch = isMill() ? 1 + (target - MILL_MIN) / (double) (MILL_MAX - MILL_MIN) : 1;
-        text.append("\n").append(Component.translatable("message.iuce.blueprint.parallel", (int) (16 * stretch), (int) (64 * stretch)));
-        if (isMill()) text.append("\n").append(Component.translatable("message.iuce.blueprint.resize", MILL_MIN, MILL_MAX));
-        return text;
-    }
 
     // ------------------------------------------------------------------ work
 

@@ -307,7 +307,7 @@ public class ModCreativeModeTabs {
     private static final List<DeferredItem<? extends Item>> COMPONENTS = List.of(
         ModItems.COPPER_COIL, ModItems.HEATING_COIL, ModItems.ELECTRIC_MOTOR, ModItems.ADVANCED_MOTOR,
         ModItems.IRON_GEAR, ModItems.BRONZE_GEAR, ModItems.BRONZE_ROTOR, ModItems.MAGNET, ModItems.ELECTRODE,
-        ModItems.PLATE_MOLD, ModItems.WIRE_MOLD, ModItems.ROD_MOLD, ModItems.CONFIGURATOR, ModItems.BLUEPRINT_TERMINAL
+        ModItems.PLATE_MOLD, ModItems.WIRE_MOLD, ModItems.ROD_MOLD, ModItems.CONFIGURATOR
     );
 
     private static final List<DeferredItem<? extends Item>> CELLS = List.of(

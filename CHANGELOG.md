@@ -193,6 +193,7 @@
 184. Fixed: Guide machine recipes share JEI layouts and animations, show fluid and outputless processes, and support ingredient recipe lookup with JEI absent.
 185. Added: Large machine controllers have a side panel with a visual status page, a material store and build controls (world preview, one-click build and dismantle, length adjustment).
 186. Added: The controller's material store holds up to what the structure needs, accepts hoppers and pipes, and stays in the controller when it is broken; a well-stocked controller only breaks while sneaking.
+187. Removed: The blueprint terminal; its bill of materials and length switching now live in the controller panel.
 
 ### 中文
 
@@ -383,3 +384,4 @@
 184. 修复：指南机器配方复用 JEI 布局与动效，补全流体和无产出工艺，并支持未安装 JEI 时查询材料配方与用途。
 185. 新增：大机器控制器界面新增侧边面板，包含图形化状态页、材料仓和搭建控制（世界预览、一键搭建与拆除、长度调节）。
 186. 新增：控制器材料仓最多存放结构所需的材料，可接漏斗和管道，拆下控制器时材料随物品保留；存量较多时必须潜行才能拆下。
+187. 移除：图纸终端，其材料清单和长度切换功能已并入控制器界面。

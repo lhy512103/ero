@@ -40,7 +40,7 @@ public class PlantControllerBlock extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
     public static final BooleanProperty LEGACY = BooleanProperty.create("legacy");
-    /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set with the blueprint terminal. */
+    /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set from the controller panel. */
     public static final net.minecraft.world.level.block.state.properties.IntegerProperty LENGTH =
         net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 33);
 
