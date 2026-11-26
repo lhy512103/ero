@@ -189,6 +189,7 @@
 181. Improved: Selected blocks in JEI structure previews have thicker animated rainbow outlines.
 182. Improved: The guide lists its tabs in progression order and explains every plastic-industry machine, route and early machine in detail.
 183. Improved: Plastic-industry guide pages show recipes as JEI-style recipe cards instead of plain text lists.
+184. Improved: Guide recipe cards resize to fit each recipe instead of leaving large blank areas.
 184. Fixed: Guide machine recipes share JEI layouts and animations, show fluid and outputless processes, and support ingredient recipe lookup with JEI absent.
 
 ### 中文
@@ -376,4 +377,5 @@
 181. 优化：JEI 结构预览中选中方块的边框加粗并呈现动态彩色效果。
 182. 优化：工业升级指南的标签页按发展顺序排列，并详细重写了塑料工业全部设备、工艺路线及前期机器的介绍。
 183. 优化：塑料工业指南页的配方改为类似 JEI 的配方卡片展示，不再是纯文字列表。
+184. 优化：指南配方卡片按当前配方自适应宽高，不再留出大片空白。
 184. 修复：指南机器配方复用 JEI 布局与动效，补全流体和无产出工艺，并支持未安装 JEI 时查询材料配方与用途。

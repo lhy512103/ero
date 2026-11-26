@@ -500,6 +500,7 @@ final class GuideBlocks {
         private int version = -1;
         private int index;
         private int bodyHeight;
+        private int cardW = 236;
         private final Map<GuideRecipes.View, GuideMachineRecipe> machinePages = new HashMap<>();
 
         Recipes(String arg, Mode mode) {
@@ -544,26 +545,55 @@ final class GuideBlocks {
 
         @Override public int layout(Font font, int width) {
             resolve();
-            bodyHeight = 18;
-            int available = Math.max(1, Math.min(width, 236) - 16);
-            for (GuideRecipes.View view : views) {
-                GuideMachineRecipe page = machinePages.get(view);
-                if (page != null && page.available()) bodyHeight = Math.max(bodyHeight, page.height(available));
-                else bodyHeight = Math.max(bodyHeight, view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28);
+            if (views.isEmpty()) { cardW = Math.min(width, 236); return 20; }
+            // size the card to the page being shown so it hugs its content
+            GuideRecipes.View view = views.get(index);
+            GuideMachineRecipe page = machinePages.get(view);
+            int contentW;
+            boolean footer = true;
+            if (page != null && page.available()) {
+                contentW = page.width();
+                footer = false;
+            } else if (view.kind() == GuideRecipes.Kind.CRAFT) {
+                contentW = 114;
+            } else {
+                int n = view.inputs().size();
+                contentW = n * 18 + Math.max(0, n - 1) * 12 + 30 + 18 + view.extras().size() * 22 + 6;
             }
-            return views.isEmpty() ? 20 : 21 + bodyHeight + 17;
+            int headerW = 23 + font.width(view.stationName()) + (views.size() > 1 ? 62 : 6);
+            int infoW = footer ? font.width(footerText(view)) : 0;
+            cardW = Math.min(width, Math.max(Math.max(contentW, infoW) + 16, headerW));
+            int available = Math.max(1, cardW - 16);
+            if (page != null && page.available()) bodyHeight = page.height(available);
+            else bodyHeight = view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28;
+            return 21 + bodyHeight + (footer ? 17 : 8);
+        }
+
+        private static String footerText(GuideRecipes.View view) {
+            if (view.kind() == GuideRecipes.Kind.CRAFT) {
+                boolean grid = view.gridW() == 3;
+                String note = view.workbenchOnly() ? I18n.get("guide.iuce.recipe.workbench_only") : grid ? "" : I18n.get("guide.iuce.recipe.shapeless");
+                if (!grid && view.workbenchOnly()) note += " · " + I18n.get("guide.iuce.recipe.shapeless");
+                return note;
+            }
+            if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                long perTick = Math.max(1, (view.energy() + view.time() - 1) / Math.max(1, view.time()));
+                return I18n.get("guide.iuce.recipe.cost", view.energy(), String.format(Locale.ROOT, "%.1f", view.time() / 20f), perTick);
+            }
+            return I18n.get("guide.iuce.recipe.time", String.format(Locale.ROOT, "%.1f", view.time() / 20f));
         }
 
         @Override public void draw(Ctx c, int x, int y, int width) {
-            int w = Math.min(width, 236);
+            int w = Math.min(width, cardW);
             if (views.isEmpty()) {
                 c.g.fill(x, y, x + w, y + 20, GuideStyle.SLOT_DARK);
                 c.g.fill(x + 1, y + 1, x + w - 1, y + 19, GuideStyle.ROW_ALT);
                 GuideStyle.text(c.g, c.font, I18n.get(GuideRecipes.current() == null ? "guide.iuce.recipe.none" : "guide.iuce.recipe.empty"), x + 6, y + 6, GuideStyle.MUTED);
                 return;
             }
-            int h = 21 + bodyHeight + 17;
             GuideRecipes.View view = views.get(index);
+            GuideMachineRecipe shown = machinePages.get(view);
+            int h = 21 + bodyHeight + (shown != null && shown.available() ? 8 : 17);
             c.g.fill(x, y, x + w, y + h, GuideStyle.SLOT_DARK);
             c.g.fill(x + 1, y + 1, x + w - 1, y + h - 1, GuideStyle.PANEL);
             c.g.fill(x + 1, y + 1, x + w - 1, y + 19, GuideStyle.ACCENT_SOFT);
