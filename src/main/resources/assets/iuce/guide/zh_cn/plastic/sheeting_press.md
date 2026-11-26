@@ -1,13 +1,29 @@
 ---
 title: 压片机
 category: plastic
-order: 100
+order: 201
 icon: iuce:sheeting_press
 items: iuce:sheeting_press
 ---
 
-LV 设备，物品输入 1 格、输出 1 格，流体输入 0 槽、输出 1 槽。
+把凝块压成胶片，挤出工艺水。
 
-凝胶块 × 2 → 胶片 × 2、工艺水 × 100 mB。60 tick，960 EU。
+## 规格
+
+- 电压：LV，内部缓存 8000 EU
+- 物品：输入 1 格，输出 1 格
+- 流体：输入 0 槽，输出 1 槽（每槽 8000 mB）
+- 升级槽：4 个
+
+## 配方
+
+- **凝胶块** × 2 → **胶片** × 2 + **工艺水** × 100 mB（60 tick / 3 秒，共 960 EU）
+
+## 上下游
+
+- 原料来自：[凝固槽](plastic/coagulation_tank)
+- 产物送往：[烟熏房](plastic/smokehouse)
+
+## 合成
 
 {recipe: iuce:sheeting_press}

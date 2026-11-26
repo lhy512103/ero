@@ -1,13 +1,29 @@
 ---
 title: 烟熏房
 category: plastic
-order: 100
+order: 202
 icon: iuce:smokehouse
 items: iuce:smokehouse
 ---
 
-LV 设备，物品输入 2 格、输出 1 格，流体输入 0 槽、输出 0 槽。
+用原木烟熏干燥胶片，得到天然橡胶。
 
-胶片 × 4、标签 logs × 1 → 橡胶 × 48。200 tick，0 EU。
+## 规格
+
+- 电压：LV，内部缓存 8000 EU
+- 物品：输入 2 格，输出 1 格
+- 流体：输入 0 槽，输出 0 槽
+- 升级槽：4 个
+
+## 配方
+
+- **胶片** × 4 + **标签 logs** × 1 → **橡胶** × 48（200 tick / 10 秒，共 0 EU）
+
+## 上下游
+
+- 原料来自：[压片机](plastic/sheeting_press)
+- 产物送往：[密炼机](plastic/rubber_mixer)
+
+## 合成
 
 {recipe: iuce:smokehouse}

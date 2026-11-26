@@ -1,15 +1,28 @@
 ---
 title: 放空火炬
 category: plastic
-order: 100
+order: 210
 icon: iuce:vent_stack
 items: iuce:vent_stack
 ---
 
-LV 设备，物品输入 0 格、输出 0 格，流体输入 1 槽、输出 0 槽。
+安全排放：烧掉可燃气体、放空无用气体，避免储罐憋满导致停机。
 
-标签 flammable_gases × 1000 mB → 排放。20 tick，0 EU。
+## 规格
 
-标签 ventable × 1000 mB → 排放。20 tick，0 EU。
+- 电压：LV，内部缓存 1000 EU
+- 物品：输入 0 格，输出 0 格
+- 流体：输入 1 槽，输出 0 槽（每槽 8000 mB）
+- 升级槽：0 个
+
+## 配方
+
+- **标签 flammable_gases** × 1000 mB → 排放（20 tick / 1 秒，共 0 EU）
+- **标签 ventable** × 1000 mB → 排放（20 tick / 1 秒，共 0 EU）
+
+> [!NOTE]
+> 把各装置的副产气汇到这里，产线就不会被废气卡住。
+
+## 合成
 
 {recipe: iuce:vent_stack}

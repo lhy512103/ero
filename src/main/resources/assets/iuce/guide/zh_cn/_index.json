@@ -2,36 +2,12 @@
   "title": "工业升级指南",
   "home": "welcome",
   "categories": [
-    {"id":"plastic","title":"塑料工业","icon":"iuce:pla_injection_pellet"},
-    {
-      "id": "start",
-      "title": "入门",
-      "icon": "iuce:guide"
-    },
-    {
-      "id": "power",
-      "title": "电力",
-      "icon": "iuce:generator"
-    },
-    {
-      "id": "materials",
-      "title": "矿物与材料",
-      "icon": "iuce:tin_ore"
-    },
-    {
-      "id": "machines",
-      "title": "机器",
-      "icon": "iuce:macerator"
-    },
-    {
-      "id": "automation",
-      "title": "升级与自动化",
-      "icon": "iuce:overclocker_upgrade"
-    },
-    {
-      "id": "advanced",
-      "title": "进阶",
-      "icon": "iuce:advanced_circuit"
-    }
+    {"id": "start", "title": "入门", "icon": "iuce:guide"},
+    {"id": "power", "title": "电力", "icon": "iuce:generator"},
+    {"id": "materials", "title": "矿物与材料", "icon": "iuce:tin_ore"},
+    {"id": "machines", "title": "机器", "icon": "iuce:macerator"},
+    {"id": "automation", "title": "升级与自动化", "icon": "iuce:overclocker_upgrade"},
+    {"id": "advanced", "title": "进阶", "icon": "iuce:advanced_circuit"},
+    {"id": "plastic", "title": "塑料工业", "icon": "iuce:pla_injection_pellet"}
   ]
 }
