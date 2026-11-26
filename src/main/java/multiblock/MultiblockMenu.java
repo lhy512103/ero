@@ -28,6 +28,8 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     private final Kind kind;
     private final BlockEntity target;
     private final int machineSlots;
+    /** Where the target sits; on the client the panel reads the controller's layout from there. */
+    private net.minecraft.core.BlockPos pos;
     private final DataSlot status = DataSlot.standalone();
     private final DataSlot progress = DataSlot.standalone();
     private final DataSlot parallel = DataSlot.standalone();
@@ -35,12 +37,18 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     // Data slots travel as 16-bit values, so EU readings are split into two halves.
     private final DataSlot energyLow = DataSlot.standalone(), energyHigh = DataSlot.standalone();
     private final DataSlot capacityLow = DataSlot.standalone(), capacityHigh = DataSlot.standalone();
+    /** Kinds of structure block shown in the side panel; per kind: stored, fitted, wrong. */
+    public static final int KINDS = 24;
+    private final DataSlot[] stored = new DataSlot[KINDS], fitted = new DataSlot[KINDS], wrong = new DataSlot[KINDS];
+    // panel buttons
+    public static final int BUILD = 0, DISMANTLE = 1, SHORTER = 2, LONGER = 3;
+    public static final int DEPOSIT = 100, WITHDRAW = 200, DEPOSIT_ALL = 300, WITHDRAW_ALL = 400;
 
     public static void open(Player player, BlockEntity target) {
         if (player instanceof ServerPlayer server) {
             Kind kind = kindOf(target);
             server.openMenu(new SimpleMenuProvider((id, inventory, ignored) -> new MultiblockMenu(id, inventory, target),
-                target.getBlockState().getBlock().getName()), buffer -> buffer.writeEnum(kind));
+                target.getBlockState().getBlock().getName()), buffer -> { buffer.writeEnum(kind); buffer.writeBlockPos(target.getBlockPos()); });
         }
     }
 
@@ -55,6 +63,7 @@ public final class MultiblockMenu extends AbstractContainerMenu {
 
     public MultiblockMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buffer) {
         this(id, inventory, buffer.readEnum(Kind.class), null);
+        this.pos = buffer.readBlockPos();
     }
 
     public MultiblockMenu(int id, Inventory inventory, BlockEntity target) {
@@ -65,6 +74,7 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         super(ModMenus.MULTIBLOCK.get(), id);
         this.kind = kind;
         this.target = target;
+        this.pos = target == null ? net.minecraft.core.BlockPos.ZERO : target.getBlockPos();
         if (kind == Kind.INPUT || kind == Kind.OUTPUT) {
             var items = target instanceof HatchBlockEntity hatch ? hatch.getInventory() : new ItemStacksResourceHandler(9);
             for (int index = 0; index < items.size(); index++) {
@@ -86,6 +96,11 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         addDataSlot(energyHigh);
         addDataSlot(capacityLow);
         addDataSlot(capacityHigh);
+        for (int i = 0; i < KINDS; i++) {
+            addDataSlot(stored[i] = DataSlot.standalone());
+            addDataSlot(fitted[i] = DataSlot.standalone());
+            addDataSlot(wrong[i] = DataSlot.standalone());
+        }
         updateReadings();
     }
 
@@ -104,8 +119,17 @@ public final class MultiblockMenu extends AbstractContainerMenu {
             progress.set(plant.getProgress());
             parallel.set(plant.isFormed() ? plant.getParallel() : 0);
             length.set(PlantControllerBlockEntity.targetLength(plant.getBlockState()));
-            long[] stored = plant.hatchEnergy();
-            setEnergy(stored[0], stored[1]);
+            long[] energy = plant.hatchEnergy();
+            setEnergy(energy[0], energy[1]);
+            var store = plant.materials();
+            int i = 0;
+            for (var entry : plant.progressByKind().entrySet()) {
+                if (i >= KINDS) break;
+                stored[i].set(store.count(entry.getKey()));
+                fitted[i].set(entry.getValue()[1]);
+                wrong[i].set(entry.getValue()[2]);
+                i++;
+            }
         } else if (target instanceof EnergyHatchBlockEntity hatch) {
             parallel.set(hatch.parallel());
             setEnergy(hatch.getEnergyStorage().getEnergyStored(), hatch.getEnergyStorage().getMaxEnergyStored());
@@ -124,6 +148,45 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     public void broadcastChanges() {
         updateReadings();
         super.broadcastChanges();
+    }
+
+    public int stored(int kind) { return stored[kind].get() & 0xFFFF; }
+    public int fitted(int kind) { return fitted[kind].get() & 0xFFFF; }
+    public int wrong(int kind) { return wrong[kind].get() & 0xFFFF; }
+    public net.minecraft.core.BlockPos pos() { return pos; }
+
+    @Override
+    public boolean clickMenuButton(Player player, int button) {
+        if (!(target instanceof PlantControllerBlockEntity plant) || !(player instanceof ServerPlayer server)) return false;
+        switch (button) {
+            case BUILD -> {
+                int[] r = plant.build(player);
+                server.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    r[1] > 0 ? "message.iuce.plant.built_missing" : "message.iuce.plant.built", r[0], r[1]));
+            }
+            case DISMANTLE -> {
+                int[] r = plant.dismantle(player);
+                server.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    r[1] + r[2] > 0 ? "message.iuce.plant.dismantled_overflow" : "message.iuce.plant.dismantled", r[0], r[1], r[2]));
+            }
+            case SHORTER -> plant.stepLength(-1);
+            case LONGER -> plant.stepLength(1);
+            default -> {
+                int index = button % 100, action = button - index;
+                var kinds = new java.util.ArrayList<>(plant.needs().keySet());
+                if (index >= kinds.size()) return false;
+                var item = kinds.get(index);
+                int stack = item.getDefaultMaxStackSize();
+                switch (action) {
+                    case DEPOSIT -> plant.deposit(player, item, stack);
+                    case WITHDRAW -> plant.withdraw(player, item, stack);
+                    case DEPOSIT_ALL -> plant.deposit(player, item, Integer.MAX_VALUE);
+                    case WITHDRAW_ALL -> plant.withdraw(player, item, Integer.MAX_VALUE);
+                    default -> { return false; }
+                }
+            }
+        }
+        return true;
     }
 
     public Kind kind() { return kind; }

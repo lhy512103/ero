@@ -58,6 +58,13 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
     private String industrial(){return PlantStructure.industrialId(getBlockState());}
     public boolean extensible(){return isMill() || getBlockState().is(ModBlocks.TWIN_SCREW_EXTRUDER.get()) || getBlockState().is(ModBlocks.COKE_OVEN_BATTERY.get());}
     public int minimumLength(){return isMill()?9:getBlockState().is(ModBlocks.TWIN_SCREW_EXTRUDER.get())?13:17;}
+    public int maximumLength(){return isMill()?MILL_MAX:33;}
+    /** Length step of the size control: one block for the mill, one section of four for the others. */
+    public int lengthStep(){return isMill()?1:4;}
+    /** Above this many stored blocks the controller can only be broken while sneaking. */
+    public static final int STORAGE_WARNING = 1000;
+    private final multiblock.MaterialStorage materials = new multiblock.MaterialStorage(this::setChanged);
+    @Nullable private BlockState materialsFor;
     @Override public BlockPos position(){return worldPosition;}
     @Override public int shares(machine.utility.Utility u){return getBlockState().is(ModBlocks.WASTE_HEAT_POWER_PLANT.get()) && u==machine.utility.Utility.STEAM ? 64:0;}
     @Override public void setOccupied(machine.utility.Utility u,int occupied){}
@@ -350,6 +357,159 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         return placed;
     }
 
+    // ------------------------------------------------------------------ material storage, building and dismantling
+
+    /** Every block the structure is made of, with how many it needs, in first-seen order. */
+    public Map<net.minecraft.world.item.Item, Integer> needs() {
+        Map<net.minecraft.world.item.Item, Integer> needs = new java.util.LinkedHashMap<>();
+        for (PlantStructure.Cell cell : layout()) needs.merge(cell.part().sample(facing()).getBlock().asItem(), 1, Integer::sum);
+        needs.remove(net.minecraft.world.item.Items.AIR);
+        return needs;
+    }
+
+    /** The material store, laid out for the structure's current size. */
+    public multiblock.MaterialStorage materials() {
+        if (materialsFor != getBlockState()) {
+            materialsFor = getBlockState();
+            materials.configure(needs());
+        }
+        return materials;
+    }
+
+    /** Per block kind: {needed, fitted, wrong}, over the loaded part of the structure. */
+    public Map<net.minecraft.world.item.Item, int[]> progressByKind() {
+        Map<net.minecraft.world.item.Item, int[]> counts = new java.util.LinkedHashMap<>();
+        if (level == null) return counts;
+        for (PlantStructure.Cell cell : layout()) {
+            var item = cell.part().sample(facing()).getBlock().asItem();
+            int[] c = counts.computeIfAbsent(item, k -> new int[3]);
+            c[0]++;
+            if (!level.isLoaded(cell.pos())) continue;
+            BlockState there = level.getBlockState(cell.pos());
+            if (cell.part().accepts(there, facing())) c[1]++;
+            else if (!there.canBeReplaced()) c[2]++;
+        }
+        return counts;
+    }
+
+    /**
+     * Places every missing part it has blocks for, taking them from the material store first and the
+     * player's inventory after; creative players need none. Returns {placed, still missing}.
+     */
+    public int[] build(net.minecraft.world.entity.player.Player player) {
+        if (level == null || level.isClientSide()) return new int[]{0, 0};
+        Direction facing = facing();
+        var store = materials();
+        boolean free = player.hasInfiniteMaterials();
+        int placed = 0, missing = 0;
+        for (PlantStructure.Cell cell : layout()) {
+            BlockPos pos = cell.pos();
+            if (!level.isLoaded(pos)) continue;
+            BlockState existing = level.getBlockState(pos);
+            if (cell.part().accepts(existing, facing) || !existing.canBeReplaced()) continue;
+            BlockState part = cell.part().sample(facing);
+            var item = part.getBlock().asItem();
+            if (!free && store.take(item, 1) == 0 && !takeFromInventory(player, item)) { missing++; continue; }
+            level.setBlock(pos, part, Block.UPDATE_ALL);
+            placed++;
+        }
+        if (placed > 0) joinParts();
+        structureDirty = true;
+        return new int[]{placed, missing};
+    }
+
+    private static boolean takeFromInventory(net.minecraft.world.entity.player.Player player, net.minecraft.world.item.Item item) {
+        var inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (stack.is(item)) { stack.shrink(1); inventory.setChanged(); return true; }
+        }
+        return false;
+    }
+
+    /** Updates the connected edges of every placed part after building. */
+    private void joinParts() {
+        for (PlantStructure.Cell cell : layout()) {
+            BlockPos pos = cell.pos();
+            if (!level.isLoaded(pos)) continue;
+            BlockState cur = level.getBlockState(pos);
+            BlockState joined = cur;
+            if (cur.is(ModBlocks.PLANT_CASING.get())) joined = ModBlocks.PLANT_CASING.get().joinedState(level, pos);
+            else if (cur.getBlock() instanceof block.ConnectedStructureBlock csb) joined = csb.joinedState(level, pos);
+            else if (cur.getBlock() instanceof PlantDrumBlock drum) joined = drum.joinedState(cur, level, pos);
+            else if (cur.getBlock() instanceof PlantFrameBlock frame) joined = frame.joinedState(cur, level, pos);
+            if (!joined.equals(cur)) level.setBlock(pos, joined, Block.UPDATE_ALL);
+        }
+    }
+
+    /**
+     * Takes down every part of the structure (the controller stays). Each block goes to the player's
+     * inventory, then to the material store, and is dropped when neither has room; the contents of
+     * hatches drop as they do when broken. Returns {to inventory, to store, dropped}.
+     */
+    public int[] dismantle(net.minecraft.world.entity.player.Player player) {
+        int[] moved = new int[3];
+        if (level == null || level.isClientSide()) return moved;
+        Direction facing = facing();
+        var store = materials();
+        for (PlantStructure.Cell cell : layout()) {
+            BlockPos pos = cell.pos();
+            if (!level.isLoaded(pos)) continue;
+            BlockState there = level.getBlockState(pos);
+            if (!cell.part().accepts(there, facing) || there.getBlock() instanceof PlantControllerBlock) continue;
+            ItemStack block = new ItemStack(there.getBlock().asItem());
+            level.removeBlock(pos, false);
+            if (block.isEmpty()) continue;
+            if (player.getInventory().add(block)) moved[0]++;
+            else if (store.add(block.getItem(), 1) == 1) moved[1]++;
+            else { Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), block); moved[2]++; }
+        }
+        structureDirty = true;
+        return moved;
+    }
+
+    /** Puts up to {@code amount} of the player's blocks of this kind into the store. */
+    public int deposit(net.minecraft.world.entity.player.Player player, net.minecraft.world.item.Item item, int amount) {
+        var store = materials();
+        int moved = 0;
+        var inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize() && moved < amount; i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.is(item)) continue;
+            int put = store.add(item, Math.min(stack.getCount(), amount - moved));
+            if (put == 0) break;
+            stack.shrink(put);
+            moved += put;
+        }
+        if (moved > 0) inventory.setChanged();
+        return moved;
+    }
+
+    /** Gives the player up to {@code amount} stored blocks of this kind; what does not fit stays. */
+    public int withdraw(net.minecraft.world.entity.player.Player player, net.minecraft.world.item.Item item, int amount) {
+        var store = materials();
+        int moved = 0;
+        while (moved < amount) {
+            int batch = Math.min(item.getDefaultMaxStackSize(), Math.min(amount - moved, store.count(item)));
+            if (batch <= 0) break;
+            ItemStack stack = new ItemStack(item, batch);
+            player.getInventory().add(stack);
+            int given = batch - stack.getCount();
+            if (given <= 0) break;
+            store.take(item, given);
+            moved += given;
+        }
+        return moved;
+    }
+
+    /** Steps the machine's length by {@code steps} size steps, within its range. */
+    public void stepLength(int steps) {
+        if (!extensible()) return;
+        int current = targetLength(getBlockState());
+        int next = Math.clamp(current + steps * lengthStep(), minimumLength(), maximumLength());
+        if (next != current) resize(next);
+    }
+
     /** Bill of materials for the blueprint terminal: size, what the shell needs and what is already there. */
     public Component summary() {
         int target = targetLength(getBlockState());
@@ -614,6 +774,31 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         output.putLong("Paid", paid);
         output.store("Pending", Pending.CODEC.listOf(), pending);
         output.store("Mold", ItemResource.OPTIONAL_CODEC, getMold());
+        var stored = materials.contents();
+        if (!stored.isEmpty()) output.store("Materials", multiblock.MaterialStorage.CODEC, stored);
+    }
+
+    @Override
+    protected void collectImplicitComponents(net.minecraft.core.component.DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        var stored = materials.contents();
+        if (stored.isEmpty()) return;
+        CompoundTag tag = new CompoundTag();
+        multiblock.MaterialStorage.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, stored).result()
+            .ifPresent(nbt -> tag.put("IuceMaterials", nbt));
+        components.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+    }
+
+    @Override
+    protected void applyImplicitComponents(net.minecraft.core.component.DataComponentGetter components) {
+        super.applyImplicitComponents(components);
+        var data = components.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (data == null) return;
+        var nbt = data.copyTag().get("IuceMaterials");
+        if (nbt != null) multiblock.MaterialStorage.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, nbt).result().ifPresent(m -> {
+            materials.restore(m);
+            materialsFor = null;
+        });
     }
 
     @Override
@@ -627,6 +812,8 @@ public class PlantControllerBlockEntity extends BlockEntity implements machine.u
         input.read("Pending", Pending.CODEC.listOf()).ifPresent(pending::addAll);
         ItemResource mold = input.read("Mold", ItemResource.OPTIONAL_CODEC).orElse(ItemResource.EMPTY);
         moldSlot.set(0, mold, mold.isEmpty() ? 0 : 1);
+        materials.restore(input.read("Materials", multiblock.MaterialStorage.CODEC).orElse(Map.of()));
+        materialsFor = null;
         clientWorking = input.getBooleanOr("Working", !pending.isEmpty());
         lastSyncedWorking = !pending.isEmpty();
         structureDirty = true;

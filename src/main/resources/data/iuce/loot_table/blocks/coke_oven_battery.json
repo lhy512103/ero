@@ -12,7 +12,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "iuce:coke_oven_battery"
+          "name": "iuce:coke_oven_battery",
+          "functions": [{"function": "minecraft:copy_components", "source": "block_entity", "include": ["minecraft:custom_data"]}]
         }
       ]
     }

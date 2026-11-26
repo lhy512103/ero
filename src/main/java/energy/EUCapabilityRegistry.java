@@ -61,6 +61,8 @@ public final class EUCapabilityRegistry {
         // 大机器的仓口
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.PLANT_TANK.get(), (hatch, side) -> hatch.getFluidHandler());
+        // 大机器控制器的材料仓：任意面都可以放入和取出结构方块
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.PLANT_CONTROLLER.get(), (controller, side) -> controller.materials());
         register(event, ModBlockEntities.ENERGY_HATCH.get());
         // 电动修理台、电灯、能量转换器
         register(event, ModBlockEntities.REPAIR_BENCH.get());

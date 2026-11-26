@@ -120,6 +120,23 @@ public class PlantControllerBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
+    /**
+     * A controller whose material store holds many blocks only comes off while sneaking, so it is
+     * not broken by accident; the stored blocks stay in the dropped controller either way.
+     */
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack tool,
+                                       boolean willHarvest, net.minecraft.world.level.material.FluidState fluid) {
+        if (level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller && !player.isShiftKeyDown()) {
+            long stored = controller.materials().total();
+            if (stored > PlantControllerBlockEntity.STORAGE_WARNING) {
+                if (!level.isClientSide()) player.sendOverlayMessage(Component.translatable("message.iuce.plant.storage_warning", stored));
+                return false;
+            }
+        }
+        return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+    }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller) {

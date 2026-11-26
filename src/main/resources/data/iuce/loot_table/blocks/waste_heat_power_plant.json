@@ -12,7 +12,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "iuce:waste_heat_power_plant"
+          "name": "iuce:waste_heat_power_plant",
+          "functions": [{"function": "minecraft:copy_components", "source": "block_entity", "include": ["minecraft:custom_data"]}]
         }
       ]
     }

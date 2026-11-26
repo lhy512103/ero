@@ -12,7 +12,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "iuce:bio_ethylene_plant"
+          "name": "iuce:bio_ethylene_plant",
+          "functions": [{"function": "minecraft:copy_components", "source": "block_entity", "include": ["minecraft:custom_data"]}]
         }
       ]
     }
