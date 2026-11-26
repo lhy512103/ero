@@ -17,7 +17,7 @@ items: iuce:filter_press
 
 ## 配方
 
-- **电石渣浆** × 1000 mB → **电石渣** × 1 + **工艺水** × 750 mB（100 tick / 5 秒，共 1600 EU）
+{recipes: filter_press}
 
 ## 上下游
 

@@ -17,8 +17,7 @@ items: iuce:haul_off_cutter
 
 ## 配方
 
-- **聚乙烯管坯** × 1 → **聚乙烯管** × 8（40 tick / 2 秒，共 640 EU）
-- **聚氯乙烯管坯** × 1 → **聚氯乙烯管** × 8（40 tick / 2 秒，共 640 EU）
+{recipes: haul_off_cutter}
 
 ## 上下游
 

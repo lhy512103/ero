@@ -17,7 +17,7 @@ items: iuce:brine_dissolver
 
 ## 配方
 
-- **岩盐** × 1 + **水** × 1000 mB → **粗盐水** × 1000 mB（80 tick / 4 秒，共 640 EU）
+{recipes: brine_dissolver}
 
 ## 上下游
 

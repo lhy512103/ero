@@ -17,7 +17,7 @@ items: iuce:coagulation_tank
 
 ## 配方
 
-- **生乳胶** × 4 + **乳酸发酵液** × 100 mB → **凝胶块** × 2 + **工艺水** × 250 mB（100 tick / 5 秒，共 800 EU）
+{recipes: coagulation_tank}
 
 ## 上下游
 

@@ -17,7 +17,7 @@ items: iuce:brine_purifier
 
 ## 配方
 
-- **生石灰** × 1 + **粗盐水** × 1000 mB → **精盐水** × 1000 mB（100 tick / 5 秒，共 1600 EU）
+{recipes: brine_purifier}
 
 ## 上下游
 

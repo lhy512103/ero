@@ -17,7 +17,7 @@ items: iuce:rubber_mixer
 
 ## 配方
 
-- **橡胶** × 4 + **硫磺** × 1 + **焦粉** × 2 → **混炼胶** × 4（100 tick / 5 秒，共 6400 EU）
+{recipes: rubber_mixer}
 
 ## 上下游
 

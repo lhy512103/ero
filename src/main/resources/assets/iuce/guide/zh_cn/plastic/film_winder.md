@@ -17,8 +17,7 @@ items: iuce:film_winder
 
 ## 配方
 
-- **聚乙烯膜泡** × 1 → **聚乙烯膜卷** × 1（60 tick / 3 秒，共 960 EU）
-- **聚乳酸膜泡** × 1 → **聚乳酸膜卷** × 1（60 tick / 3 秒，共 960 EU）
+{recipes: film_winder}
 
 ## 上下游
 

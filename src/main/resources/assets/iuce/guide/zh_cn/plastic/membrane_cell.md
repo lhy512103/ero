@@ -17,7 +17,7 @@ items: iuce:membrane_cell
 
 ## 配方
 
-- **精盐水** × 1000 mB → **氯气** × 500 mB + **氢气** × 500 mB + **烧碱液** × 500 mB（200 tick / 10 秒，共 25600 EU）
+{recipes: membrane_cell}
 
 ## 上下游
 

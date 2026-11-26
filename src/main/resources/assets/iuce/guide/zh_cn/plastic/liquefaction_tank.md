@@ -18,7 +18,7 @@ items: iuce:liquefaction_tank
 
 ## 配方
 
-- **酶制剂** × 1 + **淀粉浆** × 1000 mB → **液化醪** × 1000 mB（120 tick / 6 秒，共 1920 EU），需要蒸汽
+{recipes: liquefaction_tank}
 
 ## 上下游
 

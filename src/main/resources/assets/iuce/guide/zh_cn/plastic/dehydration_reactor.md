@@ -19,7 +19,7 @@ items: iuce:dehydration_reactor
 
 ## 配方
 
-- **乙醇** × 500 mB → **乙烯** × 500 mB + **工艺水** × 250 mB（120 tick / 6 秒，共 7680 EU），需要蒸汽、催化剂 活性氧化铝
+{recipes: dehydration_reactor}
 
 ## 上下游
 

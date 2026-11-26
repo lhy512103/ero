@@ -18,7 +18,7 @@ items: iuce:crystallizer
 
 ## 配方
 
-- **粗丙交酯** × 1000 mB → **丙交酯** × 4 + **丙交酯母液** × 250 mB（200 tick / 10 秒，共 3200 EU），需要冷却水
+{recipes: crystallizer}
 
 ## 上下游
 

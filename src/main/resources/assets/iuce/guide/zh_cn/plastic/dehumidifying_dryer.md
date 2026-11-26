@@ -17,8 +17,7 @@ items: iuce:dehumidifying_dryer
 
 ## 配方
 
-- **聚乳酸颗粒·薄膜级** × 8 → **聚乳酸颗粒·薄膜级** × 8（100 tick / 5 秒，共 1600 EU）
-- **聚乳酸颗粒·注塑级** × 8 → **聚乳酸颗粒·注塑级** × 8（100 tick / 5 秒，共 1600 EU）
+{recipes: dehumidifying_dryer}
 
 ## 上下游
 

@@ -17,7 +17,7 @@ items: iuce:water_treatment
 
 ## 配方
 
-- **标签 any_water** × 1000 mB → **去离子水** × 1000 mB（60 tick / 3 秒，共 960 EU）
+{recipes: water_treatment}
 
 ## 上下游
 

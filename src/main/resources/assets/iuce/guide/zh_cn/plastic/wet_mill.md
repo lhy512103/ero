@@ -17,8 +17,7 @@ items: iuce:wet_mill
 
 ## 配方
 
-- **标签 starch_crops** × 4 + **标签 any_water** × 1000 mB → **淀粉浆** × 1000 mB（100 tick / 5 秒，共 1600 EU）
-- **标签 sugar_crops** × 4 + **标签 any_water** × 500 mB → **蔗渣** × 1 + **糖液** × 1000 mB（100 tick / 5 秒，共 1600 EU）
+{recipes: wet_mill}
 
 ## 上下游
 

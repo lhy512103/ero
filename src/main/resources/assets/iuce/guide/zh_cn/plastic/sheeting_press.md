@@ -17,7 +17,7 @@ items: iuce:sheeting_press
 
 ## 配方
 
-- **凝胶块** × 2 → **胶片** × 2 + **工艺水** × 100 mB（60 tick / 3 秒，共 960 EU）
+{recipes: sheeting_press}
 
 ## 上下游
 

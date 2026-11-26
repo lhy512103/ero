@@ -613,7 +613,7 @@ final class GuideBlocks {
                     ex += 22;
                 }
                 String info;
-                if (view.kind() == GuideRecipes.Kind.MACHINE) {
+                if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
                     long perTick = Math.max(1, (view.energy() + view.time() - 1) / Math.max(1, view.time()));
                     info = I18n.get("guide.iuce.recipe.cost", view.energy(), String.format(Locale.ROOT, "%.1f", view.time() / 20f), perTick);
                 } else {

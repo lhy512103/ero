@@ -18,7 +18,7 @@ items: iuce:gas_compressor
 
 ## 配方
 
-- **氯乙烯气** × 1000 mB → **液化氯乙烯** × 1000 mB（80 tick / 4 秒，共 5120 EU），需要冷却水
+{recipes: gas_compressor}
 
 ## 上下游
 

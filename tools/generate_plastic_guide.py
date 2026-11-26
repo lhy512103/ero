@@ -115,7 +115,7 @@ def main():
             if "card" in r:needs.append("工艺卡 "+str(r["card"].get("family","")))
             if needs:line+="，需要"+"、".join(needs)
             lines.append(line)
-        if lines:out.append("## 配方\n\n"+"\n".join(lines))
+        if lines:out.append("## 配方\n\n{recipes: "+name+"}")
         up=sorted({m for r in rs for e in r.get("items",[])+r.get("fluids",[]) for m in makes.get(ref(e),()) if m!=name})
         down=sorted({m for r in rs for e in r.get("results",[])+r.get("fluid_results",[]) for m in uses.get(ref(e),()) if m!=name})
         flow=[]

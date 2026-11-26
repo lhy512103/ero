@@ -19,7 +19,7 @@ items: iuce:depolymerization_reactor
 
 ## 配方
 
-- **乳酸低聚物** × 500 mB → **粗丙交酯** × 500 mB（160 tick / 8 秒，共 10240 EU），需要蒸汽、催化剂 辛酸亚锡催化剂
+{recipes: depolymerization_reactor}
 
 ## 上下游
 

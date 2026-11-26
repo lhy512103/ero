@@ -18,7 +18,7 @@ items: iuce:solvent_recovery_tower
 
 ## 配方
 
-- **聚乙烯母液** × 900 mB → **聚乙烯蜡** × 1 + **溶剂油** × 880 mB（160 tick / 8 秒，共 5120 EU），需要蒸汽
+{recipes: solvent_recovery_tower}
 
 ## 上下游
 

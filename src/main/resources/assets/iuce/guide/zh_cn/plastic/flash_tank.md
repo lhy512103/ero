@@ -18,7 +18,7 @@ items: iuce:flash_tank
 
 ## 配方
 
-- **聚氯乙烯浆料** × 1000 mB → **汽提浆料** × 1000 mB + **氯乙烯气** × 150 mB（100 tick / 5 秒，共 1600 EU），需要蒸汽
+{recipes: flash_tank}
 
 ## 上下游
 

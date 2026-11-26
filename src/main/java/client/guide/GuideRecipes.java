@@ -33,7 +33,7 @@ import java.util.Set;
 final class GuideRecipes {
     private GuideRecipes() {}
 
-    enum Kind { MACHINE, CRAFT, SMELT }
+    enum Kind { MACHINE, PROCESS, CRAFT, SMELT }
 
     record Extra(ItemStack stack, float chance) {}
 
@@ -44,6 +44,7 @@ final class GuideRecipes {
                 List<List<ItemStack>> inputs, ItemStack output, List<Extra> extras, long energy, int time, String id) {
         Component stationName() {
             if (kind == Kind.MACHINE) return Component.translatable("guide.iuce.machine." + machineType);
+            if (kind == Kind.PROCESS && station.isEmpty()) return Component.literal(machineType);
             return station.getHoverName();
         }
     }
@@ -131,7 +132,7 @@ final class GuideRecipes {
                 Set<Item> seen = new LinkedHashSet<>();
                 for (List<ItemStack> slot : view.inputs) for (ItemStack stack : slot) seen.add(stack.getItem());
                 for (Item item : seen) inputs.computeIfAbsent(item, k -> new ArrayList<>()).add(view);
-                if (view.kind == Kind.MACHINE) machines.computeIfAbsent(view.machineType, k -> new ArrayList<>()).add(view);
+                if (view.kind == Kind.MACHINE || view.kind == Kind.PROCESS) machines.computeIfAbsent(view.machineType, k -> new ArrayList<>()).add(view);
             }
         }
         byOutput = outputs;
@@ -152,6 +153,27 @@ final class GuideRecipes {
             String blockPath = MACHINE_BLOCKS.get(type);
             return new View(Kind.MACHINE, type, blockPath == null ? ItemStack.EMPTY : block(blockPath), false, 0,
                 in, recipe.getOutput(), extras, recipe.getEnergyCost(), recipe.getProcessTime(), id);
+        }
+        if (holder.value() instanceof recipe.ProcessRecipe recipe) {
+            List<List<ItemStack>> in = new ArrayList<>();
+            for (var input : recipe.items()) in.add(options(input.ingredient(), input.count()));
+            for (var input : recipe.fluids()) {
+                List<ItemStack> buckets = input.ingredient().fluids().stream()
+                    .map(fluid -> new ItemStack(fluid.value().getBucket()))
+                    .filter(stack -> !stack.isEmpty()).toList();
+                if (!buckets.isEmpty()) in.add(buckets);
+            }
+            List<ItemStack> outs = new ArrayList<>();
+            List<Float> chances = new ArrayList<>();
+            for (var result : recipe.results()) { outs.add(result.create()); chances.add(result.chance()); }
+            for (var result : recipe.fluidResults()) {
+                ItemStack bucket = new ItemStack(result.fluid().getBucket());
+                if (!bucket.isEmpty()) { outs.add(bucket); chances.add(1f); }
+            }
+            List<Extra> extras = new ArrayList<>();
+            for (int i = 1; i < outs.size(); i++) extras.add(new Extra(outs.get(i), chances.get(i)));
+            return new View(Kind.PROCESS, recipe.machine(), block(recipe.machine()), false, 0, in,
+                outs.isEmpty() ? ItemStack.EMPTY : outs.get(0), extras, recipe.energy(), recipe.time(), id);
         }
         if (holder.value() instanceof CraftingRecipe recipe) {
             List<List<ItemStack>> in = new ArrayList<>();

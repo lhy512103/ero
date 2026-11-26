@@ -17,7 +17,7 @@ items: iuce:smokehouse
 
 ## 配方
 
-- **胶片** × 4 + **标签 logs** × 1 → **橡胶** × 48（200 tick / 10 秒，共 0 EU）
+{recipes: smokehouse}
 
 ## 上下游
 

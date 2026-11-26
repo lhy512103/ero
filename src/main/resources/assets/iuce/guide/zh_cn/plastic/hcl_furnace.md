@@ -18,7 +18,7 @@ items: iuce:hcl_furnace
 
 ## 配方
 
-- **氯气** × 500 mB + **氢气** × 500 mB → **氯化氢** × 1000 mB（100 tick / 5 秒，共 1600 EU），需要冷却水
+{recipes: hcl_furnace}
 
 ## 上下游
 

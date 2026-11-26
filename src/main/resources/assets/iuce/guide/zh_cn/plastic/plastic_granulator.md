@@ -17,7 +17,7 @@ items: iuce:plastic_granulator
 
 ## 配方
 
-- **水口料** × 4 → **聚乳酸颗粒·注塑级** × 1（60 tick / 3 秒，共 960 EU）
+{recipes: plastic_granulator}
 
 ## 上下游
 

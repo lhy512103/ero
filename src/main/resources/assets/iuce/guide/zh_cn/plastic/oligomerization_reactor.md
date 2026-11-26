@@ -18,7 +18,7 @@ items: iuce:oligomerization_reactor
 
 ## 配方
 
-- **乳酸** × 500 mB → **乳酸低聚物** × 500 mB + **工艺水** × 100 mB（160 tick / 8 秒，共 3840 EU），需要蒸汽
+{recipes: oligomerization_reactor}
 
 ## 上下游
 

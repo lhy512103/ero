@@ -18,7 +18,7 @@ items: iuce:saccharification_tank
 
 ## 配方
 
-- **液化醪** × 1000 mB → **糖液** × 1000 mB（160 tick / 8 秒，共 1280 EU），需要催化剂 酶制剂
+{recipes: saccharification_tank}
 
 ## 上下游
 

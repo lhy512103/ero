@@ -18,7 +18,7 @@ items: iuce:tar_distiller
 
 ## 配方
 
-- **煤焦油** × 1000 mB → **萘** × 1 + **沥青** × 2 + **溶剂油** × 500 mB（200 tick / 10 秒，共 4800 EU），需要蒸汽
+{recipes: tar_distiller}
 
 ## 上下游
 

@@ -17,8 +17,7 @@ items: iuce:neutralizer
 
 ## 配方
 
-- **氯化氢** × 1000 mB + **烧碱液** × 500 mB → **精盐水** × 1000 mB（80 tick / 4 秒，共 640 EU）
-- **废碱液** × 1000 mB + **氯化氢** × 250 mB → **精盐水** × 1000 mB（80 tick / 4 秒，共 640 EU）
+{recipes: neutralizer}
 
 ## 上下游
 

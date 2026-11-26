@@ -17,7 +17,7 @@ items: iuce:coking_oven
 
 ## 配方
 
-- **煤炭** × 4 → **焦炭** × 3 + **焦炉气** × 500 mB + **煤焦油** × 250 mB（400 tick / 20 秒，共 6400 EU）
+{recipes: coking_oven}
 
 ## 上下游
 

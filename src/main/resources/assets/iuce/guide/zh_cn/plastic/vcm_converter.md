@@ -19,7 +19,7 @@ items: iuce:vcm_converter
 
 ## 配方
 
-- **乙炔** × 500 mB + **氯化氢** × 500 mB → **粗氯乙烯** × 500 mB（160 tick / 8 秒，共 15360 EU），需要冷却水、催化剂 无汞催化剂
+{recipes: vcm_converter}
 
 ## 上下游
 

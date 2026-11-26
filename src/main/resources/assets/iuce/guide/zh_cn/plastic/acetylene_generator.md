@@ -17,7 +17,7 @@ items: iuce:acetylene_generator
 
 ## 配方
 
-- **电石** × 2 + **水** × 1000 mB → **粗乙炔** × 500 mB + **电石渣浆** × 1000 mB（100 tick / 5 秒，共 1600 EU）
+{recipes: acetylene_generator}
 
 ## 上下游
 

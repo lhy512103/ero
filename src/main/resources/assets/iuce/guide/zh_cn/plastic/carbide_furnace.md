@@ -18,7 +18,7 @@ items: iuce:carbide_furnace
 
 ## 配方
 
-- **生石灰** × 1 + **焦炭** × 1 → **电石块** × 1 + **电石炉气** × 250 mB（200 tick / 10 秒，共 25600 EU），需要催化剂 碳素电极
+{recipes: carbide_furnace}
 
 ## 上下游
 

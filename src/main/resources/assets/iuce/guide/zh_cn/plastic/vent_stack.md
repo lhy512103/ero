@@ -17,8 +17,7 @@ items: iuce:vent_stack
 
 ## 配方
 
-- **标签 flammable_gases** × 1000 mB → 排放（20 tick / 1 秒，共 0 EU）
-- **标签 ventable** × 1000 mB → 排放（20 tick / 1 秒，共 0 EU）
+{recipes: vent_stack}
 
 > [!NOTE]
 > 把各装置的副产气汇到这里，产线就不会被废气卡住。
