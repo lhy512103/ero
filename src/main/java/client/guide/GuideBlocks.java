@@ -689,6 +689,7 @@ final class GuideBlocks {
         private final RichText caption;
         private final boolean hasCaption;
         private int shownLayers = -1;
+        private int length = -1;
         private int viewH, materialsH, captionH;
         private float yaw = 225, pitch = 30;
         private boolean formed = Boolean.getBoolean("iuce.guideShots.formed");
@@ -699,8 +700,15 @@ final class GuideBlocks {
             hasCaption = !caption.isEmpty();
         }
 
+        private GuideStructure structure() {
+            int[] range = GuideStructure.lengths(name);
+            if (range == null) return GuideStructure.get(name);
+            if (length < 0) length = range[2];
+            return GuideStructure.get(name, length);
+        }
+
         @Override public int layout(Font font, int width) {
-            GuideStructure structure = GuideStructure.get(name);
+            GuideStructure structure = structure();
             if (structure == null) return RichText.LINE;
             if (shownLayers < 0) shownLayers = structure.sizeY;
             viewH = VIEW_H;
@@ -719,7 +727,7 @@ final class GuideBlocks {
         }
 
         @Override public void draw(Ctx c, int x, int y, int width) {
-            GuideStructure structure = GuideStructure.get(name);
+            GuideStructure structure = structure();
             if (structure == null) {
                 GuideStyle.text(c.g, c.font, "[structure: " + name + "]", x, y + 1, GuideStyle.WARN);
                 return;
@@ -761,6 +769,21 @@ final class GuideBlocks {
             boolean up = GuideStyle.button(c.g, x + 19 + labelW, ly, 12, 12, c.mouseX, c.mouseY, shownLayers < structure.sizeY);
             GuideStyle.triangle(c.g, x + 23 + labelW, ly + 3, 0, up ? GuideStyle.ACCENT : shownLayers < structure.sizeY ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
             c.actionZone(x + 19 + labelW, ly, 12, 12, () -> shownLayers = Math.min(structure.sizeY, shownLayers + 1), null);
+            int[] range = GuideStructure.lengths(name);
+            if (range != null) {
+                // length selector: [<] length N [>]; a new length shows the whole machine again
+                int lx = x + 37 + labelW;
+                boolean less = length > range[0], more = length < range[1];
+                boolean lh = GuideStyle.button(c.g, lx, ly, 12, 12, c.mouseX, c.mouseY, less);
+                GuideStyle.triangle(c.g, lx + 4, ly + 3, 1, lh ? GuideStyle.ACCENT : less ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
+                c.actionZone(lx, ly, 12, 12, () -> { length = Math.max(range[0], length - range[3]); shownLayers = -1; }, null);
+                String lenLabel = I18n.get("guide.iuce.structure.length", length);
+                int lenW = c.font.width(lenLabel) + 6;
+                GuideStyle.text(c.g, c.font, lenLabel, lx + 15, ly + 2, GuideStyle.TEXT);
+                boolean mh = GuideStyle.button(c.g, lx + 14 + lenW, ly, 12, 12, c.mouseX, c.mouseY, more);
+                GuideStyle.triangle(c.g, lx + 18 + lenW, ly + 3, 0, mh ? GuideStyle.ACCENT : more ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
+                c.actionZone(lx + 14 + lenW, ly, 12, 12, () -> { length = Math.min(range[1], length + range[3]); shownLayers = -1; }, null);
+            }
             String dimensions = structure.sizeX + " × " + structure.sizeY + " × " + structure.sizeZ;
             GuideStyle.text(c.g, c.font, dimensions, x + width - 6 - c.font.width(dimensions), ly + 2, GuideStyle.MUTED);
 

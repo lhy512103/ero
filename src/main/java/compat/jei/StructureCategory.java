@@ -43,7 +43,9 @@ import java.util.List;
  */
 final class StructureCategory extends AbstractRecipeCategory<StructureCategory.Page> {
     /** One large machine, by guide structure name. */
-    record Page(String name) {}
+    record Page(String name, int length) {
+        GuideStructure structure() { return length < 0 ? GuideStructure.get(name) : GuideStructure.get(name, length); }
+    }
 
     static final IRecipeType<Page> TYPE = IRecipeType.create(Identifier.parse("iuce:structure"), Page.class);
     static final List<String> NAMES = List.of("ore_plant", "rolling_mill", "twin_screw_extruder", "bio_ethylene_plant",
@@ -78,7 +80,17 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
 
     static List<Page> pages() {
         List<Page> pages = new ArrayList<>();
-        for (String name : NAMES) if (GuideStructure.get(name) != null) pages.add(new Page(name));
+        for (String name : NAMES) {
+            if (GuideStructure.get(name) == null) continue;
+            int[] range = GuideStructure.lengths(name);
+            if (range == null) {
+                pages.add(new Page(name, -1));
+                continue;
+            }
+            // the default length first, then every other length the machine can be built at
+            pages.add(new Page(name, range[2]));
+            for (int l = range[0]; l <= range[1]; l += range[3]) if (l != range[2]) pages.add(new Page(name, l));
+        }
         return pages;
     }
 
@@ -90,7 +102,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
 
     /** Every block of the machine, controller included, with its count. */
     private static List<ItemStack> materials(Page page) {
-        GuideStructure structure = GuideStructure.get(page.name());
+        GuideStructure structure = page.structure();
         return structure == null ? List.of() : structure.materials(structure.sizeY);
     }
 
@@ -114,9 +126,9 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, Page page, IFocusGroup focus) {
-        GuideStructure structure = GuideStructure.get(page.name());
+        GuideStructure structure = page.structure();
         if (structure == null) return;
-        Viewer viewer = new Viewer(structure);
+        Viewer viewer = new Viewer(structure, page.length());
         builder.addWidget(viewer);
         builder.addGuiEventListener(viewer);
     }
@@ -160,9 +172,11 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         private BlockPos picked;
         private float displayedYaw;
         private int displayedLayers;
+        private final int length;
 
-        Viewer(GuideStructure structure) {
+        Viewer(GuideStructure structure, int length) {
             this.structure = structure;
+            this.length = length;
         }
 
         private boolean canForm() { return structure.model() != null; }
@@ -222,6 +236,10 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             if (picked != null && !formed) {
                 var state = structure.stateAt(picked);
                 if (state != null) g.text(font, state.getBlock().getName(), PAD + 4, TOP + VIEW_H - 11, 0xFFFFD84A, true);
+            }
+            if (length > 0) {
+                Component len = Component.translatable("jei.iuce.structure.length", length);
+                g.text(font, len, PAD + VIEW_W - 4 - font.width(len), TOP + 4, 0xFFFFD84A, true);
             }
 
             button(g, font, PREV_X, BTN_W, Component.literal("<"), false, mouseX, mouseY, !formed);

@@ -194,6 +194,7 @@
 185. Added: Large machine controllers have a side panel with a visual status page, a material store and build controls (world preview, one-click build and dismantle, length adjustment).
 186. Added: The controller's material store holds up to what the structure needs, accepts hoppers and pipes, and stays in the controller when it is broken; a well-stocked controller only breaks while sneaking.
 187. Removed: The blueprint terminal; its bill of materials and length switching now live in the controller panel.
+188. Added: JEI and the guide book show adjustable machines at every buildable length, with matching 3D views and material lists.
 
 ### 中文
 
@@ -385,3 +386,4 @@
 185. 新增：大机器控制器界面新增侧边面板，包含图形化状态页、材料仓和搭建控制（世界预览、一键搭建与拆除、长度调节）。
 186. 新增：控制器材料仓最多存放结构所需的材料，可接漏斗和管道，拆下控制器时材料随物品保留；存量较多时必须潜行才能拆下。
 187. 移除：图纸终端，其材料清单和长度切换功能已并入控制器界面。
+188. 新增：JEI 与指南可查看可伸缩机器在各个长度下的 3D 结构和材料清单。

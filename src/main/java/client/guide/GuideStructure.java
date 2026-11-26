@@ -112,6 +112,41 @@ public final class GuideStructure {
         return CACHE.computeIfAbsent(name, GuideStructure::load).orElse(null);
     }
 
+    /** The machine built at {@code length}; machines of fixed size ignore it. */
+    @Nullable
+    public static GuideStructure get(String name, int length) {
+        int[] range = lengths(name);
+        if (range == null || length == range[2]) return get(name);
+        int clamped = Math.clamp(length, range[0], range[1]);
+        return CACHE.computeIfAbsent(name + "@" + clamped, key -> {
+            Block controller = controllerOf(name);
+            return controller == null ? Optional.empty() : Optional.of(plant(controller, clamped));
+        }).orElse(null);
+    }
+
+    /** {min, max, default, step} of an adjustable machine's length, or null when its size is fixed. */
+    @Nullable
+    public static int[] lengths(String name) {
+        Block controller = controllerOf(name);
+        if (controller == null) return null;
+        if (controller == ModBlocks.MILL_CONTROLLER.get()) return new int[]{9, 17, defaultLength(controller), 1};
+        if (controller == ModBlocks.TWIN_SCREW_EXTRUDER.get()) return new int[]{13, 33, defaultLength(controller), 4};
+        if (controller == ModBlocks.COKE_OVEN_BATTERY.get()) return new int[]{17, 33, defaultLength(controller), 4};
+        return null;
+    }
+
+    private static int defaultLength(Block controller) {
+        return PlantControllerBlockEntity.targetLength(controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false));
+    }
+
+    @Nullable
+    private static Block controllerOf(String name) {
+        if (name.equals("ore_plant")) return ModBlocks.PLANT_CONTROLLER.get();
+        if (name.equals("rolling_mill")) return ModBlocks.MILL_CONTROLLER.get();
+        Block named = BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("iuce", name));
+        return named instanceof PlantControllerBlock ? named : null;
+    }
+
     /** Block counts in first-seen order, for the materials list. */
     public List<ItemStack> materials(int layers) {
         Map<String, ItemStack> totals = new LinkedHashMap<>();
@@ -164,9 +199,14 @@ public final class GuideStructure {
     }
 
     private static GuideStructure plant(Block controller) {
+        return plant(controller, -1);
+    }
+
+    private static GuideStructure plant(Block controller, int length) {
         // The book shows the machine facing the reader: controller front towards south-west.
         Direction facing = Direction.SOUTH;
         var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false).setValue(PlantControllerBlock.FACING, facing);
+        if (length > 0) state = state.setValue(PlantControllerBlock.LENGTH, Math.clamp(length, 9, 33));
         var layout = PlantStructure.cells(BlockPos.ZERO, facing, state);
         // The bounds of the parts actually placed: a mill's bounds cover its longest setting.
         var bounds = net.minecraft.world.level.levelgen.structure.BoundingBox.encapsulatingPositions(
