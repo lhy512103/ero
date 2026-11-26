@@ -33,6 +33,10 @@ public final class GuideShots {
     private static BlockPos industrialOrigin;
 
     public static void register() {
+        if ("recipe-interactions".equals(System.getProperty("iuce.guideShots"))) {
+            client.guide.GuideRecipeChecks.register();
+            return;
+        }
         NeoForge.EVENT_BUS.addListener(GuideShots::tick);
     }
 

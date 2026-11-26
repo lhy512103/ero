@@ -4,6 +4,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.material.Fluid;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -67,10 +69,18 @@ final class Ctx {
     }
 
     void itemZone(int x, int y, int w, int h, ItemStack stack) {
-        if (!stack.isEmpty()) add(x, y, w, h, stack, null, null, null, null);
+        itemZone(x, y, w, h, stack, null);
+    }
+
+    void itemZone(int x, int y, int w, int h, ItemStack stack, @Nullable Component tip) {
+        if (!stack.isEmpty()) add(x, y, w, h, stack, null, null, tip, null);
     }
 
     void tipZone(int x, int y, int w, int h, Component tip) { add(x, y, w, h, ItemStack.EMPTY, null, null, tip, null); }
+
+    void fluidZone(int x, int y, int w, int h, Fluid fluid, Component tip) {
+        add(x, y, w, h, ItemStack.EMPTY, "fluid:" + BuiltInRegistries.FLUID.getKey(fluid), null, tip, null);
+    }
 
     boolean hover(int x, int y, int w, int h) {
         return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h

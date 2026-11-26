@@ -3,6 +3,7 @@ package client.guide;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +11,8 @@ import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -489,7 +492,7 @@ final class GuideBlocks {
      * {@code {recipes: machine_type}} every recipe of a machine. Data comes from the live recipe manager.
      */
     static final class Recipes implements Block {
-        enum Mode { PRODUCES, USES, MACHINE }
+        enum Mode { PRODUCES, USES, MACHINE, FLUID_PRODUCES, FLUID_USES }
 
         private final String arg;
         private final Mode mode;
@@ -497,6 +500,7 @@ final class GuideBlocks {
         private int version = -1;
         private int index;
         private int bodyHeight;
+        private final Map<GuideRecipes.View, GuideMachineRecipe> machinePages = new HashMap<>();
 
         Recipes(String arg, Mode mode) {
             this.arg = arg;
@@ -515,27 +519,38 @@ final class GuideBlocks {
                     found.addAll(GuideRecipes.ofMachine(key.toLowerCase(Locale.ROOT)));
                     continue;
                 }
+                if (mode == Mode.FLUID_PRODUCES || mode == Mode.FLUID_USES) {
+                    Identifier id = Identifier.tryParse(key);
+                    if (id != null) found.addAll(GuideRecipes.forFluid(BuiltInRegistries.FLUID.getValue(id), mode == Mode.FLUID_USES));
+                    continue;
+                }
                 ItemStack stack = GuideBook.stack(key);
                 if (stack.isEmpty()) continue;
                 if (mode == Mode.USES) {
                     found.addAll(GuideRecipes.using(stack.getItem()));
                 } else {
-                    for (GuideRecipes.View view : GuideRecipes.producing(stack.getItem())) {
-                        if (view.output().getItem() == stack.getItem()) found.add(view);
-                    }
+                    found.addAll(GuideRecipes.producing(stack.getItem()));
                 }
             }
-            views = found;
-            index = Math.min(index, Math.max(0, views.size() - 1));
-            bodyHeight = 18;
+            views = found.stream().distinct().toList();
+            machinePages.clear();
             for (GuideRecipes.View view : views) {
-                int h = view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28;
-                bodyHeight = Math.max(bodyHeight, h);
+                if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                    machinePages.put(view, new GuideMachineRecipe(view));
+                }
             }
+            index = Math.min(index, Math.max(0, views.size() - 1));
         }
 
         @Override public int layout(Font font, int width) {
             resolve();
+            bodyHeight = 18;
+            int available = Math.max(1, Math.min(width, 236) - 16);
+            for (GuideRecipes.View view : views) {
+                GuideMachineRecipe page = machinePages.get(view);
+                if (page != null && page.available()) bodyHeight = Math.max(bodyHeight, page.height(available));
+                else bodyHeight = Math.max(bodyHeight, view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28);
+            }
             return views.isEmpty() ? 20 : 21 + bodyHeight + 17;
         }
 
@@ -544,7 +559,7 @@ final class GuideBlocks {
             if (views.isEmpty()) {
                 c.g.fill(x, y, x + w, y + 20, GuideStyle.SLOT_DARK);
                 c.g.fill(x + 1, y + 1, x + w - 1, y + 19, GuideStyle.ROW_ALT);
-                GuideStyle.text(c.g, c.font, I18n.get("guide.iuce.recipe.none"), x + 6, y + 6, GuideStyle.MUTED);
+                GuideStyle.text(c.g, c.font, I18n.get(GuideRecipes.current() == null ? "guide.iuce.recipe.none" : "guide.iuce.recipe.empty"), x + 6, y + 6, GuideStyle.MUTED);
                 return;
             }
             int h = 21 + bodyHeight + 17;
@@ -575,6 +590,13 @@ final class GuideBlocks {
             int by = y + 25;
             int cy = by + bodyHeight / 2;
             int ox;
+            if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                GuideMachineRecipe page = machinePages.get(view);
+                if (page != null && page.available()) {
+                    page.draw(c, x + 8, by + (bodyHeight - page.height(w - 16)) / 2, w - 16);
+                    return;
+                }
+            }
             if (view.kind() == GuideRecipes.Kind.CRAFT) {
                 int top = by + (bodyHeight - 54) / 2;
                 boolean grid = view.gridW() == 3;

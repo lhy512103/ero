@@ -1,8 +1,10 @@
 package compat.jei;
 
 import client.gui.MachineScreen;
-import compat.jei.JeiPage.Mark;
-import compat.jei.JeiPage.Role;
+import client.recipe.ProcessRecipePage;
+import client.recipe.RecipePage;
+import client.recipe.RecipePage.Mark;
+import client.recipe.RecipePage.Role;
 import machine.process.ProgressStyle;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -43,7 +45,7 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
     static final Map<String, IRecipeType<PlantBatch>> TYPES = new LinkedHashMap<>();
     static { for (String name : PLANTS) TYPES.put(name, IRecipeType.create(Identifier.parse("iuce:" + name), PlantBatch.class)); }
 
-    private static final int PAD = JeiPage.PAD, TOP = PAD + 2, GAUGE_W = 7, ARROW_W = 22, ARROW_H = 16;
+    private static final int PAD = RecipePage.PAD, TOP = PAD + 2, GAUGE_W = 7, ARROW_W = 22, ARROW_H = 16;
     private static final int POWER = 512, STEAM = 64;
     private static final Identifier ARROW = Identifier.fromNamespaceAndPath("iuce", "textures/gui/process/progress/" + ProgressStyle.ARROW.id() + ".png");
 
@@ -125,11 +127,11 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
             bottom = bottom + 4 + 2 + 16;
             right = Math.max(right, inX + segments * 18 - 2);
         }
-        // a page narrower than JeiPage.MIN_WIDTH is widened, with its parts moved to the middle
-        int width = right + 2 + PAD, dx = Math.max(0, (JeiPage.MIN_WIDTH - width) / 2);
+        // a page narrower than RecipePage.MIN_WIDTH is widened, with its parts moved to the middle
+        int width = right + 2 + PAD, dx = Math.max(0, (RecipePage.MIN_WIDTH - width) / 2);
         for (int[][] parts : new int[][][]{inputs, outputs, toolAt, segmentAt}) for (int[] p : parts) p[0] += dx;
         return new Layout(rows, inputs, outputs, toolAt, segmentAt, arrowX + dx, arrowY, outX + dx, PAD + 1 + dx,
-            Math.max(width, JeiPage.MIN_WIDTH), bottom + 2 + PAD);
+            Math.max(width, RecipePage.MIN_WIDTH), bottom + 2 + PAD);
     }
 
     /** The stacks a reference stands for: an item id, or every item of a {@code #tag}. */
@@ -209,26 +211,26 @@ final class PlantRecipeCategory extends AbstractRecipeCategory<PlantBatch> {
     public void draw(PlantBatch batch, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         long period = Math.clamp(batch.time() * 50L, 1500L, 6000L), now = System.currentTimeMillis();
         float part = (now % period) / (float) period;
-        JeiPage.panel(g, getWidth(), getHeight());
+        RecipePage.panel(g, getWidth(), getHeight());
         MachineScreen.energyGauge(g, page.gaugeX, TOP, GAUGE_W, page.gaugeH(), power(batch) ? 1f : 1f - part * 0.75f);
         if (power(batch)) MachineScreen.energyGauge(g, page.outX - 1, TOP, GAUGE_W, page.gaugeH(), part);
         ProgressStyle arrow = ProgressStyle.ARROW;
-        ProcessRecipeCategory.window(g, ARROW, page.arrowX, page.arrowY, arrow.width(), arrow.height(), arrow.mode(), arrow.frames(),
+        ProcessRecipePage.window(g, ARROW, page.arrowX, page.arrowY, arrow.width(), arrow.height(), arrow.mode(), arrow.frames(),
             part, 0, true);
-        JeiPage.slots(g, marks(batch));
+        RecipePage.slots(g, marks(batch));
     }
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, PlantBatch batch, IRecipeSlotsView slots, double mouseX, double mouseY) {
         int h = page.gaugeH() + 2;
-        if (JeiPage.over(mouseX, mouseY, page.gaugeX - 1, TOP - 1, GAUGE_W + 2, h)) {
+        if (RecipePage.over(mouseX, mouseY, page.gaugeX - 1, TOP - 1, GAUGE_W + 2, h)) {
             if (power(batch)) tooltip.add(Component.translatable("jei.iuce.plant.fuel").withStyle(ChatFormatting.GRAY));
             else JeiPage.energy(tooltip, batch.energy(), Math.max(1, batch.energy() / Math.max(1, batch.time())));
-        } else if (power(batch) && JeiPage.over(mouseX, mouseY, page.outX - 2, TOP - 1, GAUGE_W + 2, h)) {
+        } else if (power(batch) && RecipePage.over(mouseX, mouseY, page.outX - 2, TOP - 1, GAUGE_W + 2, h)) {
             tooltip.add(Component.translatable("jei.iuce.plant.power", POWER).withStyle(ChatFormatting.YELLOW));
             tooltip.add(Component.translatable("jei.iuce.plant.steam", STEAM).withStyle(ChatFormatting.GRAY));
-        } else if (JeiPage.over(mouseX, mouseY, page.arrowX, page.arrowY, ARROW_W, ARROW_H)) {
-            tooltip.add(JeiPage.time(batch.time()));
+        } else if (RecipePage.over(mouseX, mouseY, page.arrowX, page.arrowY, ARROW_W, ARROW_H)) {
+            tooltip.add(RecipePage.time(batch.time()));
         }
     }
 }

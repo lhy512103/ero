@@ -1,10 +1,11 @@
 package compat.jei;
 
 import client.gui.MachineScreen;
+import client.recipe.RecipePage;
 import client.guide.GuideStructure;
 import client.guide.GuideStructureRenderState;
-import compat.jei.JeiPage.Mark;
-import compat.jei.JeiPage.Role;
+import client.recipe.RecipePage.Mark;
+import client.recipe.RecipePage.Role;
 import item.StructureManualItem;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -48,7 +49,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
     static final List<String> NAMES = List.of("ore_plant", "rolling_mill", "twin_screw_extruder", "bio_ethylene_plant",
         "carbide_furnace_plant", "coke_oven_battery", "waste_heat_power_plant");
 
-    private static final int PAD = JeiPage.PAD, WIDTH = 178, VIEW_W = WIDTH - 2 * PAD, VIEW_H = 112;
+    private static final int PAD = RecipePage.PAD, WIDTH = 178, VIEW_W = WIDTH - 2 * PAD, VIEW_H = 112;
     private static final int TOP = PAD, BAR_Y = TOP + VIEW_H + 3, BAR_H = 12, PER_ROW = 7;
     private static final int GRID_X = PAD + 2, GRID_Y = BAR_Y + BAR_H + 5;
     private static final int OUT_X = WIDTH - PAD - 2 - 16;
@@ -122,12 +123,12 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
 
     @Override
     public void draw(Page page, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
-        JeiPage.panel(g, getWidth(), getHeight());
+        RecipePage.panel(g, getWidth(), getHeight());
         List<Mark> marks = new ArrayList<>();
         int kinds = materials(page).size();
         for (int i = 0; i < kinds; i++) marks.add(new Mark(GRID_X + (i % PER_ROW) * 18, GRID_Y + (i / PER_ROW) * 18, Role.INPUT));
         marks.add(new Mark(OUT_X, outY(), Role.OUTPUT));
-        JeiPage.slots(g, marks);
+        RecipePage.slots(g, marks);
         // an arrow from the blocks to the manual
         int ax = GRID_X + PER_ROW * 18 + 2, end = OUT_X - 5, ay = outY() + 7;
         if (end - ax > 6) {
@@ -189,7 +190,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         }
 
         private static boolean inView(double x, double y) {
-            return JeiPage.over(x, y, PAD, TOP, VIEW_W, VIEW_H);
+            return RecipePage.over(x, y, PAD, TOP, VIEW_W, VIEW_H);
         }
 
         @Override
@@ -237,7 +238,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
 
         private static void button(GuiGraphicsExtractor g, Font font, int x, int w, Component text, boolean on,
                                    double mx, double my, boolean enabled) {
-            boolean hover = enabled && JeiPage.over(mx, my, x, BAR_Y, w, BAR_H);
+            boolean hover = enabled && RecipePage.over(mx, my, x, BAR_Y, w, BAR_H);
             Identifier sprite = !enabled ? BTN_OFF : on ? BTN_ON : hover ? BTN_HOVER : BTN;
             g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, sprite, x, BAR_Y, w, BAR_H);
             int dy = on ? 3 : 2;
@@ -277,21 +278,21 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (button != 0) return false;
             dragged = false;
-            if (canForm() && JeiPage.over(mouseX, mouseY, FORM_X, BAR_Y, FORM_W, BAR_H)) {
+            if (canForm() && RecipePage.over(mouseX, mouseY, FORM_X, BAR_Y, FORM_W, BAR_H)) {
                 formed = !formed;
                 return true;
             }
             if (!formed) {
                 int now = layers == 0 ? shownLayers() : layers;
-                if (JeiPage.over(mouseX, mouseY, PREV_X, BAR_Y, BTN_W, BAR_H)) {
+                if (RecipePage.over(mouseX, mouseY, PREV_X, BAR_Y, BTN_W, BAR_H)) {
                     layers = Math.max(1, now - 1);
                     return true;
                 }
-                if (JeiPage.over(mouseX, mouseY, NEXT_X, BAR_Y, BTN_W, BAR_H)) {
+                if (RecipePage.over(mouseX, mouseY, NEXT_X, BAR_Y, BTN_W, BAR_H)) {
                     layers = Math.min(structure.sizeY, now + 1);
                     return true;
                 }
-                if (JeiPage.over(mouseX, mouseY, AUTO_X, BAR_Y, AUTO_W, BAR_H)) {
+                if (RecipePage.over(mouseX, mouseY, AUTO_X, BAR_Y, AUTO_W, BAR_H)) {
                     layers = layers == 0 ? structure.sizeY : 0;
                     return true;
                 }

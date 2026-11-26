@@ -7,8 +7,10 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 
@@ -17,7 +19,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,6 +40,7 @@ public final class GuideScreen extends Screen {
     @Nullable private Ctx.Drag dragging;
     private final Deque<String> back = new ArrayDeque<>();
     private final Deque<String> forward = new ArrayDeque<>();
+    private final Map<String, GuideBook.Page> recipePages = new HashMap<>();
     private GuideBook book;
     private GuideBook.Page page;
     private EditBox search;
@@ -52,8 +57,10 @@ public final class GuideScreen extends Screen {
 
     @Override
     protected void init() {
-        book = GuideBook.get();
-        if (page == null || book.page(page.id) != page) {
+        GuideBook currentBook = GuideBook.get();
+        if (book != currentBook) recipePages.clear();
+        book = currentBook;
+        if (page == null || findPage(page.id) != page) {
             String id = requested != null ? requested : lastPage;
             GuideBook.Page found = id == null ? null : book.page(id);
             page = found != null ? found : book.homePage();
@@ -119,9 +126,15 @@ public final class GuideScreen extends Screen {
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
     }
 
+    @Nullable
+    private GuideBook.Page findPage(String id) {
+        GuideBook.Page found = book.page(id);
+        return found != null ? found : recipePages.get(id);
+    }
+
     private void goBack() {
         while (!back.isEmpty()) {
-            GuideBook.Page target = book.page(back.pop());
+            GuideBook.Page target = findPage(back.pop());
             if (target == null) continue;
             forward.push(page.id);
             show(target, false);
@@ -131,7 +144,7 @@ public final class GuideScreen extends Screen {
 
     private void goForward() {
         while (!forward.isEmpty()) {
-            GuideBook.Page target = book.page(forward.pop());
+            GuideBook.Page target = findPage(forward.pop());
             if (target == null) continue;
             back.push(page.id);
             show(target, false);
@@ -144,7 +157,7 @@ public final class GuideScreen extends Screen {
             itemClicked(GuideBook.stack(target.substring(5)), false);
             return;
         }
-        GuideBook.Page found = book.page(target);
+        GuideBook.Page found = findPage(target);
         if (found != null) show(found, true);
     }
 
@@ -152,7 +165,32 @@ public final class GuideScreen extends Screen {
         if (stack.isEmpty()) return;
         GuideBook.Page found = uses ? null : book.pageFor(stack.getItem());
         if (found != null && found != page) show(found, true);
-        else Guide.showExternalRecipes(stack, uses);
+        else if (!Guide.showExternalRecipes(stack, uses)) {
+            recipePage(BuiltInRegistries.ITEM.getKey(stack.getItem()), stack.getHoverName(), stack,
+                uses ? GuideBlocks.Recipes.Mode.USES : GuideBlocks.Recipes.Mode.PRODUCES);
+        }
+    }
+
+    private void fluidClicked(String target, boolean uses) {
+        Identifier id = Identifier.tryParse(target.substring("fluid:".length()));
+        if (id == null || !BuiltInRegistries.FLUID.containsKey(id)) return;
+        var fluid = BuiltInRegistries.FLUID.getValue(id);
+        recipePage(id, fluid.getFluidType().getDescription(), new ItemStack(fluid.getBucket()),
+            uses ? GuideBlocks.Recipes.Mode.FLUID_USES : GuideBlocks.Recipes.Mode.FLUID_PRODUCES);
+    }
+
+    private void recipePage(Identifier ingredient, Component name, ItemStack icon, GuideBlocks.Recipes.Mode mode) {
+        String id = "recipe/" + mode.name() + "/" + ingredient;
+        GuideBook.Page target = recipePages.computeIfAbsent(id, key -> {
+            GuideBook.Page result = new GuideBook.Page(key);
+            boolean uses = mode == GuideBlocks.Recipes.Mode.USES || mode == GuideBlocks.Recipes.Mode.FLUID_USES;
+            result.title = I18n.get(uses ? "guide.iuce.recipe.using" : "guide.iuce.recipe.producing");
+            result.icon = icon.copy();
+            result.blocks.add(new GuideBlocks.Heading(2, name.getString()));
+            result.blocks.add(new GuideBlocks.Recipes(ingredient.toString(), mode));
+            return result;
+        });
+        show(target, true);
     }
 
     // ------------------------------------------------------------------ drawing
@@ -212,7 +250,11 @@ public final class GuideScreen extends Screen {
         for (int i = zones.size() - 1; i >= 0; i--) {
             Ctx.Zone zone = zones.get(i);
             if (!zone.contains(mouseX, mouseY)) continue;
-            if (!zone.stack().isEmpty()) g.setTooltipForNextFrame(font, zone.stack(), mouseX, mouseY);
+            if (!zone.stack().isEmpty() && zone.tip() != null) {
+                List<Component> lines = new ArrayList<>(Screen.getTooltipFromItem(minecraft, zone.stack()));
+                lines.add(zone.tip());
+                g.setTooltipForNextFrame(font, lines, zone.stack().getTooltipImage(), zone.stack(), mouseX, mouseY);
+            } else if (!zone.stack().isEmpty()) g.setTooltipForNextFrame(font, zone.stack(), mouseX, mouseY);
             else if (zone.tip() != null) g.setTooltipForNextFrame(zone.tip(), mouseX, mouseY);
             break;
         }
@@ -377,6 +419,8 @@ public final class GuideScreen extends Screen {
             if (!zone.contains(event.x(), event.y())) continue;
             if (!zone.stack().isEmpty()) {
                 itemClicked(zone.stack(), button == 1);
+            } else if (zone.link() != null && zone.link().startsWith("fluid:")) {
+                fluidClicked(zone.link(), button == 1);
             } else if (button == 0 && zone.action() != null) {
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 zone.action().run();
