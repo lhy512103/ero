@@ -157,6 +157,8 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         private float pitch = PITCH;
         private boolean dragged;
         private BlockPos picked;
+        private float displayedYaw;
+        private int displayedLayers;
 
         Viewer(GuideStructure structure) {
             this.structure = structure;
@@ -205,16 +207,17 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             MachineScreen.inset(g, PAD, TOP, VIEW_W, VIEW_H, MachineScreen.SCREEN);
             g.fillGradient(PAD + 1, TOP + 1, PAD + VIEW_W - 1, TOP + VIEW_H - 1, 0xFF34424D, 0xFF161B20);
             int shown = shownLayers();
+            displayedLayers = shown;
+            displayedYaw = currentYaw();
             float spin = formed ? (System.currentTimeMillis() % 36000L) * 0.06f : 0;
             // picture-in-picture views are placed in screen space, so the page's offset is added here
             var pose = g.pose();
             int ox = Math.round(pose.m20()), oy = Math.round(pose.m21());
             g.submitPictureInPictureRenderState(new GuideStructureRenderState(structure, shown, formed, centre(),
-                currentYaw(), pitch, spin, ox + PAD + 1, oy + TOP + 1, ox + PAD + VIEW_W - 1, oy + TOP + VIEW_H - 1,
-                scale(), null, g.peekScissorStack()));
+                displayedYaw, pitch, spin, ox + PAD + 1, oy + TOP + 1, ox + PAD + VIEW_W - 1, oy + TOP + VIEW_H - 1,
+                scale(), !formed && picked != null && picked.getY() < shown ? picked : null, g.peekScissorStack()));
 
             Font font = Minecraft.getInstance().font;
-            if (picked != null && !formed && picked.getY() < shown) outline(g, picked);
             if (picked != null && !formed) {
                 var state = structure.stateAt(picked);
                 if (state != null) g.text(font, state.getBlock().getName(), PAD + 4, TOP + VIEW_H - 11, 0xFFFFD84A, true);
@@ -307,7 +310,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         private Matrix4f view() {
             Vector3f c = centre();
             return new Matrix4f().rotateZ((float) Math.PI)
-                .rotateX((float) Math.toRadians(-pitch)).rotateY((float) Math.toRadians(currentYaw()))
+                .rotateX((float) Math.toRadians(-pitch)).rotateY((float) Math.toRadians(displayedYaw))
                 .translate(-c.x, -c.y, -c.z);
         }
 
@@ -319,9 +322,10 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             float s = scale();
             Matrix4f inv = view().invert();
             float vx = (float) (mouseX - (PAD + VIEW_W / 2f)) / s, vy = (float) (mouseY - (TOP + VIEW_H / 2f)) / s;
-            Vector3f o = inv.transformPosition(vx, vy, 1000f, new Vector3f());
-            Vector3f d = inv.transformPosition(vx, vy, -1000f, new Vector3f()).sub(o);
-            int shown = shownLayers();
+            // PictureInPictureRenderer negates the pose Z scale, so smaller view Z is nearer.
+            Vector3f o = inv.transformPosition(vx, vy, -1000f, new Vector3f());
+            Vector3f d = inv.transformPosition(vx, vy, 1000f, new Vector3f()).sub(o);
+            int shown = displayedLayers;
             BlockPos best = null;
             float bestT = Float.MAX_VALUE;
             for (GuideStructure.Cell cell : structure.cells) {
@@ -352,34 +356,6 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
                 if (t0 > t1) return -1;
             }
             return t0;
-        }
-
-        /** The picked block's edges drawn flat over the screen, so they show through the blocks in front, cycling bright colours. */
-        private void outline(GuiGraphicsExtractor g, BlockPos p) {
-            float s = scale(), cx = PAD + VIEW_W / 2f, cy = TOP + VIEW_H / 2f;
-            Matrix4f m = view();
-            float[][] c = new float[8][];
-            for (int i = 0; i < 8; i++) {
-                Vector3f v = m.transformPosition(p.getX() + (i & 1), p.getY() + (i >> 1 & 1), p.getZ() + (i >> 2 & 1), new Vector3f());
-                c[i] = new float[]{cx + v.x * s, cy + v.y * s};
-            }
-            int[][] edges = {{0, 1}, {1, 3}, {3, 2}, {2, 0}, {4, 5}, {5, 7}, {7, 6}, {6, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
-            g.enableScissor(PAD + 1, TOP + 1, PAD + VIEW_W - 1, TOP + VIEW_H - 1);
-            long now = System.currentTimeMillis();
-            for (int pass = 0; pass < 2; pass++) for (int e = 0; e < edges.length; e++) {
-                float[] a = c[edges[e][0]], b = c[edges[e][1]];
-                int steps = Math.max(1, (int) Math.ceil(Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]))));
-                for (int i = 0; i <= steps; i++) {
-                    float t = i / (float) steps;
-                    int x = Math.round(a[0] + (b[0] - a[0]) * t), y = Math.round(a[1] + (b[1] - a[1]) * t);
-                    if (pass == 0) g.fill(x - 1, y - 1, x + 2, y + 2, 0xC0000000);
-                    else {
-                        float hue = ((now % 1500L) / 1500f + e / 12f + t / 12f) % 1f;
-                        g.fill(x, y, x + 1, y + 1, 0xFF000000 | java.awt.Color.HSBtoRGB(hue, 1f, 1f));
-                    }
-                }
-            }
-            g.disableScissor();
         }
     }
 }

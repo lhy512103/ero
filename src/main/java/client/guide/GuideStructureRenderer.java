@@ -84,11 +84,11 @@ public final class GuideStructureRenderer extends PictureInPictureRenderer<Guide
         }
         if (state.highlight() != null) {
             var p = state.highlight();
-            var box = net.minecraft.world.phys.shapes.Shapes.block();
+            var box = net.minecraft.world.phys.shapes.Shapes.box(-0.002, -0.002, -0.002, 1.002, 1.002, 1.002);
             bufferSource.endBatch();
             net.minecraft.client.renderer.ShapeRenderer.renderShape(poseStack,
                 bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.lines()), box,
-                p.getX(), p.getY(), p.getZ(), 0xFFFFD84A, 2.5F);
+                p.getX(), p.getY(), p.getZ(), 0xFFFFD84A, 1.5F);
         }
     }
 
