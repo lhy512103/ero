@@ -182,6 +182,7 @@
 176. Added: A JEI structure tab for large machines that animates the build layer by layer, previews the formed machine, and lists every block needed.
 177. Added: Structure manuals, so encoding a structure page in an AE2 pattern terminal gives a fake-crafting pattern for a whole machine.
 178. Improved: The JEI structure tab shows one large view with a layer selector, a formed toggle, scroll zoom, drag rotation, and click-to-highlight block names.
+179. Improved: The JEI structure tab picks the exact block under the cursor, turns up and down as well as around, outlines the picked block through other blocks in shifting bright colours, and uses redrawn steel buttons.
 
 ### 中文
 
@@ -363,3 +364,4 @@
 176. 新增：JEI 大型机器结构标签页，逐层动画演示搭建过程、预览成型效果并列出所需全部方块。
 177. 新增：结构手册，在 AE2 样板编码终端中编码结构页即可得到整台机器的假合成样板。
 178. 优化：JEI 结构页改为单个大预览，可逐层选择查看、切换成型后效果、滚轮缩放、拖动旋转，并可点击方块高亮显示其名称。
+179. 优化：JEI 结构页点选方块改为精确命中光标下的方块，可上下拖动翻转视角，选中方块的彩色流光边框可穿透其他方块显示，按钮改用重绘的钢板贴图。

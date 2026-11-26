@@ -53,6 +53,8 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
     private static final int GRID_X = PAD + 2, GRID_Y = BAR_Y + BAR_H + 5;
     private static final int OUT_X = WIDTH - PAD - 2 - 16;
     private static final float PITCH = 30;
+    private static final Identifier BTN = Identifier.parse("iuce:jei/button"), BTN_HOVER = Identifier.parse("iuce:jei/button_hover"),
+        BTN_ON = Identifier.parse("iuce:jei/button_on"), BTN_OFF = Identifier.parse("iuce:jei/button_off");
     private static final int TEXT = 0xFFE0E6EA, TEXT_OFF = 0xFF6A747C, ON = 0xFF2E6F8E, HOVER = 0xFF3A4752;
 
     // the controls under the screen: [<] layer [>] [auto] ......... [formed]
@@ -152,6 +154,7 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         private float zoom = 1;
         /** Turn set by dragging, or NaN while the view still turns by itself. */
         private float yaw = Float.NaN;
+        private float pitch = PITCH;
         private boolean dragged;
         private BlockPos picked;
 
@@ -207,10 +210,11 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             var pose = g.pose();
             int ox = Math.round(pose.m20()), oy = Math.round(pose.m21());
             g.submitPictureInPictureRenderState(new GuideStructureRenderState(structure, shown, formed, centre(),
-                currentYaw(), PITCH, spin, ox + PAD + 1, oy + TOP + 1, ox + PAD + VIEW_W - 1, oy + TOP + VIEW_H - 1,
-                scale(), formed ? null : picked, g.peekScissorStack()));
+                currentYaw(), pitch, spin, ox + PAD + 1, oy + TOP + 1, ox + PAD + VIEW_W - 1, oy + TOP + VIEW_H - 1,
+                scale(), null, g.peekScissorStack()));
 
             Font font = Minecraft.getInstance().font;
+            if (picked != null && !formed && picked.getY() < shown) outline(g, picked);
             if (picked != null && !formed) {
                 var state = structure.stateAt(picked);
                 if (state != null) g.text(font, state.getBlock().getName(), PAD + 4, TOP + VIEW_H - 11, 0xFFFFD84A, true);
@@ -231,8 +235,10 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
         private static void button(GuiGraphicsExtractor g, Font font, int x, int w, Component text, boolean on,
                                    double mx, double my, boolean enabled) {
             boolean hover = enabled && JeiPage.over(mx, my, x, BAR_Y, w, BAR_H);
-            MachineScreen.inset(g, x, BAR_Y, w, BAR_H, on ? ON : hover ? HOVER : MachineScreen.SCREEN);
-            g.text(font, text, x + (w - font.width(text) + 1) / 2, BAR_Y + 2, enabled ? TEXT : TEXT_OFF, false);
+            Identifier sprite = !enabled ? BTN_OFF : on ? BTN_ON : hover ? BTN_HOVER : BTN;
+            g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, sprite, x, BAR_Y, w, BAR_H);
+            int dy = on ? 3 : 2;
+            g.text(font, text, x + (w - font.width(text) + 1) / 2, BAR_Y + dy, !enabled ? 0xFF7A7F86 : on ? 0xFFFFFFFF : MachineScreen.LABEL, on);
         }
 
         @Override
@@ -259,7 +265,8 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             if (button != 0) return false;
             if (Float.isNaN(yaw)) yaw = currentYaw();
             yaw += (float) dx * 1.5f;
-            if (Math.abs(dx) > 0.5) dragged = true;
+            pitch = Math.max(-89f, Math.min(89f, pitch - (float) dy * 1.5f));
+            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) dragged = true;
             return true;
         }
 
@@ -297,30 +304,82 @@ final class StructureCategory extends AbstractRecipeCategory<StructureCategory.P
             return true;
         }
 
-        /** The shown block whose centre lies under the mouse, nearest the viewer first. */
+        private Matrix4f view() {
+            Vector3f c = centre();
+            return new Matrix4f().rotateZ((float) Math.PI)
+                .rotateX((float) Math.toRadians(-pitch)).rotateY((float) Math.toRadians(currentYaw()))
+                .translate(-c.x, -c.y, -c.z);
+        }
+
+        /**
+         * The shown block the mouse ray hits first: the ray through the mouse is taken back into
+         * layout space and tested against each block's box, once per click and never per frame.
+         */
         private BlockPos pick(double mouseX, double mouseY) {
             float s = scale();
-            Vector3f c = centre();
-            Matrix4f m = new Matrix4f().rotateZ((float) Math.PI)
-                .rotateX((float) Math.toRadians(-PITCH)).rotateY((float) Math.toRadians(currentYaw()))
-                .translate(-c.x, -c.y, -c.z);
-            float cx = PAD + VIEW_W / 2f, cy = TOP + VIEW_H / 2f;
+            Matrix4f inv = view().invert();
+            float vx = (float) (mouseX - (PAD + VIEW_W / 2f)) / s, vy = (float) (mouseY - (TOP + VIEW_H / 2f)) / s;
+            Vector3f o = inv.transformPosition(vx, vy, 1000f, new Vector3f());
+            Vector3f d = inv.transformPosition(vx, vy, -1000f, new Vector3f()).sub(o);
             int shown = shownLayers();
             BlockPos best = null;
-            float bestDepth = -Float.MAX_VALUE;
-            Vector3f v = new Vector3f();
+            float bestT = Float.MAX_VALUE;
             for (GuideStructure.Cell cell : structure.cells) {
                 BlockPos p = cell.pos();
                 if (p.getY() >= shown) continue;
-                m.transformPosition(p.getX() + 0.5f, p.getY() + 0.5f, p.getZ() + 0.5f, v);
-                double sx = cx + v.x * s, sy = cy + v.y * s;
-                if (Math.abs(sx - mouseX) > s * 0.6 || Math.abs(sy - mouseY) > s * 0.6) continue;
-                if (v.z > bestDepth) {
-                    bestDepth = v.z;
+                float t = hit(o, d, p.getX(), p.getY(), p.getZ());
+                if (t >= 0 && t < bestT) {
+                    bestT = t;
                     best = p;
                 }
             }
             return best;
+        }
+
+        /** Entry distance of the ray o + t d into the unit box at x, y, z, or -1 for a miss. */
+        private static float hit(Vector3f o, Vector3f d, int x, int y, int z) {
+            float t0 = 0, t1 = Float.MAX_VALUE;
+            float[] os = {o.x, o.y, o.z}, ds = {d.x, d.y, d.z}, lo = {x, y, z};
+            for (int i = 0; i < 3; i++) {
+                if (Math.abs(ds[i]) < 1e-7f) {
+                    if (os[i] < lo[i] || os[i] > lo[i] + 1) return -1;
+                    continue;
+                }
+                float a = (lo[i] - os[i]) / ds[i], b = (lo[i] + 1 - os[i]) / ds[i];
+                if (a > b) { float k = a; a = b; b = k; }
+                t0 = Math.max(t0, a);
+                t1 = Math.min(t1, b);
+                if (t0 > t1) return -1;
+            }
+            return t0;
+        }
+
+        /** The picked block's edges drawn flat over the screen, so they show through the blocks in front, cycling bright colours. */
+        private void outline(GuiGraphicsExtractor g, BlockPos p) {
+            float s = scale(), cx = PAD + VIEW_W / 2f, cy = TOP + VIEW_H / 2f;
+            Matrix4f m = view();
+            float[][] c = new float[8][];
+            for (int i = 0; i < 8; i++) {
+                Vector3f v = m.transformPosition(p.getX() + (i & 1), p.getY() + (i >> 1 & 1), p.getZ() + (i >> 2 & 1), new Vector3f());
+                c[i] = new float[]{cx + v.x * s, cy + v.y * s};
+            }
+            int[][] edges = {{0, 1}, {1, 3}, {3, 2}, {2, 0}, {4, 5}, {5, 7}, {7, 6}, {6, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+            g.enableScissor(PAD + 1, TOP + 1, PAD + VIEW_W - 1, TOP + VIEW_H - 1);
+            long now = System.currentTimeMillis();
+            for (int pass = 0; pass < 2; pass++) for (int e = 0; e < edges.length; e++) {
+                float[] a = c[edges[e][0]], b = c[edges[e][1]];
+                int steps = Math.max(1, (int) Math.ceil(Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]))));
+                for (int i = 0; i <= steps; i++) {
+                    float t = i / (float) steps;
+                    int x = Math.round(a[0] + (b[0] - a[0]) * t), y = Math.round(a[1] + (b[1] - a[1]) * t);
+                    if (pass == 0) g.fill(x - 1, y - 1, x + 2, y + 2, 0xC0000000);
+                    else {
+                        float hue = ((now % 1500L) / 1500f + e / 12f + t / 12f) % 1f;
+                        g.fill(x, y, x + 1, y + 1, 0xFF000000 | java.awt.Color.HSBtoRGB(hue, 1f, 1f));
+                    }
+                }
+            }
+            g.disableScissor();
         }
     }
 }

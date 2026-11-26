@@ -276,6 +276,11 @@
         'sprites/process/button': () => [plate(20, 20, light(PANEL, 0.1), 14, { chamfer: 1 }), nine(20, 20, 3)],
         'sprites/process/button_on': () => [plate(20, 20, [108, 140, 116], 15, { chamfer: 1, pressed: true }), nine(20, 20, 3)],
         'sprites/process/screen': () => [screen(), nine(16, 16, 3)],
+        // the JEI structure page's controls: raised steel keys, a hover glow and a lit, pressed state
+        'sprites/jei/button': () => [plate(16, 14, light(PANEL, 0.06), 31, { chamfer: 1 }), nine(16, 14, 3)],
+        'sprites/jei/button_hover': () => [plate(16, 14, mix(light(PANEL, 0.12), IN, 0.18), 32, { chamfer: 1 }), nine(16, 14, 3)],
+        'sprites/jei/button_on': () => [plate(16, 14, mix(PANEL, IN, 0.55), 33, { chamfer: 1, pressed: true }), nine(16, 14, 3)],
+        'sprites/jei/button_off': () => [plate(16, 14, dark(PANEL, 0.22), 34, { chamfer: 1, grain: 0.02 }), nine(16, 14, 3)],
         'process/slot': () => [recessed(18, 18, SLOT, 16), null],
         'process/tank_in': () => [tank(IN), null],
         'process/tank_out': () => [tank(OUT), null],
