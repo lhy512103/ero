@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:pail_body",
+      "iuce:pail_lid"
+    ]
+  ],
+  "result": {
+    "id": "iuce:plastic_pail",
+    "count": 1
+  }
+}

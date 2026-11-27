@@ -1,0 +1,22 @@
+{
+  "type": "iuce:process",
+  "machine": "smokehouse",
+  "time": 200,
+  "energy": 0,
+  "items": [
+    {
+      "item": "iuce:rubber_sheet",
+      "count": 4
+    },
+    {
+      "item": "#minecraft:logs",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:rubber",
+      "count": 48
+    }
+  ]
+}

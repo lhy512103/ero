@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:checker_plate",
+      "",
+      ""
+    ],
+    [
+      "iuce:checker_plate",
+      "iuce:checker_plate",
+      ""
+    ],
+    [
+      "iuce:checker_plate",
+      "iuce:checker_plate",
+      "iuce:checker_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:steel_stairs",
+    "count": 8
+  }
+}

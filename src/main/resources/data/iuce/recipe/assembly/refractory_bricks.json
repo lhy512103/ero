@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:bricks",
+      "iuce:quicklime",
+      "minecraft:bricks"
+    ],
+    [
+      "iuce:quicklime",
+      "minecraft:clay_ball",
+      "iuce:quicklime"
+    ],
+    [
+      "minecraft:bricks",
+      "iuce:quicklime",
+      "minecraft:bricks"
+    ]
+  ],
+  "result": {
+    "id": "iuce:refractory_bricks",
+    "count": 4
+  }
+}

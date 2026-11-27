@@ -1,0 +1,35 @@
+{
+  "type": "iuce:process",
+  "machine": "polymerization_reactor",
+  "time": 200,
+  "energy": 12800,
+  "fluids": [
+    {
+      "fluid": "iuce:vinyl_chloride",
+      "amount": 1000
+    },
+    {
+      "fluid": "iuce:deionized_water",
+      "amount": 1000
+    }
+  ],
+  "items": [
+    {
+      "item": "iuce:dispersant",
+      "count": 1
+    },
+    {
+      "item": "iuce:initiator",
+      "count": 1
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:pvc_slurry",
+      "amount": 1000
+    }
+  ]
+}

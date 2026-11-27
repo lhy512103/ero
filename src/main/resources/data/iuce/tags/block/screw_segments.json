@@ -1,0 +1,10 @@
+{
+  "values": [
+    "iuce:main_feed_segment",
+    "iuce:melting_segment",
+    "iuce:side_feed_segment",
+    "iuce:mixing_segment",
+    "iuce:venting_segment",
+    "iuce:die_segment"
+  ]
+}

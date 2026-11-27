@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "saccharification_tank",
+  "fluids": [
+    {
+      "fluid": "iuce:liquefied_mash",
+      "amount": 1000
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:enzyme_preparation"
+  },
+  "fluid_results": [
+    {
+      "fluid": "iuce:sugar_solution",
+      "amount": 1000
+    }
+  ],
+  "energy": 1280,
+  "time": 160
+}

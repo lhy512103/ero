@@ -1,0 +1,17 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:drip_tape",
+    "iuce:drip_tape",
+    "iuce:drip_tape",
+    "iuce:drip_tape",
+    "iuce:drip_emitter",
+    "iuce:drip_emitter",
+    "iuce:drip_emitter",
+    "iuce:drip_emitter"
+  ],
+  "result": {
+    "id": "iuce:drip_pipe",
+    "count": 8
+  }
+}

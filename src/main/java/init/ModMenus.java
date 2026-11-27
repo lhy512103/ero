@@ -67,6 +67,7 @@ public class ModMenus {
                 (machine.induction_furnace.InductionFurnaceBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
         ));
 
+    public static final Supplier<MenuType<machine.process.DesignMenu>> DESIGN = MENUS.register("process_design_table", () -> IMenuTypeExtension.create(machine.process.DesignMenu::new));
     public static final Supplier<MenuType<factory.FactoryHubMenu>> FACTORY_HUB =
         MENUS.register("factory_hub", () -> IMenuTypeExtension.create(
             (IContainerFactory<factory.FactoryHubMenu>) (id, inv, data) -> new factory.FactoryHubMenu(id, inv, data)
@@ -104,4 +105,7 @@ public class ModMenus {
             (IContainerFactory<IndustrialWorkbenchMenu>) (id, inv, data) -> new IndustrialWorkbenchMenu(id, inv,
                 (machine.workbench.IndustrialWorkbenchBlockEntity) inv.player.level().getBlockEntity(data.readBlockPos()))
         ));
+
+    public static final Supplier<MenuType<block.CrateMenu>> CRATE =
+        MENUS.register("crate", () -> new MenuType<>(block.CrateMenu::new, net.minecraft.world.flag.FeatureFlags.VANILLA_SET));
 }

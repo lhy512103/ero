@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "iuce:block/logistics_port_ii"
+    },
+    "facing=east": {
+      "model": "iuce:block/logistics_port_ii",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "iuce:block/logistics_port_ii",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "iuce:block/logistics_port_ii",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "iuce:block/logistics_port_ii",
+      "x": -90
+    },
+    "facing=down": {
+      "model": "iuce:block/logistics_port_ii",
+      "x": 90
+    }
+  }
+}

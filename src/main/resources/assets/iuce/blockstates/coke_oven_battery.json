@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "iuce:block/coke_oven_battery",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "iuce:block/coke_oven_battery",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "iuce:block/coke_oven_battery",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "iuce:block/coke_oven_battery",
+      "y": 270
+    }
+  }
+}

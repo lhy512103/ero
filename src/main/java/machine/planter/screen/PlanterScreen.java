@@ -1,93 +1,38 @@
 package machine.planter.screen;
 
+import client.gui.MachineScreen;
 import machine.planter.menu.PlanterMenu;
+import machine.process.ProgressStyle.Mode;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 import java.util.List;
 
-public class PlanterScreen extends AbstractContainerScreen<PlanterMenu> {
-
-    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/crop_planter.png");
-    private static final Identifier ENERGY_PROGRESS = Identifier.parse("iuce:textures/gui/com/energy_progress_on_5.png");
-    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
-    private static final Identifier SOLAR_ON = Identifier.parse("iuce:textures/gui/com/solar_on.png");
+/**
+ * The planter: the seed above, the soil below and the plant growing in the glass chamber between them
+ * under the grow lamps; the harvest leaves on the right. The lamp on the left shows sun or moon.
+ */
+public class PlanterScreen extends MachineScreen<PlanterMenu> {
+    public static final Window WINDOW = new Window(60, 31, 22, 29, Mode.PHASE, 8, false);
+    public static final Window SKY = new Window(23, 52, 10, 10, Mode.PHASE, 2, false);
 
     public PlanterScreen(PlanterMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 176, 166);
+        super(menu, inventory, title, 176, 166, "planter", 87);
+        // the seed slot sits on the title's row
+        titleLabel = false;
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
-    }
-
-    @Override
-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-            TEXTURE, this.leftPos, this.topPos, 0, 0,
-            this.imageWidth, this.imageHeight,
-            256, 256);
-
-        super.extractContents(graphics, mouseX, mouseY, a);
-
-        drawEnergyProgress(graphics);
-        drawPowerOn(graphics);
-        drawSolarOn(graphics);
-    }
-
-    @Override
-    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        super.extractTooltip(graphics, mouseX, mouseY);
-        int relX = mouseX - this.leftPos;
-        int relY = mouseY - this.topPos;
-        if (relX >= 63 && relX < 63 + 13 && relY >= 35 && relY < 35 + 20) {
-            int progress = menu.getProgress();
-            int maxProgress = menu.getMaxProgress();
-            graphics.setComponentTooltipForNextFrame(this.font,
-                List.of(Component.translatable("tooltip.iuce.planter.progress", progress, maxProgress)),
-                mouseX, mouseY);
-        }
-        // solar_on 悬停显示游戏日时刻和阶段信息
-        if (relX >= 19 && relX < 19 + 10 && relY >= 67 && relY < 67 + 19) {
-            int ticks = menu.getClockTime();
-            int hours = (ticks / 1000 + 6) % 24;
-            int minutes = (ticks % 1000) * 60 / 1000;
-            String phase = menu.getPhaseName();
-            float speed = menu.getSpeedMultiplier();
-            graphics.setComponentTooltipForNextFrame(this.font,
-                List.of(
-                    Component.literal(String.format("%02d:%02d", hours, minutes)),
-                    Component.translatable("tooltip.iuce.planter.speed", Component.translatable(phase), speed)),
-                mouseX, mouseY);
-        }
-    }
-
-    private void drawEnergyProgress(GuiGraphicsExtractor graphics) {
-        long energy = menu.getEnergy();
-        long maxEnergy = menu.getMaxEnergy();
-        if (maxEnergy <= 0 || energy <= 0) return;
-        int filled = (int) (energy * 20 / maxEnergy);
-        // 从上往下绘制
-        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-            ENERGY_PROGRESS, this.leftPos + 63, this.topPos + 35, 0, 0, 13, filled, 13, 20);
-    }
-
-    private void drawPowerOn(GuiGraphicsExtractor graphics) {
-        if (menu.getEnergy() > 0) {
-            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-                POWER_ON, this.leftPos + 7, this.topPos + 71, 0, 0,
-                12, 15, 12, 15);
-        }
-    }
-
-    private void drawSolarOn(GuiGraphicsExtractor graphics) {
-        if (menu.isDaytime()) {
-            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-                SOLAR_ON, this.leftPos + 19, this.topPos + 67, 0, 0,
-                10, 19, 10, 19);
-        }
+    protected void machine(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        energy(g, 12, 22, 7, 48, menu.getEnergy(), menu.getMaxEnergy());
+        run(g, "planter_progress", WINDOW, menu.getProgress(), menu.getMaxProgress(), menu.getProgress() > 0, false);
+        hit(WINDOW.x(), WINDOW.y(), WINDOW.w(), WINDOW.h(),
+            List.of(Component.translatable("tooltip.iuce.planter.progress", menu.getProgress(), menu.getMaxProgress())));
+        run(g, "planter_sky", SKY, menu.isDaytime() ? 1 : 0, 1, false, false);
+        int ticks = menu.getClockTime();
+        hit(SKY.x(), SKY.y(), SKY.w(), SKY.h(), List.of(
+            Component.literal(String.format("%02d:%02d", (ticks / 1000 + 6) % 24, (ticks % 1000) * 60 / 1000)),
+            Component.translatable("tooltip.iuce.planter.speed", Component.translatable(menu.getPhaseName()), menu.getSpeedMultiplier())));
     }
 }

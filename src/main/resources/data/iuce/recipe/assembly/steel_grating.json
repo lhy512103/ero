@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_stick",
+      "",
+      "iuce:iron_stick"
+    ],
+    [
+      "",
+      "iuce:steel_plate",
+      ""
+    ],
+    [
+      "iuce:iron_stick",
+      "",
+      "iuce:iron_stick"
+    ]
+  ],
+  "result": {
+    "id": "iuce:steel_grating",
+    "count": 8
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "distillation_column",
+  "time": 160,
+  "energy": 3840,
+  "fluids": [
+    {
+      "fluid": "iuce:liquefied_vcm",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:topped_vcm",
+      "amount": 900
+    },
+    {
+      "fluid": "iuce:acetylene",
+      "amount": 100
+    }
+  ]
+}

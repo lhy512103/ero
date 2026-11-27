@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=north,formed=false": {
+      "model": "iuce:block/steel_ladder"
+    },
+    "facing=north,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false": {
+      "model": "iuce:block/steel_ladder",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false": {
+      "model": "iuce:block/steel_ladder",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false": {
+      "model": "iuce:block/steel_ladder",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

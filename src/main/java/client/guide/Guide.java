@@ -81,9 +81,9 @@ public final class Guide {
         return openKey != null && openKey.matches(event);
     }
 
-    /** Hands an item over to JEI's recipe view when JEI is installed; otherwise does nothing. */
-    static void showExternalRecipes(ItemStack stack, boolean uses) {
-        if (ModList.get().isLoaded("jei")) compat.jei.EroJeiPlugin.showRecipes(stack, uses);
+    /** Returns whether JEI opened its recipe view for this item. */
+    static boolean showExternalRecipes(ItemStack stack, boolean uses) {
+        return ModList.get().isLoaded("jei") && compat.jei.EroJeiPlugin.showRecipes(stack, uses);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {

@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:steel_plate",
+      "iuce:heating_coil",
+      "iuce:steel_plate"
+    ],
+    [
+      "minecraft:glass",
+      "iuce:machine_casing",
+      "minecraft:glass"
+    ],
+    [
+      "iuce:steel_plate",
+      "iuce:advanced_circuit",
+      "iuce:steel_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:dehydration_reactor",
+    "count": 1
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "type": "iuce:process",
+  "machine": "fermenter",
+  "items": [
+    {
+      "item": "iuce:aspergillus_culture"
+    },
+    {
+      "item": "minecraft:sugar"
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "#iuce:any_water",
+      "amount": 250
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:aspergillus_culture"
+  },
+  "results": [
+    {
+      "id": "iuce:aspergillus_culture",
+      "count": 2
+    }
+  ],
+  "energy": 1600,
+  "time": 200
+}

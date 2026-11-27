@@ -5,6 +5,24 @@
     },
     "iuce:coal_ball": {
       "burn_time": 12800
+    },
+    "iuce:bagasse": {
+      "burn_time": 400
+    },
+    "iuce:distillers_grains": {
+      "burn_time": 800
+    },
+    "iuce:pitch": {
+      "burn_time": 800
+    },
+    "iuce:heavy_residue": {
+      "burn_time": 1600
+    },
+    "iuce:coke": {
+      "burn_time": 2400
+    },
+    "iuce:waste_film": {
+      "burn_time": 100
     }
   }
 }

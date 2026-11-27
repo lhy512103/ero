@@ -24,6 +24,13 @@ public class ModRecipes {
     public static final Supplier<RecipeSerializer<MachineRecipe>> MACHINE_SERIALIZER =
         RECIPE_SERIALIZERS.register("machine", MachineRecipeSerializer::create);
 
+    // === 通用加工机配方类型（数据驱动的小机器）===
+    public static final Supplier<RecipeType<ProcessRecipe>> PROCESS_TYPE =
+        RECIPE_TYPES.register("process", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:process")));
+
+    public static final Supplier<RecipeSerializer<ProcessRecipe>> PROCESS_SERIALIZER =
+        RECIPE_SERIALIZERS.register("process", ProcessRecipeSerializer::create);
+
     // === 工业合成配方类型 ===
     public static final Supplier<RecipeType<CraftingRecipe>> ERO_CRAFTING_TYPE =
         RECIPE_TYPES.register("crafting", () -> RecipeType.simple(net.minecraft.resources.Identifier.parse("iuce:crafting")));

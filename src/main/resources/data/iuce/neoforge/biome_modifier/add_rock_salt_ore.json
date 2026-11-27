@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#iuce:rock_salt_biomes",
+  "features": "iuce:rock_salt_ore",
+  "step": "underground_ores"
+}

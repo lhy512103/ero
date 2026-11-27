@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:copper_plate",
+      "iuce:copper_plate",
+      "iuce:copper_plate"
+    ],
+    [
+      "",
+      "minecraft:green_dye",
+      ""
+    ],
+    [
+      "iuce:copper_plate",
+      "iuce:copper_plate",
+      "iuce:copper_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:cooling_water_pipe",
+    "count": 8
+  }
+}

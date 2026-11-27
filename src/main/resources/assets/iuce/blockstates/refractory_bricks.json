@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "iuce:block/refractory_bricks"
+    },
+    "formed=true": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

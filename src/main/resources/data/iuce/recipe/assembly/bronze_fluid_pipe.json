@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:bronze_ingot",
+    "iuce:bronze_ingot",
+    "iuce:bronze_ingot"
+  ],
+  "result": {
+    "id": "iuce:bronze_fluid_pipe",
+    "count": 4
+  }
+}

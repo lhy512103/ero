@@ -43,7 +43,8 @@ public class EroClient {
         client.guide.Guide.init(container.getEventBus());
         if (System.getProperty("iuce.guideShots") != null) {
             try {
-                Class.forName("regression.GuideShots").getMethod("register").invoke(null);
+                String tool = System.getProperty("iuce.guideShots", "").startsWith("machines") ? "regression.MachineShots" : "regression.GuideShots";
+                Class.forName(tool).getMethod("register").invoke(null);
             } catch (ReflectiveOperationException error) {
                 throw new IllegalStateException("Guide screenshot tool needs -PregressionTests", error);
             }
@@ -61,6 +62,7 @@ public class EroClient {
         NeoForge.EVENT_BUS.addListener(client.PlacementPreview::onOutline);
         // 准星对着未成型的大机器控制器时，标出还缺的方块
         NeoForge.EVENT_BUS.addListener(client.StructureProjection::onOutline);
+        NeoForge.EVENT_BUS.addListener(client.StructureProjection::onRenderLevel);
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -73,12 +75,24 @@ public class EroClient {
             new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/coolant_flow")),
             null, null),
             init.ModFluids.COOLANT, init.ModFluids.FLOWING_COOLANT);
+        // 化工流体共用一张灰度贴图，颜色由 FluidType 的颜色决定，省掉每种流体两套贴图。
+        for (init.ModFluids.Chemical chemical : init.ModFluids.CHEMICALS) {
+            event.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+                new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/chemical_still")),
+                new net.minecraft.client.resources.model.sprite.Material(Identifier.parse("iuce:block/chemical_flow")),
+                null,
+                net.neoforged.neoforge.client.fluid.FluidTintSources.constant(chemical.color())),
+                init.ModFluids.chemical(chemical.id()), init.ModFluids.flowingChemical(chemical.id()));
+        }
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(init.ModMenus.DESIGN.get(), client.gui.DesignScreen::new);
         event.register(ModMenus.MACERATOR.get(), MaceratorScreen::new);
+        event.register(machine.process.ProcessMachines.MENU.get(), client.gui.ProcessMachineScreen::new);
         event.register(ModMenus.GENERATOR.get(), GeneratorScreen::new);
         event.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
+        event.register(ModMenus.CRATE.get(), client.gui.CrateScreen::new);
         event.register(ModMenus.COMPRESSOR.get(), CompressorScreen::new);
         event.register(ModMenus.METAL_FORMER.get(), machine.metal_former.screen.MetalFormerScreen::new);
         event.register(ModMenus.EXTRACTOR.get(), ExtractorScreen::new);

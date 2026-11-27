@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "liquefaction_tank",
+  "items": [
+    {
+      "item": "iuce:enzyme_preparation"
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:starch_slurry",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:liquefied_mash",
+      "amount": 1000
+    }
+  ],
+  "energy": 1920,
+  "time": 120
+}

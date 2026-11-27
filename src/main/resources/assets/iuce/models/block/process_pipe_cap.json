@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "iuce:block/structure/process_pipe",
+    "side": "iuce:block/structure/process_pipe",
+    "end": "iuce:block/structure/process_pipe_end",
+    "hub": "iuce:block/structure/process_pipe_hub"
+  },
+  "elements": [
+    {
+      "from": [
+        2.75,
+        2.75,
+        0
+      ],
+      "to": [
+        13.25,
+        13.25,
+        1.5
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            2.5,
+            0,
+            13.5,
+            1.5
+          ],
+          "texture": "#hub"
+        },
+        "down": {
+          "uv": [
+            2.5,
+            0,
+            13.5,
+            1.5
+          ],
+          "texture": "#hub"
+        },
+        "west": {
+          "uv": [
+            0,
+            2.5,
+            1.5,
+            13.5
+          ],
+          "texture": "#hub"
+        },
+        "east": {
+          "uv": [
+            0,
+            2.5,
+            1.5,
+            13.5
+          ],
+          "texture": "#hub"
+        },
+        "north": {
+          "uv": [
+            2.5,
+            2.5,
+            13.5,
+            13.5
+          ],
+          "texture": "#end",
+          "cullface": "north"
+        },
+        "south": {
+          "uv": [
+            2.5,
+            2.5,
+            13.5,
+            13.5
+          ],
+          "texture": "#end"
+        }
+      }
+    }
+  ]
+}

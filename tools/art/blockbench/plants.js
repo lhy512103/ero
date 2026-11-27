@@ -1,0 +1,1344 @@
+// Formed large-machine models in the steel chemical-plant style, built inside Blockbench:
+//   eval(requireNativeModule('fs').readFileSync('D:/Code/java/IUCE/tools/art/blockbench/core.js', 'utf8'))
+//   eval(requireNativeModule('fs').readFileSync('D:/Code/java/IUCE/tools/art/blockbench/plants.js', 'utf8'))
+//   IUCEPlants.build('carbide_furnace_plant')
+// Opens the model as a Blockbench project, then writes tools/models/<name>.bbmodel and its textures
+// to tools/models/<name>_textures; run tools/export_plant_model.py <name> afterwards.
+// Units are Blockbench pixels: the controller block spans 0..16 on every axis and the machine
+// runs towards +z, across x. Everything is a mesh: flat surfaces are cut on a world-aligned grid
+// the size of their texture, so seamless textures run on across neighbouring parts at one texel
+// per pixel; round parts are swept along their centre line with smooth normals.
+(function () {
+    const A = window.IUCEArt;
+    const { mix, light, dark, rng, HOT, COPPER } = A;
+    const MODELS = A.ROOT + 'tools/models/';
+
+    // ---- Textures of any size; drawing wraps around the edges so seamless patterns are easy.
+    class Tex {
+        constructor(w, h) { this.w = w; this.h = h; this.d = new Uint8ClampedArray(w * h * 4); }
+        i(x, y) { x = ((Math.round(x) % this.w) + this.w) % this.w; y = ((Math.round(y) % this.h) + this.h) % this.h; return (y * this.w + x) * 4; }
+        px(x, y, c, a) {
+            if (!c) return;
+            const i = this.i(x, y);
+            this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2];
+            this.d[i + 3] = a === undefined ? (c[3] === undefined ? 255 : c[3]) : a;
+        }
+        get(x, y) { const i = this.i(x, y); return [this.d[i], this.d[i + 1], this.d[i + 2], this.d[i + 3]]; }
+        rect(x0, y0, x1, y1, c, a) { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) this.px(x, y, c, a); }
+        tint(x, y, c, t) { const p = this.get(x, y); if (p[3]) this.px(x, y, mix(p, c, t)); }
+        each(f) { for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) f(x, y); }
+        dataURL() {
+            const c = document.createElement('canvas'); c.width = this.w; c.height = this.h;
+            const ctx = c.getContext('2d'); const id = ctx.createImageData(this.w, this.h);
+            id.data.set(this.d); ctx.putImageData(id, 0, 0); return c.toDataURL('image/png');
+        }
+    }
+
+    // Tileable value noise: lattice cells must divide the texture size.
+    function lattice(w, h, cx, cy, seed) {
+        const r = rng(seed), nx = Math.max(1, w / cx), ny = Math.max(1, h / cy), g = [];
+        for (let i = 0; i < nx * ny; i++) g.push(r());
+        const G = (i, j) => g[(((j % ny) + ny) % ny) * nx + (((i % nx) + nx) % nx)];
+        return (x, y) => {
+            const fx = x / cx, fy = y / cy, x0 = Math.floor(fx), y0 = Math.floor(fy);
+            const tx = fx - x0, ty = fy - y0, sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+            const a = G(x0, y0) + (G(x0 + 1, y0) - G(x0, y0)) * sx;
+            const b = G(x0, y0 + 1) + (G(x0 + 1, y0 + 1) - G(x0, y0 + 1)) * sx;
+            return a + (b - a) * sy;
+        };
+    }
+    function fbm(w, h, seed, cells) {
+        const ls = cells.map((c, i) => [lattice(w, h, Math.min(c[0], w), Math.min(c[1], h), seed + i * 31), 1 / (i + 1)]);
+        const total = ls.reduce((a, l) => a + l[1], 0);
+        return (x, y) => ls.reduce((a, l) => a + l[0](x, y) * l[1], 0) / total;
+    }
+
+    const C = {
+        steel: [[44, 48, 54], [68, 72, 78], [112, 117, 123], [152, 157, 162], [184, 189, 194], [206, 210, 214]],
+        frame: [[40, 46, 54], [62, 70, 80], [86, 96, 108], [112, 122, 134], [140, 150, 162]],
+        blue: [56, 78, 106], orange: [204, 116, 40], yellow: [198, 162, 54], water: [58, 104, 168],
+        green: [96, 210, 120], red: [214, 64, 52], dark: [22, 24, 28],
+    };
+
+    // Brushed steel: soft blotches plus fine streaks along one axis.
+    function steel(t, seed, lo, hi, streakVertical) {
+        const blot = fbm(t.w, t.h, seed, [[16, 16], [8, 8], [4, 4]]);
+        const streak = streakVertical ? lattice(t.w, t.h, 1, Math.min(16, t.h), seed + 5) : lattice(t.w, t.h, Math.min(16, t.w), 1, seed + 5);
+        t.each((x, y) => t.px(x, y, mix(lo, hi, 0.15 + 0.7 * blot(x, y) + 0.25 * (streak(x, y) - 0.5))));
+    }
+    // A weld seam: raised bead with a light top edge and a dark shadow, horizontal or vertical.
+    function weldH(t, y, x0, x1) { for (let x = x0; x <= x1; x++) { t.tint(x, y - 1, [255, 255, 255], 0.18); t.px(x, y, mix(C.steel[1], C.steel[2], (x * 7 % 5) / 5)); t.tint(x, y + 1, [0, 0, 0], 0.3); } }
+    function weldV(t, x, y0, y1) { for (let y = y0; y <= y1; y++) { t.tint(x - 1, y, [255, 255, 255], 0.18); t.px(x, y, mix(C.steel[1], C.steel[2], (y * 7 % 5) / 5)); t.tint(x + 1, y, [0, 0, 0], 0.3); } }
+    function rivet(t, x, y) { t.px(x, y, C.steel[5]); t.px(x + 1, y, C.steel[2]); t.px(x, y + 1, C.steel[2]); t.px(x + 1, y + 1, C.steel[0]); }
+    function grime(t, seed, c, amount, fromBottom) {
+        const n = fbm(t.w, t.h, seed, [[8, 8], [4, 4], [2, 2]]);
+        t.each((x, y) => { const g = n(x, y) * amount * (fromBottom ? 0.4 + 0.6 * y / t.h : 1); t.tint(x, y, c, Math.max(0, g - 0.1)); });
+    }
+    function icon(t, rows, x0, y0, c) { rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') t.px(x0 + x, y0 + y, c); else if (ch === '+') t.px(x0 + x, y0 + y, dark(c, 0.45)); })); }
+
+    const ARROW_IN = ['..#..', '..#..', '#.#.#', '.###.', '..#..'];
+    const ARROW_OUT = ['..#..', '.###.', '#.#.#', '..#..', '..#..'];
+
+    const TEXTURES = {
+        // Checker plate for the skid top: subtle low-contrast industrial anti-slip chevron plate.
+        deck: [64, 64, t => {
+            steel(t, 3, C.steel[2], C.steel[3], false);
+            for (let y = 0; y < 64; y += 8) for (let x = 0; x < 64; x += 8) {
+                const alt = ((x >> 3) + (y >> 3)) & 1;
+                for (let k = 0; k < 3; k++) {
+                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
+                    t.px(lx, ly, mix(C.steel[3], C.steel[4], 0.48));
+                    t.px(lx, ly + 1, mix(C.steel[2], C.steel[1], 0.32));
+                }
+            }
+            weldH(t, 0, 0, 63); weldV(t, 0, 0, 63);
+            grime(t, 4, [56, 50, 44], 0.22, false);
+        }],
+        // Skid side: a rolled channel beam with top and bottom flanges.
+        skid: [64, 16, t => {
+            steel(t, 5, C.frame[2], C.frame[3], false);
+            t.rect(0, 0, 63, 0, C.frame[4]); t.rect(0, 1, 63, 1, C.frame[3]); t.rect(0, 2, 63, 2, C.frame[1]);
+            t.rect(0, 13, 63, 13, C.frame[3]); t.rect(0, 14, 63, 14, C.frame[1]); t.rect(0, 15, 63, 15, C.frame[0]);
+            for (const x of [0, 32]) { weldV(t, x + 31, 3, 12); rivet(t, x + 3, 7); }
+            grime(t, 6, [46, 42, 38], 0.35, true);
+        }],
+        // Furnace shell: rolled plates, vertical and horizontal butt welds, heat tint near the top.
+        shell: [64, 80, t => {
+            steel(t, 7, C.steel[2], C.steel[5], true);
+            for (const x of [0, 32]) weldV(t, x, 0, 79);
+            for (const y of [26, 53]) weldH(t, y, 0, 63);
+            t.each((x, y) => { if (y < 14) t.tint(x, y, [150, 112, 84], (14 - y) / 40); });
+            for (let x = 4; x < 64; x += 8) { rivet(t, x, 2); rivet(t, x, 76); }
+            grime(t, 8, [70, 60, 50], 0.3, true);
+        }],
+        // Hood: darker heat-treated plate with radial ribs.
+        hood: [64, 48, t => {
+            steel(t, 9, C.steel[1], C.steel[3], true);
+            for (let x = 0; x < 64; x += 16) { t.rect(x, 0, x, 47, C.steel[4]); t.rect(x + 1, 0, x + 1, 47, C.steel[3]); t.rect(x + 2, 0, x + 2, 47, C.steel[0]); }
+            t.each((x, y) => t.tint(x, y, [130, 96, 70], 0.12 + 0.12 * Math.sin(x / 64 * Math.PI * 4) ** 2));
+            weldH(t, 24, 0, 63);
+        }],
+        // Roof lid seen from above, projected straight down onto the round cap.
+        roof: [80, 80, t => {
+            const n = fbm(80, 80, 11, [[16, 16], [8, 8], [4, 4]]);
+            t.each((x, y) => {
+                const r = Math.hypot(x - 39.5, y - 39.5);
+                let c = mix(C.steel[2], C.steel[4], 0.2 + 0.6 * n(x, y));
+                if (Math.abs(r - 30) < 0.8 || Math.abs(r - 15) < 0.8) c = C.steel[1];
+                if (Math.abs(r - 31) < 0.6 || Math.abs(r - 16) < 0.6) c = C.steel[5];
+                if (r > 37) c = mix(c, C.steel[1], 0.4);
+                t.px(x, y, c);
+            });
+            for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; rivet(t, 39.5 + Math.cos(a) * 34, 39.5 + Math.sin(a) * 34); }
+        }],
+        // Painted structural steel for the frame, decks' beams and stairs.
+        frame: [64, 64, t => { steel(t, 13, C.frame[2], C.frame[4], false); grime(t, 14, [40, 36, 32], 0.3, false); }],
+        grating: [32, 32, t => {
+            t.each((x, y) => {
+                const bar = x % 4 === 0, rung = y % 8 === 0;
+                if (bar) t.px(x, y, rung ? C.frame[4] : C.frame[3]);
+                else if (rung) t.px(x, y, C.frame[2]);
+                else if (x % 4 === 1) t.px(x, y, C.frame[1]);
+                else t.px(x, y, [0, 0, 0], 0);
+            });
+        }],
+        pipe: [32, 32, t => { steel(t, 15, C.steel[2], C.steel[4], false); weldH(t, 0, 0, 31); }],
+        water: [32, 32, t => { steel(t, 16, dark(C.water, 0.25), light(C.water, 0.25), false); weldH(t, 0, 0, 31); grime(t, 17, [30, 40, 50], 0.25, false); }],
+        gas: [32, 32, t => { steel(t, 18, dark(C.yellow, 0.22), light(C.yellow, 0.2), false); weldH(t, 0, 0, 31); grime(t, 19, [60, 50, 30], 0.3, false); }],
+        // Aluminium cladding over flue insulation: overlapping sheets with screw rows.
+        orange: [32, 32, t => { steel(t, 33, dark(C.orange, 0.2), light(C.orange, 0.15), false); grime(t, 34, [60, 40, 20], 0.3, false); }],
+        blue: [32, 32, t => { steel(t, 35, dark(C.blue, 0.18), light(C.blue, 0.14), false); grime(t, 36, [20, 26, 36], 0.3, false); }],
+        cast: [64, 64, t => {
+            steel(t, 47, [48, 52, 58], [78, 84, 92], true);
+            weldH(t, 0, 0, 63); weldV(t, 0, 0, 63);
+            for (const x of [4, 58]) for (const y of [4, 24, 44, 58]) rivet(t, x, y);
+            grime(t, 48, [30, 28, 26], 0.35, true);
+        }],
+        insul: [32, 32, t => {
+            steel(t, 20, [170, 176, 182], [222, 226, 230], true);
+            t.rect(0, 0, 31, 0, [236, 238, 240]); t.rect(0, 1, 31, 1, [128, 134, 140]);
+            for (let x = 2; x < 32; x += 8) t.px(x, 3, [110, 114, 120]);
+        }],
+        brick: [32, 32, t => {
+            const n = fbm(32, 32, 21, [[8, 8], [4, 4], [2, 2]]);
+            t.each((x, y) => {
+                const row = y >> 3, joint = y % 8 === 0 || (x + (row & 1 ? 8 : 0)) % 16 === 0;
+                t.px(x, y, joint ? [96, 84, 76] : mix([150, 118, 92], [196, 160, 124], n(x, y)));
+            });
+        }],
+        graphite: [32, 32, t => {
+            const n = fbm(32, 32, 22, [[8, 16], [4, 8], [2, 2]]);
+            t.each((x, y) => t.px(x, y, mix([34, 36, 40], [84, 86, 92], n(x, y))));
+            for (let x = 0; x < 32; x++) { t.px(x, 0, [24, 24, 28]); t.px(x, 1, [102, 104, 110]); }
+        }],
+        copper: [32, 32, t => {
+            const n = fbm(32, 32, 23, [[16, 16], [8, 8], [2, 2]]);
+            t.each((x, y) => t.px(x, y, mix(COPPER[1], COPPER[3], 0.1 + 0.8 * n(x, y))));
+            grime(t, 24, [70, 120, 100], 0.3, false);
+        }],
+        glow: [32, 32, t => {
+            const n = fbm(32, 32, 25, [[8, 8], [4, 4], [2, 2]]);
+            t.each((x, y) => { const v = n(x, y); t.px(x, y, v > 0.62 ? HOT[0] : v > 0.48 ? HOT[1] : v > 0.36 ? HOT[2] : HOT[3]); });
+        }],
+        // Transformer tank paint and its radiator panels.
+        tank: [64, 64, t => { steel(t, 26, [92, 104, 98], [132, 146, 138], false); weldH(t, 0, 0, 63); weldV(t, 0, 0, 63); grime(t, 27, [40, 40, 36], 0.3, true); }],
+        ceramic: [32, 16, t => { const n = fbm(32, 16, 28, [[8, 8], [4, 4]]); t.each((x, y) => t.px(x, y, mix([132, 72, 44], [188, 112, 70], n(x, y) + (y < 4 ? 0.3 : 0)))); }],
+        rubber: [32, 32, t => { const n = fbm(32, 32, 29, [[16, 4], [4, 2]]); t.each((x, y) => t.px(x, y, mix([24, 24, 28], [56, 56, 62], n(x, y)))); }],
+        cavity: [16, 16, t => t.each((x, y) => t.px(x, y, mix([14, 15, 18], [34, 36, 40], y / 15)))],
+
+        // ---- Ports. Item ports are square hatches with chevrons, fluid ports round flanges with a drop;
+        // blue means "goes in", orange means "comes out", and the arrows point that way.
+        item_in: [16, 16, t => {
+            t.rect(0, 0, 15, 15, C.steel[2]); t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[0]);
+            t.rect(2, 2, 13, 13, C.blue); t.rect(4, 4, 11, 11, C.dark);
+            for (const [x, y, dx, dy] of [[7, 2, 0, 1], [7, 12, 0, -1], [2, 7, 1, 0], [12, 7, -1, 0]]) {
+                const w = dx ? [0, 1] : [0, 1];
+                for (let i = 0; i < 2; i++) { t.px(x + dx * i + (dy ? w[0] : 0), y + dy * i + (dx ? w[0] : 0), [235, 242, 250]); t.px(x + dx * i + (dy ? w[1] : 0), y + dy * i + (dx ? w[1] : 0), [235, 242, 250]); }
+            }
+            icon(t, ['.####.', '#+..+#', '#....#', '#+..+#', '.####.'], 5, 5, C.steel[3]);
+        }],
+        item_out: [16, 16, t => {
+            t.rect(0, 0, 15, 15, C.steel[2]); t.rect(0, 0, 15, 0, C.steel[4]); t.rect(0, 15, 15, 15, C.steel[0]);
+            t.rect(2, 2, 13, 13, C.orange); t.rect(4, 4, 11, 11, C.dark);
+            for (const [x, y] of [[7, 0], [7, 14], [0, 7], [14, 7]]) t.rect(x, y, x + 1, y + 1, [255, 236, 200]);
+            icon(t, ARROW_OUT, 5, 5, [255, 214, 160]);
+        }],
+        // Labels above the ports, so even from a distance it is clear which hatch is which.
+        tag_item_in: [16, 8, t => { t.rect(0, 0, 15, 7, C.blue); t.rect(0, 7, 15, 7, dark(C.blue, 0.4)); icon(t, ['##.....#', '#+#...#.', '###..##.', '#+#.####', '##.....#'].map(r => r), 1, 1, [240, 244, 250]); }],
+        tag_item_out: [16, 8, t => { t.rect(0, 0, 15, 7, C.orange); t.rect(0, 7, 15, 7, dark(C.orange, 0.4)); icon(t, ['##..#...', '#+#.##..', '###.###.', '#+#.##..', '##..#...'], 1, 1, [255, 246, 232]); }],
+        tag_fluid_in: [16, 8, t => { t.rect(0, 0, 15, 7, C.blue); t.rect(0, 7, 15, 7, dark(C.blue, 0.4)); icon(t, ['..#....#', '.###...#', '#####.##', '#####..#', '.###...#'], 1, 1, [240, 244, 250]); }],
+        tag_fluid_out: [16, 8, t => { t.rect(0, 0, 15, 7, C.orange); t.rect(0, 7, 15, 7, dark(C.orange, 0.4)); icon(t, ['..#.#...', '.###.#..', '#####.#.', '#####.#.', '.###.#..'], 1, 1, [255, 246, 232]); }],
+        flange_in: [16, 16, t => {
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.blue : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+            icon(t, ['.#.', '###', '.#.'], 6, 6, [120, 170, 240]);
+        }],
+        flange_out: [16, 16, t => {
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.orange : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+        }],
+        // Control desk: screen, lamps and push buttons on a dark bezel.
+        panel: [16, 16, t => {
+            t.rect(0, 0, 15, 15, C.frame[1]); t.rect(0, 0, 15, 0, C.frame[3]);
+            t.rect(1, 1, 14, 8, C.dark); t.rect(2, 2, 13, 7, [16, 44, 32]);
+            for (let x = 2; x <= 13; x++) t.px(x, Math.round(5 - 2 * Math.sin(x * 0.9)), C.green);
+            t.rect(2, 7, 6, 7, [70, 160, 100]);
+            t.rect(2, 10, 3, 11, C.green); t.rect(5, 10, 6, 11, C.red); t.rect(8, 10, 9, 11, C.yellow);
+            t.rect(11, 10, 13, 13, C.steel[1]); t.rect(12, 11, 12, 12, C.steel[4]);
+            t.rect(2, 13, 9, 13, C.steel[2]);
+        }],
+        desk: [16, 16, t => { steel(t, 31, C.frame[2], C.frame[3], false); t.rect(0, 0, 15, 0, C.frame[4]); }],
+        // Maintenance cabinet door: tool outline, hinges, a latch and louvres; nothing like the desk.
+        maint: [16, 16, t => {
+            t.rect(0, 0, 15, 15, C.steel[3]); t.rect(0, 0, 15, 0, C.steel[5]); t.rect(0, 0, 0, 15, C.steel[4]);
+            t.rect(15, 0, 15, 15, C.steel[1]); t.rect(0, 15, 15, 15, C.steel[0]);
+            t.rect(1, 2, 1, 4, C.steel[1]); t.rect(1, 11, 1, 13, C.steel[1]);
+            t.rect(13, 6, 14, 9, C.steel[1]); t.px(13, 7, C.steel[5]);
+            for (const y of [11, 13]) t.rect(4, y, 11, y, C.steel[1]);
+            icon(t, ['.#..##', '##...#', '.#..#.', '..##..', '.#..#.', '#...##', '##..#.'], 5, 2, [240, 240, 236]);
+            icon(t, ['.#..##', '##...#', '.#..#.', '..##..', '.#..#.', '#...##', '##..#.'].map(r => r.replace(/#/g, '.')), 5, 2, C.dark);
+        }],
+        socket: [16, 16, t => {
+            t.rect(0, 0, 15, 15, C.frame[2]); t.rect(0, 0, 15, 0, C.frame[4]); t.rect(0, 15, 15, 15, C.frame[0]);
+            t.rect(2, 2, 13, 13, C.dark);
+            icon(t, ['...##', '..##.', '.####', '..##.', '.##..', '##...'], 5, 4, [250, 210, 70]);
+            for (const [x, y] of [[1, 1], [13, 1], [1, 13], [13, 13]]) rivet(t, x, y);
+        }],
+        // Enclosure plate: same brushed steel as before, without the baked inner frame so 2-block cabinets stay one panel.
+        cabinet: [32, 32, t => {
+            steel(t, 32, C.steel[2], C.steel[4], false);
+            t.rect(0, 0, 31, 0, C.steel[4]); t.rect(0, 31, 31, 31, C.steel[1]);
+        }],
+        cabinet_top: [32, 32, t => {
+            steel(t, 33, C.steel[3], C.steel[4], false);
+            grime(t, 34, [56, 50, 44], 0.15, false);
+        }],
+        gauge: [8, 8, t => { t.each((x, y) => { const r = Math.hypot(x - 3.5, y - 3.5); t.px(x, y, r > 3.6 ? C.steel[1] : [236, 236, 228]); }); t.px(3, 3, C.red); t.px(4, 2, C.red); t.px(5, 1, C.red); }],
+        flange_gas: [16, 16, t => {
+            t.each((x, y) => { const r = Math.hypot(x - 7.5, y - 7.5); t.px(x, y, r > 7.6 ? C.steel[1] : r > 5.2 ? C.steel[3] : r > 3.8 ? C.yellow : C.dark); });
+            for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; t.px(7.5 + Math.cos(a) * 6.4, 7.5 + Math.sin(a) * 6.4, C.steel[5]); }
+        }],
+        // Stainless vessel shell: bright plate, circumferential and long seams.
+        vessel: [64, 64, t => {
+            steel(t, 41, [168, 174, 178], [216, 220, 222], true);
+            weldH(t, 0, 0, 63); weldH(t, 32, 0, 63); weldV(t, 0, 0, 63);
+            grime(t, 42, [90, 80, 70], 0.2, true);
+        }],
+        // Coke oven door: heavy dark plate in a frame, heat-browned towards the middle.
+        door: [32, 32, t => {
+            steel(t, 43, C.frame[0], C.frame[2], true);
+            t.each((x, y) => t.tint(x, y, [110, 70, 40], 0.25 * Math.sin(y / 32 * Math.PI)));
+            t.rect(0, 0, 31, 0, C.frame[3]); t.rect(0, 0, 0, 31, C.frame[3]);
+            for (let y = 4; y < 32; y += 8) rivet(t, 3, y);
+        }],
+        // Polished roll and strip surfaces: bright with streaks along the roll axis.
+        roll: [32, 32, t => { steel(t, 45, C.steel[3], C.steel[5], false); t.rect(0, 0, 31, 0, C.steel[2]); }],
+        coil: [32, 32, t => {
+            steel(t, 46, C.steel[2], C.steel[4], false);
+            for (let y = 0; y < 32; y += 4) t.rect(0, y, 31, y, C.steel[1]);
+        }],
+        coil_end: [32, 32, t => t.each((x, y) => {
+            const r = Math.hypot(x - 15.5, y - 15.5);
+            t.px(x, y, r < 5 ? C.dark : Math.floor(r) % 2 ? C.steel[4] : C.steel[2]);
+        })],
+        // Perforated trommel screen plate.
+        screen: [32, 32, t => {
+            steel(t, 47, C.steel[1], C.steel[3], false);
+            for (let y = 1; y < 32; y += 4) for (let x = (y >> 2) % 2 ? 3 : 1; x < 32; x += 4) { t.px(x, y, C.dark); t.px(x + 1, y, C.dark); t.px(x, y + 1, C.dark); t.px(x + 1, y + 1, [40, 42, 46]); }
+        }],
+    };
+
+    // ---- Geometry. Each mesh collects vertices (deduplicated by position) and faces.
+    const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+    const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+    const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+
+    const scene = [];
+    // Outliner groups the shapes being drawn belong to: stretch sections (bay, stand, tail) and
+    // spinners, whose group origin is the pivot they turn about.
+    const groupPath = [];
+    const pathKey = () => groupPath.map(g => g.name).join('/');
+
+    class Shape {
+        constructor(name, smooth) {
+            this.name = name; this.smooth = smooth; this.verts = {}; this.faces = []; this.n = 0;
+            this.path = groupPath.slice(); this.pathKey = pathKey(); this.byPath = { [this.pathKey]: this };
+        }
+        v(p) {
+            const key = p.map(c => Math.round(c * 1000)).join(',');
+            if (!this.verts[key]) this.verts[key] = { id: 'v' + (this.n++), p: p.map(c => Math.round(c * 1000) / 1000) };
+            return this.verts[key].id;
+        }
+        face(points, tex, uvs) {
+            const cur = pathKey();
+            if (this.pathKey !== cur) {
+                if (!this.byPath[cur]) {
+                    const sub = new Shape(this.name, this.smooth);
+                    scene.push(sub);
+                    this.byPath[cur] = sub;
+                }
+                return this.byPath[cur].face(points, tex, uvs);
+            }
+            const ids = [], keep = [];
+            points.forEach((p, i) => { const id = this.v(p); if (!ids.includes(id)) { ids.push(id); keep.push(uvs[i]); } });
+            if (ids.length >= 3) this.faces.push({ ids, tex, uvs: keep });
+            return this;
+        }
+    }
+
+    function shape(name, smooth) { const s = new Shape(name, smooth); scene.push(s); return s; }
+    function within(name, origin, draw) { groupPath.push({ name, origin: origin || [0, 0, 0] }); try { draw(); } finally { groupPath.pop(); } }
+
+    // A flat rectangle p + U*a + V*b (a in 0..la, b in 0..lb), normal U x V. Cut on the world grid of
+    // the texture size along world axes so the pattern continues across faces.
+    function plane(s, p, U, la, V, lb, tex, fixed) {
+        const [W, H] = TEXTURES[tex];
+        if (fixed) {
+            const q = [p, add(p, mul(U, la)), add(add(p, mul(U, la)), mul(V, lb)), add(p, mul(V, lb))];
+            const [u0, v0, u1, v1] = fixed === true ? [0, 0, W, H] : fixed;
+            return s.face(q, tex, [[u0, v1], [u1, v1], [u1, v0], [u0, v0]]);
+        }
+        const su = dot(p, U), sv = dot(p, V);
+        const cuts = (start, len, period) => {
+            const out = [0];
+            for (let k = Math.floor(start / period) + 1; k * period < start + len - 1e-6; k++) if (k * period > start + 1e-6) out.push(k * period - start);
+            out.push(len);
+            return out;
+        };
+        const ca = cuts(su, la, W), cb = cuts(sv, lb, H);
+        for (let i = 0; i + 1 < ca.length; i++) for (let j = 0; j + 1 < cb.length; j++) {
+            const a0 = ca[i], a1 = ca[i + 1], b0 = cb[j], b1 = cb[j + 1];
+            const ku = Math.floor((su + a0 + 1e-6) / W) * W, kv = Math.floor((sv + b0 + 1e-6) / H) * H;
+            const u0 = su + a0 - ku, u1 = su + a1 - ku, w0 = H - (sv + b0 - kv), w1 = H - (sv + b1 - kv);
+            const q = [add(add(p, mul(U, a0)), mul(V, b0)), add(add(p, mul(U, a1)), mul(V, b0)), add(add(p, mul(U, a1)), mul(V, b1)), add(add(p, mul(U, a0)), mul(V, b1))];
+            s.face(q, tex, [[u0, w0], [u1, w0], [u1, w1], [u0, w1]]);
+        }
+        return s;
+    }
+
+    const FACE = {
+        north: { n: [0, 0, -1], U: [-1, 0, 0], V: [0, 1, 0] }, south: { n: [0, 0, 1], U: [1, 0, 0], V: [0, 1, 0] },
+        east: { n: [1, 0, 0], U: [0, 0, -1], V: [0, 1, 0] }, west: { n: [-1, 0, 0], U: [0, 0, 1], V: [0, 1, 0] },
+        up: { n: [0, 1, 0], U: [1, 0, 0], V: [0, 0, -1] }, down: { n: [0, -1, 0], U: [1, 0, 0], V: [0, 0, 1] },
+    };
+    // Axis-aligned box. tex is a texture name or {all, up, north, ...}; skip lists faces left out.
+    function box(s, a, b, tex, skip, fixed) {
+        const lo = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.min(a[2], b[2])], hi = [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.max(a[2], b[2])];
+        const size = sub(hi, lo);
+        for (const name in FACE) {
+            if (skip && skip.includes(name)) continue;
+            const f = FACE[name], t = typeof tex === 'string' ? tex : (tex[name] || tex.all);
+            if (!t) continue;
+            const la = Math.abs(dot(size, f.U)), lb = Math.abs(dot(size, f.V));
+            let p = [0, 1, 2].map(i => f.n[i] > 0 ? hi[i] : lo[i]);
+            for (let i = 0; i < 3; i++) if (f.n[i] === 0) p[i] = (f.U[i] < 0 || f.V[i] < 0) ? hi[i] : lo[i];
+            plane(s, p, f.U, la, f.V, lb, t, fixed && fixed[name]);
+        }
+        return s;
+    }
+
+    // Centre line with rounded corners: each interior corner becomes an arc of the given radius.
+    function fillet(points, radius, steps) {
+        if (!radius || points.length < 3) return points.slice();
+        const out = [points[0]];
+        for (let i = 1; i + 1 < points.length; i++) {
+            const a = points[i - 1], b = points[i], c = points[i + 1];
+            const d0 = norm(sub(a, b)), d1 = norm(sub(c, b));
+            const ang = Math.acos(Math.max(-1, Math.min(1, dot(d0, d1))));
+            if (ang > Math.PI - 1e-3) { out.push(b); continue; }
+            const r = Math.min(radius, Math.hypot(...sub(a, b)) * 0.5 / Math.tan(ang / 2) * 0.999, Math.hypot(...sub(c, b)) * 0.5 / Math.tan(ang / 2) * 0.999);
+            const t = r / Math.tan(ang / 2);
+            const p0 = add(b, mul(d0, t)), p1 = add(b, mul(d1, t));
+            const center = add(b, mul(norm(add(d0, d1)), r / Math.sin(ang / 2)));
+            const e0 = sub(p0, center), e1 = sub(p1, center);
+            const sweep = Math.PI - ang, n = steps || Math.max(3, Math.ceil(sweep / (Math.PI / 12)));
+            const axis = norm(cross(e0, e1));
+            for (let k = 0; k <= n; k++) {
+                const th = sweep * k / n, cs = Math.cos(th), sn = Math.sin(th);
+                out.push(add(center, add(mul(e0, cs), mul(cross(axis, e0), sn))));
+            }
+        }
+        out.push(points[points.length - 1]);
+        return out;
+    }
+
+    // Sweeps a circle along a centre line. radius may be a number or a function of the distance
+    // travelled. The texture wraps a whole number of times around and repeats along the length.
+    function sweep(name, points, radius, tex, opt) {
+        opt = opt || {};
+        const s = shape(name, true);
+        const [W, H] = TEXTURES[tex];
+        const rf = typeof radius === 'function' ? radius : () => radius;
+        const seg0 = opt.seg || 16;
+        const lens = [0];
+        for (let i = 1; i < points.length; i++) lens.push(lens[i - 1] + Math.hypot(...sub(points[i], points[i - 1])));
+        const total = lens[lens.length - 1];
+        const ds = new Set(lens.map(l => Math.round(l * 1000) / 1000));
+        if (!opt.noTile) for (let k = 1; k * H < total; k++) ds.add(k * H);
+        (opt.extra || []).forEach(d => ds.add(d));
+        const dist = [...ds].sort((a, b) => a - b);
+        const at = d => {
+            let i = 1; while (i < lens.length - 1 && lens[i] < d) i++;
+            const t = (d - lens[i - 1]) / ((lens[i] - lens[i - 1]) || 1);
+            return { p: add(points[i - 1], mul(sub(points[i], points[i - 1]), t)), i };
+        };
+        const tangent = i => norm(sub(points[Math.min(i + 1, points.length - 1)], points[Math.max(i - 1, 0)]));
+        // Tangents at original vertices average both neighbours, so bends stay round.
+        const samples = dist.map(d => {
+            const { p, i } = at(d);
+            const exact = lens.findIndex(l => Math.abs(l - d) < 1e-3);
+            const tan = exact >= 0 ? tangent(exact) : norm(sub(points[i], points[i - 1]));
+            return { p, d, tan };
+        });
+        const maxR = Math.max(...samples.map(q => rf(q.d)));
+        const reps = Math.max(1, Math.round(2 * Math.PI * maxR / W));
+        const per = Math.max(2, Math.ceil(seg0 / reps)), seg = per * reps;
+        let nrm = opt.up ? norm(cross(cross(samples[0].tan, opt.up), samples[0].tan)) : null;
+        if (!nrm || isNaN(nrm[0])) nrm = norm(cross(samples[0].tan, Math.abs(samples[0].tan[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]));
+        const rings = [];
+        let prev = samples[0].tan;
+        for (const q of samples) {
+            const axis = cross(prev, q.tan);
+            if (Math.hypot(...axis) > 1e-6) {
+                const ang = Math.acos(Math.max(-1, Math.min(1, dot(prev, q.tan)))), k = norm(axis);
+                nrm = add(add(mul(nrm, Math.cos(ang)), mul(cross(k, nrm), Math.sin(ang))), mul(k, dot(k, nrm) * (1 - Math.cos(ang))));
+            }
+            nrm = norm(sub(nrm, mul(q.tan, dot(nrm, q.tan))));
+            const bin = cross(q.tan, nrm), r = rf(q.d), ring = [];
+            for (let j = 0; j < seg; j++) {
+                const a = j / seg * Math.PI * 2;
+                ring.push(add(q.p, add(mul(nrm, Math.cos(a) * r), mul(bin, Math.sin(a) * r))));
+            }
+            rings.push({ ring, d: q.d });
+            prev = q.tan;
+        }
+        for (let i = 0; i + 1 < rings.length; i++) {
+            const d0 = rings[i].d, d1 = rings[i + 1].d;
+            if (d1 - d0 < 1e-4) continue;
+            const kv = opt.noTile ? 0 : Math.floor((d0 + 1e-4) / H) * H;
+            const scale = opt.noTile ? H / total : 1;
+            const w0 = H - (d0 - kv) * scale, w1 = H - (d1 - kv) * scale;
+            for (let j = 0; j < seg; j++) {
+                const j1 = (j + 1) % seg, u0 = (j % per) / per * W, u1 = u0 + W / per;
+                s.face([rings[i].ring[j], rings[i].ring[j1], rings[i + 1].ring[j1], rings[i + 1].ring[j]], tex, [[u0, w0], [u1, w0], [u1, w1], [u0, w1]]);
+            }
+        }
+        const closed = Math.hypot(...sub(points[0], points[points.length - 1])) < 1e-3;
+        const capTex = closed || opt.cap === false ? null : (opt.cap || tex);
+        if (capTex) {
+            const c = shape(name, false);
+            const [CW, CH] = TEXTURES[capTex];
+            for (const [end, flip] of [[0, true], [rings.length - 1, false]]) {
+                if (opt.capEnds && !opt.capEnds.includes(end === 0 ? 'start' : 'end')) continue;
+                const ring = rings[end].ring, center = samples[end].p, r = rf(samples[end].d);
+                if (r < 1e-3) continue;
+                const tan = samples[end].tan, ax = norm(sub(ring[0], center)), ay = cross(tan, ax);
+                const uv = p => { const d = sub(p, center); return [CW / 2 + dot(d, ax) / (2 * r) * CW, CH / 2 - dot(d, ay) / (2 * r) * CH]; };
+                for (let j = 0; j < seg; j++) {
+                    const a = ring[j], b = ring[(j + 1) % seg];
+                    const tri = flip ? [center, b, a] : [center, a, b];
+                    c.face(tri, capTex, tri.map(uv));
+                }
+            }
+        }
+        return s;
+    }
+    const tube = (name, x, z, r, y0, y1, tex, opt) => sweep(name, [[x, y0, z], [x, y1, z]], r, tex, opt);
+    // A flat ring (annulus) facing up or down at height y.
+    function annulus(name, x, z, r0, r1, y, up, tex, seg) {
+        const s = shape(name, false), [W, H] = TEXTURES[tex];
+        seg = seg || 48;
+        const reps = Math.max(1, Math.round(2 * Math.PI * r1 / W)), per = Math.max(1, Math.round(seg / reps));
+        seg = per * reps;
+        const dv = Math.min(H, r1 - r0);
+        for (let j = 0; j < seg; j++) {
+            const a0 = j / seg * Math.PI * 2, a1 = (j + 1) / seg * Math.PI * 2;
+            const P = (r, a) => [x + Math.cos(a) * r, y, z + Math.sin(a) * r];
+            const u0 = (j % per) / per * W, u1 = u0 + W / per;
+            let q = [P(r0, a0), P(r1, a0), P(r1, a1), P(r0, a1)], uv = [[u0, dv], [u0, 0], [u1, 0], [u1, dv]];
+            if (r0 < 1e-6) { q = [q[0], q[1], q[2]]; uv = [[(u0 + u1) / 2, dv], uv[1], uv[2]]; }
+            if (up) { q.reverse(); uv.reverse(); }
+            s.face(q, tex, uv);
+        }
+        return s;
+    }
+    // A solid ring band around a cylinder: outer wall plus top and bottom annuli.
+    function band(name, x, z, rIn, rOut, y0, y1, tex, seg) {
+        // The annuli close the band; a full end cap here would lie on the same plane as them.
+        tube(name, x, z, rOut, y0, y1, tex, { seg: seg || 48, cap: false });
+        annulus(name, x, z, rIn, rOut, y1, true, tex, seg || 48);
+        annulus(name, x, z, rIn, rOut, y0, false, tex, seg || 48);
+    }
+    // H-section column or beam between two points along one world axis.
+    function hbeam(s, a, b, size, flange) {
+        const axis = [0, 1, 2].find(i => Math.abs(b[i] - a[i]) > 1e-6);
+        const lo = Math.min(a[axis], b[axis]), hi = Math.max(a[axis], b[axis]);
+        const others = [0, 1, 2].filter(i => i !== axis), h = size / 2, f = flange || 2, w = 1;
+        const mk = (o0, o1, p0, p1) => {
+            const from = [0, 0, 0], to = [0, 0, 0];
+            from[axis] = lo; to[axis] = hi;
+            from[others[0]] = a[others[0]] + o0; to[others[0]] = a[others[0]] + o1;
+            from[others[1]] = a[others[1]] + p0; to[others[1]] = a[others[1]] + p1;
+            box(s, from, to, 'frame');
+        };
+        mk(-h, -h + f, -h, h); mk(h - f, h, -h, h); mk(-h + f, h - f, -w, w);
+    }
+    // A slanted strut between two points: a square tube swept straight.
+    const strut = (name, a, b, r) => sweep(name, [a, b], r || 1.6, 'frame', { seg: 4 });
+    const rail = (pts, r) => sweep('rail', fillet(pts, 3, 4), r || 0.9, 'pipe', { seg: 8 });
+
+    // Steel ladder on the north (z0) face of a block column: two stringers and rungs every 4 px.
+    function ladder(x0, z, y0, y1) {
+        const s = shape('ladder', false);
+        for (const x of [x0 + 2.5, x0 + 12.5]) box(s, [x, y0, z], [x + 1, y1, z + 1], 'frame');
+        for (let y = y0 + 2; y < y1; y += 4) box(s, [x0 + 3.5, y, z + 0.2], [x0 + 12.5, y + 1, z + 0.9], 'pipe');
+    }
+
+    const BUILD = {};
+
+    BUILD.carbide_furnace_plant = function () {
+        const X0 = -80, X1 = 96, Z0 = 0, Z1 = 176;
+        const cx = 8, cz = 88;
+        const base = shape('base', false);
+        // Skid: one plinth over the whole footprint; the front is stepped back where the ports sit.
+        box(base, [X0, 0, Z0], [X1, 16, Z1], { up: 'deck', all: 'skid' }, ['down']);
+
+        // ---- Front: item hatches either side of the control desk, fluid nozzles and the maintenance
+        // cabinet on a service frame above.
+        const front = shape('front', false);
+        box(front, [-16, 0, -1], [0, 16, 0], { north: 'item_in', all: 'skid' }, ['south', 'down'], { north: true });
+        box(front, [16, 0, -1], [32, 16, 0], { north: 'item_out', all: 'skid' }, ['south', 'down'], { north: true });
+        // Input hopper lip: four sloped blue plates flaring out from the hatch.
+        const lip = shape('front', false);
+        const flare = (x0, x1, y0, y1, out) => {
+            const inner = [[x0 + 2, y0 + 2], [x1 - 2, y0 + 2], [x1 - 2, y1 - 2], [x0 + 2, y1 - 2]], outer = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+            for (let i = 0; i < 4; i++) {
+                const a = inner[i], b = inner[(i + 1) % 4], c = outer[(i + 1) % 4], d = outer[i];
+                lip.face([[a[0], a[1], -1], [b[0], b[1], -1], [c[0], c[1], -1 - out], [d[0], d[1], -1 - out]], 'cavity', [[0, 0], [16, 0], [16, 16], [0, 16]]);
+                lip.face([[d[0], d[1], -1 - out], [c[0], c[1], -1 - out], [c[0], c[1], -1.6 - out], [d[0], d[1], -1.6 - out]].reverse(), 'blue', [[0, 0], [16, 0], [16, 1], [0, 1]]);
+            }
+        };
+        flare(-16, 0, 0.5, 16, 4);
+        // Output chute: a sloped orange-rimmed trough below the hatch opening.
+        const chute = shape('front', false);
+        box(chute, [19, 2, -7], [29, 3, -1], 'orange');
+        box(chute, [19, 3, -7], [20, 7, -1], 'orange'); box(chute, [28, 3, -7], [29, 7, -1], 'orange');
+        box(front, [-15, 17, -1], [-1, 21, 2], { north: 'tag_item_in', all: 'pipe' }, null, { north: true });
+        box(front, [17, 17, -1], [31, 21, 2], { north: 'tag_item_out', all: 'pipe' }, null, { north: true });
+        // Control desk in front of the controller block.
+        const desk = shape('desk', false);
+        box(desk, [1, 0, -6], [15, 8, 0], { all: 'desk' }, ['south', 'down']);
+        desk.face([[15, 8, -6], [1, 8, -6], [1, 14, -1], [15, 14, -1]], 'panel', [[0, 16], [16, 16], [16, 0], [0, 0]]);
+        box(desk, [1, 14, -1], [15, 16, 0], 'desk', ['south']);
+        desk.face([[1, 8, -6], [1, 8, 0], [1, 14, 0], [1, 14, -1]], 'desk', [[0, 8], [6, 8], [6, 2], [5, 2]]);
+        desk.face([[15, 8, 0], [15, 8, -6], [15, 14, -1], [15, 14, 0]], 'desk', [[0, 8], [6, 8], [5, 2], [6, 2]]);
+        // Service frame above the front row carrying the cabinet and both fluid nozzles.
+        const svc = shape('front', false);
+        box(svc, [-18, 16, 2], [34, 34, 16], { all: 'cabinet', up: 'deck' });
+        box(svc, [0.5, 17, 0], [15.5, 32, 2], { north: 'maint', all: 'cabinet' }, ['south'], { north: true });
+        box(svc, [3, 32.5, -0.5], [13, 34, 2], 'cabinet');
+        box(svc, [-15, 33, 1.4], [-1, 37, 2], { north: 'tag_fluid_in', all: 'pipe' }, null, { north: true });
+        box(svc, [17, 33, 1.4], [31, 37, 2], { north: 'tag_fluid_out', all: 'pipe' }, null, { north: true });
+        // Fluid nozzles: round pipe stubs with a bolted flange, blue water in, yellow gas out.
+        sweep('nozzle', [[-8, 27, 2], [-8, 27, -5]], 3, 'water', { seg: 16, noTile: true });
+        sweep('nozzle', [[-8, 27, -5], [-8, 27, -7]], 5, 'pipe', { seg: 16, noTile: true, cap: 'flange_in', capEnds: ['end'] });
+        sweep('nozzle', [[24, 27, 2], [24, 27, -5]], 3, 'gas', { seg: 16, noTile: true });
+        sweep('nozzle', [[24, 27, -5], [24, 27, -7]], 5, 'pipe', { seg: 16, noTile: true, cap: 'flange_out', capEnds: ['end'] });
+        // Handwheel valve on the water line.
+        sweep('valve', fillet([[-8, 31, -2.5], [-12, 31, -2.5], [-12, 35, -2.5], [-4, 35, -2.5], [-4, 31, -2.5], [-8, 31, -2.5]], 2, 5), 0.6, 'water', { seg: 6 });
+        tube('valve', -8, -2.5, 0.8, 30, 31, 'pipe', { seg: 6 });
+        box(front, [30, 28, -1], [33, 31, 2], { north: 'gauge', all: 'pipe' }, null, { north: true });
+
+        // ---- Furnace: brick foot, welded shell with stiffener bands and a cooling-water ring,
+        // conical hood and round roof lid.
+        band('foot', cx, cz, 56, 64, 16, 22, 'brick', 64);
+        tube('shell', cx, cz, 60, 22, 102, 'shell', { seg: 64, noTile: true });
+        band('band', cx, cz, 59, 62, 44, 47, 'pipe', 64);
+        band('band', cx, cz, 59, 62, 74, 77, 'pipe', 64);
+        band('flange', cx, cz, 58, 64, 100, 104, 'pipe', 64);
+        const ringPts = [];
+        for (let i = 0; i <= 48; i++) { const a = i / 48 * Math.PI * 2; ringPts.push([cx + Math.cos(a) * 64, 60, cz + Math.sin(a) * 64]); }
+        sweep('water_ring', ringPts, 2.6, 'water', { seg: 10 });
+        for (let i = 0; i < 12; i++) {
+            const a = (i + 0.5) / 12 * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+            if (Math.abs(a - Math.PI * 1.5) < 0.4) continue;
+            sweep('water_drop', fillet([[cx + c * 64, 60, cz + s * 64], [cx + c * 64, 54, cz + s * 64], [cx + c * 61, 50, cz + s * 61]], 2, 3), 1.1, 'water', { seg: 6 });
+        }
+        sweep('hood', [[cx, 104, cz], [cx, 128, cz]], d => 60 - d * (24 / 24), 'hood', { seg: 64, noTile: true, cap: false });
+        sweep('roof', [[cx, 128, cz], [cx, 134, cz]], 37, 'pipe', { seg: 48, noTile: true, cap: 'roof', capEnds: ['end'] });
+
+        // ---- Tap hole on the +x side: tapping spout, glowing stream and the carbide pot on a bogie.
+        const tap = shape('tap', false);
+        box(tap, [66, 22, 80], [72, 36, 96], 'brick');
+        box(shape('glow_tap', false), [72, 26, 84], [72.5, 32, 92], 'glow', ['west']);
+        const launder = shape('tap', false);
+        box(launder, [72, 24, 82], [86, 26, 94], 'brick');
+        box(launder, [72, 26, 82], [86, 30, 83], 'brick'); box(launder, [72, 26, 93], [86, 30, 94], 'brick');
+        box(shape('glow_stream', false), [72, 26.5, 83], [86, 27.2, 93], 'glow', ['down', 'north', 'south']);
+        box(shape('glow_stream', false), [83.6, 18, 86], [85.6, 24, 90], 'glow', ['up']);
+        band('pot', 85, 88, 8, 10, 16, 18.5, 'pipe', 24);
+        tube('pot', 85, 88, 10.5, 16, 17, 'frame', { seg: 24 });
+        annulus('glow_pot', 85, 88, 0, 8, 18, true, 'glow', 24);
+        tube('pot', 85, 88, 9.5, 18.5, 23, 'hood', { seg: 24, noTile: true });
+        annulus('pot', 85, 88, 8, 9.5, 23, true, 'hood', 24);
+
+        // ---- Gas off-take: insulated duct from the hood side bending up into a tall flue with a rain cap.
+        sweep('duct', fillet([[-22, 118, 118], [-54, 118, 150], [-54, 302, 150]], 14, 8), 8, 'insul', { seg: 20 });
+        sweep('duct', [[-54, 302, 150], [-54, 306, 150]], 11, 'pipe', { seg: 20, noTile: true });
+        sweep('duct', [[-54, 310, 150], [-54, 316, 150]], d => 13 - d * 2, 'hood', { seg: 20, noTile: true, cap: 'roof', capEnds: ['end'] });
+        for (const a of [0, 1, 2, 3]) {
+            const c = Math.cos(a * Math.PI / 2 + 0.78), s = Math.sin(a * Math.PI / 2 + 0.78);
+            strut('duct', [-54 + c * 9, 305, 150 + s * 9], [-54 + c * 9, 311, 150 + s * 9], 0.7);
+        }
+        for (const y of [160, 220, 280]) band('duct', -54, 150, 7.5, 9.5, y, y + 3, 'pipe', 20);
+        // CO gas line (yellow) from the hood front round two bends down to the gas outlet nozzle.
+        sweep('gas_line', fillet([[24, 112, 44], [24, 112, 10], [24, 60, 10], [24, 40, 6], [24, 27, 6], [24, 27, 2]], 6, 6), 3, 'gas', { seg: 12 });
+        // Cooling water from the water inlet up into the ring header.
+        sweep('water_line', fillet([[-8, 27, 2], [-8, 27, 10], [-8, 60, 10], [-8, 60, 26]], 6, 6), 2.6, 'water', { seg: 12 });
+
+        // ---- Electrodes: three graphite columns in a triangle with copper contact clamps,
+        // hydraulic slipping rams and a crosshead each.
+        const electrodes = [0, 1, 2].map(i => { const a = -Math.PI / 2 + i * Math.PI * 2 / 3; return [cx + Math.cos(a) * 20, cz + Math.sin(a) * 20]; });
+        electrodes.forEach(([ex, ez], i) => {
+            tube('electrode', ex, ez, 8, 120, 262, 'graphite', { seg: 16, cap: 'graphite', capEnds: ['end'] });
+            band('glow_seal', ex, ez, 8, 11, 134.1, 135.5, 'glow', 16);
+            band('clamp', ex, ez, 8, 11, 150, 164, 'copper', 16);
+            band('clamp', ex, ez, 8, 12, 166, 169, 'pipe', 16);
+            band('slip', ex, ez, 8, 12, 222, 226, 'pipe', 16);
+            band('slip', ex, ez, 8, 12, 244, 248, 'pipe', 16);
+            for (const s of [-1, 1]) {
+                tube('ram', ex + s * 14, ez, 2.2, 226, 244, 'pipe', { seg: 8 });
+                tube('ram', ex + s * 14, ez, 1.2, 244, 252, 'pipe', { seg: 6 });
+            }
+            const head = shape('crosshead', false);
+            box(head, [ex - 17, 252, ez - 3], [ex + 17, 257, ez + 3], 'frame');
+        });
+        // Copper bus tubes from the transformer bushings to the clamps, rounded where they bend.
+        const bush = [[-24, 150], [8, 150], [40, 150]];
+        bush.forEach(([bx, bz], i) => {
+            const [ex, ez] = electrodes[[1, 0, 2][i]];
+            sweep('bus', fillet([[bx, 76, bz], [bx, 157, bz], [ex + (ex - cx) * 0.6, 157, ez + (ez - cz) * 0.6], [ex + (ex - cx) * 0.14, 157, ez + (ez - cz) * 0.14]], 10, 6), 2.2, 'copper', { seg: 10 });
+        });
+
+        // ---- Transformer at the back with radiator banks, bushings and the HV terminal box.
+        const tf = shape('transformer', false);
+        box(tf, [-40, 16, 140], [56, 56, 166], 'tank', ['down']);
+        box(tf, [-42, 56, 138], [58, 60, 168], 'tank');
+        for (let x = -36; x < 54; x += 6) box(tf, [x, 20, 166], [x + 2, 52, 172], 'tank');
+        box(tf, [-38, 52, 166], [54, 54, 172], 'tank'); box(tf, [-38, 18, 166], [54, 20, 172], 'tank');
+        bush.forEach(([bx, bz]) => {
+            const shed = d => 4.5 + ((Math.floor(d / 2) % 2) ? 0 : 2.2);
+            sweep('bushing', [[bx, 60, bz], [bx, 76, bz]], shed, 'ceramic', { seg: 12, extra: [2, 4, 6, 8, 10, 12, 14], noTile: true });
+            tube('bushing', bx, bz, 3, 76, 80, 'copper', { seg: 10, cap: 'copper', capEnds: ['end'] });
+        });
+        sweep('conservator', [[-30, 72, 160], [46, 72, 160]], 7, 'tank', { seg: 16, cap: 'tank' });
+        for (const x of [-22, 38]) box(shape('conservator', false), [x - 1.5, 60, 158.5], [x + 1.5, 66, 161.5], 'tank');
+        // HV terminal box and the three energy sockets with their cables, on the back face.
+        const back = shape('back', false);
+        box(back, [1, 1, 176], [15, 15, 178], { south: 'socket', all: 'skid' }, ['north'], { south: true });
+        for (let i = 0; i < 3; i++) {
+            const x0 = -47 + i * 16;
+            box(back, [x0, 1, 176], [x0 + 14, 15, 178], { south: 'socket', all: 'skid' }, ['north'], { south: true });
+            sweep('cable', fillet([[x0 + 7, 8, 177], [x0 + 7, 8, 182], [x0 + 7, 14, 182]], 3, 4), 2, 'rubber', { seg: 8 });
+            sweep('cable', fillet([[x0 + 7, 14, 182], [x0 + 7, 22, 176], [x0 + 7, 30, 172]], 4, 4), 2, 'rubber', { seg: 8 });
+        }
+
+        // ---- Charging bins for lime and coke on the upper deck, feeding the roof through bent chutes.
+        for (const [bx, bz] of [[-40, 62], [56, 62]]) {
+            sweep('bin', [[bx, 212, bz], [bx, 228, bz]], d => 4 + d * (10 / 16), 'pipe', { seg: 16, noTile: true, cap: false });
+            tube('bin', bx, bz, 14, 228, 248, 'cabinet', { seg: 16, noTile: true, cap: 'roof', capEnds: ['end'] });
+            band('bin', bx, bz, 13.5, 15, 246, 248, 'pipe', 16);
+            const toward = bx < cx ? 1 : -1;
+            sweep('chute', fillet([[bx, 212, bz], [bx, 190, bz], [cx + toward * -26, 150, cz - 22], [cx + toward * -26, 133, cz - 22]], 10, 6), 3, 'pipe', { seg: 10 });
+            for (const sx of [-1, 1]) for (const sz of [-1, 1]) strut('bin_leg', [bx + sx * 10, 228, bz + sz * 10], [bx + sx * 10, 200, bz + sz * 10], 1.2);
+        }
+
+        // ---- Steel frame: H-section corner columns, ring beams, bracing, two decks and a crane girder.
+        const fr = shape('frame', false);
+        const cols = [[-72, 8], [88, 8], [-72, 168], [88, 168]];
+        for (const [x, z] of cols) { hbeam(fr, [x, 18, z], [x, 280, z], 12); box(fr, [x - 8, 16, z - 8], [x + 8, 18, z + 8], 'frame', ['down']); }
+        for (const y of [128, 200, 280]) {
+            hbeam(fr, [-66, y - 6, 8], [82, y - 6, 8], 12); hbeam(fr, [-66, y - 6, 168], [82, y - 6, 168], 12);
+            hbeam(fr, [-72, y - 6, 14], [-72, y - 6, 162], 12); hbeam(fr, [88, y - 6, 14], [88, y - 6, 162], 12);
+        }
+        for (const [a, b] of [[[-72, 8], [-72, 168]], [[88, 8], [88, 168]], [[-72, 168], [88, 168]]]) {
+            const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            for (const [y0, y1] of [[16, 122], [128, 194]]) {
+                strut('brace', [a[0], y0 + 4, a[1]], [m[0], y1 - 2, m[1]], 1.6);
+                strut('brace', [b[0], y0 + 4, b[1]], [m[0], y1 - 2, m[1]], 1.6);
+            }
+        }
+        // Main deck at the hood shoulder, open around the roof, with a grating floor and pipe railings.
+        const deck = shape('deck', false);
+        const hole = [-36, 52, 44, 132];
+        const gr = (x0, z0, x1, z1) => box(deck, [x0, 128, z0], [x1, 129, z1], 'grating');
+        gr(-66, 14, 82, hole[2]); gr(-66, hole[3], 82, 162); gr(-66, hole[2], hole[0], hole[3]); gr(hole[1], hole[2], 82, hole[3]);
+        // Beams framing the opening: the long pair lands on the front and back ring beams, the short
+        // trimmers on the long pair.
+        hbeam(fr, [hole[0], 122, 14], [hole[0], 122, 162], 10); hbeam(fr, [hole[1], 122, 14], [hole[1], 122, 162], 10);
+        for (const z of [hole[2], hole[3]]) hbeam(fr, [hole[0] + 5, 122, z], [hole[1] - 5, 122, z], 10);
+        for (const z of [14, 162]) rail([[-66, 129, z], [-66, 146, z], [82, 146, z], [82, 129, z]]);
+        for (const x of [-66, 82]) rail([[x, 146, 15.2], [x, 146, 160.8]]);
+        for (const x of [-30, 0, 30, 60]) { rail([[x, 129, 14], [x, 145, 14]], 0.75); rail([[x, 129, 162], [x, 145, 162]], 0.75); }
+        for (const z of [40, 88, 136]) { rail([[-66, 129, z], [-66, 145, z]], 0.75); rail([[82, 129, z], [82, 145, z]], 0.75); }
+        rail([[-65, 137, 14], [81, 137, 14]], 0.65); rail([[-65, 137, 162], [81, 137, 162]], 0.65);
+        rail([[-66, 137, 15], [-66, 137, 161]], 0.65); rail([[82, 137, 15], [82, 137, 161]], 0.65);
+        // Electrode deck higher up with a round opening rail around the columns.
+        gr2(deck, -66, 14, 82, 162, 200);
+        function gr2(s, x0, z0, x1, z1, y) {
+            box(s, [x0, y, z0], [x1, y + 1, 44], 'grating'); box(s, [x0, y, 132], [x1, y + 1, z1], 'grating');
+            box(s, [x0, y, 44], [-24, y + 1, 132], 'grating'); box(s, [40, y, 44], [x1, y + 1, 132], 'grating');
+        }
+        hbeam(fr, [-24, 194, 14], [-24, 194, 162], 10); hbeam(fr, [40, 194, 14], [40, 194, 162], 10);
+        for (const z of [44, 132]) hbeam(fr, [-19, 194, z], [35, 194, z], 10);
+        for (const z of [14, 162]) rail([[-66, 218, z], [82, 218, z]]);
+        for (const x of [-66, 82]) rail([[x, 218, 15.2], [x, 218, 160.8]]);
+        for (const [x, z] of [[-66, 14], [82, 14], [-66, 162], [82, 162], [8, 14], [8, 162], [-66, 88], [82, 88]]) rail([[x, 201, z], [x, 217, z]], 0.75);
+        // Crane girder across the top, sitting on the side ring beams with a bearing plate at each end.
+        hbeam(fr, [-78, 287, cz], [94, 287, cz], 12);
+        for (const x of [-72, 88]) box(fr, [x - 6, 280, cz - 8], [x + 6, 281, cz + 8], 'frame', ['down', 'up']);
+        const hoist = shape('hoist', false);
+        box(hoist, [-2, 270, cz - 10], [18, 281, cz + 10], 'cabinet');
+        tube('hoist', 8, cz, 0.6, 252, 270, 'pipe', { seg: 4 });
+        // Caged ladder up the front-left corner to the main deck and on to the electrode deck.
+        const ladder = shape('ladder', false);
+        for (const [y0, y1, z] of [[16, 146, 4], [146, 218, 4]]) {
+            for (const x of [-62, -52]) box(ladder, [x - 1, y0, z - 1], [x + 1, y1, z + 1], 'frame');
+            for (let y = y0 + 6; y < Math.min(y1, y0 === 16 ? 128 : 200); y += 6) box(ladder, [-61, y, z - 0.5], [-53, y + 1, z + 0.5], 'pipe', ['east', 'west']);
+            for (let y = y0 + 36; y < y1 - 4; y += 14) sweep('cage', fillet([[-63, y, z], [-63, y, z - 8], [-51, y, z - 8], [-51, y, z]], 4, 4), 0.6, 'frame', { seg: 6 });
+            for (const x of [-63, -57, -51]) strut('cage', [x, y0 + 36, z - 8 + (x === -57 ? 0 : 3)], [x, y1 - 6, z - 8 + (x === -57 ? 0 : 3)], 0.5);
+        }
+    };
+
+    // ---- Shared pieces for plants drawn straight over their block layout (tools/gen_plant_layouts.py):
+    // cell i of a plant w cells wide spans x cellX(w, i) .. +16, depth d spans z d*16 .. +16.
+    const cellX = (w, i) => (i - (w >> 1)) * 16;
+    const PORT_FACE = { I: 'item_in', O: 'item_out', L: 'flange_in', R: 'flange_out', Q: 'flange_gas', M: 'maint', '@': 'panel', S: 'socket', H: 'socket', E: 'socket', J: 'socket' };
+    const NOZZLE = { L: 'water', R: 'pipe', Q: 'gas' };
+        // Hatch boxes on one face of row d; rows maps a layer to its row text, as in the layout.
+        // Internal vertical faces between adjacent ports in the same row are skipped so they merge without Z-fighting!
+        function ports(w, side, d, rows, baseY) {
+            const dir = side === 'north' ? -1 : 1;
+            for (const layer in rows) {
+                const line = [...rows[layer]];
+                line.forEach((ch, i) => {
+                    const face = PORT_FACE[ch];
+                    if (!face) return;
+                    const x0 = cellX(w, i), y0 = layer * 16 + (baseY || 0), z0 = d * 16, zf = side === 'north' ? z0 : z0 + 16;
+                    const skip = ['down'];
+                    if (i > 0 && PORT_FACE[line[i - 1]]) skip.push('west');
+                    if (i + 1 < line.length && PORT_FACE[line[i + 1]]) skip.push('east');
+                    box(shape('port', false), [x0, y0, z0], [x0 + 16, y0 + 16, z0 + 16], { [side]: face, up: 'cabinet_top', all: 'cabinet' }, skip, { [side]: true });
+                    if (!NOZZLE[ch]) return;
+                    sweep('nozzle', [[x0 + 8, y0 + 8, zf], [x0 + 8, y0 + 8, zf + dir * 4]], 3.5, NOZZLE[ch], { seg: 12, noTile: true });
+                    sweep('nozzle', [[x0 + 8, y0 + 8, zf + dir * 4], [x0 + 8, y0 + 8, zf + dir * 6]], 5.5, 'pipe', { seg: 12, noTile: true, cap: face, capEnds: ['end'] });
+                });
+            }
+        }
+    // Checker-plate skid over cells [i0, i1) x [d0, d1).
+    const skid = (w, i0, i1, d0, d1, y0, y1) => box(shape('base', false), [cellX(w, i0), y0 || 0, d0 * 16], [cellX(w, i1), y1 || 16, d1 * 16], { up: 'deck', all: 'skid' }, ['down']);
+    // Square tapered hopper with an open top, lined inside.
+    function hopper(name, cx, cz, top, bot, y0, y1, tex) {
+        const s = shape(name, false);
+        const P = (h, y) => [[cx - h[0], y, cz - h[1]], [cx + h[0], y, cz - h[1]], [cx + h[0], y, cz + h[1]], [cx - h[0], y, cz + h[1]]];
+        const lo = P(bot, y0), hi = P(top, y1);
+        const [W, H] = TEXTURES[tex];
+        for (let k = 0; k < 4; k++) {
+            const a = lo[k], b = lo[(k + 1) % 4], c = hi[(k + 1) % 4], d = hi[k];
+            s.face([b, a, d, c], tex, [[0, H], [W, H], [W, 0], [0, 0]]);
+            s.face([a, b, c, d], 'cavity', [[0, 16], [16, 16], [16, 0], [0, 0]]);
+        }
+        return s;
+    }
+    // Vertical vessel: shell, stiffening bands and a dished head.
+    function vessel(name, x, z, r, y0, y1, tex, head) {
+        tube(name, x, z, r, y0, y1, tex, { seg: 24, noTile: true });
+        const h = head || r * 0.5;
+        sweep(name, [[x, y1, z], [x, y1 + h, z]], d => r * Math.sqrt(Math.max(0, 1 - (d / h) ** 2)), tex, { seg: 24, noTile: true, extra: [h * 0.3, h * 0.55, h * 0.75, h * 0.9] });
+        band(name, x, z, r - 0.5, r + 1, y0, y0 + 4, 'frame', 24);
+    }
+    // Horizontal drum along x or z with flat ends.
+    const drum = (name, a, b, r, tex) => sweep(name, [a, b], r, tex, { seg: 20, noTile: true, cap: tex });
+
+    BUILD.coke_oven_battery = function () {
+        const w = 9, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        // One oven: brick body on its regenerator, doors at both ends, charging deck with the car rails,
+        // ascension pipe into the gas collecting main.
+        const oven = (z0, stand, ends) => {
+            const skip = ['north', 'south'].filter(f => !(ends || []).includes(f));
+            const s = shape('oven', false);
+            box(s, [X(1), 0, z0], [X(8), 80, z0 + 16], 'brick', skip);
+            box(s, [X(1), 80, z0], [X(8), 96, z0 + 16], { up: 'deck', all: 'skid' }, skip);
+            box(shape('base', false), [X(0), 0, z0], [X(1), 16, z0 + 16], { up: 'deck', all: 'skid' }, ['down', ...skip]);
+            box(shape('base', false), [X(8), 0, z0], [X(9), 16, z0 + 16], { up: 'deck', all: 'skid' }, ['down', ...skip]);
+            for (const [x, out] of [[X(1), -1], [X(8), 1]]) {
+                const door = shape('door', false), skipIn = [out < 0 ? 'east' : 'west'];
+                box(shape('glow_door', false), [x, 10, z0 + 1.5], [x + out * 0.6, 76, z0 + 14.5], 'glow', skipIn);
+                sweep('door_spindle', [[x + out * 3.5, 21, z0 + 8], [x + out * 3.5, 67, z0 + 8]], 0.8, 'pipe', { seg: 8, cap: 'cast' });
+                box(door, [x + out * 0.6, 12, z0 + 2.5], [x + out * 2.2, 74, z0 + 13.5], 'door', skipIn);
+                for (const y of [24, 46, 64]) box(door, [x + out * 2.2, y, z0 + 1.5], [x + out * 2.9, y + 3, z0 + 14.5], 'frame', skipIn);
+            }
+            for (const rx of [X(0) + 1.5, X(9) - 1.5]) {
+                rail([[rx, 32, z0], [rx, 32, z0 + 16]], 0.8);
+                rail([[rx, 24, z0], [rx, 24, z0 + 16]], 0.6);
+                if (stand) rail([[rx, 16, z0 + 8], [rx, 31.1, z0 + 8]], 0.7);
+            }
+            const rails = shape('rail', false);
+            for (const x of [-24, 8]) { box(rails, [x - 3, 96, z0], [x + 3, 97.5, z0 + 16], 'frame', ['north', 'south']); box(rails, [x - 1, 97.5, z0], [x + 1, 101, z0 + 16], 'pipe', ['north', 'south']); }
+            tube('lid', -8, z0 + 8, 4, 96, 97.5, 'pipe', { seg: 12, cap: 'pipe', capEnds: ['end'] });
+            tube('ascension', 40, z0 + 8, 4, 96, 116, 'insul', { seg: 12 });
+            band('ascension', 40, z0 + 8, 4, 5.5, 104, 106, 'pipe', 12);
+            sweep('main', [[40, 120, z0], [40, 120, z0 + 16]], 6, 'gas', { seg: 16 });
+            if (!stand) return;
+            // Buckstays either side of the oven wall, tied together over the top.
+            for (const x of [X(0) + 8, X(8) + 8]) { hbeam(fr, [x, 16, z0 + 8], [x, 130, z0 + 8], 12); box(fr, [x - 7, 16, z0 + 1], [x + 7, 18, z0 + 15], 'frame', ['down']); }
+            hbeam(fr, [X(0) + 2, 136, z0 + 8], [X(9) - 2, 136, z0 + 8], 12);
+            box(fr, [36, 126, z0 + 4], [44, 130, z0 + 12], 'frame');
+        };
+        // Head: ports, the gas offtake from the main down to the gas hatch, ladder to the deck, first stand.
+        skid(w, 0, 3, 0, 1); skid(w, 6, 9, 0, 1);
+        ports(w, 'north', 0, { 0: '...I@O...', 1: '...LMRQ..' });
+        sweep('main', fillet([[40, 32, 8], [40, 120, 8], [40, 120, 16]], 6, 6), 6, 'gas', { seg: 16 });
+        ladder(X(0), 15, 16, 96);
+        oven(16, true, ['north']);
+        within('bay', null, () => oven(32, false));
+        within('stand', null, () => oven(48, true));
+        // Tail: last stand, brick end buttress with the waste-gas stack, sockets at the back.
+        within('tail', null, () => {
+            oven(240, true, ['south']);
+            skid(w, 0, 3, 16, 17); skid(w, 6, 9, 16, 17);
+            ports(w, 'south', 16, { 0: '...SHS...' });
+            box(shape('oven', false), [X(1), 16, 256], [X(8), 64, 272], 'brick');
+            tube('stack', -40, 264, 7.5, 64, 150, 'brick', { seg: 16 });
+            band('stack', -40, 264, 7.5, 9, 146, 150, 'pipe', 16);
+            sweep('main', [[40, 120, 256], [40, 120, 262]], 6, 'gas', { seg: 16, cap: 'pipe', capEnds: ['end'] });
+        });
+    };
+
+    BUILD.twin_screw_extruder = function () {
+        const w = 5, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        // Low-slung industrial bedplate + side rail guides + cable tray + twin-lobe barrel at y=25.
+        const railPair = d => {
+            const z0 = d * 16;
+            for (const x of [-14, 30]) {
+                box(fr, [x - 2, 16, z0], [x + 2, 22, z0 + 16], 'frame', ['down']);
+                box(fr, [x - 3, 22, z0], [x + 3, 24, z0 + 16], 'frame');
+            }
+            // Side cable tray along +x rail and cooling water return along -x rail.
+            box(fr, [22, 24, z0], [26, 25.5, z0 + 16], 'cabinet');
+        };
+        const barrel = d => {
+            const z0 = d * 16;
+            skid(w, 0, 5, d, d + 1);
+            railPair(d);
+            box(shape('pedestal', false), [1, 16, z0 + 3], [15, 20.5, z0 + 13], 'cast', ['down']);
+            box(fr, [-12, 18, z0 + 5], [28, 20, z0 + 11], 'frame');
+            // Twin-lobe barrel: figure-8 clam-shell barrel block + bolted side flanges + ceramic heater bands.
+            for (const bx of [5, 11]) sweep('barrel', [[bx, 25, z0], [bx, 25, z0 + 16]], 4.2, 'pipe', { seg: 12 });
+            for (const bx of [5, 11]) sweep('heater', [[bx, 25, z0 + 2], [bx, 25, z0 + 14]], 5.1, 'ceramic', { seg: 12, noTile: true });
+            box(fr, [-0.5, 23.5, z0 + 1], [16.5, 26.5, z0 + 2], 'pipe');
+            box(fr, [-0.5, 23.5, z0 + 14], [16.5, 26.5, z0 + 15], 'pipe');
+            box(shape('terminal', false), [4, 30.2, z0 + 5], [12, 32, z0 + 11], 'cabinet');
+            tube('thermo', 10, z0 + 9, 0.7, 32, 34.5, 'copper', { seg: 6 });
+            sweep('cooling', [[-4, 26, z0], [-4, 26, z0 + 16]], 1.1, 'water', { seg: 8 });
+            box(fr, [-4, 24, z0 + 7], [0.5, 26, z0 + 9], 'frame');
+        };
+        const bay = d => barrel(d);
+        const stand = d => {
+            barrel(d);
+            const zc = d * 16 + 8;
+            // Devolatilization vacuum vent dome, sight-port condenser pot and vacuum header riser.
+            tube('vent', 8, zc, 3.2, 29.5, 36, 'cast', { seg: 12, cap: 'pipe', capEnds: ['end'] });
+            band('vent', 8, zc, 3.0, 4.2, 35, 36.5, 'pipe', 12);
+            sweep('vent_line', fillet([[8, 36.5, zc], [8, 44, zc], [-10, 44, zc], [-10, 36, zc]], 3, 4), 1.5, 'pipe', { seg: 8 });
+            tube('condenser_pot', -10, zc, 3.2, 24, 36, 'vessel', { seg: 12, cap: 'pipe' });
+        };
+        // Head: bedplate, front ports + control desk, finned AC drive motor + twin-shaft gearbox, feed hopper.
+        skid(w, 0, 1, 0, 1); skid(w, 4, 5, 0, 1);
+        ports(w, 'north', 0, { 0: '.I@O.', 1: '.LMR.' });
+        skid(w, 0, 5, 1, 2);
+        railPair(1);
+        // Finned AC motor on cast pedestal + coupling guard + heavy twin-shaft reduction gearbox.
+        box(shape('pedestal', false), [2, 16, 16.5], [14, 19.5, 24.5], 'cast', ['down']);
+        sweep('motor', [[8, 25, 16.2], [8, 25, 24.5]], 5.8, 'blue', { seg: 16, noTile: true, cap: 'pipe' });
+        for (let z = 17.4; z < 24.0; z += 1.6) sweep('motor', [[8, 25, z], [8, 25, z + 0.6]], 6.6, 'blue', { seg: 16, noTile: true });
+        box(shape('motor', false), [5, 30.8, 18], [11, 33.5, 23], 'cabinet');
+        box(shape('gearbox', false), [-6, 16, 24.8], [22, 34, 31.8], 'cast', ['down']);
+        box(shape('gearbox', false), [-4, 34, 25.8], [20, 35.5, 30.8], 'cabinet', ['down']);
+        for (const x of [-4, 20]) box(fr, [x - 1, 16, 24.6], [x + 1, 33, 31.9], 'frame', ['down']);
+        // Feed segment (d=2) with gravimetric feeder throat and stainless conical feed hopper.
+        barrel(2);
+        box(shape('feeder', false), [3, 29.5, 35], [13, 33, 45], 'cast');
+        hopper('hopper', 8, 40, [7.5, 7.5], [3.8, 3.8], 33, 47, 'vessel');
+        for (const [a, b] of [[[0.5, 32.5], [15.5, 34]], [[0.5, 46], [15.5, 47.5]], [[0.5, 34], [2, 46]], [[14, 34], [15.5, 46]]])
+            box(shape('hopper', false), [a[0], 46.5, a[1]], [b[0], 48, b[1]], 'pipe');
+        within('bay', null, () => bay(3));
+        within('stand', null, () => stand(3));
+        // Tail: last barrel, hinged screen-changer & tapered die head, stainless water cooling bath, strand pelletiser.
+        within('tail', null, () => {
+            bay(10);
+            skid(w, 0, 5, 11, 12);
+            railPair(11);
+            box(shape('die', false), [1, 16, 178], [15, 21.5, 189], 'cast', ['down']);
+            box(shape('die', false), [-1, 20.5, 176.2], [17, 30.5, 180], 'cast');
+            sweep('die', [[8, 25, 180], [8, 25, 189]], d => 5.6 - d * 0.14, 'cast', { seg: 16, noTile: true, cap: 'pipe' });
+            box(shape('die', false), [3, 21.5, 189], [13, 28.5, 191.8], 'pipe');
+            // d=12: non-overlapping skids around the rear HV port at cell i=2.
+            skid(w, 0, 2, 12, 13); skid(w, 3, 5, 12, 13);
+            ports(w, 'south', 12, { 0: '..H..' });
+            // Stainless cooling trough on legs with water bath, guide rollers, air-knife dryer and strand pelletiser.
+            for (const z of [194, 201]) for (const x of [-8, 22]) box(fr, [x, 16, z], [x + 2, 20, z + 2], 'frame', ['down']);
+            for (const [a, b] of [[[-10, 192], [26, 193.5]], [[-10, 201.5], [26, 203]], [[-10, 193.5], [-8.5, 201.5]], [[24.5, 193.5], [26, 201.5]]])
+                box(shape('bath', false), [a[0], 20, a[1]], [b[0], 26.5, b[1]], 'vessel');
+            box(shape('bath', false), [-8.5, 20, 193.5], [24.5, 24.8, 201.5], { up: 'water', all: 'vessel' });
+            for (const z of [195.5, 199.5]) sweep('guide_roll', [[-8, 25.5, z], [24, 25.5, z]], 0.9, 'roll', { seg: 8 });
+            for (const x of [4, 8, 12]) sweep('strand', [[x, 25.5, 191.8], [x, 25.0, 197.5], [x, 26.0, 203.2]], 0.5, 'orange', { seg: 6 });
+            box(shape('pelletiser', false), [-3, 16, 203.2], [19, 25, 207.8], 'cast', ['down']);
+            box(shape('pelletiser', false), [0, 25, 203.2], [16, 32, 207.8], { all: 'orange', up: 'cabinet' }, ['down']);
+            box(shape('pelletiser', false), [16, 20, 204.2], [21, 24, 206.8], 'pipe');
+        });
+    };
+
+    BUILD.bio_ethylene_plant = function () {
+        const w = 9, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        skid(w, 0, 9, 1, 16); skid(w, 0, 3, 0, 1); skid(w, 6, 9, 0, 1); skid(w, 0, 3, 16, 17); skid(w, 6, 9, 16, 17);
+        ports(w, 'north', 0, { 0: '...I@O...', 1: '...LMRQ..' });
+        ports(w, 'south', 16, { 0: '...SHS...' });
+        // Four fermenters with agitator drives, each piped up to the rack.
+        for (const [x, z] of [[-40, 56], [56, 56], [-40, 120], [56, 120]]) {
+            vessel('fermenter', x, z, 22, 16, 96, 'vessel', 14);
+            for (const y of [44, 72]) band('fermenter', x, z, 21.5, 23, y, y + 3, 'pipe', 24);
+            tube('agitator', x, z, 4, 106, 116, 'blue', { seg: 12, cap: 'pipe', capEnds: ['end'] });
+            const rx = x < 0 ? -8 : 24;
+            sweep('line', fillet([[x + (rx - x) * 0.3, 104, z], [x + (rx - x) * 0.3, 112, z], [rx, 112, z], [rx, 106, z]], 3, 4), 2, 'pipe', { seg: 8 });
+        }
+        // Pipe rack down the middle: bents every four blocks, longitudinal beams, three lines on top.
+        for (const z of [40, 104, 168, 232]) {
+            for (const x of [-8, 24]) { hbeam(fr, [x, 16, z], [x, 82, z], 12); box(fr, [x - 7, 16, z - 7], [x + 7, 18, z + 7], 'frame', ['down']); }
+            hbeam(fr, [-14, 88, z], [30, 88, z], 12);
+        }
+        for (const [z0, z1] of [[46, 98], [110, 162], [174, 226]]) for (const x of [-8, 24]) hbeam(fr, [x, 88, z0], [x, 88, z1], 10);
+        for (const [x, tex] of [[-8, 'water'], [8, 'pipe'], [24, 'gas']]) sweep('rack_pipe', [[x, 101, 32], [x, 101, 240]], 4.5, tex, { seg: 12, cap: 'pipe' });
+        // Gas line from the rack down to the gas hatch.
+        sweep('gas_line', fillet([[24, 101, 36], [24, 101, 24], [40, 101, 24], [40, 24, 24], [40, 24, 16]], 6, 6), 3.5, 'gas', { seg: 12 });
+        // Ethanol column with its ring platform, overhead line and reflux drum.
+        vessel('column', -40, 200, 7, 16, 136, 'vessel', 5);
+        for (const y of [48, 112]) band('column', -40, 200, 7, 8.5, y, y + 2, 'pipe', 16);
+        const deck = shape('deck', false);
+        for (const [a, b] of [[[-64, 176], [-16, 192]], [[-64, 208], [-16, 224]], [[-64, 192], [-48, 208]], [[-32, 192], [-16, 208]]]) box(deck, [a[0], 80, a[1]], [b[0], 81, b[1]], 'grating');
+        for (const [x, z] of [[-62, 178], [-18, 178], [-62, 222], [-18, 222]]) strut('bracket', [-40 + Math.sign(x + 40) * 6, 56, 200 + Math.sign(z - 200) * 6], [x, 79, z], 1.2);
+        rail([[-64, 81, 176], [-64, 98, 176], [-16, 98, 176], [-16, 98, 224], [-64, 98, 224], [-64, 98, 177]]);
+        for (const [x, z] of [[-16, 176], [-16, 224], [-64, 224], [-40, 176], [-40, 224], [-16, 200], [-64, 200]]) rail([[x, 81, z], [x, 97, z]], 0.75);
+        ladder(X(0), 175, 16, 80);
+        drum('reflux', [-56, 24, 226], [-56, 24, 254], 7, 'vessel');
+        for (const z of [230, 250]) box(fr, [-62, 16, z - 2], [-50, 19, z + 2], 'frame', ['down']);
+        sweep('overhead', fillet([[-40, 141, 200], [-40, 142, 200], [-58, 142, 200], [-58, 142, 240], [-58, 31, 240]], 5, 5), 2.5, 'insul', { seg: 10 });
+        // Dehydration reactor, cabin-style fired heater with buckstays, convection breeching, peep holes and stack.
+        vessel('reactor', 56, 200, 7, 16, 92, 'vessel', 4);
+        const heater = shape('heater', false);
+        box(heater, [34, 16, 225], [78, 54, 255], 'hood', ['down']);
+        box(heater, [40, 54, 228], [72, 66, 252], 'insul', ['down']);
+        for (const x of [33, 77]) for (const z of [224, 240, 254]) box(fr, [x, 16, z], [x + 2, 55, z + 2], 'frame', ['down']);
+        box(fr, [32.6, 36, 223.6], [79.4, 38.5, 256.4], 'frame');
+        for (const z of [231, 243]) {
+            box(fr, [78, 25, z - 1], [79.5, 33, z + 7], 'cast', ['west']);
+            box(shape('glow_heater', false), [79.5, 26.5, z + 0.5], [80.2, 31.5, z + 5.5], 'glow', ['west']);
+        }
+        tube('stack', 56, 240, 5, 66, 144, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        band('stack', 56, 240, 5, 6.5, 100, 103, 'frame', 16);
+        sweep('transfer', fillet([[46, 66, 234], [46, 104, 234], [56, 104, 234], [56, 104, 207]], 5, 5), 2.5, 'insul', { seg: 10 });
+    };
+
+    BUILD.waste_heat_power_plant = function () {
+        const w = 9, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        skid(w, 0, 9, 1, 16); skid(w, 0, 3, 0, 1); skid(w, 6, 9, 0, 1); skid(w, 0, 4, 16, 17); skid(w, 5, 9, 16, 17);
+        ports(w, 'north', 0, { 0: '...I@O...', 1: '...LMR...' });
+        ports(w, 'south', 16, { 0: '....J....' });
+        // Boiler: plate casing with horizontal & vertical buckstay ribs, steam drum on saddles with downcomers.
+        const blr = shape('boiler', false);
+        box(blr, [X(2), 16, 32], [X(7), 112, 128], { all: 'shell', up: 'deck' }, ['down']);
+        for (const y of [44, 76]) box(fr, [X(2) - 1.5, y, 30.5], [X(7) + 1.5, y + 3.5, 129.5], 'frame');
+        for (const z of [34, 64, 94, 124]) for (const [x0, x1] of [[X(2) - 2, X(2)], [X(7), X(7) + 2]])
+            box(fr, [x0, 16, z], [x1, 112, z + 2.5], 'frame', ['down']);
+        drum('drum', [X(2) + 2, 121, 88], [X(7) - 2, 121, 88], 7, 'vessel');
+        for (const x of [-24, 40]) {
+            box(fr, [x - 4, 112, 82], [x + 4, 115, 94], 'frame', ['down']);
+            tube('downcomer', x, 76, 2.0, 112, 120, 'insul', { seg: 8 });
+        }
+        for (const x of [-8, 24]) tube('valve', x, 88, 1.6, 127, 134, 'pipe', { seg: 8, cap: 'pipe', capEnds: ['end'] });
+        // Stair up the +x side to the landing behind the boiler.
+        const stair = shape('stair', false);
+        for (let k = 0; k < 6; k++) {
+            box(stair, [X(8) + 1, 16 + 16 * k + 7, 32 + 16 * k], [X(9) - 1, 16 + 16 * k + 8, 40 + 16 * k], 'grating');
+            box(stair, [X(8) + 1, 16 + 16 * k + 15, 40 + 16 * k], [X(9) - 1, 16 + 16 * k + 16, 48 + 16 * k], 'grating');
+        }
+        for (const x of [X(8) + 1, X(9) - 1]) { strut('stringer', [x, 16, 32], [x, 112, 128], 1.2); rail([[x, 34, 34], [x, 130, 128]]); }
+        box(stair, [X(7), 112, 128], [X(9), 114, 144], 'grating');
+        for (const x of [56, 72]) hbeam(fr, [x, 16, 136], [x, 112, 136], 10);
+        rail([[X(7), 114, 144], [X(7), 130, 144], [X(9), 130, 144], [X(9), 130, 128]]);
+        // Flue duct from the back of the boiler into the brick stack.
+        box(shape('flue', false), [X(4), 80, 128], [X(5), 96, 144], 'insul', ['north']);
+        tube('stack', 8, 152, 8, 16, 150, 'brick', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        band('stack', 8, 152, 8, 9.5, 146, 150, 'pipe', 16);
+        // Feedwater up the front of the boiler into the drum; steam line over its support into the turbine.
+        sweep('feed', fillet([[-8, 24, 16], [-8, 24, 24], [-8, 121, 24], [-8, 121, 81]], 6, 6), 2.5, 'water', { seg: 10 });
+        sweep('steam', fillet([[40, 121, 95], [40, 121, 184], [40, 70, 184], [30, 62, 186]], 8, 6), 3, 'insul', { seg: 12 });
+        hbeam(fr, [40, 16, 152], [40, 114, 152], 10);
+        // Turbine table: columns, deck and condenser below; multi-stage steam turbine, coupling and finned generator on top.
+        for (const z of [184, 216, 248]) for (const x of [-8, 56]) hbeam(fr, [x, 16, z], [x, 32, z], 10);
+        box(shape('table', false), [X(3), 32, 176], [X(8), 48, 256], { up: 'deck', all: 'skid' });
+        drum('condenser', [24, 24, 194], [24, 24, 222], 7, 'vessel');
+        box(fr, [4, 48, 177], [44, 52, 207], 'cast', ['down']);
+        sweep('turbine', [[24, 58, 178], [24, 58, 206]], d => 6 + d * 0.12, 'blue', { seg: 20, noTile: true, cap: 'pipe' });
+        for (const z of [184, 196]) sweep('turbine', [[24, 58, z], [24, 58, z + 2]], 9.6, 'pipe', { seg: 20, noTile: true });
+        sweep('shaft', [[24, 58, 206], [24, 58, 226]], 2.2, 'pipe', { seg: 10 });
+        box(fr, [6, 48, 225], [42, 52, 255], 'cast', ['down']);
+        sweep('generator', [[24, 58, 226], [24, 58, 254]], 9.2, 'blue', { seg: 20, noTile: true, cap: 'cast' });
+        box(shape('generator', false), [14, 66.5, 231], [34, 71, 249], 'cabinet');
+        for (const x of [4, 12]) sweep('cable', fillet([[x + 8, 52, 254], [x + 8, 52, 262], [x + 8, 16, 262]], 4, 4), 1.8, 'rubber', { seg: 8 });
+    };
+
+    BUILD.ore_processing_plant = function () {
+        const w = 5, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        skid(w, 0, 5, 1, 6); skid(w, 0, 1, 0, 1); skid(w, 4, 5, 0, 1); skid(w, 0, 2, 6, 7); skid(w, 3, 5, 6, 7);
+        ports(w, 'north', 0, { 0: '.I@O.' });
+        ports(w, 'south', 6, { 0: '..E..' });
+        // Frame over the crusher and the trommel.
+        for (const z of [8, 40, 72]) {
+            for (const x of [-24, 40]) { hbeam(fr, [x, 16, z], [x, 50, z], 12); box(fr, [x - 7, 16, z - 7], [x + 7, 18, z + 7], 'frame', ['down']); }
+            hbeam(fr, [-32, 56, z], [48, 56, z], 12);
+        }
+        for (const [z0, z1] of [[14, 34], [46, 66]]) for (const x of [-24, 40]) hbeam(fr, [x, 56, z0], [x, 56, z1], 12);
+        // Roll crusher: heavy cast-steel housing with stiffening ribs, two counter-rotating rolls, thick-walled feed hopper.
+        const housing = shape('crusher', false);
+        box(housing, [X(1), 16, 0.5], [X(4), 32, 32], 'cast', ['down']);
+        box(housing, [X(1), 32, 0.5], [X(4), 48, 16], 'cast', ['down']);
+        for (const x of [X(1), X(4) - 3]) box(housing, [x, 32, 16], [x + 3, 48, 32], 'cast', ['down']);
+        for (const x of [X(1) + 4, X(4) - 6]) box(fr, [x, 16, -0.5], [x + 2, 48, 0.5], 'frame', ['south']);
+        box(housing, [X(1) + 12, 20, -1], [X(4) - 12, 36, 0.5], 'cabinet', ['south']);
+        within('roller_front', [8, 42, 20], () => sweep('roll', [[-13, 42, 20], [29, 42, 20]], 3.8, 'roll', { seg: 12, cap: 'pipe' }));
+        within('roller_back', [8, 42, 28], () => sweep('roll', [[-13, 42, 28], [29, 42, 28]], 3.8, 'roll', { seg: 12, cap: 'pipe' }));
+        hopper('hopper', 8, 24, [22, 8], [12, 4], 48, 64, 'vessel');
+        const hp = shape('hopper', false);
+        for (const [a, b] of [[[X(1), 0], [X(4), 2]], [[X(1), 30], [X(4), 32]], [[X(1), 2], [X(1) + 2, 30]], [[X(4) - 2, 2], [X(4), 30]]])
+            box(hp, [a[0], 64, a[1]], [b[0], 80, b[1]], 'vessel');
+        box(hp, [X(1) + 2, 64, 2], [X(4) - 2, 73, 30], { up: 'cavity', all: 'vessel' });
+        // Washing trommel on its drive cradle, spray header resting on the cross beams.
+        box(shape('drive', false), [X(1) + 2, 16, 32], [X(4) - 2, 28, 48], 'cabinet', ['down']);
+        within('washing_drum', [8, 34, 64], () => {
+            sweep('trommel', [[8, 34, 48], [8, 34, 80]], 14.5, 'screen', { seg: 20, cap: 'pipe' });
+            for (const z of [49.5, 63, 76.5]) sweep('trommel', [[8, 34, z], [8, 34, z + 2.5]], 15.6, 'pipe', { seg: 20, noTile: true });
+        });
+        sweep('spray', [[8, 72, 34], [8, 72, 80]], 3, 'water', { seg: 10, cap: 'pipe' });
+        for (const z of [40, 72]) box(fr, [5, 62, z - 3], [11, 69, z + 3], 'frame');
+        for (const z of [52, 64]) tube('spray', 8, z, 1, 50, 69, 'water', { seg: 6 });
+        // Cylindrical rotary roasting kiln on riding tyres + brick-lined firing hood with glowing sight port and exhaust stack.
+        const kiln = shape('kiln', false);
+        for (const z of [83, 94]) {
+            box(fr, [-14, 16, z - 2], [30, 23, z + 2], 'cast', ['down']);
+            sweep('kiln_tyre', [[8, 36, z - 1.5], [8, 36, z + 1.5]], 16.2, 'pipe', { seg: 24, noTile: true });
+        }
+        sweep('kiln_shell', [[8, 36, 80.2], [8, 36, 100]], 14.8, 'hood', { seg: 24, noTile: true, cap: 'cast' });
+        box(kiln, [X(1) + 2, 16, 99], [X(4) - 2, 60, 111.5], 'brick', ['down']);
+        box(fr, [X(1) + 1, 58, 98.5], [X(4) - 1, 61, 112], 'frame');
+        box(fr, [X(4) - 2, 31, 102], [X(4) - 0.5, 43, 109], 'cast', ['west']);
+        box(shape('glow_kiln', false), [X(4) - 0.5, 33, 103.5], [X(4) + 0.2, 41, 107.5], 'glow', ['west']);
+        tube('stack', 8, 105, 5.2, 61, 98, 'pipe', { seg: 16, cap: 'cavity', capEnds: ['end'] });
+        band('stack', 8, 105, 5.0, 6.5, 80, 83, 'frame', 16);
+    };
+
+    BUILD.rolling_mill = function () {
+        const w = 9, X = i => cellX(w, i);
+        const fr = shape('frame', false);
+        // Solid scale-flume foundation slice along z0..z1: operator walkway on -x, recessed dark pit in middle, drive bedplate on +x.
+        const millBed = (z0, z1, fullCorners) => {
+            const base = shape('base', false);
+            if (!fullCorners) {
+                // Run the headers below the rear edge of the drive bed, clear of motor pedestals.
+                sweep('lube_hdr', [[49, 4.5, z0], [49, 4.5, z1]], 1.4, 'orange', { seg: 8 });
+                sweep('cool_hdr', [[51.9, 4.5, z0], [51.9, 4.5, z1]], 1.0, 'water', { seg: 8 });
+                box(fr, [47, 0, z0 + 1], [54, 3.2, z0 + 3], 'frame', ['down']);
+            }
+            box(base, [fullCorners ? X(0) : X(1), -16, z0], [-20, 0, z1], { up: 'deck', all: 'skid' }, ['down']);
+            box(base, [-20, -16, z0], [36, -12, z1], { up: 'cavity', all: 'skid' }, ['down']);
+            box(base, [36, -16, z0], [X(9), 0, z1], { up: 'deck', all: 'skid' }, ['down']);
+        };
+        // Roller-table bay furniture at row d: side frames, bearing blocks, side guides, table roll and hot strip.
+        const rollerTable = (d, spinner, walkway) => {
+            const z0 = d * 16, z1 = z0 + 16;
+            const tbl = shape('table', false);
+            for (const [x0, x1] of [[-26, -20], [36, 42]]) {
+                box(tbl, [x0, 0, z0], [x1, 13, z1], 'frame', ['down']);
+                box(tbl, [x0 - 0.5, 5, z0 + 5], [x1 + 0.5, 11, z0 + 11], 'cast');
+            }
+            for (const [x0, x1] of [[-15, -13], [29, 31]]) box(tbl, [x0, 12, z0], [x1, 15.2, z1], 'pipe');
+            within(spinner, [8, 8, z0 + 8], () => sweep('roll', [[-20, 8, z0 + 8], [36, 8, z0 + 8]], 4.4, 'roll', { seg: 14, cap: 'pipe' }));
+            box(shape('strip', false), [-12, 12.6, z0], [28, 13.3, z1], 'roll');
+            if (walkway) {
+                box(shape('walkway', false), [X(1) + 1, 0, z0], [X(2) - 1, 1.5, z1], 'grating', ['down']);
+                rail([[X(1) + 1.5, 14, z0], [X(1) + 1.5, 14, z1]], 0.8);
+                rail([[X(1) + 1.5, 7.5, z0], [X(1) + 1.5, 7.5, z1]], 0.6);
+
+            }
+        };
+
+        // Helper for a clean framed corner electrical cabinet spanning [x0..x1, 0..16, z0..z1] with a unified top bevel rim (no split L-seams!).
+        const cornerCabinet = (x0, z0, x1, z1) => {
+            const cab = shape('cabinet', false);
+            box(cab, [x0, 0, z0], [x1, 15, z1], { up: 'cabinet_top', all: 'cabinet' }, ['down']);
+            // Unified 1px raised steel bezel cap around all 4 edges of the 1x2 corner cabinet!
+            box(cab, [x0, 15, z0], [x1, 16, z0 + 2], 'frame', ['down']);
+            box(cab, [x0, 15, z1 - 2], [x1, 16, z1], 'frame', ['down']);
+            box(cab, [x0, 15, z0 + 2], [x0 + 2, 16, z1 - 2], 'frame', ['down']);
+            box(cab, [x1 - 2, 15, z0 + 2], [x1, 16, z1 - 2], 'frame', ['down']);
+            box(cab, [x0 + 2, 15, z0 + 2], [x1 - 2, 15.8, z1 - 2], { up: 'cabinet_top', all: 'cabinet' }, ['down']);
+        };
+
+        // Head (d = 0..1): entry foundation, continuous front console bank (C-I-@-O-C), unified 2-block corner cabinets and entry guide table.
+        box(shape('base', false), [X(0), -16, 0], [X(9), 0, 16], { up: 'deck', all: 'skid' }, ['down']);
+        millBed(16, 32, true);
+        for (const i of [0, 8]) cornerCabinet(X(i), 0, X(i) + 16, 32);
+        // Continuous front console bank across i=2..6 (x = X(2)..X(7), z = 0..16) with a single unbroken top canopy!
+        const frontBank = shape('port', false);
+        box(frontBank, [X(2), 0, 0], [X(3), 15.5, 16], { up: 'cabinet_top', all: 'cabinet' }, ['down', 'east']);
+        box(frontBank, [X(6), 0, 0], [X(7), 15.5, 16], { up: 'cabinet_top', all: 'cabinet' }, ['down', 'west']);
+        for (const [i, face] of [[3, 'item_in'], [4, 'panel'], [5, 'item_out']]) {
+            box(frontBank, [X(i), 0, 0], [X(i) + 16, 15.5, 16], { north: face, up: 'cabinet_top', all: 'cabinet' }, ['down', 'west', 'east'], { north: true });
+        }
+        // Single continuous steel console coping across all 5 front blocks (X(2)..X(7)) so there are zero seam breaks!
+        box(frontBank, [X(2) - 0.5, 15.5, -0.5], [X(7) + 0.5, 16.5, 16.2], { up: 'cabinet_top', all: 'frame' }, ['down']);
+        rollerTable(1, 'entry_roll', false);
+
+        // Bay (modelled at d = 2): continuous pit, roller table, operator walkway and drive-side headers.
+        within('bay', null, () => {
+            millBed(32, 48, false);
+            rollerTable(2, 'bay_roll', true);
+            rail([[X(1) + 1.5, 1.5, 40], [X(1) + 1.5, 13.1, 40]], 0.7);
+        });
+
+        // Four-high stand (modelled at d = 2): twin sculpted closed-top cast-steel housings with open bearing windows,
+        // individual hydraulic AGC cylinders, top tie-bridge, four rolls, pinion stand, twin spindles and finned mill motor.
+        within('stand', null, () => {
+            millBed(32, 48, false);
+            box(shape('walkway', false), [X(1) + 1, 0, 32], [X(2) - 1, 1.5, 48], 'grating', ['down']);
+            rail([[X(1) + 1.5, 14, 32], [X(1) + 1.5, 14, 48]], 0.8);
+            rail([[X(1) + 1.5, 1.5, 40], [X(1) + 1.5, 13.1, 40]], 0.7);
+            const cast = shape('housing', false);
+            for (const x0 of [-31, 35]) {
+                // Soleplate, front & rear window posts (inset to z=33..47 so adjacent stands never Z-fight), arched crown and bearing chocks.
+                box(cast, [x0 - 1, 0, 32.5], [x0 + 13, 3, 47.5], 'cast', ['down']);
+                box(cast, [x0, 3, 33], [x0 + 12, 36, 37.2], 'cast', ['down', 'up']);
+                box(cast, [x0, 3, 42.8], [x0 + 12, 36, 47], 'cast', ['down', 'up']);
+                box(cast, [x0, 36, 33], [x0 + 12, 44, 47], 'cast');
+                box(cast, [x0 + 1.5, 44, 34.5], [x0 + 10.5, 47, 45.5], 'frame', ['down']);
+                // Bearing chocks seated inside the housing window around the roll necks.
+                for (const [yLo, yHi] of [[0.2, 4.8], [8.0, 12.2], [13.8, 18.0], [21.0, 28.0]])
+                    box(fr, [x0 + 1.4, yLo, 37.2], [x0 + 10.6, yHi, 42.8], 'pipe', ['north', 'south']);
+                // Hydraulic AGC screw-down cylinder and servo cap atop each housing post.
+                const cx = x0 + 6;
+                tube('agc_cyl', cx, 40, 4.0, 47, 55, 'cast', { seg: 14, cap: 'pipe' });
+                tube('agc_rod', cx, 40, 2.0, 55, 60, 'pipe', { seg: 10, cap: 'cabinet' });
+            }
+            // Top structural tie-beams, tie rods and descaling header spanning between the twin housings.
+            hbeam(fr, [-19, 40, 40], [35, 40, 40], 8);
+            for (const zt of [34.8, 45.2]) sweep('tie_rod', [[-19, 41, zt], [35, 41, zt]], 1.4, 'pipe', { seg: 8 });
+            box(shape('bridge', false), [-19, 44.2, 36], [35, 45.5, 44], 'grating');
+            sweep('descale', [[-19, 20.5, 33.5], [35, 20.5, 33.5]], 1.5, 'water', { seg: 8 });
+
+            // Four-high roll stack seated right into the twin housing windows (x = -26..42).
+            for (const [name, y, r] of [
+                ['stand_backup_bottom', 1.5, 6.0],
+                ['stand_roll_bottom', 10.2, 2.5],
+                ['stand_roll_top', 15.8, 2.5],
+                ['stand_backup_top', 24.5, 6.0],
+            ]) {
+                within(name, [8, y, 40], () => {
+                    sweep('roll_body', [[-19.2, y, 40], [35.2, y, 40]], r, 'roll', { seg: 16, cap: 'pipe' });
+                    sweep('roll_neck_l', [[-26, y, 40], [-19.2, y, 40]], r * 0.52, 'pipe', { seg: 12 });
+                    sweep('roll_neck_r', [[35.2, y, 40], [42, y, 40]], r * 0.52, 'pipe', { seg: 12 });
+                });
+            }
+            box(shape('strip', false), [-12, 12.6, 32], [28, 13.3, 48], 'roll');
+
+            // Drive side (+x): twin universal drive spindles -> pinion stand gearbox -> finned DC mill motor.
+            for (const ys of [10.2, 15.8]) sweep('spindle', [[47, ys, 40], [53, ys, 40]], 1.8, 'pipe', { seg: 10 });
+            box(cast, [53, 0, 34], [63, 22, 46], 'cast', ['down']);
+            box(fr, [54, 22, 35], [62, 23.5, 45], 'cabinet', ['down']);
+            sweep('coupling', [[63, 12, 40], [66, 12, 40]], 2.4, 'pipe', { seg: 10 });
+            box(cast, [66, 0, 34.5], [78.5, 6, 45.5], 'cast', ['down']);
+            sweep('motor', [[66, 12.5, 40], [78.5, 12.5, 40]], 6.2, 'blue', { seg: 16, noTile: true, cap: 'pipe' });
+            for (let x = 67.5; x < 77.5; x += 2.0) sweep('motor_fin', [[x, 12.5, 40], [x + 0.7, 12.5, 40]], 6.9, 'blue', { seg: 16, noTile: true });
+            box(fr, [70, 18.8, 37.5], [75.5, 21.5, 42.5], 'cabinet');
+        });
+
+        // Tail (modelled at d = 7..8): exit roller table with pinch-roll portal, unified 2-block rear corner cabinets and heavy down-coiler.
+        within('tail', null, () => {
+            millBed(112, 128, true);
+            rollerTable(7, 'exit_roll', false);
+            // Pinch-roll portal guiding the finished strip into the coiler throat.
+            const coilerCast = shape('housing', false);
+            for (const x0 of [-27, 37]) box(coilerCast, [x0, 0, 122], [x0 + 6, 22, 127.5], 'cast', ['down']);
+            box(fr, [-27, 22, 122.5], [43, 25, 127], 'frame');
+
+            box(shape('base', false), [X(0), -16, 128], [X(9), 0, 144], { up: 'deck', all: 'skid' }, ['down']);
+            for (const i of [0, 8]) cornerCabinet(X(i), 112, X(i) + 16, 144);
+            ports(w, 'south', 8, { 1: '.E.......' }, -16);
+            for (const x0 of [-30, 34]) {
+                box(coilerCast, [x0, 0, 129], [x0 + 12, 30, 143], 'cast', ['down']);
+                box(fr, [x0 + 2, 30, 131], [x0 + 10, 33, 141], 'pipe', ['down']);
+            }
+            sweep('mandrel', [[-31, 16, 136], [47, 16, 136]], 3.2, 'pipe', { seg: 12 });
+            within('coiler', [8, 16, 136], () => sweep('coil', [[-16, 16, 136], [32, 16, 136]], 12.2, 'coil', { seg: 24, noTile: true, cap: 'coil_end' }));
+            // Pneumatic wrapper roll hold-down bridge over the coil.
+            sweep('wrapper_roll', [[-16, 29.5, 131.5], [32, 29.5, 131.5]], 2.2, 'roll', { seg: 10 });
+            for (const x of [-17, 32]) strut('wrapper_arm', [x + 0.5, 31, 136], [x + 0.5, 29.5, 131.5], 1.2);
+        });
+    };
+
+    // Each movable bay is 16 pixels long. Use a matching material period so arbitrary
+    // repetitions of a bay meet at the same point in the grain.
+    const bayMaterials = {
+        // The ore plant's chevron tread (TEXTURES.deck) on a 16-pixel period: the same 8-pixel cells,
+        // the same low-contrast ridges and grime, so a stretched floor reads like the ore plant's.
+        deck(t) {
+            steel(t, 3, C.steel[2], C.steel[3], false);
+            for (let y = 0; y < 16; y += 8) for (let x = 0; x < 16; x += 8) {
+                const alt = ((x >> 3) + (y >> 3)) & 1;
+                for (let k = 0; k < 3; k++) {
+                    const lx = x + 2 + k, ly = y + (alt ? 2 + k : 4 - k);
+                    t.px(lx, ly, mix(C.steel[3], C.steel[4], 0.48));
+                    t.px(lx, ly + 1, mix(C.steel[2], C.steel[1], 0.32));
+                }
+            }
+            grime(t, 4, [56, 50, 44], 0.22, false);
+        },
+        cast(t) { steel(t, 47, [50, 56, 64], [82, 88, 98], true); },
+        frame(t) { steel(t, 13, C.frame[2], C.frame[3], false); },
+        roll(t) { steel(t, 45, C.steel[3], C.steel[5], false); },
+        skid(t) {
+            steel(t, 5, C.frame[2], C.frame[3], false);
+            t.rect(0, 0, 15, 0, C.frame[4]);
+            t.rect(0, 1, 15, 1, C.frame[3]);
+            t.rect(0, 2, 15, 2, C.frame[0]);
+            t.rect(0, 13, 15, 13, C.frame[3]);
+            t.rect(0, 14, 15, 14, C.frame[1]);
+            t.rect(0, 15, 15, 15, C.frame[0]);
+            // the ore plant's channel beam: a rivet per bay and the same grime
+            rivet(t, 3, 7);
+            grime(t, 6, [46, 42, 38], 0.35, true);
+        }
+    };
+
+    function build(name) {
+        const fs = A.fs;
+        const texDir = MODELS + name + '_textures/';
+        if (!fs.existsSync(texDir)) fs.mkdirSync(texDir);
+        for (const f of fs.readdirSync(texDir)) fs.unlinkSync(texDir + f);
+        scene.length = 0;
+        BUILD[name]();
+        const used = new Set();
+        for (const s of scene) for (const f of s.faces) used.add(f.tex);
+        newProject(Formats.free);
+        Project.name = name;
+        const tex = {};
+        for (const key of Object.keys(TEXTURES)) {
+            if (!used.has(key)) continue;
+            const [w, h, draw] = TEXTURES[key];
+            const t = new Tex(w, h);
+            if (['rolling_mill', 'twin_screw_extruder', 'coke_oven_battery'].includes(name) && bayMaterials[key]) {
+                const tile = new Tex(16, 16);
+                bayMaterials[key](tile);
+                t.each((x, y) => t.px(x, y, tile.get(x, y)));
+            } else draw(t);
+            const url = t.dataURL();
+            fs.writeFileSync(texDir + key + '.png', Buffer.from(url.split(',')[1], 'base64'));
+            tex[key] = new Texture({ name: key + '.png' }).fromDataURL(url).add(false);
+            tex[key].uv_width = w; tex[key].uv_height = h;
+        }
+        let faces = 0;
+        const groups = {};
+        const groupFor = path => {
+            if (!path.length) return null;
+            const key = path.map(g => g.name).join('/');
+            if (!groups[key]) {
+                const parent = groupFor(path.slice(0, -1)), last = path[path.length - 1];
+                const g = new Group({ name: last.name, origin: last.origin }).init();
+                if (parent) g.addTo(parent);
+                groups[key] = g;
+            }
+            return groups[key];
+        };
+        for (const s of scene) {
+            if (!s.faces.length) continue;
+            const mesh = new Mesh({ name: s.name, vertices: {}, origin: [0, 0, 0] });
+            const ids = {};
+            for (const key in s.verts) { const v = s.verts[key]; ids[v.id] = mesh.addVertices(v.p)[0]; }
+            for (const f of s.faces) {
+                const keys = f.ids.map(id => ids[id]);
+                const uv = {}; keys.forEach((k, i) => uv[k] = f.uvs[i]);
+                mesh.addFaces(new MeshFace(mesh, { vertices: keys, uv, texture: tex[f.tex].uuid }));
+                faces++;
+            }
+            mesh.shading = s.smooth ? 'smooth' : 'flat';
+            mesh.init();
+            const g = groupFor(s.path);
+            if (g) mesh.addTo(g);
+        }
+        Canvas.updateAll();
+        const model = JSON.parse(Codecs.project.compile());
+        for (const t of model.textures) { const k = t.name.replace(/\.png$/, ''); if (TEXTURES[k]) { t.uv_width = TEXTURES[k][0]; t.uv_height = TEXTURES[k][1]; } }
+        fs.writeFileSync(MODELS + name + '.bbmodel', JSON.stringify(model));
+        return scene.length + ' shapes, ' + faces + ' faces, ' + Object.keys(tex).length + ' textures';
+    }
+
+    window.IUCEPlants = { TEXTURES, BUILD, build, Tex };
+    return 'plants loaded';
+})();

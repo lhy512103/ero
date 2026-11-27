@@ -1,0 +1,329 @@
+{
+  "variants": {
+    "facing=east,formed=false,half=bottom,shape=straight": {
+      "model": "iuce:block/steel_stairs"
+    },
+    "facing=east,formed=true,half=bottom,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=bottom,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=bottom,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=bottom,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner"
+    },
+    "facing=east,formed=true,half=bottom,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=bottom,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=bottom,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=bottom,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer"
+    },
+    "facing=east,formed=true,half=bottom,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=top,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "x": 180,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=top,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=top,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=top,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=top,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=top,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=top,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=top,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=east,formed=false,half=top,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=east,formed=true,half=top,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=bottom,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=bottom,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=bottom,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner"
+    },
+    "facing=south,formed=true,half=bottom,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=bottom,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=bottom,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=bottom,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer"
+    },
+    "facing=south,formed=true,half=bottom,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=bottom,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=bottom,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=top,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=top,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=top,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=top,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=top,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=top,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=top,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=top,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=south,formed=false,half=top,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=south,formed=true,half=top,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=bottom,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=bottom,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=bottom,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=bottom,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=bottom,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=bottom,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=bottom,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=bottom,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=bottom,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=bottom,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=top,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=top,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=top,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=top,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=top,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=top,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=top,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=top,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=west,formed=false,half=top,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,formed=true,half=top,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=bottom,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=bottom,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=bottom,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=bottom,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=bottom,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=bottom,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=bottom,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=bottom,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=bottom,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=bottom,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=top,shape=straight": {
+      "model": "iuce:block/steel_stairs",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=top,shape=straight": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=top,shape=inner_left": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=top,shape=inner_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=top,shape=inner_right": {
+      "model": "iuce:block/steel_stairs_inner",
+      "x": 180,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=top,shape=inner_right": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=top,shape=outer_left": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=top,shape=outer_left": {
+      "model": "iuce:block/plant_empty"
+    },
+    "facing=north,formed=false,half=top,shape=outer_right": {
+      "model": "iuce:block/steel_stairs_outer",
+      "x": 180,
+      "uvlock": true
+    },
+    "facing=north,formed=true,half=top,shape=outer_right": {
+      "model": "iuce:block/plant_empty"
+    }
+  }
+}

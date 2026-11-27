@@ -1,0 +1,30 @@
+{
+  "type": "iuce:process",
+  "machine": "injection_molder",
+  "time": 100,
+  "energy": 4800,
+  "items": [
+    {
+      "item": "#iuce:grade/injection",
+      "count": 4
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:housing_mold",
+    "damage": 0
+  },
+  "utilities": [
+    "air",
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:machine_housing",
+      "count": 1
+    },
+    {
+      "id": "iuce:sprue",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "iuce:block/twin_screw_extruder",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "iuce:block/twin_screw_extruder",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "iuce:block/twin_screw_extruder",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "iuce:block/twin_screw_extruder",
+      "y": 270
+    }
+  }
+}

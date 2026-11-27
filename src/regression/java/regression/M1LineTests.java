@@ -1,0 +1,604 @@
+package regression;
+
+import block.ModBlocks;
+import blockentity.EnergyDisplay;
+import energy.EUEnergyStorageImpl;
+import fluid.MachineTank;
+import init.ModFluids;
+import item.ModItems;
+import machine.process.ProcessMachineBlockEntity;
+import machine.process.ProcessMachines;
+import machine.utility.Utility;
+import machine.utility.UtilityNetwork;
+import machine.utility.UtilityPlantBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * The M1 line: biological ethylene, and the utility shares that keep it running.
+ * <p>
+ * The boiler and pipe tests use the boiler's eight steam shares with liquefaction tanks, whose only
+ * shipped recipe needs steam. The line tests drive every machine by hand the way the test press
+ * tests do, so they do not depend on the game loop's timing; the network is reset whenever the
+ * layout changes so that the next tick sees it.
+ * </p>
+ */
+final class M1LineTests {
+    private M1LineTests() {}
+
+    static void register(Map<String, Consumer<GameTestHelper>> tests) {
+        tests.put("m1_steam_shares", M1LineTests::steamShares);
+        tests.put("m1_boiler_gas", M1LineTests::boilerGas);
+        tests.put("m1_pipe_reach", M1LineTests::pipeReach);
+        tests.put("m1_ethylene_line", M1LineTests::ethyleneLine);
+        tests.put("m1_byproducts", M1LineTests::byproducts);
+        tests.put("m2_pla_line", M1LineTests::plaLine);
+        tests.put("m3_injection", M1LineTests::injection);
+        tests.put("legacy_pla_layout", M1LineTests::legacyLayout);
+        tests.put("m4_pvc", PvcLineTest::run);
+        tests.put("m5_solvent", M1LineTests::solvent);
+        tests.put("m6_colored_strand", M1LineTests::coloredStrand);
+        tests.put("m7_drip", M1LineTests::drip);
+        tests.put("m8_vulcanizer", M1LineTests::rubber);
+    }
+
+    // ------------------------------------------------------------------ helpers
+
+    private static final BlockPos ORIGIN = new BlockPos(1, 1, 1);
+
+    private static ProcessMachineBlockEntity machine(GameTestHelper helper, String id, int x) {
+        BlockPos pos = ORIGIN.offset(x, 0, 0);
+        helper.setBlock(pos, ProcessMachines.get(id).block().get());
+        return helper.getBlockEntity(pos, ProcessMachineBlockEntity.class);
+    }
+
+    private static EUEnergyStorageImpl energy(ProcessMachineBlockEntity machine) {
+        return (EUEnergyStorageImpl) ((EnergyDisplay) machine).getEnergyStorage();
+    }
+
+    /** Tops the machine up and ticks it once; every hand-driven test does this before each tick. */
+    private static void poweredTick(ProcessMachineBlockEntity machine) {
+        energy(machine).setEnergy(energy(machine).getMaxEnergyStored());
+        machine.tick();
+    }
+
+    private static void give(blockentity.MachineBlockEntity machine, int slot, ItemStack stack) {
+        var handler = machine.getItemHandler();
+        try (Transaction tx = Transaction.openRoot()) {
+            if (handler.insert(slot, ItemResource.of(stack), stack.getCount(), tx) != stack.getCount())
+                throw new IllegalStateException("Could not insert " + stack + " into slot " + slot + " of " + machine);
+            tx.commit();
+        }
+    }
+
+    /** A fresh utility round, so a layout built a moment ago is seen on the very next tick. */
+    private static void newRound(GameTestHelper helper) {
+        UtilityNetwork.of((ServerLevel) helper.getLevel()).clear();
+    }
+
+    private static UtilityNetwork network(GameTestHelper helper) {
+        return UtilityNetwork.of((ServerLevel) helper.getLevel());
+    }
+
+    private static void check(GameTestHelper helper, boolean value, String message) {
+        helper.assertTrue(value, message);
+    }
+
+    private static int count(ProcessMachineBlockEntity machine, int slot) {
+        return machine.getItemHandler().getAmountAsInt(slot);
+    }
+
+    private static MachineTank input(ProcessMachineBlockEntity machine, int index) {
+        return machine.getTanks().get(index);
+    }
+
+    private static MachineTank output(ProcessMachineBlockEntity machine, int index) {
+        return machine.getTanks().get(machine.getInputTankCount() + index);
+    }
+
+    private static int amount(MachineTank tank, Fluid fluid) {
+        return tank.getResource().getFluid().isSame(fluid) ? tank.getAmount() : 0;
+    }
+
+    /** Moves up to {@code amount} of {@code fluid} between two tanks; returns how much moved. */
+    private static int transfer(MachineTank from, MachineTank to, Fluid fluid, int amount) {
+        try (Transaction tx = Transaction.openRoot()) {
+            FluidResource resource = FluidResource.of(fluid);
+            int taken = from.extract(0, resource, amount, tx);
+            int moved = to.insert(0, resource, taken, tx);
+            if (moved < taken) from.insert(0, resource, taken - moved, tx);
+            tx.commit();
+            return moved;
+        }
+    }
+
+    /** Carries a product tank into the next machine's input tank, the way a pump would. */
+    private static int pump(ProcessMachineBlockEntity from, int fromTank, ProcessMachineBlockEntity to, int toTank,
+                            Fluid fluid, int amount) {
+        return transfer(output(from, fromTank), input(to, toTank), fluid, amount);
+    }
+
+    /** A creative source touching the given spot: the machine there gets all the steam and cooling water it asks for. */
+    private static void creativeUtilities(GameTestHelper helper, int x) {
+        helper.setBlock(ORIGIN.offset(x, 0, 0), ModBlocks.CREATIVE_UTILITY_SOURCE.get());
+    }
+
+    /** A run of steam pipes behind the line, touching every machine from {@code from} to {@code to}. */
+    private static void utilityBus(GameTestHelper helper, int from, int to) {
+        for (int x = from; x < to; x++) helper.setBlock(ORIGIN.offset(x, 0, 1), ModBlocks.STEAM_PIPE.get());
+        helper.setBlock(ORIGIN.offset(to, 0, 1), ModBlocks.CREATIVE_UTILITY_SOURCE.get());
+    }
+
+    // ------------------------------------------------------------------ utility shares
+
+    /**
+     * A boiler with gas in its second tank: the tank only takes a gas on the flammable tag, and one
+     * charge of 250 mB fires the firebox for longer than a lump of coal would. Gas and the fuel slot
+     * both feed the same firebox; the slot goes first when it holds something burnable.
+     */
+    private static void boilerGas(GameTestHelper helper) {
+        newRound(helper);
+        helper.setBlock(ORIGIN, ModBlocks.BOILER.get());
+        UtilityPlantBlockEntity boiler = helper.getBlockEntity(ORIGIN, UtilityPlantBlockEntity.class);
+        check(helper, boiler.getInputTankCount() == 2, "the boiler must have a water tank and a gas tank");
+        boiler.getTank().fill(Fluids.WATER, 8_000);
+
+        Fluid ethylene = ModFluids.chemical("ethylene");
+        Fluid co2 = ModFluids.chemical("carbon_dioxide");
+        MachineTank firebox = boiler.getTanks().get(1);
+        check(helper, firebox.fill(co2, 1_000) == 0, "the firebox must not take a gas that is not flammable");
+        check(helper, firebox.fill(ethylene, 500) == 500, "the firebox must take flammable gas");
+        check(helper, boiler.ready(), "a boiler with gas and water must be ready");
+
+        ProcessMachineBlockEntity tank = machine(helper, "liquefaction_tank", 1);
+        give(tank, 0, new ItemStack(ModItems.ENZYME_PREPARATION.get()));
+        input(tank, 0).fill(ModFluids.chemical("starch_slurry"), 1_000);
+
+        newRound(helper);
+        poweredTick(tank);
+        newRound(helper);
+        poweredTick(tank);
+        boiler.tick();
+        check(helper, boiler.occupied() == 1, "the boiler must hand its share to the tank, it serves " + boiler.occupied());
+        check(helper, boiler.burningGas(), "the firebox must be running on gas when the fuel slot is empty");
+        check(helper, firebox.getAmount() == 250, "one ignition must take 250 mB of gas, " + firebox.getAmount() + " is left");
+        check(helper, boiler.getBurnTime() > UtilityPlantBlockEntity.GAS_SHARE_TICKS - 10,
+            "one charge of gas must keep the firebox lit, " + boiler.getBurnTime() + " share ticks are left");
+        helper.succeed();
+    }
+
+    /**
+     * The boiler gives eight steam shares, so eight tanks next to it run and the ninth stays idle
+     * with "missing_utility" and the numbers the menu shows.
+     */
+    private static void steamShares(GameTestHelper helper) {
+        newRound(helper);
+        helper.setBlock(ORIGIN, ModBlocks.BOILER.get());
+        UtilityPlantBlockEntity boiler = helper.getBlockEntity(ORIGIN, UtilityPlantBlockEntity.class);
+        give(boiler, 0, new ItemStack(Items.COAL_BLOCK, 4));
+        boiler.getTank().fill(Fluids.WATER, 8_000);
+
+        List<ProcessMachineBlockEntity> tanks = new ArrayList<>();
+        for (int i = 1; i <= 9; i++) tanks.add(machine(helper, "liquefaction_tank", i));
+        for (ProcessMachineBlockEntity tank : tanks) {
+            give(tank, 0, new ItemStack(ModItems.ENZYME_PREPARATION.get()));
+            input(tank, 0).fill(ModFluids.chemical("starch_slurry"), 1_000);
+        }
+
+        newRound(helper);
+        for (ProcessMachineBlockEntity tank : tanks) poweredTick(tank);
+
+        int running = 0, shortOfSteam = 0;
+        ProcessMachineBlockEntity idle = null;
+        for (ProcessMachineBlockEntity tank : tanks) {
+            if (tank.currentRecipe() != null) running++;
+            if ("missing_utility".equals(tank.reason())) { shortOfSteam++; idle = tank; }
+        }
+        check(helper, boiler.occupied() == 8, "the boiler must serve eight shares, it serves " + boiler.occupied());
+        check(helper, running == 8, "eight tanks must run on eight shares, " + running + " do");
+        check(helper, shortOfSteam == 1, "exactly one tank must report missing_utility, " + shortOfSteam + " do");
+        check(helper, idle != null && idle.shortUtility() == Utility.STEAM, "the idle tank must be short of steam");
+        check(helper, idle.neededShares() == 1 && idle.freeShares() == 0,
+            "the idle tank must say it needs 1 share and 0 are free, it says "
+                + idle.neededShares() + " and " + idle.freeShares());
+        check(helper, count(idle, 0) == 1 && input(idle, 0).getAmount() >= 1_000, "the idle tank must keep its inputs");
+
+        // the same layout hands out the same shares in a second round
+        newRound(helper);
+        for (ProcessMachineBlockEntity tank : tanks) poweredTick(tank);
+        check(helper, boiler.occupied() == 8, "the second round must also serve eight shares");
+        helper.succeed();
+    }
+
+    /** Steam crosses a run of pipes; breaking a pipe or running the boiler dry cuts the whole run off. */
+    private static void pipeReach(GameTestHelper helper) {
+        newRound(helper);
+        helper.setBlock(ORIGIN, ModBlocks.BOILER.get());
+        UtilityPlantBlockEntity boiler = helper.getBlockEntity(ORIGIN, UtilityPlantBlockEntity.class);
+        give(boiler, 0, new ItemStack(Items.COAL_BLOCK, 2));
+        boiler.getTank().fill(Fluids.WATER, 8_000);
+        for (int i = 1; i <= 4; i++) helper.setBlock(ORIGIN.offset(i, 0, 0), ModBlocks.STEAM_PIPE.get());
+
+        ProcessMachineBlockEntity tank = machine(helper, "liquefaction_tank", 5);
+        give(tank, 0, new ItemStack(ModItems.ENZYME_PREPARATION.get()));
+        input(tank, 0).fill(ModFluids.chemical("starch_slurry"), 4_000);
+
+        newRound(helper);
+        poweredTick(tank);
+        check(helper, tank.currentRecipe() != null, "a run of pipes must carry steam to the tank");
+        check(helper, network(helper).granted(tank.position(), Utility.STEAM) == 1, "the tank must hold one steam share");
+
+        // break the line in the middle
+        helper.setBlock(ORIGIN.offset(2, 0, 0), Blocks.AIR);
+        newRound(helper);
+        for (int i = 0; i < UtilityNetwork.PERIOD; i++) poweredTick(tank);
+        check(helper, "missing_utility".equals(tank.reason()), "a broken pipe must cut the steam off, got '" + tank.reason() + "'");
+
+        // mend it, then run the boiler dry while it burns
+        helper.setBlock(ORIGIN.offset(2, 0, 0), ModBlocks.STEAM_PIPE.get());
+        boiler.getTank().drain(8_000);
+        newRound(helper);
+        for (int i = 0; i < UtilityNetwork.PERIOD * 2; i++) poweredTick(tank);
+        check(helper, "missing_utility".equals(tank.reason()), "the tank must say the steam is missing, got '" + tank.reason() + "'");
+        int stalled = tank.getProgress();
+        for (int i = 0; i < UtilityNetwork.PERIOD * 2; i++) poweredTick(tank);
+        check(helper, tank.getProgress() == stalled, "a tank without steam must not advance, it went from "
+            + stalled + " to " + tank.getProgress());
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ the line
+
+    /**
+     * Potato to ethylene, one machine per step, every fluid carried over by hand. The line has eight
+     * machines: wet mill, liquefaction, saccharification, fermenter, column, dehydration reactor,
+     * dryer and vent stack. The dryer and the vent stack get the byproducts the other steps make, so
+     * nothing fills up: distiller's grains out of the stillage, and the carbon dioxide burnt off.
+     * The creative source beside the vent stack feeds the whole line its steam and cooling water.
+     */
+    private static void ethyleneLine(GameTestHelper helper) {
+        newRound(helper);
+        ProcessMachineBlockEntity mill = machine(helper, "wet_mill", 1);
+        ProcessMachineBlockEntity liquefaction = machine(helper, "liquefaction_tank", 2);
+        ProcessMachineBlockEntity saccharification = machine(helper, "saccharification_tank", 3);
+        ProcessMachineBlockEntity fermenter = machine(helper, "fermenter", 4);
+        ProcessMachineBlockEntity column = machine(helper, "distillation_column", 5);
+        ProcessMachineBlockEntity reactor = machine(helper, "dehydration_reactor", 6);
+        ProcessMachineBlockEntity dryer = machine(helper, "dryer", 7);
+        ProcessMachineBlockEntity vent = machine(helper, "vent_stack", 8);
+        // the bus sits one block behind the line, so every machine and the source are in one cluster
+        utilityBus(helper, 1, 9);
+
+        Fluid slurry = ModFluids.chemical("starch_slurry");
+        Fluid mash = ModFluids.chemical("liquefied_mash");
+        Fluid sugar = ModFluids.chemical("sugar_solution");
+        Fluid wash = ModFluids.chemical("fermented_wash");
+        Fluid co2 = ModFluids.chemical("carbon_dioxide");
+        Fluid ethanol = ModFluids.chemical("ethanol");
+        Fluid stillage = ModFluids.chemical("stillage");
+        Fluid ethylene = ModFluids.chemical("ethylene");
+        Fluid processWater = ModFluids.chemical("process_water");
+
+        // two runs of the mill: 8 potatoes and 2 buckets of water make 2 litres of slurry
+        give(mill, 0, new ItemStack(Items.POTATO, 8));
+        input(mill, 0).fill(Fluids.WATER, 2_000);
+        give(liquefaction, 0, new ItemStack(ModItems.ENZYME_PREPARATION.get(), 2));
+        give(saccharification, saccharification.def().catalystIndex(), new ItemStack(ModItems.ENZYME_PREPARATION.get()));
+        give(fermenter, fermenter.def().catalystIndex(), new ItemStack(ModItems.YEAST_CULTURE.get()));
+        give(reactor, reactor.def().catalystIndex(), new ItemStack(ModItems.ACTIVATED_ALUMINA.get()));
+
+        int millRuns = 0, liquefied = 0, saccharified = 0, fermented = 0, distilled = 0, dehydrated = 0;
+        boolean millWasRunning = false;
+        int tick = 0;
+        for (; tick < 3_000; tick++) {
+            if (tick % UtilityNetwork.PERIOD == 0) newRound(helper);
+            // the pump between each pair of machines
+            while (pump(mill, 0, liquefaction, 0, slurry, 1_000) == 1_000) liquefied++;
+            while (pump(liquefaction, 0, saccharification, 0, mash, 1_000) == 1_000) saccharified++;
+            while (pump(saccharification, 0, fermenter, 0, sugar, 1_000) == 1_000) fermented++;
+            while (pump(fermenter, 0, column, 0, wash, 1_000) == 1_000) distilled++;
+            while (pump(column, 0, reactor, 0, ethanol, 500) == 500) dehydrated++;
+            // byproducts leave on their own machine
+            while (transfer(output(fermenter, 1), input(vent, 0), co2, 250) == 250) {}
+            while (transfer(output(column, 1), input(dryer, 0), stillage, 500) == 500) {}
+
+            for (ProcessMachineBlockEntity machine : List.of(mill, liquefaction, saccharification, fermenter,
+                column, reactor, dryer, vent)) poweredTick(machine);
+
+            boolean millRunning = mill.currentRecipe() != null;
+            if (millWasRunning && !millRunning) millRuns++;
+            millWasRunning = millRunning;
+            if (millRuns >= 2 && ethylene(reactor, ethylene) >= 1_000 && processWater(reactor, processWater) >= 500
+                && count(dryer, dryer.def().outputStart()) >= 1) break;
+        }
+
+        check(helper, millRuns == 2, "the mill must have run twice, it ran " + millRuns + " time(s)");
+        check(helper, liquefied >= 2 && saccharified >= 2 && fermented >= 2 && distilled >= 2 && dehydrated >= 2,
+            "every step must have run twice: liquefied " + liquefied + ", saccharified " + saccharified
+                + ", fermented " + fermented + ", distilled " + distilled + ", dehydrated " + dehydrated);
+        check(helper, amount(output(reactor, 0), ethylene) == 1_000,
+            "the line must end with 1 litre of ethylene, it has " + amount(output(reactor, 0), ethylene));
+        check(helper, amount(output(reactor, 1), processWater) == 500,
+            "the line must also make 500 mB of process water, it has " + amount(output(reactor, 1), processWater));
+        check(helper, amount(input(dryer, 0), stillage) == 0, "the dryer must keep up with the stillage");
+        check(helper, amount(input(vent, 0), co2) < 1_000,
+            "the vent stack must keep up with the carbon dioxide, it holds " + amount(input(vent, 0), co2) + " mB");
+
+        // nothing jammed: every machine is either idle or still has everything it needs
+        for (ProcessMachineBlockEntity machine : List.of(mill, liquefaction, saccharification, fermenter,
+            column, reactor, dryer, vent)) {
+            check(helper, !"output_full".equals(machine.reason()) && !"tank_full".equals(machine.reason()),
+                machine.def().id() + " jammed with '" + machine.reason() + "' after " + tick + " ticks");
+        }
+        helper.succeed();
+    }
+
+    /** Drives the sugar and recovery branches for ten minutes of machine time. */
+    private static void plaLine(GameTestHelper helper) {
+        newRound(helper);
+        var mill = machine(helper, "wet_mill", 1);
+        var fermenter = machine(helper, "fermenter", 2);
+        var evaporator = machine(helper, "evaporator", 3);
+        var oligomer = machine(helper, "oligomerization_reactor", 4);
+        var depolymer = machine(helper, "depolymerization_reactor", 5);
+        var crystals = machine(helper, "crystallizer", 6);
+        var polymer = machine(helper, "polymerization_reactor", 7);
+        var cutter = machine(helper, "strand_pelletizer", 8);
+        var recovery = machine(helper, "evaporator", 9);
+        var prep = machine(helper, "catalyst_prep_tank", 10);
+        utilityBus(helper, 1, 11);
+        give(fermenter, fermenter.def().catalystIndex(), new ItemStack(ModItems.LACTIC_CULTURE.get()));
+        give(prep, 0, new ItemStack(ModItems.PURIFIED_TIN_DUST.get(), 4));
+        input(prep, 0).fill(ModFluids.chemical("ethanol"), 500);
+        for (var target : List.of(depolymer, polymer)) {
+            for (int i = 0; i < 110; i++) poweredTick(prep);
+            int slot = prep.def().outputStart();
+            check(helper, count(prep, slot) == 1, "catalyst preparation must supply one catalyst");
+            give(target, target.def().catalystIndex(), prep.getItemHandler().getResource(slot).toStack(1));
+            prep.getItemHandler().set(slot, ItemResource.EMPTY, 0);
+        }
+        int fresh = 0, recycled = 0, mother = 0, fed = 0, pellets = 0;
+        boolean wroteCard = false;
+        for (int tick = 0; tick < 12000; tick++) {
+            if (count(mill, 0) == 0) give(mill, 0, new ItemStack(Items.SUGAR_CANE, 64));
+            input(mill, 0).fill(Fluids.WATER, 500);
+            mill.getItemHandler().set(mill.def().outputStart(), ItemResource.EMPTY, 0);
+            pump(mill, 0, fermenter, 0, ModFluids.chemical("sugar_solution"), 8000);
+            pump(fermenter, 0, evaporator, 0, ModFluids.chemical("lactic_broth"), 8000);
+            fresh += pump(evaporator, 0, oligomer, 0, ModFluids.chemical("lactic_acid"), 8000);
+            recycled += pump(recovery, 0, oligomer, 0, ModFluids.chemical("lactic_acid"), 8000);
+            output(evaporator, 1).drain(8000);
+            output(oligomer, 1).drain(8000);
+            pump(oligomer, 0, depolymer, 0, ModFluids.chemical("pla_oligomer"), 8000);
+            pump(depolymer, 0, crystals, 0, ModFluids.chemical("crude_lactide"), 8000);
+            mother += pump(crystals, 0, recovery, 0, ModFluids.chemical("lactide_mother_liquor"), 8000);
+            int slot = crystals.def().outputStart();
+            if (count(crystals, slot) > 0) {
+                int n = count(crystals, slot);
+                give(polymer, 0, crystals.getItemHandler().getResource(slot).toStack(n));
+                crystals.getItemHandler().set(slot, ItemResource.EMPTY, 0);
+                fed += n;
+            }
+            pump(polymer, 0, cutter, 0, ModFluids.chemical("pla_melt_film"), 8000);
+            for (var m : List.of(mill, fermenter, evaporator, oligomer, depolymer, crystals, polymer, cutter, recovery)) poweredTick(m);
+            if (!wroteCard && fed > 0) {
+                check(helper, "no_card".equals(polymer.reason()), "polymerization requires a card");
+                give(polymer, polymer.def().cardIndex(), machine.process.ProcessCards.write(
+                    new recipe.ProcessRecipe.CardRequirement("pla", Map.of("grade", 2))));
+                wroteCard = true;
+            }
+            int finished = count(cutter, cutter.def().outputStart());
+            if (finished > 0) {
+                check(helper, cutter.getItemHandler().getResource(cutter.def().outputStart()).toStack(1)
+                    .is(ModItems.PLA_FILM_PELLET.get()), "film card must produce film pellets");
+                pellets += finished;
+                cutter.getItemHandler().set(cutter.def().outputStart(), ItemResource.EMPTY, 0);
+            }
+        }
+        check(helper, fresh > 0 && recycled >= 1000 && pellets > 0, "both feeds and the pelletizer must run");
+        check(helper, mother == input(recovery, 0).getAmount() + 2 * (recycled + output(recovery, 0).getAmount()),
+            "mother liquor recovery drifted");
+        var film=machine(helper,"single_screw_extruder",1);
+        var winder=machine(helper,"film_winder",2);
+        give(film,0,new ItemStack(ModItems.PLA_FILM_PELLET.get(),8));
+        give(film,film.def().catalystIndex(),new ItemStack(ModItems.FILM_DIE.get()));
+        newRound(helper);
+        for(int t=0;t<205;t++) poweredTick(film);
+        int bubbles=film.def().outputStart();
+        give(winder,0,film.getItemHandler().getResource(bubbles).toStack(count(film,bubbles)));
+        for(int t=0;t<125;t++) poweredTick(winder);
+        var rolls=winder.getItemHandler().getResource(winder.def().outputStart()).toStack(count(winder,winder.def().outputStart()));
+        check(helper,rolls.is(ModItems.PLA_FILM_ROLL.get()) && rolls.getCount()==2,"sugar line must supply two film rolls");
+        var grid=net.minecraft.world.item.crafting.CraftingInput.of(2,1,List.of(rolls.copyWithCount(1),rolls.copyWithCount(1)));
+        var assembly=helper.getLevel().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING,grid,helper.getLevel()).orElseThrow();
+        check(helper,assembly.value().assemble(grid).is(ModItems.MULCH_FILM_PLA.get()),"two rolls must assemble into mulch");
+        helper.succeed();
+    }
+
+    private static void solvent(GameTestHelper helper) {
+        newRound(helper);
+        var reactor=machine(helper,"polymerization_reactor",1);
+        var centrifuge=machine(helper,"centrifuge",2);
+        var dryer=machine(helper,"dryer",3);
+        var tower=machine(helper,"solvent_recovery_tower",4);
+        utilityBus(helper,1,4);
+        var solvent=ModFluids.chemical("solvent_naphtha");
+        int used=0, recovered=0, reserve=1000;
+        for(int t=0;t<24000;t++) {
+            if (count(reactor,0)==0 && reserve>=1000) {
+                give(reactor,0,new ItemStack(ModItems.POLYOLEFIN_CATALYST.get()));
+                input(reactor,0).fill(ModFluids.chemical("ethylene"),1000);
+                input(reactor,1).fill(solvent,1000); reserve-=1000;used+=1000;
+            }
+            pump(reactor,0,centrifuge,0,ModFluids.chemical("pe_slurry"),1000);
+            output(reactor,1).drain(1000);
+            pump(centrifuge,0,tower,0,ModFluids.chemical("pe_mother_liquor"),900);
+            int slot=centrifuge.def().outputStart();
+            if(count(centrifuge,slot)>0) {
+                give(dryer,0,centrifuge.getItemHandler().getResource(slot).toStack(count(centrifuge,slot)));
+                centrifuge.getItemHandler().set(slot,ItemResource.EMPTY,0);
+            }
+            for(var m:List.of(reactor,centrifuge,dryer,tower)) poweredTick(m);
+            int returned=output(dryer,0).drain(1000)+output(tower,0).drain(1000);
+            reserve+=returned;recovered+=returned;
+            if(reserve==980) reserve+=20;
+            dryer.getItemHandler().set(dryer.def().outputStart(),ItemResource.EMPTY,0);
+            tower.getItemHandler().set(tower.def().outputStart(),ItemResource.EMPTY,0);
+        }
+        int complete=recovered/980;
+        check(helper,complete>35 && recovered%980<=100 && used/1000-complete<=1,"PE solvent inventory drifted: "+used+" / "+recovered);
+        helper.succeed();
+    }
+
+    private static void coloredStrand(GameTestHelper helper) {
+        newRound(helper);
+        var extruder=machine(helper,"compounding_extruder",1);
+        var pelletizer=machine(helper,"strand_pelletizer",2);
+        utilityBus(helper,1,2);
+        give(extruder,0,new ItemStack(ModItems.BIO_PE_PELLET.get(),4));
+        give(extruder,1,new ItemStack(Items.RED_DYE,4));
+        for(int t=0;t<105;t++) poweredTick(extruder);
+        int slot=extruder.def().outputStart();
+        var strand=extruder.getItemHandler().getResource(slot).toStack(count(extruder,slot));
+        check(helper,strand.is(ModItems.STRAND.get()) && strand.getCount()==4,"red dye must create four strands");
+        give(pelletizer,0,strand);
+        for(int t=0;t<90;t++) poweredTick(pelletizer);
+        var pellets=pelletizer.getItemHandler().getResource(pelletizer.def().outputStart()).toStack(1);
+        check(helper,pellets.is(ModItems.COLOR_MASTERBATCH.get()) && pellets.get(net.minecraft.core.component.DataComponents.DYE)==net.minecraft.world.item.DyeColor.RED,"red masterbatch must retain its grade and color");
+        helper.succeed();
+    }
+
+    private static void drip(GameTestHelper helper) {
+        var tankPos=new BlockPos(1,1,2);
+        helper.setBlock(tankPos,ModBlocks.FLUID_TANK.get());
+        var tank=helper.getBlockEntity(tankPos,blockentity.FluidTankBlockEntity.class).getTank();
+        tank.fill(Fluids.WATER,1000);
+        for(int x=2;x<10;x++) {
+            var p=new BlockPos(x,1,2);
+            helper.setBlock(p,ModBlocks.DRIP_PIPE.get().defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING,net.minecraft.core.Direction.EAST));
+            for(int z:List.of(1,3)) helper.setBlock(new BlockPos(x,1,z),Blocks.FARMLAND);
+        }
+        for(int pass=0;pass<2;pass++) {
+            if(pass==1)tank.drain(1000);
+            for(int x=2;x<10;x++) {
+                helper.getBlockEntity(new BlockPos(x,1,2),blockentity.DripPipeBlockEntity.class).refresh();
+                for(int z:List.of(1,3))check(helper,net.neoforged.neoforge.common.FarmlandWaterManager.hasBlockWaterTicket(helper.getLevel(),helper.absolutePos(new BlockPos(x,1,z)))==(pass==0),"drip supply follows tank");
+            }
+        }
+        helper.succeed();
+    }
+
+    private static void rubber(GameTestHelper helper) {
+        newRound(helper);
+        var plant=machine(helper,"vulcanizer",1);
+        utilityBus(helper,1,2);
+        give(plant,0,new ItemStack(ModItems.RUBBER_COMPOUND.get(),4));
+        give(plant,plant.def().catalystIndex(),new ItemStack(ModItems.BELT_MOLD.get()));
+        for(int t=0;t<165;t++) poweredTick(plant);
+        check(helper,plant.getItemHandler().getResource(plant.def().outputStart()).getItem()==ModItems.RUBBER_BELT.get(),"steam and belt mold must vulcanize one belt");
+        helper.succeed();
+    }
+
+    private static void legacyLayout(GameTestHelper helper) {
+        var original = machine(helper, "polymerization_reactor", 1);
+        give(original, 2, new ItemStack(ModItems.TIN_CATALYST.get()));
+        give(original, 3, machine.process.ProcessCards.write(new recipe.ProcessRecipe.CardRequirement("pla", Map.of("grade", 2))));
+        output(original, 0).setAmount(ModFluids.chemical("pla_melt_film"), 700);
+        var registries = helper.getLevel().registryAccess();
+        var tag = original.saveWithoutMetadata(registries);
+        tag.remove("ProcessLayout");
+        tag.put("tank0", tag.get("tank2").copy());
+        tag.remove("tank1");
+        tag.remove("tank2");
+        var copy = machine(helper, "polymerization_reactor", 3);
+        copy.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,registries,tag));
+        check(helper, copy.getItemHandler().getResource(copy.def().catalystIndex()).getItem() == ModItems.TIN_CATALYST.get(), "legacy catalyst moved");
+        check(helper, copy.getItemHandler().getResource(copy.def().cardIndex()).toStack(1).has(machine.process.ProcessCards.TYPE.get()), "legacy card moved");
+        check(helper, amount(output(copy, 0), ModFluids.chemical("pla_melt_film")) == 700, "legacy melt moved");
+        helper.succeed();
+    }
+
+    private static void injection(GameTestHelper helper) {
+        newRound(helper);
+        var dry = machine(helper, "dehumidifying_dryer", 1);
+        var mold = machine(helper, "injection_molder", 2);
+        var grind = machine(helper, "plastic_granulator", 3);
+        utilityBus(helper, 1, 3);
+        give(dry, 0, new ItemStack(ModItems.PLA_INJECTION_PELLET.get(), 8));
+        give(mold, 0, new ItemStack(ModItems.PLA_INJECTION_PELLET.get(), 8));
+        give(mold, mold.def().catalystIndex(), new ItemStack(ModItems.BRICK_MOLD.get()));
+        poweredTick(mold);
+        check(helper, mold.reason().equals("needs_drying"), "wet PLA must stop the injection molder");
+        for (int tick = 0; tick < 105; tick++) poweredTick(dry);
+        var dried = dry.getItemHandler().getResource(dry.def().outputStart());
+        check(helper, dried.toStack(1).has(machine.process.PlasticComponents.DRIED.get()), "dryer must mark the batch");
+        mold.getItemHandler().set(0, dried, 8);
+        for (int tick = 0; tick < 401; tick++) poweredTick(mold);
+        int out = mold.def().outputStart();
+        check(helper, count(mold, out) == 32 && count(mold, out+1) == 4, "four shots must yield 32 bricks and four sprues");
+        give(grind, 0, mold.getItemHandler().getResource(out+1).toStack(4));
+        for (int tick = 0; tick < 65; tick++) poweredTick(grind);
+        check(helper, count(grind, grind.def().outputStart()) == 1, "four sprues return one pellet");
+        mold.getItemHandler().set(out, ItemResource.EMPTY, 0);
+        mold.getItemHandler().set(0, dried, 6);
+        mold.getItemHandler().set(mold.def().catalystIndex(), ItemResource.of(new ItemStack(ModItems.CRATE_MOLD.get())), 1);
+        for (int tick = 0; tick < 105; tick++) poweredTick(mold);
+        check(helper, mold.getItemHandler().getResource(out).toStack(1).is(ModBlocks.CRATE.get().asItem()), "crate mold must produce a crate");
+        helper.succeed();
+    }
+
+    private static int ethylene(ProcessMachineBlockEntity reactor, Fluid ethylene) {
+        return amount(output(reactor, 0), ethylene);
+    }
+
+    private static int processWater(ProcessMachineBlockEntity reactor, Fluid processWater) {
+        return amount(output(reactor, 1), processWater);
+    }
+
+    /** Carbon dioxide vents and stillage dries, but the vent stack refuses anything but a ventable gas. */
+    private static void byproducts(GameTestHelper helper) {
+        newRound(helper);
+        ProcessMachineBlockEntity vent = machine(helper, "vent_stack", 3);
+        ProcessMachineBlockEntity dryer = machine(helper, "dryer", 1);
+        creativeUtilities(helper, 2);
+
+        Fluid co2 = ModFluids.chemical("carbon_dioxide");
+        Fluid stillage = ModFluids.chemical("stillage");
+        Fluid ethanol = ModFluids.chemical("ethanol");
+
+        input(vent, 0).fill(co2, 1_000);
+        input(dryer, 0).fill(stillage, 1_000);
+
+        int ticks = 0;
+        for (; ticks < 400; ticks++) {
+            if (ticks % UtilityNetwork.PERIOD == 0) newRound(helper);
+            poweredTick(vent);
+            poweredTick(dryer);
+            if (amount(input(vent, 0), co2) == 0 && amount(input(dryer, 0), stillage) == 0) break;
+        }
+        check(helper, amount(input(vent, 0), co2) == 0, "the vent stack must take a litre of carbon dioxide");
+        check(helper, amount(input(dryer, 0), stillage) == 0, "the dryer must take a litre of stillage");
+        check(helper, count(dryer, dryer.def().outputStart()) == 2,
+            "a litre of stillage must give two distiller's grains, got " + count(dryer, dryer.def().outputStart()));
+
+        // ethanol is not ventable, so the vent stack refuses it at the tank rather than running
+        check(helper, input(vent, 0).fill(ethanol, 1_000) == 0, "the vent stack must not take ethanol");
+        check(helper, input(vent, 0).isEmpty(), "the vent stack's tank must stay empty");
+        check(helper, vent.currentRecipe() == null, "the vent stack must not run on ethanol");
+        helper.succeed();
+    }
+}

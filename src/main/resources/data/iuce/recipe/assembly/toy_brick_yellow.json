@@ -1,0 +1,16 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:toy_brick",
+    "minecraft:yellow_dye"
+  ],
+  "result": {
+    "id": "iuce:toy_brick",
+    "count": 1,
+    "components": {
+      "minecraft:block_state": {
+        "color": "yellow"
+      }
+    }
+  }
+}

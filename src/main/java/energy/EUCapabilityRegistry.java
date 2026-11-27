@@ -30,6 +30,7 @@ public final class EUCapabilityRegistry {
         register(event, ModBlockEntities.INDUCTION_FURNACE.get());
         register(event, ModBlockEntities.ORE_WASHER.get());
         register(event, ModBlockEntities.ELECTROLYZER.get());
+        register(event, machine.process.ProcessMachines.BLOCK_ENTITY.get());
 
         // 储能箱
         register(event, ModBlockEntities.TRANSFORMER.get());
@@ -47,6 +48,9 @@ public final class EUCapabilityRegistry {
         // 工业工作台
         register(event, ModBlockEntities.INDUSTRIAL_WORKBENCH.get());
 
+        // 公用工程：冷却塔耗电，锅炉不要电但共用同一个方块实体
+        register(event, ModBlockEntities.UTILITY_PLANT.get());
+
         // 滑槽：任意面都可以放入和取出
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.CHUTE.get(), (chute, direction) -> chute.getInventory());
         // 工厂中枢：只进不出
@@ -56,6 +60,9 @@ public final class EUCapabilityRegistry {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.FLUID_TANK.get(), (tank, direction) -> tank.getTank());
         // 大机器的仓口
         event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.ITEM_HATCH.get(), (hatch, direction) -> hatch.external());
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.PLANT_TANK.get(), (hatch, side) -> hatch.getFluidHandler());
+        // 大机器控制器的材料仓：任意面都可以放入和取出结构方块
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.PLANT_CONTROLLER.get(), (controller, side) -> controller.materials());
         register(event, ModBlockEntities.ENERGY_HATCH.get());
         // 电动修理台、电灯、能量转换器
         register(event, ModBlockEntities.REPAIR_BENCH.get());
@@ -119,8 +126,8 @@ public final class EUCapabilityRegistry {
             (blockEntity, direction) -> blockEntity instanceof blockentity.MachineBlockEntity be
                 ? be.getAutomationItemHandler(direction) : null);
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, type,
-            (blockEntity, direction) -> blockEntity instanceof fluid.FluidProvider provider
-                ? provider.getTank() : null);
+            (blockEntity, direction) -> blockEntity instanceof fluid.MultiTankProvider tanks ? tanks.getFluidHandler()
+                : blockEntity instanceof fluid.FluidProvider provider ? provider.getTank() : null);
     }
 
     private static void registerCable(RegisterCapabilitiesEvent event,

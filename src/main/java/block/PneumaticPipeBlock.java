@@ -58,9 +58,10 @@ public class PneumaticPipeBlock extends Block {
     }
 
     /** A pipe joins other pipes, and interfaces that have their back towards it. */
-    private static boolean connects(BlockState neighbour, Direction towardsNeighbour) {
-        return neighbour.getBlock() instanceof PneumaticPipeBlock
-            || (neighbour.getBlock() instanceof LogisticsPortBlock && neighbour.getValue(LogisticsPortBlock.FACING) == towardsNeighbour);
+    private boolean connects(BlockState neighbour, Direction towardsNeighbour) {
+        boolean fluid = this instanceof FluidPipeBlock;
+        return neighbour.getBlock() instanceof PneumaticPipeBlock && (neighbour.getBlock() instanceof FluidPipeBlock)==fluid && FluidPipeBlock.open(neighbour,towardsNeighbour.getOpposite())
+            || (neighbour.getBlock() instanceof LogisticsPortBlock && (fluid ? neighbour.getValue(LogisticsPortBlock.FACING)!=towardsNeighbour.getOpposite() : neighbour.getValue(LogisticsPortBlock.FACING)==towardsNeighbour));
     }
 
     @Override
@@ -76,7 +77,7 @@ public class PneumaticPipeBlock extends Block {
     @Override
     protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
                                      BlockPos neighbourPos, BlockState neighbourState, RandomSource random) {
-        return state.setValue(SIDES[direction.get3DDataValue()], connects(neighbourState, direction));
+        return state.setValue(SIDES[direction.get3DDataValue()], FluidPipeBlock.open(state,direction) && connects(neighbourState, direction));
     }
 
     @Override

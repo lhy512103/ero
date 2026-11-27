@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "minecraft:paper",
+      "iuce:circuit"
+    ]
+  ],
+  "result": {
+    "id": "iuce:process_card",
+    "count": 4
+  }
+}

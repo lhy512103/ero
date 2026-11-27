@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:logistics_port"
+  ],
+  "result": {
+    "id": "iuce:logistics_port_ii",
+    "count": 1
+  }
+}

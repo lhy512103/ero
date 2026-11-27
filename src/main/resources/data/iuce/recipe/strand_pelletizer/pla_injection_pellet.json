@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "strand_pelletizer",
+  "time": 80,
+  "energy": 1280,
+  "fluids": [
+    {
+      "fluid": "iuce:pla_melt_injection",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pla_injection_pellet",
+      "count": 4
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ]
+}

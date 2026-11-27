@@ -40,9 +40,9 @@ public class PlantControllerBlock extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
     public static final BooleanProperty LEGACY = BooleanProperty.create("legacy");
-    /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set with the blueprint terminal. */
+    /** Length the structure is built to; only the rolling mill uses anything but the minimum. Set from the controller panel. */
     public static final net.minecraft.world.level.block.state.properties.IntegerProperty LENGTH =
-        net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 17);
+        net.minecraft.world.level.block.state.properties.IntegerProperty.create("length", 9, 33);
 
     public PlantControllerBlock(Properties properties) {
         super(properties);
@@ -54,7 +54,23 @@ public class PlantControllerBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return !state.getValue(LEGACY) && state.getValue(FORMED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null ? RenderShape.INVISIBLE : RenderShape.MODEL;
+    }
+
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(BlockState state) {
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null
+            ? net.minecraft.world.phys.shapes.Shapes.empty() : super.getOcclusionShape(state);
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state) {
+        return (state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null) || super.propagatesSkylightDown(state);
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return state.getValue(FORMED) && multiblock.PlantStructure.formedModel(state) != null ? 1.0F : super.getShadeBrightness(state, level, pos);
     }
 
     @Override
@@ -102,6 +118,23 @@ public class PlantControllerBlock extends BaseEntityBlock {
             player.sendOverlayMessage(controller.describe());
         }
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * A controller whose material store holds many blocks only comes off while sneaking, so it is
+     * not broken by accident; the stored blocks stay in the dropped controller either way.
+     */
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack tool,
+                                       boolean willHarvest, net.minecraft.world.level.material.FluidState fluid) {
+        if (level.getBlockEntity(pos) instanceof PlantControllerBlockEntity controller && !player.isShiftKeyDown()) {
+            long stored = controller.materials().total();
+            if (stored > PlantControllerBlockEntity.STORAGE_WARNING) {
+                if (!level.isClientSide()) player.sendOverlayMessage(Component.translatable("message.iuce.plant.storage_warning", stored));
+                return false;
+            }
+        }
+        return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
     }
 
     @Override

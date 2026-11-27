@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Generates everything a data-driven process machine needs, from one content table.
+
+    python tools/gen_content.py            # write
+    python tools/gen_content.py --check    # write nothing, fail if anything is stale
+
+Inputs: every tools/content/*.json with a "machines" list.
+  * tools/content/stage2.json    ships to players          -> src/main/resources/iuce/machines/
+  * tools/content/regression.json  test-only                  -> src/regression/resources/iuce/machines/
+A file may set "output": "regression" (test source set) or "output": "main" (the default).
+
+A machine entry is a process machine definition (see ProcessMachineDef.CODEC) plus keys the game
+never sees: name_en, name_zh, model and textures. For every machine it writes the definition, its
+blockstate, block model (normal and running), item model and loot table; registers it as
+mineable/pickaxe; and adds the two name keys when the language files lack them.
+
+Assets always go to the main source set, so a regression-only machine still renders in-game.
+Everything is written in a fixed order: running the script twice leaves `git diff` empty.
+"""
+import glob
+import io
+import json
+import os
+import sys
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")).replace("\\", "/")
+MAIN = "src/main/resources/"
+REGRESSION = "src/regression/resources/"
+CONTENT = sorted(glob.glob(ROOT + "/tools/content/*.json"))
+CHECK = "--check" in sys.argv
+
+# Keys a content entry carries for the generator only; the mod never reads them.
+# "accent" is the colour tools/art/m1_machines.py paints into the machine's front.
+EXTRAS = {"name_en", "name_zh", "model", "textures", "accent"}
+# Looks a machine can take. The template decides the shared side, top and bottom textures; the front
+# is the machine's own. tools/art/m1_machines.py draws all of them.
+MODELS = ("box", "tank", "column")
+# Textures a model needs, as (role, default path); {id} is the machine id and {model} the template.
+TEXTURES = (("side", "iuce:block/machine/process/{model}_side"),
+            ("top", "iuce:block/machine/process/{model}_top"),
+            ("bottom", "iuce:block/machine/process/{model}_bottom"),
+            ("front", "iuce:block/machine/process/{id}_front"),
+            ("front_active", "iuce:block/machine/process/{id}_front_active"))
+FACING = (("north", 0), ("east", 90), ("south", 180), ("west", 270))
+
+errors = []
+written = 0
+
+
+def read(path):
+    with io.open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
+def load(path):
+    with io.open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def write(path, data, compact=False):
+    """Writes stable JSON; leaves the file alone when the text already matches."""
+    global written
+    text = (json.dumps(data, ensure_ascii=False, separators=(",", ":")) if compact
+            else json.dumps(data, ensure_ascii=False, indent=2)) + "\n"
+    full = ROOT + "/" + path
+    if os.path.exists(full) and read(full) == text:
+        return
+    if CHECK:
+        print("stale: " + path)
+        errors.append(path)
+        return
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    with io.open(full, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+    written += 1
+
+
+def path_of(file, name):
+    return file + "/" + name
+
+
+# ------------------------------------------------------------------ per-machine files
+
+
+def definition(machine):
+    """The part of a content entry the mod reads."""
+    return {key: value for key, value in machine.items() if key not in EXTRAS}
+
+
+def blockstate(machine):
+    variant = "iuce:block/process/" + machine["id"]
+    variants = {}
+    for facing, y in FACING:
+        variants["facing=%s,running=false" % facing] = {"model": variant, "y": y}
+        variants["facing=%s,running=true" % facing] = {"model": variant + "_active", "y": y}
+    return {"variants": variants}
+
+
+def block_model(machine, active):
+    given = machine.get("textures", {})
+    model = machine.get("model", "box")
+    if model not in MODELS:
+        raise SystemExit("unknown model %r for %s" % (model, machine["id"]))
+    textures = {}
+    for role, default in TEXTURES:
+        if given and role not in given:
+            continue                    # hand-picked textures: only the roles given (bottom falls back to top)
+        textures[role] = given.get(role, default).replace("{id}", machine["id"]).replace("{model}", model)
+    front = "#front_active" if active and "front_active" in textures else "#front"
+    textures["particle"] = textures["front"]
+    return {
+        "parent": "minecraft:block/block",
+        "textures": textures,
+        "elements": [{
+            "from": [0, 0, 0], "to": [16, 16, 16],
+            "faces": {
+                "north": {"texture": front, "cullface": "north"},
+                "south": {"texture": "#side", "cullface": "south"},
+                "east": {"texture": "#side", "cullface": "east"},
+                "west": {"texture": "#side", "cullface": "west"},
+                "up": {"texture": "#top", "cullface": "up"},
+                "down": {"texture": "#bottom" if "bottom" in textures else "#top", "cullface": "down"},
+            },
+        }],
+    }
+
+
+def loot_table(machine):
+    return {
+        "type": "minecraft:block",
+        "pools": [{
+            "rolls": 1.0, "bonus_rolls": 0.0,
+            "conditions": [{"condition": "minecraft:survives_explosion"}],
+            "entries": [{"type": "minecraft:item", "name": "iuce:" + machine["id"]}],
+        }],
+        "random_sequence": "iuce:blocks/" + machine["id"],
+    }
+
+
+def generate(machine):
+    name = machine["id"]
+    write(MAIN + "assets/iuce/blockstates/%s.json" % name, blockstate(machine))
+    write(MAIN + "assets/iuce/models/block/process/%s.json" % name, block_model(machine, False))
+    write(MAIN + "assets/iuce/models/block/process/%s_active.json" % name, block_model(machine, True))
+    write(MAIN + "assets/iuce/items/%s.json" % name,
+          {"model": {"type": "minecraft:model", "model": "iuce:block/process/" + name}}, compact=True)
+    write(MAIN + "data/iuce/loot_table/blocks/%s.json" % name, loot_table(machine))
+
+
+# ------------------------------------------------------------------ main
+by_output = {"main": [], "regression": []}
+seen = {}
+for file in CONTENT:
+    table = load(file)
+    output = table.get("output", "main")
+    if output not in by_output:
+        raise SystemExit("%s: unknown output %r" % (file, output))
+    for machine in table.get("machines", []):
+        if machine["id"] in seen:
+            raise SystemExit("duplicate machine %r in %s and %s" % (machine["id"], seen[machine["id"]], file))
+        seen[machine["id"]] = file
+        by_output[output].append(machine)
+
+for output, target in (("main", MAIN), ("regression", REGRESSION)):
+    machines = sorted(by_output[output], key=lambda machine: machine["id"])
+    if not machines:
+        continue
+    for machine in machines:
+        write(target + "iuce/machines/%s.json" % machine["id"], definition(machine))
+    write(target + "iuce/machines/_index%s.json" % ("" if output == "main" else "_regression"),
+          {"machines": [machine["id"] for machine in machines]})
+
+every = sorted(by_output["main"] + by_output["regression"], key=lambda machine: machine["id"])
+for machine in every:
+    generate(machine)
+
+# mineable/pickaxe: main only gets main machines (a missing regression-only id like test_press
+# would cause Minecraft to reject the entire minecraft:mineable/pickaxe tag in-game).
+regression_ids = {"iuce:" + machine["id"] for machine in by_output["regression"]}
+main_machines = sorted(by_output["main"], key=lambda machine: machine["id"])
+pickaxe_path = MAIN + "data/minecraft/tags/block/mineable/pickaxe.json"
+pickaxe = load(ROOT + "/" + pickaxe_path)
+present = [entry for entry in pickaxe.get("values", []) if entry not in regression_ids]
+absent = ["iuce:" + machine["id"] for machine in main_machines if "iuce:" + machine["id"] not in present]
+if len(present) != len(pickaxe.get("values", [])) or absent:
+    pickaxe["values"] = present + absent
+    write(pickaxe_path, pickaxe)
+if by_output["regression"]:
+    reg_pickaxe_path = REGRESSION + "data/minecraft/tags/block/mineable/pickaxe.json"
+    reg_machines = sorted(by_output["regression"], key=lambda machine: machine["id"])
+    write(reg_pickaxe_path, {
+        "replace": False,
+        "values": ["iuce:" + machine["id"] for machine in reg_machines],
+    })
+
+# names: only fill in what the language files do not have yet
+for code, field in (("zh_cn", "name_zh"), ("en_us", "name_en")):
+    lang_path = MAIN + "assets/iuce/lang/%s.json" % code
+    lang = load(ROOT + "/" + lang_path)
+    changed = False
+    for machine in every:
+        name = machine.get(field)
+        if name and "block.iuce." + machine["id"] not in lang:
+            lang["block.iuce." + machine["id"]] = name
+            changed = True
+    if changed:
+        write(lang_path, lang)
+
+from plant_recipes import compile_plants
+for plant, batches in compile_plants(ROOT).items():
+    write(MAIN + "iuce/plants/batches/" + plant + ".json", batches)
+
+if CHECK:
+    if errors:
+        raise SystemExit("%d generated file(s) out of date; run tools/gen_content.py" % len(errors))
+    print("generated content is up to date")
+else:
+    print("%d machine(s) (%d test-only); %d file(s) written"
+          % (len(every), len(by_output["regression"]), written))

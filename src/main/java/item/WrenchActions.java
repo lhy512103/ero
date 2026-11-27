@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 /** Both wrenches run before block GUI activation and share exactly the same interactions. */
 public final class WrenchActions {
     private WrenchActions() {}
+    private static void invalidatePipe(net.minecraft.world.level.Level level) { logistics.LogisticsManager.invalidate(level); }
     public static InteractionResult use(UseOnContext context, boolean electric) {
         var level = context.getLevel();
         var player = context.getPlayer();
@@ -36,7 +37,7 @@ public final class WrenchActions {
         EnumProperty<Direction> facing = state.hasProperty(BlockStateProperties.FACING) ? BlockStateProperties.FACING
             : state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? BlockStateProperties.HORIZONTAL_FACING
             : state.hasProperty(BlockStateProperties.FACING_HOPPER) ? BlockStateProperties.FACING_HOPPER : null;
-        if (!dismantle && !(entity instanceof CableBlockEntity) && facing == null) return InteractionResult.PASS;
+        if (!dismantle && !(entity instanceof CableBlockEntity) && !(state.getBlock() instanceof block.FluidPipeBlock) && facing == null) return InteractionResult.PASS;
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (dismantle) {
             // Resource handlers are not vanilla Containers, so their contents need explicit drops.
@@ -55,6 +56,9 @@ public final class WrenchActions {
             if (!level.removeBlock(pos, false)) return InteractionResult.FAIL;
             Block.popResource(level, pos, new ItemStack(state.getBlock()));
             for (ItemStack stack : contents) if (!stack.isEmpty()) Block.popResource(level, pos, stack);
+        } else if (state.getBlock() instanceof block.FluidPipeBlock) {
+            level.setBlockAndUpdate(pos,state.setValue(block.FluidPipeBlock.CLOSED,state.getValue(block.FluidPipeBlock.CLOSED) ^ (1 << context.getClickedFace().get3DDataValue())));
+            invalidatePipe(level);
         } else if (entity instanceof CableBlockEntity cable) {
             cable.toggleSide(context.getClickedFace());
         } else {

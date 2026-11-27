@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:bronze_plate",
+      "iuce:bronze_plate",
+      "iuce:bronze_plate"
+    ],
+    [
+      "iuce:bronze_plate",
+      "minecraft:furnace",
+      "iuce:bronze_plate"
+    ],
+    [
+      "minecraft:bricks",
+      "minecraft:bricks",
+      "minecraft:bricks"
+    ]
+  ],
+  "result": {
+    "id": "iuce:boiler",
+    "count": 1
+  }
+}

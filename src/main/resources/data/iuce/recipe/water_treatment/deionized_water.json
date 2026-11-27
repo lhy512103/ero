@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "water_treatment",
+  "time": 60,
+  "energy": 960,
+  "fluids": [
+    {
+      "fluid": "#iuce:any_water",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:deionized_water",
+      "amount": 1000
+    }
+  ]
+}

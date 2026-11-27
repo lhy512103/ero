@@ -1,0 +1,17 @@
+{
+  "id": "test_press",
+  "voltage": "MV",
+  "buffer": 20000,
+  "items_in": 2,
+  "items_out": 1,
+  "fluids_in": [
+    4000
+  ],
+  "fluids_out": [
+    4000
+  ],
+  "catalyst_slot": false,
+  "card_slot": false,
+  "upgrades": 4,
+  "base_time": 40
+}

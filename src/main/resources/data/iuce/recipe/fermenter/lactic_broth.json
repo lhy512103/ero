@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "fermenter",
+  "fluids": [
+    {
+      "fluid": "iuce:sugar_solution",
+      "amount": 1000
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:lactic_culture"
+  },
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:lactic_broth",
+      "amount": 1000
+    }
+  ],
+  "energy": 1600,
+  "time": 200
+}

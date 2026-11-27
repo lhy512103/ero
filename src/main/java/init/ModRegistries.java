@@ -8,8 +8,11 @@ import net.neoforged.bus.api.IEventBus;
 
 public class ModRegistries {
     public static void registerAll(IEventBus modEventBus) {
+        machine.process.ProcessMachines.bootstrap();   // adds blocks, items and types before the registers attach
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        machine.process.PlasticComponents.initialize();
+        machine.process.ProcessCards.REGISTER.register(modEventBus);
         ModBlockItems.BLOCK_ITEMS.register(modEventBus);
         ModCreativeModeTabs.TABS.register(modEventBus);
         ModBlockEntities.register(modEventBus);

@@ -1,53 +1,23 @@
 package machine.macerator.screen;
 
+import client.gui.MachineScreen;
 import machine.macerator.menu.MaceratorMenu;
+import machine.process.ProgressStyle.Mode;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
-public class MaceratorScreen extends AbstractContainerScreen<MaceratorMenu> {
-
-    private static final Identifier TEXTURE = Identifier.parse("iuce:textures/gui/machine/macerator.png");
-    private static final Identifier ARROW_ON = Identifier.parse("iuce:textures/gui/com/arrow_on.png");
-    private static final Identifier POWER_ON = Identifier.parse("iuce:textures/gui/com/power_on.png");
+/** The macerator: the ore drops from the hopper between two toothed rolls and the dust piles up below them. */
+public class MaceratorScreen extends MachineScreen<MaceratorMenu> {
+    public static final Window WINDOW = new Window(72, 35, 32, 24, Mode.UP, 4, true);
 
     public MaceratorScreen(MaceratorMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 176, 166);
+        super(menu, inventory, title, 176, 166, "macerator", 87);
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
-    }
-
-    @Override
-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-            TEXTURE, this.leftPos, this.topPos, 0, 0,
-            this.imageWidth, this.imageHeight,
-            256, 256);
-
-        super.extractContents(graphics, mouseX, mouseY, a);
-
-        drawProgressArrow(graphics);
-        drawPowerOn(graphics);
-    }
-
-    private void drawProgressArrow(GuiGraphicsExtractor graphics) {
-        int progress = menu.getProgress(0);
-        int maxProgress = menu.getMaxProgress(0);
-        if (maxProgress <= 0 || progress <= 0) return;
-        int filled = progress * 22 / maxProgress;
-        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-            ARROW_ON, this.leftPos + 79, this.topPos + 36, 0, 0, 16, filled, 16, 22);
-    }
-
-    private void drawPowerOn(GuiGraphicsExtractor graphics) {
-        if (menu.getEnergy() > 0) {
-            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-                POWER_ON, this.leftPos + 7, this.topPos + 71, 0, 0,
-                12, 15, 12, 15);
-        }
+    protected void machine(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        energy(g, 12, 22, 7, 48, menu.getEnergy(), menu.getMaxEnergy());
+        run(g, WINDOW, menu.getProgress(0), menu.getMaxProgress(0));
     }
 }

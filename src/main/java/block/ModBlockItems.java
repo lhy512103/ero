@@ -63,6 +63,16 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> PLANT_CASING = registerBlockItem(ModBlocks.PLANT_CASING);
     public static final DeferredItem<BlockItem> PLANT_FRAME = registerBlockItem(ModBlocks.PLANT_FRAME);
     public static final DeferredItem<BlockItem> PLANT_DRUM = registerBlockItem(ModBlocks.PLANT_DRUM);
+    public static final DeferredItem<BlockItem> CHECKER_PLATE = registerBlockItem(ModBlocks.CHECKER_PLATE);
+    public static final DeferredItem<BlockItem> STEEL_GRATING = registerBlockItem(ModBlocks.STEEL_GRATING);
+    public static final DeferredItem<BlockItem> STEEL_STAIRS = registerBlockItem(ModBlocks.STEEL_STAIRS);
+    public static final DeferredItem<BlockItem> STEEL_HANDRAIL = registerBlockItem(ModBlocks.STEEL_HANDRAIL);
+    public static final DeferredItem<BlockItem> STEEL_LADDER = registerBlockItem(ModBlocks.STEEL_LADDER);
+    public static final DeferredItem<BlockItem> PROCESS_PIPE = registerBlockItem(ModBlocks.PROCESS_PIPE);
+    public static final DeferredItem<BlockItem> FURNACE_SHELL = registerBlockItem(ModBlocks.FURNACE_SHELL);
+    public static final DeferredItem<BlockItem> REFRACTORY_BRICKS = registerBlockItem(ModBlocks.REFRACTORY_BRICKS);
+    public static final DeferredItem<BlockItem> GRAPHITE_ELECTRODE = registerBlockItem(ModBlocks.GRAPHITE_ELECTRODE);
+    public static final DeferredItem<BlockItem> TANK_SHELL = registerBlockItem(ModBlocks.TANK_SHELL);
     public static final DeferredItem<BlockItem> PLANT_CONTROLLER = registerControllerItem("plant_controller", ModBlocks.PLANT_CONTROLLER);
     public static final DeferredItem<BlockItem> ITEM_INPUT_HATCH = registerBlockItem(ModBlocks.ITEM_INPUT_HATCH);
     public static final DeferredItem<BlockItem> ITEM_OUTPUT_HATCH = registerBlockItem(ModBlocks.ITEM_OUTPUT_HATCH);
@@ -70,6 +80,7 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> ENERGY_HATCH_HV = registerBlockItem(ModBlocks.ENERGY_HATCH_HV);
     public static final DeferredItem<BlockItem> MILL_CONTROLLER = registerControllerItem("mill_controller", ModBlocks.MILL_CONTROLLER);
     public static final DeferredItem<BlockItem> REPAIR_BENCH = registerBlockItem(ModBlocks.REPAIR_BENCH);
+    public static final DeferredItem<BlockItem> PROCESS_DESIGN_TABLE = registerBlockItem(ModBlocks.PROCESS_DESIGN_TABLE);
     public static final DeferredItem<BlockItem> LAMP = registerBlockItem(ModBlocks.LAMP);
     public static final DeferredItem<BlockItem> CONVERTER = registerBlockItem(ModBlocks.CONVERTER);
     public static final DeferredItem<BlockItem> BUILDER = registerBlockItem(ModBlocks.BUILDER);
@@ -86,6 +97,42 @@ public class ModBlockItems {
     public static final DeferredItem<BlockItem> EXTRACTOR = registerBlockItem(ModBlocks.EXTRACTOR);
     // 种植机 (Planters)
     public static final DeferredItem<BlockItem> PLANTER = registerBlockItem(ModBlocks.PLANTER);
+    // 公用工程 (Utility plants)
+    public static final DeferredItem<BlockItem> BOILER = registerBlockItem(ModBlocks.BOILER);
+    public static final DeferredItem<BlockItem> TOY_BRICK = registerBlockItem(ModBlocks.TOY_BRICK);
+    public static final DeferredItem<BlockItem> CRATE = registerBlockItem(ModBlocks.CRATE);
+    public static final DeferredItem<BlockItem> ROCK_SALT_ORE = registerBlockItem(ModBlocks.ROCK_SALT_ORE);
+    public static final DeferredItem<BlockItem> LIMESTONE = registerBlockItem(ModBlocks.LIMESTONE);
+    public static final DeferredItem<BlockItem> AIR_COMPRESSOR = registerBlockItem(ModBlocks.AIR_COMPRESSOR);
+    public static final DeferredItem<BlockItem> CONVEYOR_II = registerBlockItem(ModBlocks.CONVEYOR_II);
+    public static final DeferredItem<BlockItem> LOGISTICS_PORT_II = registerBlockItem(ModBlocks.LOGISTICS_PORT_II);
+    public static final DeferredItem<BlockItem> BULK_SILO = registerBlockItem(ModBlocks.BULK_SILO);
+    public static final DeferredItem<BlockItem> GAS_TANK = registerBlockItem(ModBlocks.GAS_TANK);
+    public static final DeferredItem<BlockItem> FLUID_PIPE = registerBlockItem(ModBlocks.FLUID_PIPE);
+    public static final DeferredItem<BlockItem> BRONZE_FLUID_PIPE = registerBlockItem(ModBlocks.BRONZE_FLUID_PIPE);
+    public static final DeferredItem<BlockItem> DRIP_PIPE = registerBlockItem(ModBlocks.DRIP_PIPE);
+    public static final DeferredItem<BlockItem> MULCHED_FARMLAND = registerBlockItem(ModBlocks.MULCHED_FARMLAND);
+    public static final DeferredItem<BlockItem> TWIN_SCREW_EXTRUDER = registerBlockItem(ModBlocks.TWIN_SCREW_EXTRUDER);
+    public static final DeferredItem<BlockItem> BIO_ETHYLENE_PLANT = registerBlockItem(ModBlocks.BIO_ETHYLENE_PLANT);
+    public static final DeferredItem<BlockItem> CARBIDE_FURNACE_PLANT = registerBlockItem(ModBlocks.CARBIDE_FURNACE_PLANT);
+    public static final DeferredItem<BlockItem> COKE_OVEN_BATTERY = registerBlockItem(ModBlocks.COKE_OVEN_BATTERY);
+    public static final DeferredItem<BlockItem> WASTE_HEAT_POWER_PLANT = registerBlockItem(ModBlocks.WASTE_HEAT_POWER_PLANT);
+    public static final DeferredItem<BlockItem> MAIN_FEED_SEGMENT = registerBlockItem(ModBlocks.MAIN_FEED_SEGMENT);
+    public static final DeferredItem<BlockItem> MELTING_SEGMENT = registerBlockItem(ModBlocks.MELTING_SEGMENT);
+    public static final DeferredItem<BlockItem> SIDE_FEED_SEGMENT = registerBlockItem(ModBlocks.SIDE_FEED_SEGMENT);
+    public static final DeferredItem<BlockItem> MIXING_SEGMENT = registerBlockItem(ModBlocks.MIXING_SEGMENT);
+    public static final DeferredItem<BlockItem> VENTING_SEGMENT = registerBlockItem(ModBlocks.VENTING_SEGMENT);
+    public static final DeferredItem<BlockItem> DIE_SEGMENT = registerBlockItem(ModBlocks.DIE_SEGMENT);
+    public static final DeferredItem<BlockItem> FLUID_INPUT_HATCH = registerBlockItem(ModBlocks.FLUID_INPUT_HATCH);
+    public static final DeferredItem<BlockItem> FLUID_OUTPUT_HATCH = registerBlockItem(ModBlocks.FLUID_OUTPUT_HATCH);
+    public static final DeferredItem<BlockItem> GAS_OUTPUT_HATCH = registerBlockItem(ModBlocks.GAS_OUTPUT_HATCH);
+    public static final DeferredItem<BlockItem> GENERATION_HATCH = registerBlockItem(ModBlocks.GENERATION_HATCH);
+    public static final DeferredItem<BlockItem> MAINTENANCE_HATCH = registerBlockItem(ModBlocks.MAINTENANCE_HATCH);
+    public static final DeferredItem<BlockItem> COOLING_TOWER = registerBlockItem(ModBlocks.COOLING_TOWER);
+    public static final DeferredItem<BlockItem> CREATIVE_UTILITY_SOURCE = registerBlockItem(ModBlocks.CREATIVE_UTILITY_SOURCE);
+    public static final DeferredItem<BlockItem> STEAM_PIPE = registerBlockItem(ModBlocks.STEAM_PIPE);
+    public static final DeferredItem<BlockItem> COOLING_WATER_PIPE = registerBlockItem(ModBlocks.COOLING_WATER_PIPE);
+    public static final DeferredItem<BlockItem> AIR_PIPE = registerBlockItem(ModBlocks.AIR_PIPE);
     // 工业工作台 (Industrial Workbench)
     public static final DeferredItem<BlockItem> INDUSTRIAL_WORKBENCH = registerBlockItem(ModBlocks.INDUSTRIAL_WORKBENCH);
     // 太阳能发电机 (Solar Generators) - 保留到奇异

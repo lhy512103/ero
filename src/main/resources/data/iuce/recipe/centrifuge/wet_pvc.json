@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "centrifuge",
+  "time": 100,
+  "energy": 4800,
+  "fluids": [
+    {
+      "fluid": "iuce:stripped_pvc_slurry",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:wet_pvc",
+      "count": 4
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:process_water",
+      "amount": 800
+    }
+  ]
+}

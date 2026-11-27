@@ -1,0 +1,32 @@
+{
+  "type": "iuce:process",
+  "machine": "scrubber",
+  "time": 100,
+  "energy": 1600,
+  "fluids": [
+    {
+      "fluid": "iuce:coke_oven_gas",
+      "amount": 1000
+    },
+    {
+      "fluid": "iuce:caustic_solution",
+      "amount": 100
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:clean_coke_oven_gas",
+      "amount": 1000
+    },
+    {
+      "fluid": "iuce:spent_lye",
+      "amount": 100
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:sulfur",
+      "count": 1
+    }
+  ]
+}

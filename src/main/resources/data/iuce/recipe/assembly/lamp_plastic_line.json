@@ -1,0 +1,14 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:lamp_shade",
+      "iuce:circuit",
+      "minecraft:redstone"
+    ]
+  ],
+  "result": {
+    "id": "iuce:lamp",
+    "count": 1
+  }
+}

@@ -13,6 +13,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
 import recipe.CraftingRecipe;
 import recipe.MachineRecipe;
@@ -33,7 +34,7 @@ import java.util.Set;
 final class GuideRecipes {
     private GuideRecipes() {}
 
-    enum Kind { MACHINE, CRAFT, SMELT }
+    enum Kind { MACHINE, PROCESS, CRAFT, SMELT }
 
     record Extra(ItemStack stack, float chance) {}
 
@@ -41,9 +42,10 @@ final class GuideRecipes {
      * @param gridW for CRAFT: 3 when {@code inputs} is a row-major 3x3 grid, 0 for shapeless
      */
     record View(Kind kind, String machineType, ItemStack station, boolean workbenchOnly, int gridW,
-                List<List<ItemStack>> inputs, ItemStack output, List<Extra> extras, long energy, int time, String id) {
+                List<List<ItemStack>> inputs, ItemStack output, List<Extra> extras, long energy, int time, String id, RecipeHolder<?> holder) {
         Component stationName() {
             if (kind == Kind.MACHINE) return Component.translatable("guide.iuce.machine." + machineType);
+            if (kind == Kind.PROCESS && station.isEmpty()) return Component.literal(machineType);
             return station.getHoverName();
         }
     }
@@ -97,6 +99,22 @@ final class GuideRecipes {
         return byMachine.getOrDefault(machineType, List.of());
     }
 
+    static List<View> forFluid(Fluid fluid, boolean uses) {
+        refresh();
+        return byMachine.values().stream().flatMap(List::stream).filter(view -> {
+            if (view.holder().value() instanceof MachineRecipe recipe) {
+                return uses ? recipe.getFluidInputTemplate().stream().anyMatch(input -> input.fluid().value().isSame(fluid))
+                    : recipe.getFluidOutputTemplate().stream().anyMatch(output -> output.fluid().value().isSame(fluid));
+            }
+            if (view.holder().value() instanceof recipe.ProcessRecipe recipe) {
+                return uses ? recipe.fluids().stream().anyMatch(input -> input.ingredient().fluids().stream()
+                    .anyMatch(option -> option.value().isSame(fluid)))
+                    : recipe.fluidResults().stream().anyMatch(output -> output.fluid().isSame(fluid));
+            }
+            return false;
+        }).sorted(Comparator.comparing(View::id)).toList();
+    }
+
     @Nullable
     static RecipeMap current() {
         var server = Minecraft.getInstance().getSingleplayerServer();
@@ -125,13 +143,15 @@ final class GuideRecipes {
             holders.sort(Comparator.comparing(holder -> holder.id().identifier().toString()));
             for (RecipeHolder<?> holder : holders) {
                 View view = view(holder);
-                if (view == null || view.output.isEmpty()) continue;
-                outputs.computeIfAbsent(view.output.getItem(), k -> new ArrayList<>()).add(view);
-                for (Extra extra : view.extras) outputs.computeIfAbsent(extra.stack.getItem(), k -> new ArrayList<>()).add(view);
+                if (view == null) continue;
+                Set<Item> products = new LinkedHashSet<>();
+                if (!view.output.isEmpty()) products.add(view.output.getItem());
+                for (Extra extra : view.extras) if (!extra.stack.isEmpty()) products.add(extra.stack.getItem());
+                for (Item item : products) outputs.computeIfAbsent(item, k -> new ArrayList<>()).add(view);
                 Set<Item> seen = new LinkedHashSet<>();
-                for (List<ItemStack> slot : view.inputs) for (ItemStack stack : slot) seen.add(stack.getItem());
+                for (List<ItemStack> slot : view.inputs) for (ItemStack stack : slot) if (!stack.isEmpty()) seen.add(stack.getItem());
                 for (Item item : seen) inputs.computeIfAbsent(item, k -> new ArrayList<>()).add(view);
-                if (view.kind == Kind.MACHINE) machines.computeIfAbsent(view.machineType, k -> new ArrayList<>()).add(view);
+                if (view.kind == Kind.MACHINE || view.kind == Kind.PROCESS) machines.computeIfAbsent(view.machineType, k -> new ArrayList<>()).add(view);
             }
         }
         byOutput = outputs;
@@ -146,12 +166,43 @@ final class GuideRecipes {
             List<List<ItemStack>> in = new ArrayList<>();
             in.add(options(recipe.getInput(), recipe.getInputCount()));
             recipe.getInput2().ifPresent(second -> in.add(options(second, recipe.getInput2Count())));
+            recipe.getCatalyst().ifPresent(catalyst -> in.add(options(catalyst, 1)));
+            recipe.getFluidInputTemplate().ifPresent(fluid -> {
+                ItemStack bucket = new ItemStack(fluid.fluid().value().getBucket());
+                if (!bucket.isEmpty()) in.add(List.of(bucket));
+            });
             List<Extra> extras = new ArrayList<>();
             for (MachineRecipe.ExtraResult extra : recipe.getExtraResults()) extras.add(new Extra(extra.create(), extra.chance()));
+            recipe.getFluidOutputTemplate().ifPresent(fluid -> {
+                ItemStack bucket = new ItemStack(fluid.fluid().value().getBucket());
+                if (!bucket.isEmpty()) extras.add(new Extra(bucket, 1f));
+            });
             String type = recipe.getMachineType();
             String blockPath = MACHINE_BLOCKS.get(type);
             return new View(Kind.MACHINE, type, blockPath == null ? ItemStack.EMPTY : block(blockPath), false, 0,
-                in, recipe.getOutput(), extras, recipe.getEnergyCost(), recipe.getProcessTime(), id);
+                in, recipe.getOutput(), extras, recipe.getEnergyCost(), recipe.getProcessTime(), id, holder);
+        }
+        if (holder.value() instanceof recipe.ProcessRecipe recipe) {
+            List<List<ItemStack>> in = new ArrayList<>();
+            for (var input : recipe.items()) in.add(options(input.ingredient(), input.count()));
+            recipe.catalyst().ifPresent(catalyst -> in.add(options(catalyst.ingredient(), 1)));
+            for (var input : recipe.fluids()) {
+                List<ItemStack> buckets = input.ingredient().fluids().stream()
+                    .map(fluid -> new ItemStack(fluid.value().getBucket()))
+                    .filter(stack -> !stack.isEmpty()).toList();
+                if (!buckets.isEmpty()) in.add(buckets);
+            }
+            List<ItemStack> outs = new ArrayList<>();
+            List<Float> chances = new ArrayList<>();
+            for (var result : recipe.results()) { outs.add(result.create()); chances.add(result.chance()); }
+            for (var result : recipe.fluidResults()) {
+                ItemStack bucket = new ItemStack(result.fluid().getBucket());
+                if (!bucket.isEmpty()) { outs.add(bucket); chances.add(1f); }
+            }
+            List<Extra> extras = new ArrayList<>();
+            for (int i = 1; i < outs.size(); i++) extras.add(new Extra(outs.get(i), chances.get(i)));
+            return new View(Kind.PROCESS, recipe.machine(), block(recipe.machine()), false, 0, in,
+                outs.isEmpty() ? ItemStack.EMPTY : outs.get(0), extras, recipe.energy(), recipe.time(), id, holder);
         }
         if (holder.value() instanceof CraftingRecipe recipe) {
             List<List<ItemStack>> in = new ArrayList<>();
@@ -173,7 +224,7 @@ final class GuideRecipes {
             }
             boolean workbench = !recipe.isStandardCrafting();
             return new View(Kind.CRAFT, "", workbench ? block("industrial_workbench") : new ItemStack(Items.CRAFTING_TABLE),
-                workbench, gridW, in, recipe.getOutput(), List.of(), 0, 0, id);
+                workbench, gridW, in, recipe.getOutput(), List.of(), 0, 0, id, holder);
         }
         if (holder.value() instanceof AbstractCookingRecipe recipe && recipe.getType() == RecipeType.SMELTING) {
             ItemStack output = recipe.assemble(new SingleRecipeInput(ItemStack.EMPTY));
@@ -182,7 +233,7 @@ final class GuideRecipes {
                 || in.stream().anyMatch(stack -> "iuce".equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace()));
             if (!ours) return null;
             return new View(Kind.SMELT, "", new ItemStack(Items.FURNACE), false, 0, List.of(in), output, List.of(),
-                0, recipe.cookingTime(), id);
+                0, recipe.cookingTime(), id, holder);
         }
         return null;
     }

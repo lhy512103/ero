@@ -1,0 +1,14 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:sulfur",
+      "iuce:coke_dust",
+      "minecraft:bone_meal"
+    ]
+  ],
+  "result": {
+    "id": "minecraft:gunpowder",
+    "count": 1
+  }
+}

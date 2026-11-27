@@ -1,0 +1,42 @@
+{
+  "base_y": -1,
+  "layouts": {
+    "5": [
+      [
+        "SSSSS",
+        "SSSSS",
+        "SSSSS",
+        "SSSSS",
+        "SSSSS"
+      ],
+      [
+        "SS@SS",
+        "S...S",
+        "S...S",
+        "S...S",
+        "SSSSS"
+      ],
+      [
+        "SSSSS",
+        "S...S",
+        "S...S",
+        "S...S",
+        "SSSSS"
+      ],
+      [
+        "SSSSS",
+        "S...S",
+        "S...S",
+        "S...S",
+        "SSSSS"
+      ],
+      [
+        "SSSSS",
+        "SSSSS",
+        "SSSSS",
+        "SSSSS",
+        "SSSSS"
+      ]
+    ]
+  }
+}

@@ -615,7 +615,12 @@ final class MachineTests {
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, net.minecraft.world.phys.Vec3.ZERO)
                 .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL, pickaxe));
             if (block == ModBlocks.RUBBER_LEAVES.get()) continue;   // leaves drop saplings by chance
-            check(helper, loot.size() == 1 && loot.get(0).is(block.asItem()), holder.getId() + " must drop itself, dropped " + loot);
+            if (block == ModBlocks.MULCHED_FARMLAND.get()) {
+                check(helper, loot.size()==2 && loot.stream().anyMatch(s -> s.is(ModItems.WASTE_FILM.get())), "PE mulch returns waste film");
+                continue;
+            }
+            var expected = block == ModBlocks.ROCK_SALT_ORE.get() ? ModItems.ROCK_SALT.get() : block.asItem();
+            check(helper, loot.size() == 1 && loot.get(0).is(expected), holder.getId() + " must drop " + expected + ", dropped " + loot);
         }
 
         BlockPos pos = new BlockPos(1, 1, 1);
@@ -1326,9 +1331,25 @@ final class MachineTests {
                 "Removing the formed controller must restore part visibility");
             for (var cell : cells) level.removeBlock(cell.pos(), false);
         }
+        // Stretchable extruder: screw segments must hide when formed and reappear when resized.
+        BlockPos twinOrigin = helper.absolutePos(new BlockPos(5, 2, 2));
+        var twinState = ModBlocks.TWIN_SCREW_EXTRUDER.get().defaultBlockState().setValue(block.PlantControllerBlock.LEGACY, false);
+        level.setBlockAndUpdate(twinOrigin, twinState);
+        var twin = (blockentity.PlantControllerBlockEntity) level.getBlockEntity(twinOrigin);
+        var twinCells = multiblock.PlantStructure.cells(twinOrigin, direction, twinState);
+        check(helper, twin != null && twin.assembleCreative() > 0 && twin.isFormed(), "Extruder creative assembly must form");
+        check(helper, twinCells.stream().allMatch(cell -> formed(level.getBlockState(cell.pos()))),
+            "All extruder parts including screw segments must be marked formed");
+        twin.resize(17);
+        check(helper, !twin.isFormed() && twinCells.stream().noneMatch(cell -> formed(level.getBlockState(cell.pos()))),
+            "Resizing a formed machine must immediately restore part visibility");
+        level.removeBlock(twinOrigin, false);
+        for (var cell : twinCells) level.removeBlock(cell.pos(), false);
         BlockPos casing = helper.absolutePos(new BlockPos(8, 4, 2));
         var state = ModBlocks.PLANT_CASING.get().defaultBlockState();
         var east = net.minecraft.world.level.block.state.properties.BlockStateProperties.EAST;
+        var north = net.minecraft.world.level.block.state.properties.BlockStateProperties.NORTH;
+        var up = net.minecraft.world.level.block.state.properties.BlockStateProperties.UP;
         level.setBlockAndUpdate(casing, state);
         check(helper, !level.getBlockState(casing).getValue(east), "An exposed edge must keep its trim");
         level.setBlockAndUpdate(casing.east(), ModBlocks.ITEM_INPUT_HATCH.get().defaultBlockState());
@@ -1336,6 +1357,45 @@ final class MachineTests {
         level.removeBlock(casing.east(), false);
         check(helper, !level.getBlockState(casing).getValue(east), "Removing the hatch must restore the trim");
         level.removeBlock(casing, false);
+
+        // Connected checker plate, tank shell, coaxial drum, articulated H-beam and process pipe joints.
+        BlockPos p0 = helper.absolutePos(new BlockPos(8, 5, 2));
+        level.setBlockAndUpdate(p0, ModBlocks.CHECKER_PLATE.get().defaultBlockState());
+        level.setBlockAndUpdate(p0.east(), ModBlocks.CHECKER_PLATE.get().defaultBlockState());
+        check(helper, level.getBlockState(p0).getValue(east), "Adjacent checker plates must join seamlessly");
+        level.removeBlock(p0.east(), false);
+        level.removeBlock(p0, false);
+
+        level.setBlockAndUpdate(p0, ModBlocks.TANK_SHELL.get().defaultBlockState());
+        level.setBlockAndUpdate(p0.above(), ModBlocks.TANK_SHELL.get().defaultBlockState());
+        check(helper, level.getBlockState(p0).getValue(up), "Stacked tank shells must join seamlessly");
+        level.removeBlock(p0.above(), false);
+        level.removeBlock(p0, false);
+
+        var drumX = ModBlocks.PLANT_DRUM.get().defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.X);
+        level.setBlockAndUpdate(p0, drumX);
+        level.setBlockAndUpdate(p0.east(), drumX);
+        check(helper, level.getBlockState(p0).getValue(block.PlantDrumBlock.POS) && level.getBlockState(p0.east()).getValue(block.PlantDrumBlock.NEG),
+            "Coaxial industrial drums must hide internal end caps");
+        level.removeBlock(p0.east(), false);
+        level.removeBlock(p0, false);
+
+        var colY = ModBlocks.PLANT_FRAME.get().defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.Y);
+        var beamX = ModBlocks.PLANT_FRAME.get().defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.X);
+        level.setBlockAndUpdate(p0, colY);
+        level.setBlockAndUpdate(p0.east(), beamX);
+        check(helper, level.getBlockState(p0).getValue(east) && level.getBlockState(p0.east()).getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WEST),
+            "Perpendicular H-beams must connect with gusset brackets");
+        level.removeBlock(p0.east(), false);
+        level.removeBlock(p0, false);
+
+        var pipeY = ModBlocks.PROCESS_PIPE.get().defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.Y);
+        var pipeZ = ModBlocks.PROCESS_PIPE.get().defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.Z);
+        level.setBlockAndUpdate(p0, pipeY);
+        level.setBlockAndUpdate(p0.north(), pipeZ);
+        check(helper, level.getBlockState(p0).getValue(north), "Meeting process pipes must connect into an articulated elbow");
+        level.removeBlock(p0.north(), false);
+        level.removeBlock(p0, false);
         helper.succeed();
     }
 

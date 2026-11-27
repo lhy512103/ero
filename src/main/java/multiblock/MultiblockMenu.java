@@ -28,6 +28,8 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     private final Kind kind;
     private final BlockEntity target;
     private final int machineSlots;
+    /** Where the target sits; on the client the panel reads the controller's layout from there. */
+    private net.minecraft.core.BlockPos pos;
     private final DataSlot status = DataSlot.standalone();
     private final DataSlot progress = DataSlot.standalone();
     private final DataSlot parallel = DataSlot.standalone();
@@ -35,12 +37,44 @@ public final class MultiblockMenu extends AbstractContainerMenu {
     // Data slots travel as 16-bit values, so EU readings are split into two halves.
     private final DataSlot energyLow = DataSlot.standalone(), energyHigh = DataSlot.standalone();
     private final DataSlot capacityLow = DataSlot.standalone(), capacityHigh = DataSlot.standalone();
+    /** Kinds of structure block shown in the side panel; per kind: stored, fitted, wrong. */
+    public static final int KINDS = 24;
+    private final DataSlot[] stored = new DataSlot[KINDS], fitted = new DataSlot[KINDS], wrong = new DataSlot[KINDS];
+    // panel buttons
+    public static final int BUILD = 0, DISMANTLE = 1, SHORTER = 2, LONGER = 3;
+    /** The store's slots, in panel coordinates on the materials page. */
+    public static final int STORE_X = 8, STORE_Y = 22, STORE_COLS = 9;
+    private final DataSlot kindCount = DataSlot.standalone();
+    private int storeStart;
+    /** Set by the client screen: the store's slots only show on the materials page. */
+    public boolean storeShown;
+    /** Set by the client screen: the mold slot only shows on the machine page. */
+    public boolean machineShown = true;
+
+    /** One slot of the material store; slots past the store's kinds stay hidden and empty. */
+    public final class StoreSlot extends ResourceHandlerSlot {
+        private final ItemStacksResourceHandler store;
+        StoreSlot(ItemStacksResourceHandler store, int index, int x, int y) { super(store, store::set, index, x, y); this.store = store; }
+        private boolean in() { return getSlotIndex() < store.size() && getSlotIndex() < kindCount(); }
+        public int index() { return getSlotIndex(); }
+        @Override public boolean isActive() { return in() && (target != null || storeShown); }
+        @Override protected ItemStack getStackCopy() { return getSlotIndex() < store.size() ? super.getStackCopy() : ItemStack.EMPTY; }
+        @Override protected void setStackCopy(ItemStack stack) { if (getSlotIndex() < store.size()) super.setStackCopy(stack); }
+        @Override public boolean mayPlace(ItemStack stack) { return in() && super.mayPlace(stack); }
+        @Override public boolean mayPickup(Player player) { return in() && super.mayPickup(player); }
+        @Override public int getMaxStackSize() { return in() ? super.getMaxStackSize() : 0; }
+        @Override public int getMaxStackSize(ItemStack stack) { return in() ? super.getMaxStackSize(stack) : 0; }
+    }
+
+    public int kindCount() { return kindCount.get(); }
+
+    public static final int DEPOSIT = 100, WITHDRAW = 200, DEPOSIT_ALL = 300, WITHDRAW_ALL = 400;
 
     public static void open(Player player, BlockEntity target) {
         if (player instanceof ServerPlayer server) {
             Kind kind = kindOf(target);
             server.openMenu(new SimpleMenuProvider((id, inventory, ignored) -> new MultiblockMenu(id, inventory, target),
-                target.getBlockState().getBlock().getName()), buffer -> buffer.writeEnum(kind));
+                target.getBlockState().getBlock().getName()), buffer -> { buffer.writeEnum(kind); buffer.writeBlockPos(target.getBlockPos()); });
         }
     }
 
@@ -55,6 +89,7 @@ public final class MultiblockMenu extends AbstractContainerMenu {
 
     public MultiblockMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buffer) {
         this(id, inventory, buffer.readEnum(Kind.class), null);
+        this.pos = buffer.readBlockPos();
     }
 
     public MultiblockMenu(int id, Inventory inventory, BlockEntity target) {
@@ -65,6 +100,7 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         super(ModMenus.MULTIBLOCK.get(), id);
         this.kind = kind;
         this.target = target;
+        this.pos = target == null ? net.minecraft.core.BlockPos.ZERO : target.getBlockPos();
         if (kind == Kind.INPUT || kind == Kind.OUTPUT) {
             var items = target instanceof HatchBlockEntity hatch ? hatch.getInventory() : new ItemStacksResourceHandler(9);
             for (int index = 0; index < items.size(); index++) {
@@ -74,7 +110,17 @@ public final class MultiblockMenu extends AbstractContainerMenu {
             }
         } else if (kind == Kind.MILL) {
             var mold = target instanceof PlantControllerBlockEntity plant ? plant.moldSlot() : new ItemStacksResourceHandler(1);
-            addSlot(new MoldSlot(mold, mold::set, 0, MOLD_X, MOLD_Y));
+            addSlot(new MoldSlot(mold, mold::set, 0, MOLD_X, MOLD_Y) {
+                @Override public boolean isActive() { return target != null || machineShown; }
+            });
+        }
+        storeStart = slots.size();
+        if (isController(kind)) {
+            ItemStacksResourceHandler store = target instanceof PlantControllerBlockEntity plant ? plant.materials()
+                : new ItemStacksResourceHandler(KINDS) {
+                    @Override protected int getCapacity(int index, net.neoforged.neoforge.transfer.item.ItemResource resource) { return Integer.MAX_VALUE; }
+                };
+            for (int i = 0; i < KINDS; i++) addSlot(new StoreSlot(store, i, STORE_X + i % STORE_COLS * 18, STORE_Y + i / STORE_COLS * 18));
         }
         machineSlots = slots.size();
         addStandardInventorySlots(playerInventory, INVENTORY_X, inventoryY(kind));
@@ -86,6 +132,12 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         addDataSlot(energyHigh);
         addDataSlot(capacityLow);
         addDataSlot(capacityHigh);
+        addDataSlot(kindCount);
+        for (int i = 0; i < KINDS; i++) {
+            addDataSlot(stored[i] = DataSlot.standalone());
+            addDataSlot(fitted[i] = DataSlot.standalone());
+            addDataSlot(wrong[i] = DataSlot.standalone());
+        }
         updateReadings();
     }
 
@@ -104,8 +156,18 @@ public final class MultiblockMenu extends AbstractContainerMenu {
             progress.set(plant.getProgress());
             parallel.set(plant.isFormed() ? plant.getParallel() : 0);
             length.set(PlantControllerBlockEntity.targetLength(plant.getBlockState()));
-            long[] stored = plant.hatchEnergy();
-            setEnergy(stored[0], stored[1]);
+            long[] energy = plant.hatchEnergy();
+            setEnergy(energy[0], energy[1]);
+            var store = plant.materials();
+            kindCount.set(Math.min(KINDS, store.size()));
+            int i = 0;
+            for (var entry : plant.progressByKind().entrySet()) {
+                if (i >= KINDS) break;
+                stored[i].set(store.count(entry.getKey()));
+                fitted[i].set(entry.getValue()[1]);
+                wrong[i].set(entry.getValue()[2]);
+                i++;
+            }
         } else if (target instanceof EnergyHatchBlockEntity hatch) {
             parallel.set(hatch.parallel());
             setEnergy(hatch.getEnergyStorage().getEnergyStored(), hatch.getEnergyStorage().getMaxEnergyStored());
@@ -126,6 +188,45 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         super.broadcastChanges();
     }
 
+    public int stored(int kind) { return stored[kind].get() & 0xFFFF; }
+    public int fitted(int kind) { return fitted[kind].get() & 0xFFFF; }
+    public int wrong(int kind) { return wrong[kind].get() & 0xFFFF; }
+    public net.minecraft.core.BlockPos pos() { return pos; }
+
+    @Override
+    public boolean clickMenuButton(Player player, int button) {
+        if (!(target instanceof PlantControllerBlockEntity plant) || !(player instanceof ServerPlayer server)) return false;
+        switch (button) {
+            case BUILD -> {
+                int[] r = plant.build(player);
+                server.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    r[1] > 0 ? "message.iuce.plant.built_missing" : "message.iuce.plant.built", r[0], r[1]));
+            }
+            case DISMANTLE -> {
+                int[] r = plant.dismantle(player);
+                server.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    r[1] + r[2] > 0 ? "message.iuce.plant.dismantled_overflow" : "message.iuce.plant.dismantled", r[0], r[1], r[2]));
+            }
+            case SHORTER -> plant.stepLength(-1);
+            case LONGER -> plant.stepLength(1);
+            default -> {
+                int index = button % 100, action = button - index;
+                var kinds = new java.util.ArrayList<>(plant.needs().keySet());
+                if (index >= kinds.size()) return false;
+                var item = kinds.get(index);
+                int stack = item.getDefaultMaxStackSize();
+                switch (action) {
+                    case DEPOSIT -> plant.deposit(player, item, stack);
+                    case WITHDRAW -> plant.withdraw(player, item, stack);
+                    case DEPOSIT_ALL -> plant.deposit(player, item, Integer.MAX_VALUE);
+                    case WITHDRAW_ALL -> plant.withdraw(player, item, Integer.MAX_VALUE);
+                    default -> { return false; }
+                }
+            }
+        }
+        return true;
+    }
+
     public Kind kind() { return kind; }
     public Status status() { return Status.values()[status.get()]; }
     public int progress() { return progress.get(); }
@@ -143,7 +244,9 @@ public final class MultiblockMenu extends AbstractContainerMenu {
         if (index < machineSlots) {
             if (!moveItemStackTo(moving, machineSlots, slots.size(), true)) return ItemStack.EMPTY;
         } else {
-            if (kind == Kind.INPUT || kind == Kind.MILL) {
+            if (isController(kind) && moveItemStackTo(moving, storeStart, machineSlots, false)) {
+                // went into the material store
+            } else if (kind == Kind.INPUT || kind == Kind.MILL) {
                 if (!moveItemStackTo(moving, 0, machineSlots, false)) return ItemStack.EMPTY;
             } else {
                 int hotbar = slots.size() - 9;

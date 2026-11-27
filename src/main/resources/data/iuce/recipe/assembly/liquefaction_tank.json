@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:copper_plate",
+      "iuce:heating_coil",
+      "iuce:copper_plate"
+    ],
+    [
+      "minecraft:glass",
+      "iuce:machine_casing",
+      "minecraft:glass"
+    ],
+    [
+      "iuce:copper_plate",
+      "iuce:circuit",
+      "iuce:copper_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:liquefaction_tank",
+    "count": 1
+  }
+}

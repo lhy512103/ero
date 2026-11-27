@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "hcl_furnace",
+  "time": 100,
+  "energy": 1600,
+  "fluids": [
+    {
+      "fluid": "iuce:chlorine",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:hydrogen",
+      "amount": 500
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:hydrogen_chloride",
+      "amount": 1000
+    }
+  ]
+}

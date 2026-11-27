@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:rubber_belt",
+    "iuce:electric_motor",
+    "iuce:conveyor"
+  ],
+  "result": {
+    "id": "iuce:conveyor_ii",
+    "count": 2
+  }
+}

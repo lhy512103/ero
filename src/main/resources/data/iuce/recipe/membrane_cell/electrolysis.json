@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "membrane_cell",
+  "time": 200,
+  "energy": 25600,
+  "fluids": [
+    {
+      "fluid": "iuce:brine",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:chlorine",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:hydrogen",
+      "amount": 500
+    },
+    {
+      "fluid": "iuce:caustic_solution",
+      "amount": 500
+    }
+  ]
+}

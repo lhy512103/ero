@@ -1,0 +1,209 @@
+package regression;
+
+import client.gui.ProcessMachineScreen;
+import machine.process.ProcessMachineBlockEntity;
+import machine.process.ProcessMachineMenu.Page;
+import machine.process.ProcessMachines;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
+import net.minecraft.core.BlockPos;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import recipe.ProcessRecipe;
+import recipe.cache.ProcessRecipeCache;
+
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Development tool: places a few process machines next to the player, opens each one and saves a
+ * screenshot of every tab to {@code screenshots/machine_<id>_<tab>.png}, then quits. Run with
+ * {@code gradlew runClient -PsmokeTest -PregressionTests -PguideShots=machines -PguideWorld=<save>}; with
+ * {@code -PguideShots=machines:old} only the older machines; with {@code -PguideShots=machines:jei} the JEI page of
+ * every machine instead, saved as {@code screenshots/jei_<page>.png}.
+ */
+public final class MachineShots {
+    private MachineShots() {}
+
+    private static final List<String> MACHINES = List.of("single_screw_extruder", "cooling_tank", "vulcanizer",
+        "smokehouse", "film_winder", "haul_off_cutter", "cnc_machining_center", "polymerization_reactor",
+        "distillation_column", "lime_kiln", "fermenter", "additive_reactor", "catalyst_prep_tank", "dehydration_reactor",
+        "depolymerization_reactor", "oligomerization_reactor", "vcm_converter", "neutralizer", "acetylene_generator",
+        "solvent_recovery_tower", "tar_distiller", "scrubber", "flash_tank", "evaporator", "crystallizer", "vent_stack",
+        "carbide_furnace", "coking_oven", "hcl_furnace", "dryer",
+        "brine_dissolver", "brine_purifier", "coagulation_tank", "liquefaction_tank", "saccharification_tank",
+        "water_treatment", "centrifuge", "filter_press", "membrane_cell", "wet_mill", "gas_compressor",
+        "strand_pelletizer", "sheeting_press",
+        "compounding_extruder", "dehumidifying_dryer", "high_speed_mixer", "injection_molder", "plastic_granulator",
+        "rubber_mixer");
+    /** The older machines, opened from their own block; one screenshot each, as they have no tabs. */
+    private static final List<String> OLD = List.of("macerator", "compressor", "extractor", "metal_former",
+        "electric_furnace", "induction_furnace", "generator", "batbox", "ore_washer", "electrolyzer", "planter",
+        "industrial_workbench", "crate", "factory_hub");
+    private static final int PER_MACHINE = 100, OPEN = 10, FIRST_PAGE = 40, PER_PAGE = 10;
+
+    /** {@code -PguideShots=machines:old} skips the process machines and shoots only the older ones. */
+    private static final boolean OLD_ONLY = "machines:old".equals(System.getProperty("iuce.guideShots"));
+    private static int ticks, settle = -1, step = OLD_ONLY ? MACHINES.size() * PER_MACHINE - 1 : -1;
+    private static BlockPos placed;
+    /** {@code -PguideShots=machines:jei} opens the JEI recipe page of every machine instead. */
+    private static final boolean JEI_ONLY = "machines:jei".equals(System.getProperty("iuce.guideShots"));
+    private static final int PER_JEI_PAGE = 40;
+    private static List<String> jeiPages;
+
+    public static void register() {
+        NeoForge.EVENT_BUS.addListener(MachineShots::tick);
+    }
+
+    private static void tick(ClientTickEvent.Post event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.options.pauseOnLostFocus = false;
+        ticks++;
+        var server = minecraft.getSingleplayerServer();
+        if (minecraft.player == null || server == null) {
+            if (ticks > 2400) minecraft.stop();
+            return;
+        }
+        if (settle < 0) settle = ticks + 100;
+        if (ticks < settle) return;
+        step++;
+        if (JEI_ONLY) {
+            jei(minecraft);
+            return;
+        }
+        int machine = step / PER_MACHINE, phase = step % PER_MACHINE;
+        if (machine >= MACHINES.size() + OLD.size()) {
+            minecraft.stop();
+            return;
+        }
+        if (machine >= MACHINES.size()) {
+            old(minecraft, server, OLD.get(machine - MACHINES.size()), machine, phase);
+            return;
+        }
+        String id = MACHINES.get(machine);
+        // The block goes down first; the menu opens a few ticks later, once the client has the new block entity.
+        if (phase == 0) place(minecraft, server, id, machine);
+        if (phase == OPEN) open(minecraft, server);
+        if (phase < FIRST_PAGE || !(minecraft.screen instanceof ProcessMachineScreen screen)) return;
+        List<Page> pages = screen.pages();
+        int page = (phase - FIRST_PAGE) / PER_PAGE, inPage = (phase - FIRST_PAGE) % PER_PAGE;
+        if (page >= pages.size()) return;
+        if (inPage == 0) screen.selectPage(pages.get(page));
+        if (inPage == PER_PAGE - 2) {
+            String name = "machine_" + id + "_" + pages.get(page).name().toLowerCase(Locale.ROOT) + ".png";
+            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+            System.out.println("[MachineShots] " + name);
+        }
+    }
+
+    /** Places the machine in the air above the player, charges it and loads the inputs of its first recipe. */
+    private static void place(Minecraft minecraft, net.minecraft.server.MinecraftServer server, String id, int index) {
+        var uuid = minecraft.player.getUUID();
+        server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            var entry = ProcessMachines.get(id);
+            if (player == null || entry == null) return;
+            var level = player.level();
+            // within reach of the player, or the menu closes again at once
+            BlockPos pos = player.blockPosition().offset(index % 8 - 4, 4, 0);
+            placed = pos;
+            level.setBlockAndUpdate(pos, entry.block().get().defaultBlockState());
+            if (!(level.getBlockEntity(pos) instanceof ProcessMachineBlockEntity machine)) return;
+            if (machine.getEnergyStorage() instanceof energy.EUEnergyStorageImpl storage) {
+                storage.setEnergy(storage.getMaxEnergyStored() * 3 / 4);
+            }
+            var recipes = ProcessRecipeCache.recipes(level, id);
+            if (!recipes.isEmpty()) {
+                ProcessRecipe recipe = recipes.getFirst().value();
+                var handler = machine.getItemHandler();
+                int slot = 0;
+                for (ProcessRecipe.ItemInput input : recipe.items()) {
+                    if (slot >= machine.def().itemsIn()) break;
+                    var item = input.ingredient().items().findFirst();
+                    if (item.isEmpty()) continue;
+                    handler.set(slot++, ItemResource.of(item.get().value()), Math.min(64, input.count() * 8));
+                }
+                // input tanks get the recipe's fluids, output tanks some of its products, so the gauges show
+                var tanks = machine.getTanks();
+                int in = machine.getInputTankCount();
+                for (int i = 0; i < recipe.fluids().size() && i < in; i++) {
+                    var tank = tanks.get(i);
+                    recipe.fluids().get(i).ingredient().fluids().forEach(fluid -> {
+                        if (tank.isEmpty()) tank.fill(fluid.value(), tank.getCapacity() * 3 / 4);
+                    });
+                }
+                for (int i = 0; i < recipe.fluidResults().size() && in + i < tanks.size(); i++) {
+                    var tank = tanks.get(in + i);
+                    tank.fill(recipe.fluidResults().get(i).fluid(), tank.getCapacity() / (3 + i));
+                }
+            }
+        });
+    }
+
+    /** Places an older machine, charges it, opens it and saves {@code machine_<id>.png}. */
+    private static void old(Minecraft minecraft, net.minecraft.server.MinecraftServer server, String id, int index, int phase) {
+        var uuid = minecraft.player.getUUID();
+        if (phase == 0) server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("iuce", id));
+            if (player == null) return;
+            BlockPos pos = player.blockPosition().offset(index % 8 - 4, 4, 0);
+            placed = pos;
+            player.level().setBlockAndUpdate(pos, block.defaultBlockState());
+            var entity = player.level().getBlockEntity(pos);
+            if (entity instanceof blockentity.EnergyDisplay provider && provider.getEnergyStorage() instanceof energy.EUEnergyStorageImpl storage) {
+                storage.setEnergy(storage.getMaxEnergyStored() * 3 / 4);
+            }
+        });
+        if (phase == OPEN) server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            if (player != null && placed != null && player.level().getBlockEntity(placed) instanceof net.minecraft.world.MenuProvider provider) {
+                player.openMenu(provider, placed);
+            }
+        });
+        if (phase == FIRST_PAGE + PER_PAGE - 2 && minecraft.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>) {
+            String name = "machine_" + id + ".png";
+            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+            System.out.println("[MachineShots] " + name);
+        }
+    }
+
+    private static void open(Minecraft minecraft, net.minecraft.server.MinecraftServer server) {
+        var uuid = minecraft.player.getUUID();
+        server.execute(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            if (player == null || placed == null) return;
+            if (player.level().getBlockEntity(placed) instanceof ProcessMachineBlockEntity machine) player.openMenu(machine, placed);
+        });
+    }
+
+    /**
+     * Opens each machine's JEI page in turn and saves {@code jei_<page>.png}. The plugin is called by
+     * reflection so this tool does not need JEI on its own classpath.
+     */
+    @SuppressWarnings("unchecked")
+    private static void jei(Minecraft minecraft) {
+        try {
+            Class<?> plugin = Class.forName("compat.jei.EroJeiPlugin");
+            if (jeiPages == null) jeiPages = (List<String>) plugin.getMethod("machinePages").invoke(null);
+            int index = Math.max(0, step) / PER_JEI_PAGE, phase = Math.max(0, step) % PER_JEI_PAGE;
+            if (index >= jeiPages.size()) {
+                minecraft.stop();
+                return;
+            }
+            String page = jeiPages.get(index);
+            if (phase == 0 && !(boolean) plugin.getMethod("showMachinePage", String.class).invoke(null, page)) {
+                System.out.println("[MachineShots] JEI not ready for " + page);
+            }
+            if (phase == PER_JEI_PAGE - 4) {
+                String name = "jei_" + page + ".png";
+                Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
+                System.out.println("[MachineShots] " + name);
+            }
+        } catch (ReflectiveOperationException error) {
+            System.out.println("[MachineShots] JEI unavailable: " + error);
+            minecraft.stop();
+        }
+    }
+}

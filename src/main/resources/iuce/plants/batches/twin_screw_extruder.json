@@ -1,0 +1,229 @@
+[
+  {
+    "id": "bio_pe_pellet",
+    "inputs": {
+      "iuce:pe_powder": 4
+    },
+    "outputs": {
+      "iuce:bio_pe_pellet": 4
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3840,
+    "time": 180,
+    "segments": [
+      "main_feed",
+      "melting",
+      "die"
+    ]
+  },
+  {
+    "id": "rigid_pvc_pellet",
+    "inputs": {
+      "iuce:rigid_pvc_dry_blend": 8
+    },
+    "outputs": {
+      "iuce:rigid_pvc_pellet": 8
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 4480,
+    "time": 260,
+    "segments": [
+      "main_feed",
+      "melting",
+      "venting",
+      "die"
+    ]
+  },
+  {
+    "id": "soft_pvc_pellet",
+    "inputs": {
+      "iuce:soft_pvc_dry_blend": 8
+    },
+    "outputs": {
+      "iuce:soft_pvc_pellet": 8
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 4480,
+    "time": 260,
+    "segments": [
+      "main_feed",
+      "melting",
+      "venting",
+      "die"
+    ]
+  },
+  {
+    "id": "filled_pe_pellet",
+    "inputs": {
+      "iuce:bio_pe_pellet": 6,
+      "iuce:calcium_carbonate": 2
+    },
+    "outputs": {
+      "iuce:filled_pe_pellet": 8
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 4480,
+    "time": 260,
+    "segments": [
+      "main_feed",
+      "melting",
+      "side_feed",
+      "die"
+    ]
+  },
+  {
+    "id": "color_masterbatch",
+    "inputs": {
+      "iuce:bio_pe_pellet": 4,
+      "#c:dyes": 4
+    },
+    "outputs": {
+      "iuce:color_masterbatch": 4
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3840,
+    "time": 180,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_pla_injection_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:pla_injection_pellet": 25
+    },
+    "outputs": {
+      "iuce:pla_injection_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_pla_film_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:pla_film_pellet": 25
+    },
+    "outputs": {
+      "iuce:pla_film_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_bio_pe_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:bio_pe_pellet": 25
+    },
+    "outputs": {
+      "iuce:bio_pe_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_rigid_pvc_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:rigid_pvc_pellet": 25
+    },
+    "outputs": {
+      "iuce:rigid_pvc_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_soft_pvc_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:soft_pvc_pellet": 25
+    },
+    "outputs": {
+      "iuce:soft_pvc_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  },
+  {
+    "id": "color_filled_pe_pellet",
+    "inputs": {
+      "iuce:color_masterbatch": 1,
+      "iuce:filled_pe_pellet": 25
+    },
+    "outputs": {
+      "iuce:filled_pe_pellet": 25
+    },
+    "fluids": {},
+    "products": {},
+    "tools": {},
+    "energy": 3200,
+    "time": 100,
+    "segments": [
+      "main_feed",
+      "melting",
+      "mixing",
+      "die"
+    ]
+  }
+]

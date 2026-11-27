@@ -1,0 +1,51 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "side": "iuce:block/machine/process/box_side",
+    "top": "iuce:block/machine/process/box_top",
+    "bottom": "iuce:block/machine/process/box_bottom",
+    "front": "iuce:block/machine/process/sheeting_press_front",
+    "front_active": "iuce:block/machine/process/sheeting_press_front_active",
+    "particle": "iuce:block/machine/process/sheeting_press_front"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front_active",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#bottom",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

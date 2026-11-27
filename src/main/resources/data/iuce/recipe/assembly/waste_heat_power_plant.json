@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_housing",
+    "iuce:advanced_circuit",
+    "iuce:boiler"
+  ],
+  "result": {
+    "id": "iuce:waste_heat_power_plant",
+    "count": 1
+  }
+}

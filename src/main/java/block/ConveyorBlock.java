@@ -51,6 +51,7 @@ public class ConveyorBlock extends Block {
     public static final EnumProperty<ConveyorShape> SHAPE = EnumProperty.create("shape", ConveyorShape.class);
     /** Blocks per tick the belt asks for (ground friction makes the real speed about 1.5 blocks per second). */
     public static final double SPEED = 0.125;
+    private final java.util.Map<Level, java.util.Map<BlockPos,Long>> nextUnit = new java.util.WeakHashMap<>();
     private static final VoxelShape FLAT = Block.box(0, 0, 0, 16, 4, 16);
     private static final Map<Direction, VoxelShape> RAMPS = new EnumMap<>(Direction.class);
     private static final Map<Direction, VoxelShape> DOWN_RAMPS = new EnumMap<>(Direction.class);
@@ -176,6 +177,7 @@ public class ConveyorBlock extends Block {
             entity.setDeltaMovement(motion.add(facing.getStepX() * 0.03, 0, facing.getStepZ() * 0.03));
             return;
         }
+        double speed = state.is(ModBlocks.CONVEYOR_II.get()) ? 0.25 : SPEED;
         boolean alongX = facing.getAxis() == Direction.Axis.X;
         double along = alongX ? entity.getX() - pos.getX() : entity.getZ() - pos.getZ();
         if (facing.getAxisDirection() == Direction.AxisDirection.NEGATIVE) along = 1 - along;
@@ -184,20 +186,20 @@ public class ConveyorBlock extends Block {
 
         if (ascending) {
             // ride the slope; near the top, step onto the higher belt
-            double step = along >= 0.8 ? 0.35 : SPEED;
-            double y = along >= 0.8 ? pos.getY() + 1.3 : pos.getY() + 0.3 + Math.max(0, along + SPEED) * 0.7;
+            double step = along >= 0.8 ? 0.35 : speed;
+            double y = along >= 0.8 ? pos.getY() + 1.3 : pos.getY() + 0.3 + Math.max(0, along + speed) * 0.7;
             item.setPos(entity.getX() + facing.getStepX() * step + (alongX ? 0 : sideways * 0.2), y,
                 entity.getZ() + facing.getStepZ() * step + (alongX ? sideways * 0.2 : 0));
-            item.setDeltaMovement(facing.getStepX() * SPEED, 0, facing.getStepZ() * SPEED);
+            item.setDeltaMovement(facing.getStepX() * speed, 0, facing.getStepZ() * speed);
             return;
         }
 
         if (descending && along < 0.85) {
             // glide down the slope; the last stretch is handled like a flat belt
-            item.setPos(entity.getX() + facing.getStepX() * SPEED + (alongX ? 0 : sideways * 0.2),
-                pos.getY() + 0.3 + Math.max(0, 0.85 - along - SPEED) * 0.75,
-                entity.getZ() + facing.getStepZ() * SPEED + (alongX ? sideways * 0.2 : 0));
-            item.setDeltaMovement(facing.getStepX() * SPEED, 0, facing.getStepZ() * SPEED);
+            item.setPos(entity.getX() + facing.getStepX() * speed + (alongX ? 0 : sideways * 0.2),
+                pos.getY() + 0.3 + Math.max(0, 0.85 - along - speed) * 0.75,
+                entity.getZ() + facing.getStepZ() * speed + (alongX ? sideways * 0.2 : 0));
+            item.setDeltaMovement(facing.getStepX() * speed, 0, facing.getStepZ() * speed);
             return;
         }
 
@@ -205,11 +207,17 @@ public class ConveyorBlock extends Block {
             var target = level.getCapability(Capabilities.Item.BLOCK, pos.relative(facing), facing.getOpposite());
             if (target != null) {
                 ItemStack stack = item.getItem();
+                var access = nextUnit.computeIfAbsent(level, l -> new java.util.HashMap<>());
+                if (state.is(ModBlocks.CONVEYOR_II.get()) && access.getOrDefault(pos,0L)>level.getGameTime()) {
+                    item.setDeltaMovement(0,motion.y,0);
+                    return;
+                }
                 int moved;
                 try (Transaction transaction = Transaction.openRoot()) {
                     moved = target.insert(ItemResource.of(stack), stack.getCount(), transaction);
                     transaction.commit();
                 }
+                if (moved>0 && state.is(ModBlocks.CONVEYOR_II.get())) access.put(pos.immutable(),level.getGameTime()+2);
                 if (moved >= stack.getCount()) {
                     item.discard();
                 } else {
@@ -223,7 +231,7 @@ public class ConveyorBlock extends Block {
                 return;
             }
         }
-        item.setDeltaMovement(alongX ? facing.getStepX() * SPEED : sideways * 0.2, motion.y,
-            alongX ? sideways * 0.2 : facing.getStepZ() * SPEED);
+        item.setDeltaMovement(alongX ? facing.getStepX() * speed : sideways * 0.2, motion.y,
+            alongX ? sideways * 0.2 : facing.getStepZ() * speed);
     }
 }

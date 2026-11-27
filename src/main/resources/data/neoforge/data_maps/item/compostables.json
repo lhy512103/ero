@@ -1,0 +1,10 @@
+{
+  "values": {
+    "iuce:bagasse": {
+      "chance": 0.5
+    },
+    "iuce:distillers_grains": {
+      "chance": 0.65
+    }
+  }
+}

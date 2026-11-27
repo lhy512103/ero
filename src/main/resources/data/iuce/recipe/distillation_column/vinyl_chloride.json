@@ -1,0 +1,27 @@
+{
+  "type": "iuce:process",
+  "machine": "distillation_column",
+  "time": 160,
+  "energy": 3840,
+  "fluids": [
+    {
+      "fluid": "iuce:topped_vcm",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:vinyl_chloride",
+      "amount": 950
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:heavy_residue",
+      "count": 1
+    }
+  ]
+}

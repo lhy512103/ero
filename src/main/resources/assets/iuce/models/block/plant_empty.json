@@ -1,3 +1,6 @@
 {
+  "textures": {
+    "particle": "iuce:block/plant_casing"
+  },
   "elements": []
 }

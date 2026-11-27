@@ -33,6 +33,10 @@ public final class GuideShots {
     private static BlockPos industrialOrigin;
 
     public static void register() {
+        if ("recipe-interactions".equals(System.getProperty("iuce.guideShots"))) {
+            client.guide.GuideRecipeChecks.register();
+            return;
+        }
         NeoForge.EVENT_BUS.addListener(GuideShots::tick);
     }
 
@@ -94,14 +98,39 @@ public final class GuideShots {
         }
     }
 
+    /** Machines built side by side for {@code -PguideShots=industrial}: controller, length, screenshot, camera offset. */
+    private record Shot(java.util.function.Supplier<? extends net.minecraft.world.level.block.Block> controller, int length,
+                        String file, int dx, int camX, int camY, int camZ, float pitch, float yaw) {
+        Shot(java.util.function.Supplier<? extends net.minecraft.world.level.block.Block> controller, int length, String file, int dx, int camX, int camY, int camZ, float pitch) {
+            this(controller, length, file, dx, camX, camY, camZ, pitch, camX > 0 ? 44 : -44);
+        }
+    }
+    private static final List<Shot> SHOTS = List.of(
+        new Shot(ModBlocks.PLANT_CONTROLLER, 0, "iuce_ore_plant.png", -52, 15, 10, -10, 14),
+        new Shot(ModBlocks.MILL_CONTROLLER, 17, "iuce_rolling_mill.png", 52, 15, 9, -10, 14),
+        new Shot(ModBlocks.CARBIDE_FURNACE_PLANT, 0, "iuce_carbide_furnace_plant.png", 0, 21, 14, -15, 12, 45),
+        new Shot(ModBlocks.CARBIDE_FURNACE_PLANT, 0, "iuce_carbide_furnace_plant_back.png", 0, -20, 8, 26, 2, -135),
+        new Shot(ModBlocks.CARBIDE_FURNACE_PLANT, 0, "iuce_carbide_furnace_plant_front.png", 0, 5, 3, -6, 12, 32),
+        new Shot(ModBlocks.CARBIDE_FURNACE_PLANT, 0, "iuce_carbide_furnace_plant_top.png", 0, 12, 14, -4, 30, 60),
+        new Shot(ModBlocks.BIO_ETHYLENE_PLANT, 0, "iuce_bio_ethylene_plant.png", -104, 22, 16, -14, 24, 45),
+        new Shot(ModBlocks.WASTE_HEAT_POWER_PLANT, 0, "iuce_waste_heat_power_plant.png", 104, 22, 16, -14, 24, 45),
+        new Shot(ModBlocks.COKE_OVEN_BATTERY, 21, "iuce_coke_oven_battery.png", -156, -22, 18, -14, 24, -45),
+        new Shot(ModBlocks.TWIN_SCREW_EXTRUDER, 21, "iuce_twin_screw_extruder.png", 156, 16, 10, -10, 20, 45));
+
     private static void industrialShots(Minecraft minecraft) {
         var server = minecraft.getSingleplayerServer();
         if (server == null || minecraft.player == null) { minecraft.stop(); return; }
         settle++;
-        if (settle == 1 || settle == 150) {
-            boolean mill = settle == 150;
+        int index = (settle - 1) / 150, step = (settle - 1) % 150;
+        if (index >= SHOTS.size()) {
+            minecraft.options.hideGui = false;
+            minecraft.stop();
+            return;
+        }
+        Shot shot = SHOTS.get(index);
+        if (step == 0) {
             var uuid = minecraft.player.getUUID();
-            if (!mill) industrialOrigin = minecraft.player.blockPosition();
+            if (index == 0) industrialOrigin = minecraft.player.blockPosition();
             var playerPos = industrialOrigin;
             minecraft.setScreen(null);
             minecraft.options.hideGui = true;
@@ -110,33 +139,53 @@ public final class GuideShots {
                 if (player == null) return;
                 var level = server.overworld();
                 int height = Math.min(level.getMaxY() - 32, Math.max(playerPos.getY() + 28, 120));
-                var origin = new BlockPos(playerPos.getX() + (mill ? 52 : -52), height, playerPos.getZ() + 8);
+                var origin = new BlockPos(playerPos.getX() + shot.dx(), height, playerPos.getZ() + 8);
                 for (int x = -10; x <= 10; x++) {
-                    for (int z = -5; z <= 20; z++) {
+                    for (int z = -12; z <= 40; z++) {
                         BlockPos floor = origin.offset(x, -2, z);
                         level.getChunkAt(floor);
                         level.setBlockAndUpdate(floor, Blocks.SMOOTH_STONE.defaultBlockState());
+                        level.setBlockAndUpdate(origin.offset(x, -1, z), Blocks.SMOOTH_STONE.defaultBlockState());
+                        for (int y = 0; y <= 22; y++) {
+                            BlockPos air = origin.offset(x, y, z);
+                            if (!level.getBlockState(air).isAir()) level.setBlockAndUpdate(air, Blocks.AIR.defaultBlockState());
+                        }
                     }
                 }
-                var controller = (mill ? ModBlocks.MILL_CONTROLLER : ModBlocks.PLANT_CONTROLLER).get();
-                var state = controller.defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
-                if (mill) state = state.setValue(PlantControllerBlock.LENGTH, 17);
-                level.setBlockAndUpdate(origin, state);
+                var state = shot.controller().get().defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+                if (shot.length() > 0) state = state.setValue(PlantControllerBlock.LENGTH, shot.length());
                 for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
                     var part = cell.part().sample(Direction.NORTH);
                     if (part.is(ModBlocks.PLANT_CASING.get())) part = ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos());
                     level.setBlockAndUpdate(cell.pos(), part);
                 }
+                for (var cell : PlantStructure.cells(origin, Direction.NORTH, state)) {
+                    if (cell.part().canFillWithCasing() && level.getBlockState(cell.pos()).is(ModBlocks.PLANT_CASING.get())) {
+                        level.setBlockAndUpdate(cell.pos(), ModBlocks.PLANT_CASING.get().joinedState(level, cell.pos()));
+                    }
+                }
                 server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set day");
                 player.setGameMode(GameType.SPECTATOR);
-                player.teleportTo(level, origin.getX() + 15, height + (mill ? 9 : 10), origin.getZ() - 10, Set.of(), 44, 14, true);
+                player.teleportTo(level, origin.getX() + shot.camX(), height + shot.camY(), origin.getZ() + shot.camZ(), Set.of(),
+                    shot.yaw(), shot.pitch(), true);
             });
-        } else if (settle == 125 || settle == 274) {
-            var name = settle == 125 ? "iuce_ore_plant.png" : "iuce_rolling_mill.png";
-            Screenshot.grab(minecraft.gameDirectory, name, minecraft.getMainRenderTarget(), 1, message -> { });
-        } else if (settle > 285) {
-            minecraft.options.hideGui = false;
-            minecraft.stop();
+        } else if (step == 40) {
+            Screenshot.grab(minecraft.gameDirectory, "unformed_" + shot.file(), minecraft.getMainRenderTarget(), 1, message -> { });
+        } else if (step == 45) {
+            var playerPos = industrialOrigin;
+            server.execute(() -> {
+                var level = server.overworld();
+                int height = Math.min(level.getMaxY() - 32, Math.max(playerPos.getY() + 28, 120));
+                var origin = new BlockPos(playerPos.getX() + shot.dx(), height, playerPos.getZ() + 8);
+                var state = shot.controller().get().defaultBlockState().setValue(PlantControllerBlock.LEGACY, false);
+                if (shot.length() > 0) state = state.setValue(PlantControllerBlock.LENGTH, shot.length());
+                level.setBlockAndUpdate(origin, state);
+                if (level.getBlockEntity(origin) instanceof blockentity.PlantControllerBlockEntity controller) {
+                    controller.assembleCreative();
+                }
+            });
+        } else if (step == 124) {
+            Screenshot.grab(minecraft.gameDirectory, shot.file(), minecraft.getMainRenderTarget(), 1, message -> { });
         }
     }
 

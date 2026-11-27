@@ -1,0 +1,15 @@
+{
+  "id": "carbide_furnace",
+  "voltage": "MV",
+  "buffer": 16000,
+  "catalyst_slot": true,
+  "card_slot": false,
+  "upgrades": 4,
+  "base_time": 200,
+  "items_in": 2,
+  "items_out": 2,
+  "fluids_in": [],
+  "fluids_out": [
+    8000
+  ]
+}

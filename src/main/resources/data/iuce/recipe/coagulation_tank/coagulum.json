@@ -1,0 +1,30 @@
+{
+  "type": "iuce:process",
+  "machine": "coagulation_tank",
+  "time": 100,
+  "energy": 800,
+  "items": [
+    {
+      "item": "iuce:raw_latex",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:lactic_broth",
+      "amount": 100
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:coagulum",
+      "count": 2
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:process_water",
+      "amount": 250
+    }
+  ]
+}

@@ -23,13 +23,21 @@ public record GuideStructureRenderState(
     int x1,
     int y1,
     float scale,
+    net.minecraft.core.@Nullable BlockPos highlight,
     @Nullable ScreenRectangle scissorArea,
     @Nullable ScreenRectangle bounds
 ) implements PictureInPictureRenderState {
     public GuideStructureRenderState(GuideStructure structure, int layers, boolean formed, Vector3f centre,
                                      float yaw, float pitch, float spin,
                                      int x0, int y0, int x1, int y1, float scale, @Nullable ScreenRectangle scissorArea) {
-        this(structure, layers, formed, centre, yaw, pitch, spin, x0, y0, x1, y1, scale, scissorArea,
+        this(structure, layers, formed, centre, yaw, pitch, spin, x0, y0, x1, y1, scale, null, scissorArea);
+    }
+
+    /** A view with one block outlined ({@code highlight}, in layout blocks; null for none). */
+    public GuideStructureRenderState(GuideStructure structure, int layers, boolean formed, Vector3f centre,
+                                     float yaw, float pitch, float spin, int x0, int y0, int x1, int y1, float scale,
+                                     net.minecraft.core.@Nullable BlockPos highlight, @Nullable ScreenRectangle scissorArea) {
+        this(structure, layers, formed, centre, yaw, pitch, spin, x0, y0, x1, y1, scale, highlight, scissorArea,
             PictureInPictureRenderState.getBounds(x0, y0, x1, y1, scissorArea));
     }
 }

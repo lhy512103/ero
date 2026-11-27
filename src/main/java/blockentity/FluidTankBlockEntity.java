@@ -19,10 +19,12 @@ import net.minecraft.world.level.storage.ValueOutput;
 /** Fluid tank: 16 buckets of any one fluid. Filled and emptied with buckets, pipes and fluid upgrades. */
 public class FluidTankBlockEntity extends BlockEntity {
     public static final int CAPACITY = 16_000;
-    private final MachineTank tank = new MachineTank(CAPACITY, resource -> true, this::setChanged);
+    private final MachineTank tank;
 
     public FluidTankBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FLUID_TANK.get(), pos, state);
+        boolean gas = state.is(block.ModBlocks.GAS_TANK.get());
+        tank = new MachineTank(gas ? 64000 : CAPACITY, resource -> !gas || resource.getFluid().getFluidType().getDensity() < 0, this::setChanged);
     }
 
     public MachineTank getTank() { return tank; }
@@ -30,7 +32,7 @@ public class FluidTankBlockEntity extends BlockEntity {
     public Component describe() {
         if (tank.isEmpty()) return Component.translatable("message.iuce.tank.empty");
         return Component.translatable("message.iuce.tank.status", tank.getResource().getFluid().getFluidType().getDescription(),
-            tank.getAmount(), CAPACITY);
+            tank.getAmount(), tank.getCapacity());
     }
 
     /** A full bucket empties into the tank, an empty one is filled from it. Returns false for anything that is not a bucket. */

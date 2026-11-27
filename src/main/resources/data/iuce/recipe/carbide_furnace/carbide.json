@@ -1,0 +1,32 @@
+{
+  "type": "iuce:process",
+  "machine": "carbide_furnace",
+  "time": 200,
+  "energy": 25600,
+  "items": [
+    {
+      "item": "iuce:quicklime",
+      "count": 1
+    },
+    {
+      "item": "iuce:coke",
+      "count": 1
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:carbon_electrode",
+    "damage": 1
+  },
+  "results": [
+    {
+      "id": "iuce:carbide_lump",
+      "count": 1
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:furnace_gas",
+      "amount": 250
+    }
+  ]
+}

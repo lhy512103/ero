@@ -1,0 +1,66 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "formed": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_panel"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "north": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_north"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "south": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_south"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "west": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_west"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_east"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "down": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_down"
+      }
+    },
+    {
+      "when": {
+        "formed": "false",
+        "up": "false"
+      },
+      "apply": {
+        "model": "iuce:block/checker_plate_edge_up"
+      }
+    }
+  ]
+}

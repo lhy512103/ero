@@ -1,0 +1,31 @@
+{
+  "type": "iuce:process",
+  "machine": "tar_distiller",
+  "time": 200,
+  "energy": 4800,
+  "fluids": [
+    {
+      "fluid": "iuce:coal_tar",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:solvent_naphtha",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:naphthalene",
+      "count": 1
+    },
+    {
+      "id": "iuce:pitch",
+      "count": 2
+    }
+  ]
+}

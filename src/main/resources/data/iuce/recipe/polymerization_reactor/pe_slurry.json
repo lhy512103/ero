@@ -1,0 +1,35 @@
+{
+  "type": "iuce:process",
+  "machine": "polymerization_reactor",
+  "time": 200,
+  "energy": 12800,
+  "fluids": [
+    {
+      "fluid": "iuce:ethylene",
+      "amount": 1000
+    },
+    {
+      "fluid": "iuce:solvent_naphtha",
+      "amount": 1000
+    }
+  ],
+  "items": [
+    {
+      "item": "iuce:polyolefin_catalyst",
+      "count": 1
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:pe_slurry",
+      "amount": 1000
+    },
+    {
+      "fluid": "iuce:ethylene",
+      "amount": 100
+    }
+  ]
+}

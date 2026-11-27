@@ -205,7 +205,20 @@ public class CraftingRecipe implements net.minecraft.world.item.crafting.Craftin
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input) { return getOutput(); }
+    public ItemStack assemble(CraftingInput input) {
+        ItemStack result = getOutput();
+        if (result.is(block.ModBlocks.CRATE.get().asItem())) {
+            for (int i = 0; i < input.size(); i++) {
+                ItemStack in = input.getItem(i);
+                if (in.is(block.ModBlocks.CRATE.get().asItem())) {
+                    result.copyFrom(net.minecraft.core.component.DataComponents.CONTAINER, in);
+                    result.copyFrom(net.minecraft.core.component.DataComponents.CUSTOM_NAME, in);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
     @Override
     public boolean isSpecial() { return !standardCrafting; }

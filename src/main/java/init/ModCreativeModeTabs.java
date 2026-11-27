@@ -36,13 +36,23 @@ public class ModCreativeModeTabs {
         ModBlockItems.PLANT_CASING,
         ModBlockItems.PLANT_FRAME,
         ModBlockItems.PLANT_DRUM,
+        ModBlockItems.CHECKER_PLATE,
+        ModBlockItems.STEEL_GRATING,
+        ModBlockItems.STEEL_STAIRS,
+        ModBlockItems.STEEL_HANDRAIL,
+        ModBlockItems.STEEL_LADDER,
+        ModBlockItems.PROCESS_PIPE,
+        ModBlockItems.FURNACE_SHELL,
+        ModBlockItems.REFRACTORY_BRICKS,
+        ModBlockItems.GRAPHITE_ELECTRODE,
+        ModBlockItems.TANK_SHELL,
         ModBlockItems.PLANT_CONTROLLER,
         ModBlockItems.ITEM_INPUT_HATCH,
         ModBlockItems.ITEM_OUTPUT_HATCH,
         ModBlockItems.ENERGY_HATCH,
         ModBlockItems.ENERGY_HATCH_HV,
         ModBlockItems.MILL_CONTROLLER,
-        ModBlockItems.REPAIR_BENCH,
+        ModBlockItems.REPAIR_BENCH, ModBlockItems.PROCESS_DESIGN_TABLE,
         ModBlockItems.LAMP,
         ModBlockItems.CONVERTER,
         ModBlockItems.BUILDER,
@@ -55,6 +65,39 @@ public class ModCreativeModeTabs {
         ModBlockItems.ELECTROLYZER,
         ModBlockItems.EXTRACTOR,
         ModBlockItems.PLANTER,
+        // 公用工程
+        ModBlockItems.BOILER,
+        ModBlockItems.ROCK_SALT_ORE,
+        ModBlockItems.LIMESTONE,
+        ModBlockItems.AIR_COMPRESSOR,
+        ModBlockItems.CONVEYOR_II,
+        ModBlockItems.LOGISTICS_PORT_II,
+        ModBlockItems.BULK_SILO,
+        ModBlockItems.GAS_TANK,
+        ModBlockItems.FLUID_PIPE,
+        ModBlockItems.BRONZE_FLUID_PIPE,
+        ModBlockItems.DRIP_PIPE,
+        ModBlockItems.TWIN_SCREW_EXTRUDER,
+        ModBlockItems.BIO_ETHYLENE_PLANT,
+        ModBlockItems.CARBIDE_FURNACE_PLANT,
+        ModBlockItems.COKE_OVEN_BATTERY,
+        ModBlockItems.WASTE_HEAT_POWER_PLANT,
+        ModBlockItems.MAIN_FEED_SEGMENT,
+        ModBlockItems.MELTING_SEGMENT,
+        ModBlockItems.SIDE_FEED_SEGMENT,
+        ModBlockItems.MIXING_SEGMENT,
+        ModBlockItems.VENTING_SEGMENT,
+        ModBlockItems.DIE_SEGMENT,
+        ModBlockItems.FLUID_INPUT_HATCH,
+        ModBlockItems.FLUID_OUTPUT_HATCH,
+        ModBlockItems.GAS_OUTPUT_HATCH,
+        ModBlockItems.GENERATION_HATCH,
+        ModBlockItems.MAINTENANCE_HATCH,
+        ModBlockItems.COOLING_TOWER,
+        ModBlockItems.STEAM_PIPE,
+        ModBlockItems.COOLING_WATER_PIPE,
+        ModBlockItems.AIR_PIPE,
+        ModBlockItems.CREATIVE_UTILITY_SOURCE,
         ModBlockItems.INDUSTRIAL_WORKBENCH,
         // 太阳能发电机 - 保留到奇异
         ModBlockItems.SOLAR_GENERATOR,
@@ -139,6 +182,91 @@ public class ModCreativeModeTabs {
         ModItems.RUBBER, ModItems.RAW_LATEX
     );
 
+    private static final List<DeferredItem<? extends Item>> BIOLOGICAL = List.of(
+        ModItems.BAGASSE, ModItems.DISTILLERS_GRAINS, ModItems.ENZYME_PREPARATION,
+        ModItems.YEAST_CULTURE, ModItems.LACTIC_CULTURE, ModItems.ASPERGILLUS_CULTURE,
+        ModItems.MOLD_BLANK,
+        ModItems.SPRUE,
+        ModItems.TOOL_STEEL_INGOT,
+        ModItems.PLASTIC_PAIL,
+        ModItems.CRATE_MOLD,
+        ModItems.PAIL_MOLD,
+        ModItems.PAIL_LID_MOLD,
+        ModItems.BRICK_MOLD,
+        ModItems.FITTING_MOLD,
+        ModItems.HOUSING_MOLD,
+        ModItems.EMITTER_MOLD,
+        ModItems.LAMP_SHADE_MOLD,
+        ModItems.PAIL_BODY,
+        ModItems.PAIL_LID,
+        ModItems.PIPE_FITTING,
+        ModItems.MACHINE_HOUSING,
+        ModItems.DRIP_EMITTER,
+        ModItems.LAMP_SHADE,
+        ModItems.ROCK_SALT,
+        ModItems.COKE,
+        ModItems.COKE_DUST,
+        ModItems.NAPHTHALENE,
+        ModItems.PITCH,
+        ModItems.SULFUR,
+        ModItems.CALCIUM_CARBONATE,
+        ModItems.QUICKLIME,
+        ModItems.CARBIDE_LUMP,
+        ModItems.CALCIUM_CARBIDE,
+        ModItems.CARBIDE_SLAG,
+        ModItems.CARBON_ELECTRODE,
+        ModItems.CAUSTIC_SODA,
+        ModItems.ACTIVATED_CARBON,
+        ModItems.MERCURY_FREE_CATALYST,
+        ModItems.HEAVY_RESIDUE,
+        ModItems.HEAT_STABILIZER,
+        ModItems.PLASTICIZER,
+        ModItems.INITIATOR,
+        ModItems.DISPERSANT,
+        ModItems.PE_WAX,
+        ModItems.WET_PVC,
+        ModItems.PVC_RESIN,
+        ModItems.RIGID_PVC_DRY_BLEND,
+        ModItems.SOFT_PVC_DRY_BLEND,
+        ModItems.POLYOLEFIN_CATALYST,
+        ModItems.WET_PE_POWDER,
+        ModItems.PE_POWDER,
+        ModItems.BIO_PE_PELLET,
+        ModItems.STRAND,
+        ModItems.FILLED_PE_PELLET,
+        ModItems.RIGID_PVC_PELLET,
+        ModItems.SOFT_PVC_PELLET,
+        ModItems.COLOR_MASTERBATCH,
+        ModItems.PIPE_DIE,
+        ModItems.FILM_DIE,
+        ModItems.COATING_DIE,
+        ModItems.HOT_PVC_PIPE,
+        ModItems.HOT_PE_PIPE,
+        ModItems.PVC_PIPE_BLANK,
+        ModItems.PE_PIPE_BLANK,
+        ModItems.HOT_DRIP_TAPE,
+        ModItems.DRIP_TAPE,
+        ModItems.PLA_FILM_BUBBLE,
+        ModItems.PE_FILM_BUBBLE,
+        ModItems.HOT_COATED_WIRE,
+        ModItems.PVC_PIPE,
+        ModItems.PE_PIPE,
+        ModItems.PLA_FILM_ROLL,
+        ModItems.PE_FILM_ROLL,
+        ModItems.MULCH_FILM_PLA,
+        ModItems.MULCH_FILM_PE,
+        ModItems.WASTE_FILM,
+        ModItems.COAGULUM,
+        ModItems.RUBBER_SHEET,
+        ModItems.RUBBER_COMPOUND,
+        ModItems.RUBBER_BELT,
+        ModItems.RUBBER_SEAL,
+        ModItems.BELT_MOLD,
+        ModItems.SEAL_MOLD,
+        ModItems.ACTIVATED_ALUMINA, ModItems.SPENT_CATALYST, ModItems.LACTIDE, ModItems.TIN_CATALYST,
+        ModItems.PLA_INJECTION_PELLET, ModItems.PLA_FILM_PELLET, ModItems.PROCESS_CARD
+    );
+
     private static final List<DeferredItem<? extends Item>> CASINGS = List.of(
         ModBlockItems.MACHINE_CASING, ModBlockItems.MACHINE_CASING_2,
         ModBlockItems.FISSION_CONTROLLER_FRONT, ModBlockItems.REACTOR_CASING_BACK, ModBlockItems.REACTOR_CASING_SIDE
@@ -179,7 +307,7 @@ public class ModCreativeModeTabs {
     private static final List<DeferredItem<? extends Item>> COMPONENTS = List.of(
         ModItems.COPPER_COIL, ModItems.HEATING_COIL, ModItems.ELECTRIC_MOTOR, ModItems.ADVANCED_MOTOR,
         ModItems.IRON_GEAR, ModItems.BRONZE_GEAR, ModItems.BRONZE_ROTOR, ModItems.MAGNET, ModItems.ELECTRODE,
-        ModItems.PLATE_MOLD, ModItems.WIRE_MOLD, ModItems.ROD_MOLD, ModItems.CONFIGURATOR, ModItems.BLUEPRINT_TERMINAL
+        ModItems.PLATE_MOLD, ModItems.WIRE_MOLD, ModItems.ROD_MOLD, ModItems.CONFIGURATOR
     );
 
     private static final List<DeferredItem<? extends Item>> CELLS = List.of(
@@ -204,7 +332,7 @@ public class ModCreativeModeTabs {
 
     private static final List<List<DeferredItem<? extends Item>>> ALL_GROUPS = List.of(
         INGOTS, DUSTS, CRUSHED_ORES, PLATES, DENSE_PLATES, NUGGETS, STICKS, COMPONENTS, CIRCUITS, PLATED_SHELLS, CASINGS, UPGRADES, CELLS, SOLAR_GLASSES, BATTERIES,
-        ORES, DEEP_ORES, METAL_BLOCKS, COAL_PRODUCTS, RUBBER_PRODUCTS
+        ORES, DEEP_ORES, METAL_BLOCKS, COAL_PRODUCTS, RUBBER_PRODUCTS, BIOLOGICAL
     );
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ERO_TAB = TABS.register("iuce_tab",
@@ -219,7 +347,19 @@ public class ModCreativeModeTabs {
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup." + Ero.MOD_ID + ".machine"))
             .icon(() -> ModBlockItems.GENERATOR.get().getDefaultInstance())
-            .displayItems((parameters, output) -> MACHINES.forEach(output::accept))
+            .displayItems((parameters, output) -> {
+                MACHINES.forEach(output::accept);
+                // one stack per dye colour so every colour shows in the tab and in JEI
+                for (var coloured : List.of(ModBlockItems.TOY_BRICK, ModBlockItems.CRATE)) {
+                    for (net.minecraft.world.item.DyeColor dye : net.minecraft.world.item.DyeColor.values()) {
+                        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(coloured.get());
+                        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                            net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(block.ColoredPlasticBlock.COLOR, dye));
+                        output.accept(stack);
+                    }
+                }
+                machine.process.ProcessMachines.all().forEach(entry -> output.accept(entry.item()));
+            })
             .build()
     );
 }

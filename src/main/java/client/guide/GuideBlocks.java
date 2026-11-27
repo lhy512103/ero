@@ -3,6 +3,7 @@ package client.guide;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +11,8 @@ import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -289,7 +292,7 @@ final class GuideBlocks {
         @Override public String searchText() { return title + ' ' + subtitle.plain(); }
     }
 
-    /** {@code {image: gui/machine/macerator.png, u, v, w, h | caption}} - texture path is relative to textures/. */
+    /** {@code {image: gui/machine/schematic/macerator.png, u, v, w, h | caption}} - texture path is relative to textures/. */
     static final class Image implements Block {
         private final Identifier texture;
         private final RichText caption;
@@ -380,7 +383,9 @@ final class GuideBlocks {
      * {@code @id} marks a machine (drawn as a raised tile), {@code a + b} joins inputs.
      */
     static final class Flow implements Block {
-        private record Element(int type, ItemStack stack) {}   // 0 item, 1 station, 2 arrow, 3 plus
+        private record Element(int type, ItemStack stack, String fluid, int amount) {
+            Element(int type,ItemStack stack){this(type,stack,"",0);}
+        }
         private final List<Element> elements = new ArrayList<>();
         private final List<int[]> positions = new ArrayList<>();
 
@@ -392,6 +397,11 @@ final class GuideBlocks {
                 for (int p = 0; p < parts.length; p++) {
                     if (p > 0) elements.add(new Element(3, ItemStack.EMPTY));
                     String spec = parts[p].trim();
+                    if(spec.startsWith("~")){
+                        String[] fluid=spec.substring(1).split("\\*");
+                        elements.add(new Element(4,ItemStack.EMPTY,fluid[0],fluid.length>1?Integer.parseInt(fluid[1]):1000));
+                        continue;
+                    }
                     boolean station = spec.startsWith("@");
                     elements.add(new Element(station ? 1 : 0, GuideBook.stack(station ? spec.substring(1) : spec)));
                 }
@@ -399,7 +409,7 @@ final class GuideBlocks {
         }
 
         private static int widthOf(Element element) {
-            return switch (element.type) { case 1 -> 24; case 2 -> 22; case 3 -> 12; default -> 18; };
+            return switch (element.type) { case 1 -> 24; case 2 -> 22; case 3 -> 12; case 4 -> 85; default -> 18; };
         }
 
         @Override public int layout(Font font, int width) {
@@ -426,6 +436,13 @@ final class GuideBlocks {
                     }
                     case 2 -> GuideStyle.arrow(c.g, ex + 4, ey + 12, 14, GuideStyle.SLOT_DARK);
                     case 3 -> GuideStyle.text(c.g, c.font, "+", ex + 3, ey + 8, GuideStyle.MUTED);
+                    case 4 -> {
+                        var fluid=net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(net.minecraft.resources.Identifier.parse(element.fluid));
+                        int color=init.ModFluids.CHEMICALS.stream().filter(ch->("iuce:"+ch.id()).equals(element.fluid)).mapToInt(init.ModFluids.Chemical::color).findFirst().orElse(0xff5283be);
+                        c.g.fill(ex,ey+2,ex+8,ey+21,color);
+                        GuideStyle.text(c.g,c.font,fluid.getFluidType().getDescription().getString(),ex+10,ey+2,GuideStyle.TEXT);
+                        GuideStyle.text(c.g,c.font,element.amount+" mB",ex+10,ey+13,GuideStyle.MUTED);
+                    }
                     default -> c.slotItem(element.stack, ex, ey + 3);
                 }
             }
@@ -475,7 +492,7 @@ final class GuideBlocks {
      * {@code {recipes: machine_type}} every recipe of a machine. Data comes from the live recipe manager.
      */
     static final class Recipes implements Block {
-        enum Mode { PRODUCES, USES, MACHINE }
+        enum Mode { PRODUCES, USES, MACHINE, FLUID_PRODUCES, FLUID_USES }
 
         private final String arg;
         private final Mode mode;
@@ -483,6 +500,8 @@ final class GuideBlocks {
         private int version = -1;
         private int index;
         private int bodyHeight;
+        private int cardW = 236;
+        private final Map<GuideRecipes.View, GuideMachineRecipe> machinePages = new HashMap<>();
 
         Recipes(String arg, Mode mode) {
             this.arg = arg;
@@ -501,40 +520,80 @@ final class GuideBlocks {
                     found.addAll(GuideRecipes.ofMachine(key.toLowerCase(Locale.ROOT)));
                     continue;
                 }
+                if (mode == Mode.FLUID_PRODUCES || mode == Mode.FLUID_USES) {
+                    Identifier id = Identifier.tryParse(key);
+                    if (id != null) found.addAll(GuideRecipes.forFluid(BuiltInRegistries.FLUID.getValue(id), mode == Mode.FLUID_USES));
+                    continue;
+                }
                 ItemStack stack = GuideBook.stack(key);
                 if (stack.isEmpty()) continue;
                 if (mode == Mode.USES) {
                     found.addAll(GuideRecipes.using(stack.getItem()));
                 } else {
-                    for (GuideRecipes.View view : GuideRecipes.producing(stack.getItem())) {
-                        if (view.output().getItem() == stack.getItem()) found.add(view);
-                    }
+                    found.addAll(GuideRecipes.producing(stack.getItem()));
                 }
             }
-            views = found;
-            index = Math.min(index, Math.max(0, views.size() - 1));
-            bodyHeight = 18;
+            views = found.stream().distinct().toList();
+            machinePages.clear();
             for (GuideRecipes.View view : views) {
-                int h = view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28;
-                bodyHeight = Math.max(bodyHeight, h);
+                if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                    machinePages.put(view, new GuideMachineRecipe(view));
+                }
             }
+            index = Math.min(index, Math.max(0, views.size() - 1));
         }
 
         @Override public int layout(Font font, int width) {
             resolve();
-            return views.isEmpty() ? 20 : 21 + bodyHeight + 17;
+            if (views.isEmpty()) { cardW = Math.min(width, 236); return 20; }
+            // size the card to the page being shown so it hugs its content
+            GuideRecipes.View view = views.get(index);
+            GuideMachineRecipe page = machinePages.get(view);
+            int contentW;
+            boolean footer = true;
+            if (page != null && page.available()) {
+                contentW = page.width();
+                footer = false;
+            } else if (view.kind() == GuideRecipes.Kind.CRAFT) {
+                contentW = 114;
+            } else {
+                int n = view.inputs().size();
+                contentW = n * 18 + Math.max(0, n - 1) * 12 + 30 + 18 + view.extras().size() * 22 + 6;
+            }
+            int headerW = 23 + font.width(view.stationName()) + (views.size() > 1 ? 62 : 6);
+            int infoW = footer ? font.width(footerText(view)) : 0;
+            cardW = Math.min(width, Math.max(Math.max(contentW, infoW) + 16, headerW));
+            int available = Math.max(1, cardW - 16);
+            if (page != null && page.available()) bodyHeight = page.height(available);
+            else bodyHeight = view.kind() == GuideRecipes.Kind.CRAFT ? 54 : view.extras().isEmpty() ? 18 : 28;
+            return 21 + bodyHeight + (footer ? 17 : 8);
+        }
+
+        private static String footerText(GuideRecipes.View view) {
+            if (view.kind() == GuideRecipes.Kind.CRAFT) {
+                boolean grid = view.gridW() == 3;
+                String note = view.workbenchOnly() ? I18n.get("guide.iuce.recipe.workbench_only") : grid ? "" : I18n.get("guide.iuce.recipe.shapeless");
+                if (!grid && view.workbenchOnly()) note += " · " + I18n.get("guide.iuce.recipe.shapeless");
+                return note;
+            }
+            if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                long perTick = Math.max(1, (view.energy() + view.time() - 1) / Math.max(1, view.time()));
+                return I18n.get("guide.iuce.recipe.cost", view.energy(), String.format(Locale.ROOT, "%.1f", view.time() / 20f), perTick);
+            }
+            return I18n.get("guide.iuce.recipe.time", String.format(Locale.ROOT, "%.1f", view.time() / 20f));
         }
 
         @Override public void draw(Ctx c, int x, int y, int width) {
-            int w = Math.min(width, 236);
+            int w = Math.min(width, cardW);
             if (views.isEmpty()) {
                 c.g.fill(x, y, x + w, y + 20, GuideStyle.SLOT_DARK);
                 c.g.fill(x + 1, y + 1, x + w - 1, y + 19, GuideStyle.ROW_ALT);
-                GuideStyle.text(c.g, c.font, I18n.get("guide.iuce.recipe.none"), x + 6, y + 6, GuideStyle.MUTED);
+                GuideStyle.text(c.g, c.font, I18n.get(GuideRecipes.current() == null ? "guide.iuce.recipe.none" : "guide.iuce.recipe.empty"), x + 6, y + 6, GuideStyle.MUTED);
                 return;
             }
-            int h = 21 + bodyHeight + 17;
             GuideRecipes.View view = views.get(index);
+            GuideMachineRecipe shown = machinePages.get(view);
+            int h = 21 + bodyHeight + (shown != null && shown.available() ? 8 : 17);
             c.g.fill(x, y, x + w, y + h, GuideStyle.SLOT_DARK);
             c.g.fill(x + 1, y + 1, x + w - 1, y + h - 1, GuideStyle.PANEL);
             c.g.fill(x + 1, y + 1, x + w - 1, y + 19, GuideStyle.ACCENT_SOFT);
@@ -561,6 +620,13 @@ final class GuideBlocks {
             int by = y + 25;
             int cy = by + bodyHeight / 2;
             int ox;
+            if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
+                GuideMachineRecipe page = machinePages.get(view);
+                if (page != null && page.available()) {
+                    page.draw(c, x + 8, by + (bodyHeight - page.height(w - 16)) / 2, w - 16);
+                    return;
+                }
+            }
             if (view.kind() == GuideRecipes.Kind.CRAFT) {
                 int top = by + (bodyHeight - 54) / 2;
                 boolean grid = view.gridW() == 3;
@@ -599,7 +665,7 @@ final class GuideBlocks {
                     ex += 22;
                 }
                 String info;
-                if (view.kind() == GuideRecipes.Kind.MACHINE) {
+                if (view.kind() == GuideRecipes.Kind.MACHINE || view.kind() == GuideRecipes.Kind.PROCESS) {
                     long perTick = Math.max(1, (view.energy() + view.time() - 1) / Math.max(1, view.time()));
                     info = I18n.get("guide.iuce.recipe.cost", view.energy(), String.format(Locale.ROOT, "%.1f", view.time() / 20f), perTick);
                 } else {
@@ -623,6 +689,7 @@ final class GuideBlocks {
         private final RichText caption;
         private final boolean hasCaption;
         private int shownLayers = -1;
+        private int length = -1;
         private int viewH, materialsH, captionH;
         private float yaw = 225, pitch = 30;
         private boolean formed = Boolean.getBoolean("iuce.guideShots.formed");
@@ -633,8 +700,15 @@ final class GuideBlocks {
             hasCaption = !caption.isEmpty();
         }
 
+        private GuideStructure structure() {
+            int[] range = GuideStructure.lengths(name);
+            if (range == null) return GuideStructure.get(name);
+            if (length < 0) length = range[2];
+            return GuideStructure.get(name, length);
+        }
+
         @Override public int layout(Font font, int width) {
-            GuideStructure structure = GuideStructure.get(name);
+            GuideStructure structure = structure();
             if (structure == null) return RichText.LINE;
             if (shownLayers < 0) shownLayers = structure.sizeY;
             viewH = VIEW_H;
@@ -653,7 +727,7 @@ final class GuideBlocks {
         }
 
         @Override public void draw(Ctx c, int x, int y, int width) {
-            GuideStructure structure = GuideStructure.get(name);
+            GuideStructure structure = structure();
             if (structure == null) {
                 GuideStyle.text(c.g, c.font, "[structure: " + name + "]", x, y + 1, GuideStyle.WARN);
                 return;
@@ -695,6 +769,21 @@ final class GuideBlocks {
             boolean up = GuideStyle.button(c.g, x + 19 + labelW, ly, 12, 12, c.mouseX, c.mouseY, shownLayers < structure.sizeY);
             GuideStyle.triangle(c.g, x + 23 + labelW, ly + 3, 0, up ? GuideStyle.ACCENT : shownLayers < structure.sizeY ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
             c.actionZone(x + 19 + labelW, ly, 12, 12, () -> shownLayers = Math.min(structure.sizeY, shownLayers + 1), null);
+            int[] range = GuideStructure.lengths(name);
+            if (range != null) {
+                // length selector: [<] length N [>]; a new length shows the whole machine again
+                int lx = x + 37 + labelW;
+                boolean less = length > range[0], more = length < range[1];
+                boolean lh = GuideStyle.button(c.g, lx, ly, 12, 12, c.mouseX, c.mouseY, less);
+                GuideStyle.triangle(c.g, lx + 4, ly + 3, 1, lh ? GuideStyle.ACCENT : less ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
+                c.actionZone(lx, ly, 12, 12, () -> { length = Math.max(range[0], length - range[3]); shownLayers = -1; }, null);
+                String lenLabel = I18n.get("guide.iuce.structure.length", length);
+                int lenW = c.font.width(lenLabel) + 6;
+                GuideStyle.text(c.g, c.font, lenLabel, lx + 15, ly + 2, GuideStyle.TEXT);
+                boolean mh = GuideStyle.button(c.g, lx + 14 + lenW, ly, 12, 12, c.mouseX, c.mouseY, more);
+                GuideStyle.triangle(c.g, lx + 18 + lenW, ly + 3, 0, mh ? GuideStyle.ACCENT : more ? GuideStyle.TEXT : GuideStyle.PANEL_LO);
+                c.actionZone(lx + 14 + lenW, ly, 12, 12, () -> { length = Math.min(range[1], length + range[3]); shownLayers = -1; }, null);
+            }
             String dimensions = structure.sizeX + " × " + structure.sizeY + " × " + structure.sizeZ;
             GuideStyle.text(c.g, c.font, dimensions, x + width - 6 - c.font.width(dimensions), ly + 2, GuideStyle.MUTED);
 

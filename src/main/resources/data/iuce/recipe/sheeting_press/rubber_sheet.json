@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "sheeting_press",
+  "time": 60,
+  "energy": 960,
+  "items": [
+    {
+      "item": "iuce:coagulum",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:rubber_sheet",
+      "count": 2
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:process_water",
+      "amount": 100
+    }
+  ]
+}

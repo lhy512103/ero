@@ -1,0 +1,18 @@
+{
+  "type": "iuce:process",
+  "machine": "haul_off_cutter",
+  "time": 40,
+  "energy": 640,
+  "items": [
+    {
+      "item": "iuce:pe_pipe_blank",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:pe_pipe",
+      "count": 8
+    }
+  ]
+}

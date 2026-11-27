@@ -1,5 +1,19 @@
 # Development and regression checks
 
+## M5–M9 verification
+
+The dedicated regression server passed 117 required tests. The polyethylene line ran for 24,000 machine ticks. The molding and PVC fixtures continue through PLA film assembly and PVC pipe cutting. The drip-line fixture verifies hydration and withdrawal across sixteen farmland blocks.
+
+With Spark 1.10.187 for NeoForge in the regression runtime, the active logistics benchmark measured 0.266 ms per game tick on this workstation. It connects 2,000 pneumatic pipe blocks and 300 tier II interfaces, continually refills a source and empties a receiver, warms up for 200 transfer rounds and measures 1,000 more. It times the transfer rounds and divides by the four-tick scheduling interval. Topology reconstruction, world setup and unrelated server tick time are excluded. Spark used its Java sampler on Windows. A standalone Spark report was not verified.
+
+## Stage 2 integrated plants
+
+The November 21 factory fixture passed 123 required GameTests with `-PregressionTests -PfactoryBenchmark`. It formed all five integrated plants and fed coal to 60 powered small coke ovens, the coke battery and the waste heat plant. The other three integrated plants stayed formed and idle. Over the server's most recent 100 ticks the mean was 2.261 ms and P95 was 4.136 ms. Spark 1.10.187 sampled locally using its Windows Java engine. The reported tick durations come from Minecraft's tick timer. A saved Spark capture was not verified.
+
+A separate quick-play client loaded a copy of the July 18 world archive from `run/saves`, entered the world, rendered the plastic overview and the twin-screw structure page, saved screenshots and exited normally.
+
+`python tools/stage2_timing.py` audits 56 small-machine and controller construction recipes. Under its supplied raw-material, bulk-metal and utility assumptions, serial intermediate production takes at most 145.20 seconds (vulcanizer). This figure excludes construction of the multiblock shell, machine placement, tool setup, world travel and mining.
+
 ## Commands
 
 ```powershell

@@ -1,0 +1,9 @@
+{
+  "parent": "iuce:block/crate_open",
+  "textures": {
+    "side": "iuce:block/crate_brown",
+    "top": "iuce:block/crate_brown_top",
+    "inner": "iuce:block/crate_brown_inner",
+    "particle": "#side"
+  }
+}

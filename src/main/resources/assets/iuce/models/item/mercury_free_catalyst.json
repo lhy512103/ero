@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "iuce:item/component/mercury_free_catalyst"
+  }
+}

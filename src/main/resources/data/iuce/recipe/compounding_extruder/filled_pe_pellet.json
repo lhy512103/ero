@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "compounding_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:bio_pe_pellet",
+      "count": 6
+    },
+    {
+      "item": "iuce:calcium_carbonate",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:strand",
+      "count": 8,
+      "components": {
+        "iuce:strand_product": "iuce:filled_pe_pellet"
+      }
+    }
+  ]
+}

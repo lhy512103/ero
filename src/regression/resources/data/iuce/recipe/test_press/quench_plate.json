@@ -1,0 +1,29 @@
+{
+  "type": "iuce:process",
+  "machine": "test_press",
+  "items": [
+    {
+      "item": "iuce:copper_dust"
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "#iuce:any_water",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:copper_plate",
+      "count": 1
+    }
+  ],
+  "energy": 1200,
+  "time": 30,
+  "fluid_results": [
+    {
+      "fluid": "iuce:coolant",
+      "amount": 250
+    }
+  ]
+}

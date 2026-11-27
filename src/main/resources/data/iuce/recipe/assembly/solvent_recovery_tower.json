@@ -1,0 +1,13 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "iuce:machine_casing_2",
+    "iuce:circuit",
+    "iuce:electric_motor",
+    "iuce:heating_coil"
+  ],
+  "result": {
+    "id": "iuce:solvent_recovery_tower",
+    "count": 1
+  }
+}

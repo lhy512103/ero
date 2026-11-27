@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "dryer",
+  "fluids": [
+    {
+      "fluid": "iuce:stillage",
+      "amount": 1000
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "results": [
+    {
+      "id": "iuce:distillers_grains",
+      "count": 2
+    }
+  ],
+  "energy": 1600,
+  "time": 100
+}

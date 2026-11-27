@@ -1,0 +1,25 @@
+{
+  "type": "iuce:process",
+  "machine": "depolymerization_reactor",
+  "time": 160,
+  "energy": 10240,
+  "fluids": [
+    {
+      "fluid": "iuce:pla_oligomer",
+      "amount": 500
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:crude_lactide",
+      "amount": 500
+    }
+  ],
+  "utilities": [
+    "steam"
+  ],
+  "catalyst": {
+    "item": "iuce:tin_catalyst",
+    "damage": 1
+  }
+}

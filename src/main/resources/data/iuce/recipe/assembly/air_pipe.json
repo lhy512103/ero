@@ -1,0 +1,24 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    [
+      "iuce:iron_plate",
+      "iuce:iron_plate",
+      "iuce:iron_plate"
+    ],
+    [
+      "",
+      "minecraft:light_blue_dye",
+      ""
+    ],
+    [
+      "iuce:iron_plate",
+      "iuce:iron_plate",
+      "iuce:iron_plate"
+    ]
+  ],
+  "result": {
+    "id": "iuce:air_pipe",
+    "count": 8
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "values": [
+    "iuce:ethylene",
+    "iuce:flowing_ethylene",
+    "iuce:coke_oven_gas",
+    "iuce:clean_coke_oven_gas",
+    "iuce:furnace_gas",
+    "iuce:acetylene",
+    "iuce:hydrogen"
+  ]
+}

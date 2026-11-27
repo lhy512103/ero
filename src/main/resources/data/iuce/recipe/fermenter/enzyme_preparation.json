@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "fermenter",
+  "items": [
+    {
+      "item": "minecraft:wheat"
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:sugar_solution",
+      "amount": 500
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:aspergillus_culture"
+  },
+  "results": [
+    {
+      "id": "iuce:enzyme_preparation",
+      "count": 2
+    }
+  ],
+  "energy": 1600,
+  "time": 200
+}

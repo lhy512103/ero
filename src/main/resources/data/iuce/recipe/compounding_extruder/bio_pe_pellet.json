@@ -1,0 +1,21 @@
+{
+  "type": "iuce:process",
+  "machine": "compounding_extruder",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:pe_powder",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:strand",
+      "count": 4,
+      "components": {
+        "iuce:strand_product": "iuce:bio_pe_pellet"
+      }
+    }
+  ]
+}

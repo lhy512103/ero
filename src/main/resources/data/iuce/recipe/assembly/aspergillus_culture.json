@@ -1,0 +1,12 @@
+{
+  "type": "iuce:standard_crafting",
+  "input": [
+    "minecraft:wheat",
+    "minecraft:red_mushroom",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "iuce:aspergillus_culture",
+    "count": 1
+  }
+}

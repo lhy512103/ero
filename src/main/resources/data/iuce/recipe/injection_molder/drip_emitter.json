@@ -1,0 +1,30 @@
+{
+  "type": "iuce:process",
+  "machine": "injection_molder",
+  "time": 100,
+  "energy": 4800,
+  "items": [
+    {
+      "item": "#iuce:grade/injection",
+      "count": 1
+    }
+  ],
+  "catalyst": {
+    "item": "iuce:emitter_mold",
+    "damage": 0
+  },
+  "utilities": [
+    "air",
+    "cooling_water"
+  ],
+  "results": [
+    {
+      "id": "iuce:drip_emitter",
+      "count": 16
+    },
+    {
+      "id": "iuce:sprue",
+      "count": 1
+    }
+  ]
+}

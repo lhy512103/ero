@@ -1,0 +1,24 @@
+{
+  "type": "iuce:process",
+  "machine": "catalyst_prep_tank",
+  "time": 100,
+  "energy": 3200,
+  "items": [
+    {
+      "item": "iuce:purified_aluminium_dust",
+      "count": 2
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "iuce:caustic_solution",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:activated_alumina",
+      "count": 1
+    }
+  ]
+}

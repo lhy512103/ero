@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "neoforge:ingredient_type": "neoforge:components",
+    "items": "iuce:mold_blank",
+    "components": {
+      "minecraft:custom_data": {
+        "mold": "pail"
+      }
+    }
+  },
+  "result": {
+    "id": "iuce:pail_mold"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

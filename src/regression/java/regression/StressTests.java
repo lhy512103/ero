@@ -25,6 +25,7 @@ final class StressTests {
 
     static void register(Map<String, Consumer<GameTestHelper>> tests) {
         tests.put("stress_structure_scan_400k", StressTests::structureScan);
+        tests.put("stress_logistics_2000", StressTests::logistics);
     }
 
     /**
@@ -32,6 +33,56 @@ final class StressTests {
      * spread that over ticks: no single step may look at more than its budget, and one step must
      * stay far below a tick.
      */
+    private static void logistics(GameTestHelper helper) {
+        var level=helper.getLevel();
+        var origin=helper.absolutePos(new BlockPos(0,10,0));
+        var endpoints=new ArrayList<blockentity.SiloBlockEntity>();
+        for(int y=0;y<8;y++) for(int z=0;z<16;z++) for(int x=0;x<16;x++) {
+            int index=(y*16+z)*16+x;
+            if(index>=2000) continue;
+            // Ports face out from the upper and lower surfaces of one connected bundle.
+            var pos=origin.offset(x,y,z);
+            level.setBlock(pos,ModBlocks.PNEUMATIC_PIPE.get().defaultBlockState(),2);
+            if(y==0 || y==7 && index<1836) {
+                var dir=y==0 ? net.minecraft.core.Direction.DOWN : net.minecraft.core.Direction.UP;
+                var port=pos.relative(dir);
+                level.setBlock(port,ModBlocks.LOGISTICS_PORT_II.get().defaultBlockState().setValue(block.LogisticsPortBlock.FACING,dir),2);
+                var store=port.relative(dir);
+                level.setBlock(store,ModBlocks.BULK_SILO.get().defaultBlockState(),2);
+                endpoints.add((blockentity.SiloBlockEntity)level.getBlockEntity(store));
+                logistics.LogisticsManager.register(level,port);
+            }
+        }
+        helper.assertTrue(endpoints.size()==300,"benchmark requires 300 endpoints");
+        var sourcePos=origin.below();
+        helper.assertTrue(logistics.LogisticsManager.networkOf(level,sourcePos).size()==300,"all benchmark interfaces must be connected");
+        // A machine consumes iron each round. Refill its source before the measured transfer.
+        var machinePos=origin.below(2);
+        level.setBlock(machinePos, ModBlocks.COMPRESSOR.get().defaultBlockState(),2);
+        var consumer=(blockentity.MachineBlockEntity)level.getBlockEntity(machinePos);
+        var iron=net.neoforged.neoforge.transfer.item.ItemResource.of(new net.minecraft.world.item.ItemStack(item.ModItems.IRON_PLATE.get()));
+        boolean profile=Boolean.getBoolean("iuce.sparkBenchmark");
+        var server=level.getServer();
+        if(profile) server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),"spark profiler start --interval 1");
+        long elapsed=0;
+        for(int i=0;i<1200;i++){
+            endpoints.get(1).getInventory().set(iron,64);
+            consumer.getItemHandler().set(0,net.neoforged.neoforge.transfer.item.ItemResource.EMPTY,0);
+            long start=System.nanoTime();
+            logistics.LogisticsManager.runCycle(level);
+            if(i>=200) elapsed+=System.nanoTime()-start;
+        }
+        if(profile) server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),"spark profiler stop --save-to-file");
+        double perTick=elapsed/1e6/1000/logistics.LogisticsManager.INTERVAL;
+        LOGGER.info("[IUCE stress] 2000 pipes, 300 ports, active transfer: {} ms/tick",perTick);
+        helper.assertTrue(consumer.getItemHandler().getAmountAsInt(0)>0,"benchmark moved no iron");
+        helper.assertTrue(perTick<0.5,"logistics exceeded 0.5 ms/tick: "+perTick);
+        if (profile) {
+            long stopped = System.nanoTime();
+            helper.succeedWhen(() -> helper.assertTrue(System.nanoTime()-stopped > 3_000_000_000L,"waiting for local Spark report"));
+        } else helper.succeed();
+    }
+
     private static void structureScan(GameTestHelper helper) {
         // real blocks in loaded chunks, visited over and over to reach the size of a stage V shell
         List<BlockPos> area = new ArrayList<>();

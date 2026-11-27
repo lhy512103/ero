@@ -1,0 +1,27 @@
+{
+  "type": "iuce:process",
+  "machine": "crystallizer",
+  "time": 200,
+  "energy": 3200,
+  "fluids": [
+    {
+      "fluid": "iuce:crude_lactide",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "iuce:lactide_mother_liquor",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:lactide",
+      "count": 4
+    }
+  ],
+  "utilities": [
+    "cooling_water"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "iuce:process",
+  "machine": "rubber_mixer",
+  "time": 100,
+  "energy": 6400,
+  "items": [
+    {
+      "item": "iuce:rubber",
+      "count": 4
+    },
+    {
+      "item": "iuce:sulfur",
+      "count": 1
+    },
+    {
+      "item": "iuce:coke_dust",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "iuce:rubber_compound",
+      "count": 4
+    }
+  ]
+}
